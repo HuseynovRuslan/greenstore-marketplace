@@ -2,7 +2,7 @@ import { Shovel, Sprout } from 'lucide-react'
 import { Badge } from '@/components/ui/Badge'
 import { ButtonLink } from '@/components/ui/Button'
 import { SelectField, TextAreaField, TextField } from '@/components/ui/Field'
-import { Notice } from '@/components/ui/Notice'
+import { InfoNotice, Notice } from '@/components/ui/Notice'
 import {
   SERVICE_CATEGORY_ID,
   TITLE_MAX,
@@ -20,7 +20,7 @@ import {
   withPlaceholder,
   type PostAdDraft,
 } from '@/data/postAd'
-import { CheckboxField, InfoNotice, KindCard, SafeImage } from './components'
+import { CheckboxField, KindCard, SafeImage } from './components'
 import { contactLine, isPlant, isService, previewAttributes, previewImage, previewLocation, priceLabel } from './draft'
 import { PhotoUploader } from './PhotoUploader'
 import type { FieldKey } from './validation'

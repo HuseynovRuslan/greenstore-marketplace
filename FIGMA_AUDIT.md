@@ -154,8 +154,11 @@ The exports total 2.2 MB. The mapping from Figma node to file is in [`docs/figma
 
 How images map to listings:
 
-* Each listing keeps every photo the design attaches to it. `cover` is the photo used on the 1440 cards, `images` is the
-  gallery in frame order, and `thumbnail` is the cabinet image.
+* Each listing keeps every photo the design attaches to it. `cover`, `coverTablet` and `coverMobile` are the photos on
+  the 1440, 768 and 390 cards; `ListingCard` serves them with `<picture>`, so each breakpoint shows the Figma photo for
+  that frame. `images` is the gallery in frame order, and `thumbnail` is the cabinet image. A few pages also have
+  photos specific to their own frame (search, the "Oxşar elanlar" and seller grids), which are mapped per page in
+  `src/features/*`.
 * Services use the catalogue photo as `cover`. The home showcase uses the home‑frame photo.
 
 ---
@@ -219,9 +222,12 @@ All of the following is reproduced verbatim in the typed data modules under `src
    sources exist in Figma but can only be downloaded from `www.figma.com`, which this environment blocks. **Fix:** allow
    `www.figma.com` in the environment's network settings and re‑export from the original fills. The node mapping is in
    `docs/figma/image-manifest.json`.
-2. **Two render glitches.** `get_screenshot` renders of `4:35327` (Qaraçöhrə) and `4:35342` (Dəfnə, search frame) came back
-   half blank every time. Both were cropped from the full‑frame render instead. The favourite‑button overlay that sat on
-   top was removed by patching about 34 px of background from the neighbouring area.
+2. **Six render glitches, all on the search frame.** I diffed every export against the same region of its full‑frame
+   render. Six search‑frame photos did not match: the single‑node render was half blank (`4:35327` Qaraçöhrə, `4:35342`
+   Dəfnə) or zoomed in (`4:35311` Zeytun, `4:35319` Mavi küknar, `4:35332` Tuya, `4:35337` İtalyan şamı). Those six were
+   cropped from the full‑frame render instead. The favourite‑button and VIP‑badge overlays baked into those crops were
+   removed by patching about 40 px of neighbouring background. The other 89 exports match their frame region (mean pixel
+   difference 2–8, which is compression noise).
 3. **SVG icons.** These were not downloaded (same host). The build uses the identical Lucide glyphs.
 4. **Responsive frames.** Only the home page has 768 and 390 frames. Mobile also has the filter sheet and favourites.
    Every other screen exists at 1440 only, so its tablet and mobile layouts are adaptations.

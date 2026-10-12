@@ -1,3 +1,4 @@
+import { InfoNotice } from '@/components/ui/Notice'
 import { useState, type FormEvent } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router'
 import { useSession } from '@/app/store'
@@ -6,7 +7,7 @@ import { Button } from '@/components/ui/Button'
 import { SelectField, TextField } from '@/components/ui/Field'
 import { SectionHeader } from '@/components/ui/SectionHeader'
 import { AuthIntro } from '@/features/auth/AuthIntro'
-import { Card, Checkbox, InfoNotice } from '@/features/account/ui'
+import { Card, Checkbox } from '@/features/account/ui'
 import { pillClass } from '@/features/account/pill'
 import {
   emailError,

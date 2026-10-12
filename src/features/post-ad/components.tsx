@@ -6,20 +6,7 @@ import { POST_AD_STEPS, STEP_COUNT, type PostAdDraft, type StepNumber } from '@/
 import { cn } from '@/lib/format'
 import { priceLabel, summaryMeta } from './draft'
 
-/*
- * Wizard-only building blocks (Figma "Elan yerləşdir · 1–6").
- * The neutral "Məlumat bildirişi" here is #eaf0e9 (mint) — the shared Notice only has success/warning/danger tones.
- */
-
-/** Figma "Məlumat bildirişi" (mint): p 18, radius 8, 14 px semibold title + 13 px body, leading 1.6. */
-export function InfoNotice({ title, children, className }: { title: ReactNode; children?: ReactNode; className?: string }) {
-  return (
-    <div className={cn('w-full rounded-lg bg-mint p-[18px] text-ink', className)}>
-      <p className="text-sm leading-[1.6] font-semibold">{title}</p>
-      {children && <p className="text-[13px] leading-[1.6]">{children}</p>}
-    </div>
-  )
-}
+/* Wizard-only building blocks (Figma "Elan yerləşdir · 1–6"). */
 
 /** Figma "☐ / ☑ …" option line: 14 px (or 13 px) text, leading 1.5, native checkbox in brand colour. */
 export function CheckboxField({

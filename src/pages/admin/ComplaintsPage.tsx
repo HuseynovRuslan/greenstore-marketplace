@@ -1,3 +1,4 @@
+import { InfoNotice } from '@/components/ui/Notice'
 import { useRef, useState } from 'react'
 import { complaintStatusLabels, type ComplaintStatus } from '@/data/admin'
 import { Badge, type BadgeTone } from '@/components/ui/Badge'
@@ -5,7 +6,7 @@ import { Button, ButtonLink } from '@/components/ui/Button'
 import { Dialog } from '@/components/ui/Dialog'
 import { SelectField, TextAreaField } from '@/components/ui/Field'
 import { Panel } from '@/components/ui/Panel'
-import { AdminPage, Chip, InfoNote, PanelTitle } from '@/features/admin/AdminUi'
+import { AdminPage, Chip, PanelTitle } from '@/features/admin/AdminUi'
 import {
   complaintCounts,
   complaintListing,
@@ -199,7 +200,7 @@ export default function ComplaintsPage() {
                 </div>
               </Panel>
 
-              <InfoNote title="Qərar tarixçəsi">
+              <InfoNotice title="Qərar tarixçəsi">
                 <div aria-live="polite">
                   {selected.history.length === 0 && !closingNote ? (
                     'Qərar hələ qeydə alınmayıb.'
@@ -216,7 +217,7 @@ export default function ComplaintsPage() {
                     </>
                   )}
                 </div>
-              </InfoNote>
+              </InfoNotice>
 
               <Dialog open={confirmOpen} title="Elanı dayandırmaq istəyirsiniz?" onClose={() => setConfirmOpen(false)}>
                 <p className="text-[15px] leading-[1.5] text-ink">

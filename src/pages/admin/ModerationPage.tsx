@@ -6,9 +6,9 @@ import { moderationSortOptions, moderatorName, rejectionReasons, type Moderation
 import { Badge, type BadgeTone } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { SelectField, TextAreaField } from '@/components/ui/Field'
-import { Notice, type NoticeTone } from '@/components/ui/Notice'
+import { InfoNotice, Notice, type NoticeTone } from '@/components/ui/Notice'
 import { Panel } from '@/components/ui/Panel'
-import { AdminPage, Chip, InfoNote, PanelTitle } from '@/features/admin/AdminUi'
+import { AdminPage, Chip, PanelTitle } from '@/features/admin/AdminUi'
 import { formatQueueTime, revealWhenStacked, rowClass, useAdminState } from '@/features/admin/lib'
 import { buildQueue, moderationCounts, type ModerationDecision, type QueueEntry } from '@/features/admin/moderation'
 import { formatPrice } from '@/lib/format'
@@ -275,9 +275,9 @@ export default function ModerationPage() {
             </Panel>
           )}
 
-          <InfoNote title="Moderasiya qeydi">
+          <InfoNotice title="Moderasiya qeydi">
             Təsdiqdən sonra elan aktiv olur və ictimai axtarışda görünür. Rədd edilərsə, satıcı səbəbi şəxsi kabinetdə görür.
-          </InfoNote>
+          </InfoNotice>
         </div>
       </div>
     </AdminPage>

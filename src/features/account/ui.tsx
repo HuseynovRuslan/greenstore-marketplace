@@ -28,16 +28,6 @@ export function Checkbox({ label, className, ...rest }: { label: ReactNode } & O
   )
 }
 
-/** "Məlumat bildirişi" in the neutral mint tone (#eaf0e9) — the shared Notice only has success/warning/danger. */
-export function InfoNotice({ title, children, className }: { title: ReactNode; children?: ReactNode; className?: string }) {
-  return (
-    <div className={cn('w-full rounded-lg bg-mint p-[18px] text-ink', className)}>
-      <p className="text-sm leading-[1.6] font-semibold">{title}</p>
-      {children && <div className="text-[13px] leading-[1.6]">{children}</div>}
-    </div>
-  )
-}
-
 /** 23 px panel title ("Şirkət və əlaqə məlumatları", "Təhlükəsizlik", "Bildiriş seçimləri"). */
 export function PanelTitle({ children, id, as: Tag = 'h2' }: { children: ReactNode; id?: string; as?: 'h2' | 'h3' }) {
   return (

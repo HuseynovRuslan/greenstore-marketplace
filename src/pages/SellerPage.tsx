@@ -1,3 +1,4 @@
+import { InfoNotice } from '@/components/ui/Notice'
 import { useCallback, useEffect, useState } from 'react'
 import { useParams } from 'react-router'
 import { Flag, Search } from 'lucide-react'
@@ -12,7 +13,7 @@ import { ComplaintDialog } from '@/features/seller/ComplaintDialog'
 import { sellerComplaintReasons } from '@/features/seller/complaintReasons'
 import { PhoneReveal, WhatsAppLink } from '@/features/seller/ContactActions'
 import { SellerListings } from '@/features/seller/SellerListings'
-import { Breadcrumb, InfoNotice } from '@/features/seller/ui'
+import { Breadcrumb } from '@/features/seller/ui'
 import type { Seller } from '@/types'
 
 /** Satıcı profili — Figma "Abşeron Tingçilik · 1440" (4:36085). */

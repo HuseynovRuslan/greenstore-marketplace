@@ -1,7 +1,6 @@
 import type { ButtonHTMLAttributes, ReactNode } from 'react'
 import { Link, useLocation } from 'react-router'
 import { SectionHeader } from '@/components/ui/SectionHeader'
-import { cn } from '@/lib/format'
 import { chipClass } from './lib'
 
 const sections: Array<{ label: string; to?: string; paths: string[] }> = [
@@ -57,16 +56,6 @@ export function Chip({ active, className, children, ...rest }: ButtonHTMLAttribu
     <button type="button" aria-pressed={active} className={chipClass(active, className)} {...rest}>
       {children}
     </button>
-  )
-}
-
-/** Figma "Məlumat bildirişi" in the neutral mint tone ("Moderasiya qeydi", "Qərar tarixçəsi"). */
-export function InfoNote({ title, children, className }: { title: ReactNode; children?: ReactNode; className?: string }) {
-  return (
-    <section className={cn('w-full rounded-lg bg-mint p-[18px] text-ink', className)}>
-      <h2 className="text-sm leading-[1.6] font-semibold">{title}</h2>
-      {children && <div className="text-[13px] leading-[1.6]">{children}</div>}
-    </section>
   )
 }
 

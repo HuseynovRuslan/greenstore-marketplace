@@ -41,19 +41,6 @@ export function PageHeading({ title, subtitle }: { title: ReactNode; subtitle?: 
   )
 }
 
-/**
- * Figma "Məlumat bildirişi" in its neutral (#eaf0e9) variant — p 18, radius 8, 14 px semibold title + 13 px body (leading 1.6).
- * The shared `Notice` only has success/warning/danger tones, so the neutral one lives here.
- */
-export function InfoNotice({ title, children, className }: { title: ReactNode; children?: ReactNode; className?: string }) {
-  return (
-    <aside className={cn('w-full rounded-lg bg-mint p-[18px] text-ink', className)}>
-      <p className="text-sm leading-[1.6] font-semibold">{title}</p>
-      {children && <p className="text-[13px] leading-[1.6]">{children}</p>}
-    </aside>
-  )
-}
-
 /** Inner-page content column: 15 px spacer under the header + 36 px top padding (24 on 390), 28 px section gap. */
 export function PageContent({ children, className }: { children: ReactNode; className?: string }) {
   return (
