@@ -13,15 +13,23 @@ const sectionLinks = [
   { label: 'Satıcılar', to: '/#saticilar' },
 ]
 
+/** Header search: follows `?q=` on the catalogue pages and searches services while you are in /xidmetler. */
 function useHeaderSearch() {
   const navigate = useNavigate()
   const [params] = useSearchParams()
-  const location = useLocation()
-  const [query, setQuery] = useState(location.pathname === '/elanlar' ? (params.get('q') ?? '') : '')
+  const { pathname } = useLocation()
+  const target = pathname.startsWith('/xidmetler') ? '/xidmetler' : '/elanlar'
+  const urlQuery = pathname === target ? (params.get('q') ?? '') : ''
+  const [query, setQuery] = useState(urlQuery)
+  const [syncedQuery, setSyncedQuery] = useState(urlQuery)
+  if (urlQuery !== syncedQuery) {
+    setSyncedQuery(urlQuery)
+    setQuery(urlQuery)
+  }
   const submit = (e: FormEvent) => {
     e.preventDefault()
     const q = query.trim()
-    navigate(q ? `/elanlar?q=${encodeURIComponent(q)}` : '/elanlar')
+    navigate(q ? `${target}?q=${encodeURIComponent(q)}` : target)
   }
   return { query, setQuery, submit }
 }

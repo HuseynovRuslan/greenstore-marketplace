@@ -14,7 +14,8 @@ const img = (file: string) => `/images/listings/${file}.webp`
  * in frame order (detail-page gallery first where one exists). See FIGMA_AUDIT.md → "Asset inventory".
  *
  * `categoryId` is not written on the cards; it follows the search page (filter "Ağaclar" → its 6 results)
- * and the product type for the rest — documented as inferred in FIGMA_AUDIT.md.
+ * and the product type for the rest — documented as inferred in FIGMA_AUDIT.md. `subcategory: 'Dekorativ ağaclar'`
+ * follows the Figma filter state ("Ağaclar / Dekorativ ağaclar" → the same 6 results, mobile filter panel).
  * `publishedAt` times only preserve the Figma ordering of "Son elanlar" (all cards say "12 oktyabr").
  */
 export const listings: Listing[] = [
@@ -74,6 +75,7 @@ export const listings: Listing[] = [
     publishedAt: '2026-10-12T08:55:00',
     vip: true,
     categoryId: 'agaclar',
+    subcategory: 'Dekorativ ağaclar',
     cover: img('mavi-kuknar-1'),
     images: [img('mavi-kuknar-1'), img('mavi-kuknar-4'), img('mavi-kuknar-5'), img('mavi-kuknar-2'), img('mavi-kuknar-3')],
     deliveryAvailable: true,
@@ -203,6 +205,7 @@ export const listings: Listing[] = [
     publishedAt: '2026-10-12T08:47:00',
     vip: false,
     categoryId: 'agaclar',
+    subcategory: 'Dekorativ ağaclar',
     sellerId: 'abseron-tingcilik',
     cover: img('tuya-smaragd-1'),
     thumbnail: '/images/dashboard/my-listing-2.webp',
@@ -221,6 +224,7 @@ export const listings: Listing[] = [
     publishedAt: '2026-10-12T08:35:00',
     vip: false,
     categoryId: 'agaclar',
+    subcategory: 'Dekorativ ağaclar',
     sellerId: 'abseron-tingcilik',
     cover: img('defne-agaci-1'),
     images: [img('defne-agaci-1'), img('defne-agaci-2')],
@@ -267,6 +271,7 @@ export const listings: Listing[] = [
     publishedAt: '2026-10-12T08:45:00',
     vip: false,
     categoryId: 'agaclar',
+    subcategory: 'Dekorativ ağaclar',
     cover: img('italyan-sami-1'),
     images: [img('italyan-sami-1')],
     deliveryAvailable: true,
@@ -282,6 +287,7 @@ export const listings: Listing[] = [
     publishedAt: '2026-10-12T08:48:00',
     vip: false,
     categoryId: 'agaclar',
+    subcategory: 'Dekorativ ağaclar',
     cover: img('qaracohre-1'),
     images: [img('qaracohre-1')],
     deliveryAvailable: true,
