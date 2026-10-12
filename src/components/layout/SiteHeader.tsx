@@ -53,9 +53,10 @@ function HeaderSearchForm({ variant, urlQuery, onSubmitted }: SearchFormProps & 
     setSyncedQuery(urlQuery)
     setQuery(urlQuery)
   }
+  // Without JavaScript the form is a plain GET to the catalogue (`action` + `name="q"`); with it, `submit` navigates.
+  const target = searchTarget(pathname)
   const submit = (e: FormEvent) => {
     e.preventDefault()
-    const target = searchTarget(pathname)
     const q = query.trim()
     router.push(q ? `${target}?q=${encodeURIComponent(q)}` : target)
     onSubmitted?.()
@@ -64,6 +65,7 @@ function HeaderSearchForm({ variant, urlQuery, onSubmitted }: SearchFormProps & 
     <input
       autoFocus={variant === 'mobile'}
       type="search"
+      name="q"
       value={query}
       onChange={(e) => setQuery(e.target.value)}
       placeholder={searchPlaceholder}
@@ -76,14 +78,14 @@ function HeaderSearchForm({ variant, urlQuery, onSubmitted }: SearchFormProps & 
   )
   if (variant === 'bar') {
     return (
-      <form role="search" onSubmit={submit} className="flex h-[46px] min-w-0 flex-1 items-center gap-2.5 rounded-lg border border-line bg-cream px-3 focus-within:border-olive">
+      <form role="search" action={target} method="get" onSubmit={submit} className="flex h-[46px] min-w-0 flex-1 items-center gap-2.5 rounded-lg border border-line bg-cream px-3 focus-within:border-olive">
         <Search aria-hidden size={20} strokeWidth={1} absoluteStrokeWidth className="shrink-0 text-forest" />
         {input}
       </form>
     )
   }
   return (
-    <form role="search" onSubmit={submit} className="flex items-center gap-2.5 border-t border-line px-5 py-3 md:hidden">
+    <form role="search" action={target} method="get" onSubmit={submit} className="flex items-center gap-2.5 border-t border-line px-5 py-3 md:hidden">
       <div className="flex h-[46px] flex-1 items-center gap-2.5 rounded-lg border border-line bg-cream px-3 focus-within:border-olive">
         <Search aria-hidden size={20} strokeWidth={1} absoluteStrokeWidth className="shrink-0 text-forest" />
         {input}

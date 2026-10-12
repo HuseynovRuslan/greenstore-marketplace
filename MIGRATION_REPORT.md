@@ -72,6 +72,8 @@ src/seo/                         env switches, metadata, catalogue rules, JSON-L
   * the server page parses `searchParams` and renders the results;
   * client controls `router.push()` a new URL with `scroll: false`.
   * The header search reads `?q=` behind a Suspense boundary, so static pages keep their server HTML.
+  * The header search also works without JavaScript: the form is a plain GET to `/elanlar` (or `/xidmetler` on the
+    services pages), and the results are rendered on the server.
   * The seller page's in-place filters update the address bar with `history.replaceState`, which the App Router
     keeps in sync, so there is no server round trip per keystroke.
 * The wizard's `location.state`:
