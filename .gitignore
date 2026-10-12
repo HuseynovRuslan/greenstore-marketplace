@@ -6,3 +6,11 @@ dist-ssr
 coverage
 .DS_Store
 *.log
+
+# Environment files (never commit secrets)
+.env
+.env.*
+!.env.example
+
+# Vercel CLI
+.vercel

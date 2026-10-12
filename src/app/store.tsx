@@ -29,7 +29,7 @@ interface FavoritesValue {
 const FavoritesContext = createContext<FavoritesValue | null>(null)
 
 /* ------------------------------------------------------------------ */
-/* Mock session — no backend yet; "Daxil ol" just flips this flag       */
+/* DEMO ONLY — mock session, no backend; see src/config/demo.ts        */
 /* ------------------------------------------------------------------ */
 
 interface SessionValue {

@@ -1,3 +1,4 @@
+import { DEMO_LOGIN_PASSWORD } from '@/config/demo'
 import { useState, type FormEvent } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router'
 import { useSession } from '@/app/store'
@@ -27,7 +28,7 @@ export default function LoginPage() {
   const [method, setMethod] = useState<Method>('phone')
   const [phone, setPhone] = useState(currentUser.phone)
   const [email, setEmail] = useState(currentUser.email)
-  const [password, setPassword] = useState('greenstore')
+  const [password, setPassword] = useState(DEMO_LOGIN_PASSWORD)
   const [remember, setRemember] = useState(true)
   const [errors, setErrors] = useState<{ id?: string; password?: string }>({})
   const [forgotOpen, setForgotOpen] = useState(false)
