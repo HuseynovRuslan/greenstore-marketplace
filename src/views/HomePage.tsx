@@ -25,7 +25,8 @@ function HeroSearch() {
 
           <p className="w-full text-xs leading-[1.5] text-muted">
             Populyar:{' '}
-            <Link className="hover:text-forest" href={`/elanlar?q=${encodeURIComponent('Zeytun ağacı')}`}>
+            {/* No prefetch: Next.js 16 leaves the prefetch of a non-ASCII query string unread (an open request). */}
+            <Link className="hover:text-forest" href={`/elanlar?q=${encodeURIComponent('Zeytun ağacı')}`} prefetch={false}>
               Zeytun ağacı
             </Link>{' '}
             ·{' '}

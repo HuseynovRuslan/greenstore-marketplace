@@ -5,4 +5,7 @@ Everything in this folder is **sample data for the demo/staging build**. It was 
 
 * None of these listings, sellers, services, people, phone numbers or e-mail addresses are real records.
 * `user.ts` is the demo seller account that every mock login signs in to (see `src/config/demo.ts`).
-* When the ASP.NET Core Web API is ready, replace these modules with API calls behind `src/services/`.
+* Server-rendered pages read this data only through `MarketplaceRepository` (`src/services/repository.ts`). When the
+  ASP.NET Core Web API is ready, implement that interface with API calls and select it with `DATA_SOURCE=api`.
+* While this sample data is the data source (`DATA_SOURCE=mock`), every page is `noindex` and the sitemap is empty
+  (`src/seo/env.ts`), so none of it is presented to search engines as real inventory.

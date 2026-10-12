@@ -258,7 +258,7 @@ All of the following is reproduced verbatim in the typed data modules under `src
 
 * **Stack:** Vite 7, React 19, TypeScript 5.9, Tailwind CSS v4 with tokens from §3, React Router 7, and `lucide-react`.
   No UI kit was added.
-* **Structure:**
+* **Structure** (of the Vite build; after the Next.js migration see `MIGRATION_REPORT.md` → "File map"):
 
   | Path | Contents |
   | --- | --- |

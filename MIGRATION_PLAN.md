@@ -45,13 +45,17 @@ src/
 
 **Route map.** Every existing Azerbaijani URL is preserved.
 
+> **Implementation note.** The category pages are rendered per request rather than prerendered, because they honour
+> `?sehife=` (crawlable pagination), `siralama` and `gorunus`. Everything else follows this plan; the outcome is in
+> MIGRATION_REPORT.md.
+
 | URL | Rendering | Notes |
 | --- | --- | --- |
 | `/` | Static (SSG) | Server sections plus client islands (hero search, favourite buttons, header) |
 | `/elanlar` | Dynamic (query) | Server results and pagination; client filter shell. Indexing rules in SEO_ARCHITECTURE.md |
 | `/elanlar/[slug]` | SSG for public listings | Real 404 for unknown and non-public slugs. The client fallback shows the demo owner's own unpublished ads |
-| `/kateqoriyalar/[kateqoriya]` | SSG (new) | Category landing page: same catalogue UI, clean canonical URL |
-| `/kateqoriyalar/[kateqoriya]/[seher]` | SSG (new) | Category × city page; indexable only above an inventory threshold |
+| `/kateqoriyalar/[kateqoriya]` | Dynamic (new; planned as SSG, see note) | Category landing page: same catalogue UI, clean canonical URL |
+| `/kateqoriyalar/[kateqoriya]/[seher]` | Dynamic (new; planned as SSG, see note) | Category × city page; indexable only above an inventory threshold |
 | `/saticilar/[slug]` | Dynamic (tab, search and page in the query) | Server profile; client listing filters |
 | `/xidmetler`, `/xidmetler/[slug]` | Dynamic / SSG | Same split as the product pages |
 | `/daxil-ol`, `/qeydiyyat`, `/kabinet`, `/kabinet/profil`, `/secilmisler`, `/elan-yerlesdir/*`, `/idareetme/*` | Client components rendered on the server; `noindex` | Private or demo state in `localStorage` |

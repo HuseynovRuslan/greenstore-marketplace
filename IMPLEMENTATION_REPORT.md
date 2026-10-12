@@ -1,5 +1,9 @@
 # GreenStore — implementation report
 
+> This report describes the original React + Vite build (PR #1). The frontend has since been migrated to the Next.js
+> App Router without visual changes; see [`MIGRATION_REPORT.md`](MIGRATION_REPORT.md) for the new structure and
+> [`SEO_ARCHITECTURE.md`](SEO_ARCHITECTURE.md) for the SEO layer. File paths below refer to the Vite build.
+
 This report covers the frontend implementation of the approved Figma design (file `uYNd146nDVjM8uLJoeY6NT`), with
 the prototype wordmark "YARPAQ" replaced by **GreenStore**. The design audit is in [`FIGMA_AUDIT.md`](FIGMA_AUDIT.md).
 

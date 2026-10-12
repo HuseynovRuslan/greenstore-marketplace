@@ -3,7 +3,7 @@
  *
  * - Every listing, seller, service, user, statistic and admin record in `src/data/*` is sample data copied from the
  *   approved Figma design. None of it is real.
- * - Authentication is simulated in the browser (`src/app/store.tsx`): any well-formed phone/e-mail and password signs
+ * - Authentication is simulated in the browser (`src/state/store.tsx`): any well-formed phone/e-mail and password signs
  *   in the demo seller account. No credentials are sent anywhere or checked by a server.
  * - Everything a visitor creates (favourites, posted ads, profile edits, moderation decisions) lives only in that
  *   browser's localStorage.
