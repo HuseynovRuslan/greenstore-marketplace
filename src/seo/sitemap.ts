@@ -1,7 +1,7 @@
 import type { MetadataRoute } from 'next'
 import type { MarketplaceRepository } from '@/services/repository'
 import { categoryIndexRule, categoryPath } from './catalog'
-import { isIndexable, PRIVATE_PATHS } from './env'
+import { isIndexable, PRIVATE_PATHS, siteUrl } from './env'
 import { absoluteUrl } from './site'
 
 /**
@@ -13,7 +13,7 @@ export function buildRobots(indexable = isIndexable()): MetadataRoute.Robots {
   return {
     rules: { userAgent: '*', allow: '/', disallow: [...PRIVATE_PATHS] },
     sitemap: absoluteUrl('/sitemap.xml'),
-    host: absoluteUrl('/'),
+    host: siteUrl(),
   }
 }
 
