@@ -47,7 +47,8 @@ export function ListingCard({ listing, compact, className }: ListingCardProps) {
         title={listing.title}
         className={cn('absolute top-[21px]', compact ? 'right-[17px]' : 'right-[17px] md:right-[21px]')}
       />
-      <div className="w-full min-w-0 leading-[1.6] break-words">
+      {/* Figma's text box is shorter than its 1.6 line boxes; the negative margin keeps card heights at Figma's 259 / 340 px. */}
+      <div className={cn('w-full min-w-0 leading-[1.6] break-words', compact ? '-mb-1' : '-mb-1 md:-mb-[7px]')}>
         <p className={cn('text-ink', compact ? 'text-[20px]' : 'text-[20px] md:text-[23px]')}>{formatPrice(listing.price)}</p>
         <h3 className={cn('font-semibold text-ink', compact ? 'text-[13px]' : 'text-[13px] md:text-[15px]')}>{listing.title}</h3>
         <p className={cn('text-muted', compact ? 'text-[11px]' : 'text-[11px] md:text-[12px]')}>{meta}</p>

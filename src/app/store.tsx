@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components -- context provider and its hooks live together */
 import { createContext, useCallback, useContext, useMemo, type ReactNode } from 'react'
 import { useLocalStorage } from '@/hooks/useLocalStorage'
 import { currentUser } from '@/data/user'

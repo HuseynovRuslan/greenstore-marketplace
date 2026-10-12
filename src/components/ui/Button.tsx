@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components -- buttonClass is shared with link-styled buttons */
 import type { ButtonHTMLAttributes, ReactNode } from 'react'
 import { Link, type LinkProps } from 'react-router'
 import { cn } from '@/lib/format'
