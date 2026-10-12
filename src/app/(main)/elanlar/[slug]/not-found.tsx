@@ -1,9 +1,12 @@
 import type { Metadata } from 'next'
-import { OwnListingFallback } from '@/features/listing/OwnListingFallback'
+import { ListingNotFound } from '@/views/ListingDetailPage'
 
 export const metadata: Metadata = { title: 'Elan tapılmadı', robots: { index: false, follow: false } }
 
-/** HTTP 404 "Elan tapılmadı"; the demo seller still sees their own unpublished listings here (client-side). */
+/**
+ * HTTP 404 for unknown, pending, expired and rejected listings — for everyone. Sellers open their own unpublished
+ * listings in the private owner preview (/kabinet/elanlar/[slug]).
+ */
 export default function ListingNotFoundBoundary() {
-  return <OwnListingFallback />
+  return <ListingNotFound />
 }

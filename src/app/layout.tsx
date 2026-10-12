@@ -5,6 +5,8 @@ import '@fontsource/inter/600.css'
 import '@fontsource/inter/700.css'
 import '@/styles/index.css'
 import { AppStoreProvider } from '@/state/store'
+import { PRE_HYDRATION_SCRIPT } from '@/state/bootstrap'
+import { InlineScript } from '@/components/layout/InlineScript'
 import { siteUrl } from '@/seo/env'
 import { robotsFor } from '@/seo/metadata'
 import { DEFAULT_OG_IMAGE, SITE_DESCRIPTION, SITE_LOCALE, SITE_NAME, SITE_TITLE } from '@/seo/site'
@@ -24,7 +26,11 @@ export const viewport: Viewport = { width: 'device-width', initialScale: 1 }
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="az">
+    // suppressHydrationWarning: the pre-hydration script sets data-auth / data-banner / --gs-user-name on <html>.
+    <html lang="az" suppressHydrationWarning>
+      <head>
+        <InlineScript html={PRE_HYDRATION_SCRIPT} />
+      </head>
       <body>
         <AppStoreProvider>{children}</AppStoreProvider>
       </body>

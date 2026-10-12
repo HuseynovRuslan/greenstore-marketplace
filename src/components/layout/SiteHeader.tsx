@@ -7,6 +7,8 @@ import { Heart, LogOut, Menu, Plus, Search, UserRound, X } from 'lucide-react'
 import { Logo } from '@/components/ui/Logo'
 import { ButtonLink } from '@/components/ui/Button'
 import { useSession } from '@/state/store'
+import { preHydrationClass } from '@/state/bootstrap'
+import { useHydrated } from './ClientGate'
 import { cn } from '@/lib/format'
 
 const sectionLinks = [
@@ -114,6 +116,11 @@ export function SiteHeader({ withSections = false }: { withSections?: boolean })
     closeMenu()
     router.push('/')
   }
+  // The session is only known in the browser: until hydration render both variants (CSS picks one, see bootstrap.ts).
+  const hydrated = useHydrated()
+  const showUser = !hydrated || Boolean(user)
+  const showGuest = !hydrated || !user
+  const preClass = (variant: 'user' | 'guest') => (hydrated ? undefined : preHydrationClass(variant))
 
   return (
     <header className="sticky top-0 z-40 w-full bg-surface shadow-[inset_0_-1px_0_var(--color-line)]">
@@ -124,25 +131,33 @@ export function SiteHeader({ withSections = false }: { withSections?: boolean })
         <Link href="/secilmisler" aria-label="Seçilmişlər" className="shrink-0 text-forest hover:text-olive">
           <Heart aria-hidden size={20} strokeWidth={1.8} absoluteStrokeWidth />
         </Link>
-        {/* 768–1279 px: the Figma 768 header has no "Daxil ol" text, so account access is a compact icon. */}
-        <Link
-          href={user ? '/kabinet' : '/daxil-ol'}
-          aria-label={user ? 'Şəxsi kabinet' : 'Daxil ol'}
-          className="shrink-0 text-forest hover:text-olive xl:hidden"
-        >
-          <UserRound aria-hidden size={20} strokeWidth={1.8} absoluteStrokeWidth />
-        </Link>
-        {user ? (
-          <span className="hidden shrink-0 items-center gap-3 text-sm leading-[normal] whitespace-nowrap xl:inline-flex">
-            <Link href="/kabinet" className="text-forest hover:text-olive">
-              {user.fullName}
+        {/* 768–1279 px: the Figma 768 header has no "Daxil ol" text, so account access is a compact icon.
+            Before hydration both session variants are rendered and CSS shows the one the browser knows (bootstrap.ts). */}
+        {showUser && (
+          <Link href="/kabinet" aria-label="Şəxsi kabinet" className={cn('shrink-0 text-forest hover:text-olive xl:hidden', preClass('user'))}>
+            <UserRound aria-hidden size={20} strokeWidth={1.8} absoluteStrokeWidth />
+          </Link>
+        )}
+        {showGuest && (
+          <Link href="/daxil-ol" aria-label="Daxil ol" className={cn('shrink-0 text-forest hover:text-olive xl:hidden', preClass('guest'))}>
+            <UserRound aria-hidden size={20} strokeWidth={1.8} absoluteStrokeWidth />
+          </Link>
+        )}
+        {showUser && (
+          <span className={cn('hidden shrink-0 items-center gap-3 text-sm leading-[normal] whitespace-nowrap xl:inline-flex', preClass('user'))}>
+            <Link href="/kabinet" className={cn('text-forest hover:text-olive', !hydrated && 'auth-user-name')}>
+              {hydrated ? user?.fullName : null}
             </Link>
             <button type="button" onClick={handleSignOut} className="text-muted hover:text-forest">
               Çıxış
             </button>
           </span>
-        ) : (
-          <Link href="/daxil-ol" className="hidden shrink-0 text-sm leading-[normal] whitespace-nowrap text-forest hover:text-olive xl:inline">
+        )}
+        {showGuest && (
+          <Link
+            href="/daxil-ol"
+            className={cn('hidden shrink-0 text-sm leading-[normal] whitespace-nowrap text-forest hover:text-olive xl:inline', preClass('guest'))}
+          >
             Daxil ol
           </Link>
         )}

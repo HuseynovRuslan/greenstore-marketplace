@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { Badge } from '@/components/ui/Badge'
 import { Button, ButtonLink } from '@/components/ui/Button'
 import { formatPrice } from '@/lib/format'
+import { cabinetListingHref } from '@/features/listing/ownerPreview'
 import { rowMeta, statusBadge } from './rowFormat'
 import type { MyListingRow } from './useMyListingRows'
 
@@ -22,7 +23,7 @@ interface Props {
 export function MyListingRowCard({ row, onDeactivate, onRenew, onActivate }: Props) {
   const { listing, status } = row
   const badge = statusBadge[status]
-  const detailHref = `/elanlar/${listing.slug}`
+  const detailHref = cabinetListingHref(row)
 
   let secondary
   if (status === 'active')

@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import { ClientGate } from '@/components/layout/ClientGate'
+import { WizardSkeleton } from '@/features/post-ad/WizardSkeleton'
 import { STEP_COUNT, type StepNumber } from '@/data/postAd'
 import { privateMetadata } from '@/seo/metadata'
 import PostAdPage from '@/views/post-ad/PostAdPage'
@@ -14,7 +15,7 @@ export default async function Page({ params }: Props) {
   const n = /^\d+$/.test(step) ? Number(step) : NaN
   if (!Number.isInteger(n) || n < 1 || n > STEP_COUNT) redirect('/elan-yerlesdir/1')
   return (
-    <ClientGate>
+    <ClientGate fallback={<WizardSkeleton step={n as StepNumber} />}>
       <PostAdPage step={n as StepNumber} />
     </ClientGate>
   )

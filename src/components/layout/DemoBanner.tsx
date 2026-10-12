@@ -3,18 +3,20 @@
 import { X } from 'lucide-react'
 import { DEMO_MODE } from '@/config/demo'
 import { useStoredState } from '@/hooks/useLocalStorage'
+import { BANNER_DISMISSED_KEY } from '@/state/bootstrap'
 
 /**
  * Staging notice: the site runs on sample data and a simulated login (see src/config/demo.ts).
  * Not part of the Figma design — it sits above the header and can be dismissed for the browser session.
- * Rendered on the server too, so the notice is part of the initial HTML; dismissal applies after hydration.
+ * Rendered on the server too, so the notice is part of the initial HTML. A dismissal in this browser session is
+ * applied before the first paint by `data-banner` (src/state/bootstrap.ts) and the `demo-banner` class.
  */
 export function DemoBanner() {
-  const [dismissed, setDismissed] = useStoredState('greenstore:demo-banner-dismissed', false, 'session')
+  const [dismissed, setDismissed] = useStoredState(BANNER_DISMISSED_KEY, false, 'session')
   if (!DEMO_MODE || dismissed) return null
 
   return (
-    <div role="note" aria-label="Demo versiya" className="w-full border-b border-line bg-vip text-ink">
+    <div role="note" aria-label="Demo versiya" className="demo-banner w-full border-b border-line bg-vip text-ink">
       <div className="page-x mx-auto flex w-full max-w-[1440px] items-start gap-3 py-2 text-xs leading-[1.5]">
         <p className="min-w-0 flex-1">
           <span className="font-semibold text-olive">Demo versiya.</span>{' '}

@@ -15,9 +15,10 @@ export function useHydrated(): boolean {
 
 /**
  * Renders `children` only in the browser. Used for the private pages whose content depends entirely on
- * `localStorage` (demo session, favourites, wizard draft): the server sends an empty frame instead of guessing a
- * signed-out state that would flash and then change. These pages are `noindex`, so nothing is lost for SEO.
+ * `localStorage` (demo session, favourites, wizard draft): until then the server HTML shows `fallback`, a loading
+ * skeleton shaped like the page (see SessionFallback for frames that differ for guests). These pages are `noindex`,
+ * so nothing is lost for SEO.
  */
-export function ClientGate({ children }: { children: ReactNode }) {
-  return useHydrated() ? children : <div aria-busy="true" className="min-h-[60vh] w-full" />
+export function ClientGate({ children, fallback }: { children: ReactNode; fallback: ReactNode }) {
+  return useHydrated() ? children : fallback
 }

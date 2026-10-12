@@ -1,33 +1,25 @@
 'use client'
 
 import { useEffect } from 'react'
-import { usePathname } from 'next/navigation'
-import { useHydrated } from '@/components/layout/ClientGate'
 import { categoryById } from '@/data/categories'
 import { listingBySlug } from '@/data/listings'
 import { sellerById } from '@/data/sellers'
+import { SignInPrompt } from '@/features/account/SignInPrompt'
 import { useMyListings, useSession } from '@/state/store'
 import { ListingDetail, ListingNotFound } from '@/views/ListingDetailPage'
 import { otherSellerListings, similarListings } from './detail'
+import { ownerPreviewPath, resolveOwnerPreview } from './ownerPreview'
 
 /**
- * 404 body of /elanlar/[slug]. Unknown and unpublished listings are a real 404 for everyone, but the signed-in demo
- * seller may still open their own pending / expired listings (data, or ads posted in this browser), as in the Vite
- * build. Those exist only in the browser (localStorage), so they are resolved here after hydration.
- * With a real backend this becomes an authenticated "my listing" API call.
+ * /kabinet/elanlar/[slug] — the signed-in seller's preview of their own listing (pending, expired, deactivated or
+ * posted in this browser), in the same layout as the public listing page, with its status notice.
+ * Rendered in the browser only (session and submitted ads live in localStorage); the route is private and noindex.
  */
-export function OwnListingFallback() {
-  const pathname = usePathname()
-  const slug = decodeURIComponent(pathname.split('/')[2] ?? '')
-  const hydrated = useHydrated()
+export function OwnerListingPreview({ slug }: { slug: string }) {
   const { user } = useSession()
   const { submitted } = useMyListings()
-
-  const own = submitted.find((l) => l.slug === slug)
-  const fromData = listingBySlug(slug)
-  const candidate = fromData ?? own
-  const isOwner = Boolean(candidate && (own || (user?.sellerId && candidate.sellerId === user.sellerId)))
-  const listing = hydrated && isOwner ? candidate : undefined
+  const preview = resolveOwnerPreview(slug, user, submitted, listingBySlug)
+  const listing = preview.kind === 'listing' ? preview.listing : undefined
 
   useEffect(() => {
     if (!listing) return
@@ -38,6 +30,7 @@ export function OwnListingFallback() {
     }
   }, [listing])
 
+  if (preview.kind === 'signin') return <SignInPrompt next={ownerPreviewPath(slug)} />
   if (!listing) return <ListingNotFound />
   const others = otherSellerListings(listing)
   return (

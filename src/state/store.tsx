@@ -2,6 +2,7 @@
 
 import { createContext, useCallback, useContext, useMemo, type ReactNode } from 'react'
 import { useLocalStorage } from '@/hooks/useLocalStorage'
+import { ACCOUNT_FAVORITES_KEY, GUEST_FAVORITES_KEY, SESSION_KEY } from './bootstrap'
 import { currentUser } from '@/data/user'
 import type { Listing, UserProfile } from '@/types'
 
@@ -56,11 +57,11 @@ interface MyListingsValue {
 const MyListingsContext = createContext<MyListingsValue | null>(null)
 
 export function AppStoreProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useLocalStorage<UserProfile | null>('greenstore:session', null)
+  const [user, setUser] = useLocalStorage<UserProfile | null>(SESSION_KEY, null)
   // Guests start with an empty list (home/search frames show no saved hearts). The demo account
   // gets the five items saved in Figma "Seçilmişlər · 390" — as if loaded from the server on sign-in.
-  const [guestFavorites, setGuestFavorites] = useLocalStorage<string[]>('greenstore:favorites:guest', [])
-  const [accountFavorites, setAccountFavorites] = useLocalStorage<string[]>('greenstore:favorites:account', ACCOUNT_FAVORITES)
+  const [guestFavorites, setGuestFavorites] = useLocalStorage<string[]>(GUEST_FAVORITES_KEY, [])
+  const [accountFavorites, setAccountFavorites] = useLocalStorage<string[]>(ACCOUNT_FAVORITES_KEY, ACCOUNT_FAVORITES)
   const favorites = user ? accountFavorites : guestFavorites
   const setFavorites = user ? setAccountFavorites : setGuestFavorites
   const [submitted, setSubmitted] = useLocalStorage<Listing[]>('greenstore:my-listings', [])

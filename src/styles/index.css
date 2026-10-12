@@ -68,3 +68,18 @@
     display: none;
   }
 }
+
+/*
+ * Before hydration the header and the private pages' loading frames render both session variants; the
+ * pre-hydration script (src/state/bootstrap.ts) marks <html> so only the right one is painted.
+ */
+html[data-auth='user'] .auth-guest,
+html:not([data-auth='user']) .auth-user,
+html[data-banner='dismissed'] .demo-banner,
+html[data-favorites='none'] .favorites-some,
+html:not([data-favorites='none']) .favorites-none {
+  display: none !important;
+}
+.auth-user-name::before {
+  content: var(--gs-user-name, '');
+}
