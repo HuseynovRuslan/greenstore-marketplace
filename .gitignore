@@ -1,0 +1,20 @@
+node_modules
+dist
+dist-ssr
+.next
+out
+next-env.d.ts
+*.tsbuildinfo
+*.local
+.vite
+coverage
+.DS_Store
+*.log
+
+# Environment files (never commit secrets)
+.env
+.env.*
+!.env.example
+
+# Vercel CLI
+.vercel
