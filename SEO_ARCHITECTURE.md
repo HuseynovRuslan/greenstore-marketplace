@@ -44,7 +44,8 @@ HTML. Client components are small islands for interaction only.
 | `/saticilar/[slug]` | Dynamic (tab, search, sort, page in the query) | Profile, contact panel, the seller's listing grid |
 | `/xidmetler` | Dynamic (query string) | Heading, filters, service cards, pagination links |
 | `/xidmetler/[slug]` | SSG for every service | Service description, areas, provider, portfolio |
-| Private pages | Static frame, client content | Header, footer and an empty frame. The content depends on browser storage (demo session, favourites, draft) |
+| `/kabinet/elanlar/[slug]` | Per request (`connection()`), never cached per slug | Owner preview: header, footer and a loading skeleton; the listing is drawn for its signed-in owner only |
+| Private pages | Static frame, client content | Header, footer and a loading skeleton of the page. The content depends on browser storage (demo session, favourites, draft) |
 
 Metadata is in `<head>` of the first response. This was checked with a browser user agent on the dynamic routes (catalogue, category, seller, services, private pages).
 
@@ -94,7 +95,8 @@ Why the rules are built this way:
 | Case | Status |
 | --- | --- |
 | Unknown URL | 404 ("Səhifə tapılmadı") |
-| Unknown listing, or a pending, expired or rejected listing | 404 ("Elan tapılmadı"). The signed-in demo owner still sees their own unpublished listing; the browser draws it after hydration from local data |
+| Unknown listing, or a pending, expired or rejected listing | 404 ("Elan tapılmadı"), for everyone including the owner |
+| Owner preview `/kabinet/elanlar/[slug]` | 200 + `noindex, nofollow` (header and meta), disallowed in robots.txt, never in the sitemap. The listing is shown only to its signed-in owner; others see "Elan tapılmadı" or the sign-in prompt |
 | Unknown seller, service, category or city | 404 |
 | Page number out of range | 404 |
 | `/elan-yerlesdir/<invalid step>` | 307 → `/elan-yerlesdir/1` |
@@ -165,7 +167,8 @@ They are set in `next.config.ts`:
 * `Cache-Control` of one hour for `/images/*`;
 * the `X-Robots-Tag` rules described above.
 
-**CSP note.** Next.js streams its RSC payload in inline scripts, so `script-src` includes `'unsafe-inline'`.
+**CSP note.** Next.js streams its RSC payload in inline scripts, and the pre-paint session script in `<head>`
+(`src/state/bootstrap.ts`) is inline too, so `script-src` includes `'unsafe-inline'`.
 Removing it requires a per-request nonce (a `proxy.ts` that sets a nonce, with fully dynamic rendering). That is
 planned hardening, not done yet. When the API runs on another origin, add it to `connect-src`.
 

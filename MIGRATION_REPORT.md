@@ -53,7 +53,8 @@ src/seo/                         env switches, metadata, catalogue rules, JSON-L
 | `/saticilar/[slug]` | cover, profile, contact panel, verified notice | phone reveal, complaint dialog, `SellerListings` (tabs/search/sort/pages, server-rendered first) |
 | `/xidmetler` | breadcrumb, heading, service cards, pagination links | search form, category toggles, provider tabs + sort |
 | `/xidmetler/[slug]` | all text sections, areas | gallery, favourite/share, phone reveal, portfolio viewer, complaint |
-| private pages | frame only | the page itself (local state) |
+| `/kabinet/elanlar/[slug]` (owner preview) | frame + loading skeleton | the listing view, for the signed-in owner only |
+| private pages | frame + loading skeleton | the page itself (local state) |
 
 * 53 modules are `'use client'`. Cards, badges, buttons, panels, notices, section headers, the footer and all public
   page views are shared or server components.
@@ -92,8 +93,20 @@ src/seo/                         env switches, metadata, catalogue rules, JSON-L
   the default value and the browser value applies right after hydration, so markup always matches. The demo banner,
   favourites, session and submitted ads use it.
 * **Browser-only pages.** Pages whose whole content comes from browser storage (cabinet, profile, favourites, wizard,
-  confirmation, moderation queue) render inside `ClientGate`. The server sends the frame with an empty main area.
-  This avoids a flash of the signed-out state for signed-in users, and these pages are `noindex`.
+  owner preview, confirmation, moderation queue) render inside `ClientGate`. Until the browser has read that storage,
+  the server HTML shows a **loading skeleton shaped like the page**: the real frame, headings, tabs and static panels,
+  with placeholders (design colour `#e8ebe5`) only where per-visitor values go. The placeholders are sized like the
+  default demo state, so the content replaces them without moving the page (§5.5). These pages are `noindex`.
+* **Pre-paint session state.** An inline script in `<head>` (`src/state/bootstrap.ts`, the pattern from Next.js's
+  "Preventing flash before hydration" guide) reads browser storage before the first paint and marks `<html>`:
+  * `data-auth="user"`, with the display name in `--gs-user-name`;
+  * `data-favorites="some|none"`;
+  * `data-banner="dismissed"`.
+
+  Until hydration, the header, the workflow header, the mobile nav's "Profil" link and the guest/user loading frames
+  render both variants, and CSS shows the right one (`src/styles/index.css`). `<html>` carries
+  `suppressHydrationWarning` because the script sets its attributes. On client-side navigations React renders the
+  real state directly.
 * **Deterministic formatting.** Azerbaijani alphabetical order and case mapping are implemented in `src/lib/format.ts`
   (`compareAz`, `lowerAz`, `upperAz`) instead of `localeCompare(…, 'az')` and `toLocaleLowerCase('az')`. Node and
   Chromium ship different ICU data: Chromium ordered "Qaraçöhrə" after "Leyland sərvi", which caused the only
@@ -153,8 +166,16 @@ New:
   * `features/contact/RevealContext.tsx`;
   * `features/seller/ComplaintButton.tsx`;
   * `features/services/{ServicesControls,ServiceComplaint,Portfolio}.tsx`;
-  * `features/listing/OwnListingFallback.tsx`;
-* `components/layout/ClientGate.tsx`, `components/ui/NavButton.tsx`, `lib/pagination.ts`, `lib/searchParams.ts`.
+  * `features/listing/OwnerListingPreview.tsx` (owner preview, `/kabinet/elanlar/[slug]`);
+* loading frames:
+  * `components/ui/Skeleton.tsx`;
+  * `features/account/AccountSkeletons.tsx`;
+  * `features/post-ad/WizardSkeleton.tsx`;
+  * `views/ListingSkeleton.tsx`;
+  * `components/layout/SessionFallback.tsx`;
+* pre-paint state: `state/bootstrap.ts`, `components/layout/InlineScript.tsx`;
+* `components/layout/ClientGate.tsx`, `components/ui/NavButton.tsx`, `lib/pagination.ts`, `lib/searchParams.ts`;
+* `.github/workflows/ci.yml`.
 
 ## 3. Differences from the approved build
 
@@ -166,9 +187,9 @@ Visually nothing changed (§5.2). Behaviour and URL differences are listed here 
 | 2 | The category crumb in listing breadcrumbs links to the category page. | Same |
 | 3 | New routes: `/kateqoriyalar/[kateqoriya]` and `/kateqoriyalar/[kateqoriya]/[seher]`. The category × city page keeps the design's heading ("Bağınız üçün ağaclar") and adds the city as the last breadcrumb item and to the `<title>`. | SEO landing pages |
 | 4 | Pagination numbers (catalogue, services, seller page) are `<a href="?sehife=N">` links instead of buttons. They look the same; "Növbəti" on the last page is still a disabled button. The catalogue (`/elanlar`) shows pagination only when there is more than one page of 24, so with the 16 sample listings nothing new appears. | Crawlable pagination |
-| 5 | Unknown, pending, expired and rejected listings, unknown sellers, services and categories, and out-of-range pages return **HTTP 404**. The SPA always answered 200. The demo owner still sees their own unpublished listing, drawn in the browser after a short "Elan tapılmadı" frame. | Real 404s, no soft 404s |
-| 6 | Cabinet, profile, favourites, the wizard, the confirmation page and the moderation queue render after hydration. The server HTML has an empty main area, so a full page load shows a blank content area for one frame. | No hydration mismatch and no signed-out flash |
-| 7 | The header account area shows the guest state in the server HTML and switches to the signed-in name right after hydration. | Session lives in `localStorage` |
+| 5 | Unknown, pending, expired and rejected listings, unknown sellers, services and categories, and out-of-range pages return **HTTP 404**, for everyone, including the listing's owner. The SPA always answered 200. Owners open their unpublished listings, and ads posted in this browser, at the **private owner preview** `/kabinet/elanlar/[slug]`. It uses the same listing layout and status notice, is `noindex`, and is disallowed in robots.txt. The cabinet's "Elanlarım" rows link there for every listing that is not publicly published; published listings still link to their public page. | Real 404s, no soft 404s; private preview kept off public URLs |
+| 6 | Cabinet, profile, favourites, the wizard, the owner preview, the confirmation page and the moderation queue render after hydration. Until then the server HTML shows a loading skeleton of the page; guests see the real sign-in prompt immediately. | No hydration mismatch and no signed-out flash |
+| 7 | Before hydration, the header shows the session state the browser has, through the pre-paint script and CSS. The server HTML alone (no JavaScript at all) still shows the guest state. | Session lives in `localStorage` |
 | 8 | Species filter options are in Azerbaijani alphabetical order (… K, Q, L …) on every browser. Before, the order depended on the browser's ICU data. | Same output on server and client |
 | 9 | `/elan-yerlesdir/<invalid>` redirects on the server (307) rather than in the browser. | Same result, earlier |
 | 10 | The home "Populyar: Zeytun ağacı" link is not prefetched. Next.js 16.3 leaves the prefetch of a non-ASCII query string unread (an open request, harmless for users, but it blocks "network idle" in tests). | Workaround |
@@ -181,7 +202,7 @@ Visually nothing changed (§5.2). Behaviour and URL differences are listed here 
 | --- | --- |
 | `npm run typecheck` | clean |
 | `npm run lint` (eslint-config-next core-web-vitals + typescript) | clean, 0 warnings |
-| `npm test` (Vitest) | **44 tests in 8 files, all passing** |
+| `npm test` (Vitest) | **55 tests in 10 files, all passing** |
 | `npm run build` | passes. 40 pages generated: static pages, 16 prerendered listings and 6 services; the rest dynamic |
 
 Vitest changes:
@@ -205,7 +226,16 @@ Vitest changes:
     offers).
 * New `StructuredData.test.tsx`: JSON-LD escaping.
 * `format.test.ts`: Azerbaijani collation and case mapping.
+* New `features/listing/ownerPreview.test.ts`, covering:
+  * owner preview access (guest, owner, browser-only ads, other sellers, unknown slugs);
+  * the cabinet link rule (public page only for published listings).
+* New `state/bootstrap.test.ts`, covering the pre-paint script:
+  * session, name and favourites markers;
+  * banner dismissal;
+  * corrupt storage.
 * `assets.test.ts`, `marketplace.test.ts` and `query.test.ts` are unchanged and pass.
+* CI (`.github/workflows/ci.yml`) runs `npm ci`, lint, typecheck, unit tests and the production build on every pull
+  request and on pushes to `main`.
 
 ## 5. Verification against the production build (`next build && next start`)
 
@@ -213,8 +243,10 @@ Vitest changes:
 
 * **Status codes** (curl):
   * 200 for every route, sample listing, seller and service, and both category page types;
-  * 404 for an unknown listing, a pending listing, unknown sellers, services, categories and cities, an unknown URL,
-    an out-of-range `?sehife` and a missing image;
+  * 404 for an unknown listing, a pending or expired listing (also for its owner), unknown sellers, services,
+    categories and cities, an unknown URL, an out-of-range `?sehife` and a missing image;
+  * 200 + `X-Robots-Tag: noindex` + robots meta `noindex, nofollow` for the owner preview
+    `/kabinet/elanlar/[slug]`;
   * 307 for an invalid wizard step.
 * **Initial HTML** (curl, no JavaScript):
   * `/elanlar` contains its 16 listing cards and "Seçiminizə uyğun 16 elan tapıldı";
@@ -227,7 +259,7 @@ Vitest changes:
 * **Staging behaviour:**
   * `X-Robots-Tag: noindex, nofollow` and the security headers and CSP are on every response;
   * `robots.txt` is `Disallow: /`, and `sitemap.xml` is empty.
-* **Link crawl:** starting at `/` and following every internal `<a href>` in the server HTML, 50 pages and 74
+* **Link crawl:** starting at `/` and following every internal `<a href>` in the server HTML, 56 pages and 74
   image/`srcset` URLs were checked. All return 200.
 
 ### 5.2 Visual parity
@@ -238,9 +270,9 @@ Vitest changes:
 
 ### 5.3 Hydration and console
 
-* **Pages checked.** 34 URLs × guest and signed in × 1440 and 390, on both the production build and `next dev`:
+* **Pages checked.** 36 URLs × guest and signed in × 1440 and 390, on both the production build and `next dev`:
   * every route, including filtered catalogue, category, seller-tab, list-view and 404 URLs;
-  * the owner's pending listing.
+  * the owner preview of a pending listing and of an unknown slug.
 * **Result:** no hydration errors, no console errors or warnings, no failed requests, no broken images. The only
   console messages are Chromium's "404" log lines for the intentional 404 documents, which the script filters out.
 
@@ -250,13 +282,14 @@ The existing Playwright scripts were pointed at `next start`.
 
 | Suite | Result |
 | --- | --- |
-| Cross-page flow: guest prompt → login with `next` → wizard validation → submit → cabinet "Yoxlamada" → moderator approves → "Aktiv" → favourites → header search → listing → seller | 12 / 12, three consecutive runs |
+| Cross-page flow: guest prompt → login with `next` → wizard validation → submit → cabinet "Yoxlamada" → the cabinet links to the owner preview, which shows it, while its public URL is a 404 → moderator approves → "Aktiv" → favourites → header search → listing → seller | 15 / 15, including the first run on a cold cache (§5.6) |
 | Wizard: validation, deep links, service variant, draft persistence, stale blob cleanup, guest submit → login | all passed |
 | Admin: moderation queue, filters, sort, decisions, categories CRUD, complaints workflow and dialogs | 61 / 61 |
 | Services catalogue and detail: search, categories, tabs, sort, pager, favourites, share, phone, complaint, 404, mobile bar | all passed |
-| Listing and seller pages: gallery keyboard, favourite, share, phone and WhatsApp, complaint validation, all 16 public listings render, 404s, owner sees pending and expired listings, seller tabs, search, sort, pagination, mobile bar | all passed |
+| Listing and seller pages: gallery keyboard, favourite, share, phone and WhatsApp, complaint validation, all 16 public listings render, 404s. Owner preview: sign-in prompt for guests, public URL 404 for the owner, preview 200 + noindex with pending and expired notices, cabinet link rule. Seller tabs, search, sort, pagination, mobile bar | all passed |
 | Sign-out from header, drawer and cabinet | 7 / 7 |
 | Persistence after reload: favourites, session, banner, header `?q=`; category card → category page → view toggle → chip removal | 10 / 10 |
+| Header search with and without JavaScript | 6 / 6 |
 
 Script changes for Next.js:
 
@@ -264,9 +297,58 @@ Script changes for Next.js:
 * The two `import('/src/…')` calls, which only worked on the Vite dev server, were replaced.
 * The pager count now counts links.
 * One selector was stale since `a82bd34` and now targets the "Qərar tarixçəsi" notice.
+* The services search selector is scoped to `main`. Since the header search gained `name="q"` for its no-JavaScript
+  fallback, the bare `input[name=q]` matched the header box first.
 
 These Playwright scripts live outside the repository, as in PR #1. Adding `@playwright/test` and committing them for
 CI is still the recommended next step.
+
+### 5.5 Loading frames and header state before hydration
+
+* **Method.** Each private page × 1440 / 768 / 390 was loaded twice:
+  * with the Next.js JavaScript blocked, which freezes the pre-hydration frame (inline scripts still run);
+  * normally.
+
+  The two `main` heights and the header's account area were compared.
+* **Results:**
+
+  | Page | Height difference |
+  | --- | --- |
+  | Dashboard | 0 / 0 / 22 px |
+  | Profile | 0 at every width |
+  | Wizard steps 1–6 | ≤ 1 px at every width |
+  | Favourites | 0 / 24 / 38 px (long titles wrapping) |
+  | Guest sign-in prompts | 0 |
+
+  * The owner preview's skeleton covers the first screen; its related-listing sections below the fold are not
+    reserved.
+  * The confirmation page and the moderation queue use a generic skeleton. Their frames have no footer, so nothing
+    below them moves.
+* **Header before hydration:** shows "Elvin Əliyev · Çıxış" (or "Daxil ol" for guests) on every page and width.
+  The dismissed demo banner stays hidden from the first paint.
+* **CLS** during a normal local load: 0 on every page.
+
+### 5.6 Intermittent 404 during end-to-end tests — root cause
+
+* **Request:** `GET /elanlar/test-servi-e2e-150-sm-10525?_rsc=…` with `rsc: 1`, `next-router-prefetch: 1` and
+  `next-router-segment-prefetch: /_tree`. This is the route-tree prefetch that `<Link>` sends when a link enters the
+  viewport.
+* **Initiator:** the cabinet row of the ad the test had just submitted. That ad exists only in the browser, but its
+  row linked to the public URL `/elanlar/<slug>`.
+* **Why it 404'd and why only sometimes:**
+  * Next.js renders unknown `[slug]` params on demand and stores the result in its route cache
+    (`.next/server/route-cache`).
+  * The first prefetch of an uncached slug returns **404**, and Chromium logs a console error. Later prefetches are
+    served from the cache with 200; the document itself stays 404.
+  * The test always creates the same slug (fixed title, deterministic listing number). So only the first run after
+    each `next build`, which clears the cache, hit the 404. That matches the 2 failures in about 30 runs; both were
+    first runs after a rebuild.
+* **Reproduction:** deterministic with a never-seen slug: 404 on the first visit, 200 on the second.
+* **Fix:** the app no longer links to URLs that are 404 by design. Cabinet rows of unpublished and browser-only
+  listings link to the owner preview, which is rendered per request (`connection()`) and never cached per slug.
+* **After the fix:**
+  * first run on a freshly built server: 15 / 15, no 4xx responses, no console errors;
+  * the never-seen-slug probe now prefetches `/kabinet/elanlar/<slug>` with 200.
 
 ## 6. Known limitations and next steps
 
@@ -278,5 +360,14 @@ CI is still the recommended next step.
    it with an object-storage loader once uploads exist.
 4. **`braces` dev-only advisory.** It goes away when `eslint-config-next` updates its glob dependency.
 5. **Dynamic catalogue pages render per request.** With the real API, add data caching or `revalidate` per endpoint.
-6. **Owner-only views of unpublished listings** come from `localStorage` (demo). With auth they become an
-   authenticated API call; the 404 status for everyone else stays.
+6. **Owner preview data** comes from `localStorage` (demo), so the route answers 200 for any slug and decides in the
+   browser. With real auth it becomes an authenticated server request, which can return 404/403 directly.
+7. **On-demand route cache for unknown listing slugs.** Any `/elanlar/<random>` request renders on demand and leaves an
+   entry in Next.js's route cache, with the document still 404 (§5.6). With mock data every public slug is known at
+   build time, so `export const dynamicParams = false` on `/elanlar/[slug]` and `/xidmetler/[slug]` would stop this.
+   I left it on because new API listings will need on-demand rendering. Decide together with the API caching
+   strategy (`revalidate`, platform cache limits).
+8. **Skeleton sizing follows the default demo state.** A visitor with more or fewer listings or favourites than the
+   demo seller sees the content grow or shrink once, below the first rows.
+9. **Before hydration, buttons need JavaScript.** Links work as plain links from the first paint, but buttons such as
+   "Çıxış" and the wizard's "Davam et" respond once the page has hydrated, usually within a moment.

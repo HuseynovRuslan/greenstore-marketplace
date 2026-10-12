@@ -40,6 +40,9 @@ npm run lint       # ESLint (eslint-config-next: core-web-vitals + typescript)
 npm test           # vitest run
 ```
 
+CI (`.github/workflows/ci.yml`) runs `npm ci`, lint, typecheck, the unit tests and the production build on every pull
+request and on pushes to `main`.
+
 ## Environment variables
 
 None are required. Copy [`.env.example`](.env.example) to `.env.local` to override them locally.
@@ -59,7 +62,7 @@ src/
                 robots.ts, sitemap.ts, not-found pages
   views/        page bodies rendered by the routes (server components, plus client pages for private areas)
   components/   ui/ (Button, Badge, Field, Panel, Notice, Dialog, Pagination…), cards/,
-                layout/ (header, footer, frames, ClientGate)
+                layout/ (header, footer, frames, ClientGate + loading frames)
   features/     page-specific components and client islands, grouped by area
                 (home, search, listing, seller, services, account, post-ad, admin, contact)
   services/     data-access boundary: MarketplaceRepository interface + mock implementation, query helpers
@@ -85,10 +88,14 @@ docs/figma/     Figma reference renders + image manifest (Figma node → file)
 | `/xidmetler`, `/xidmetler/:slug` | Services catalogue and service detail | per request / prerendered |
 | `/daxil-ol`, `/qeydiyyat` | Login and registration (mock session) | private, noindex |
 | `/kabinet`, `/kabinet/profil`, `/secilmisler` | Cabinet, profile and favourites | private, rendered in the browser |
+| `/kabinet/elanlar/:slug` | Owner preview of the seller's own unpublished listings (pending, expired, or posted in this browser) | private, noindex, rendered in the browser |
 | `/elan-yerlesdir[/:step]`, `/elan-yerlesdir/gonderildi` | 6-step ad posting wizard and its confirmation | private, rendered in the browser |
 | `/idareetme`, `/idareetme/moderasiya`, `/idareetme/kateqoriyalar`, `/idareetme/sikayetler` | Moderation tools (demo) | private, noindex |
 
-Unknown URLs, unpublished listings, and unknown sellers, services or categories return a real HTTP 404.
+Unknown URLs, unpublished listings (also for their owner, who uses the preview above), and unknown sellers, services
+or categories return a real HTTP 404. Private pages show a loading skeleton of the page until the browser has read the
+demo session and local data. A small inline script in `<head>` (`src/state/bootstrap.ts`) makes the header show the
+right signed-in or guest state from the first paint.
 
 ## Deploying to Vercel (staging)
 
