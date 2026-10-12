@@ -1,0 +1,70 @@
+@import 'tailwindcss';
+
+/*
+ * GreenStore design tokens — values taken 1:1 from the Figma frame
+ * "Vizual komponentlər və vəziyyətlər" (Rəng və tipoqrafiya) and the page frames.
+ */
+@theme {
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+
+  /* Palette (Figma name in comment) */
+  --color-forest: #173f32; /* Meşə yaşılı — primary, logo, buttons */
+  --color-forest-hover: #285541; /* Düymə · üzərinə gətirilmiş */
+  --color-olive: #788149; /* Zeytun — focus ring, VIP text, hover border */
+  --color-cream: #fafaf6; /* İsti ağ — page background */
+  --color-surface: #ffffff; /* Səth */
+  --color-line: #dee3d9; /* Sərhəd */
+  --color-ink: #20352b; /* Mətn */
+  --color-muted: #727c72; /* Köməkçi mətn */
+  --color-mint: #eaf0e9; /* search band, chips, secondary button */
+  --color-sand: #f0eee4; /* "Daha rahat və təhlükəsiz seçim" band */
+  --color-disabled: #e8ebe5; /* disabled button / field, skeleton */
+  --color-vip: #f1f2e6; /* VIP badge background */
+  --color-success: #287247;
+  --color-success-soft: #eaf5ec;
+  --color-warning: #96691e;
+  --color-warning-soft: #fbf2dc;
+  --color-danger: #b6443f;
+  --color-danger-soft: #faece9;
+  --color-footer-text: #d6dfd2;
+
+  --shadow-card-hover: 0px 8px 24px 0px rgba(23, 63, 50, 0.1);
+
+  --breakpoint-xs: 26rem;
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-cream font-sans text-ink antialiased;
+    font-feature-settings: 'cv11';
+    line-height: normal;
+  }
+  button,
+  [role='button'] {
+    cursor: pointer;
+  }
+  button:disabled {
+    cursor: not-allowed;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-olive);
+    outline-offset: 2px;
+  }
+}
+
+@layer utilities {
+  /* Page gutter used by every Figma frame: 20 px @390, 28 px @768, 64 px @1440 */
+  .page-x {
+    @apply px-5 md:px-7 xl:px-16;
+  }
+  .scrollbar-none {
+    scrollbar-width: none;
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+}

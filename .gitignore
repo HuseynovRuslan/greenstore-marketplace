@@ -1,0 +1,16 @@
+node_modules
+dist
+dist-ssr
+*.local
+.vite
+coverage
+.DS_Store
+*.log
+
+# Environment files (never commit secrets)
+.env
+.env.*
+!.env.example
+
+# Vercel CLI
+.vercel
