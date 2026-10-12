@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { Link, NavLink, useLocation, useNavigate, useSearchParams } from 'react-router'
-import { Heart, Menu, Plus, Search, X } from 'lucide-react'
+import { Heart, LogOut, Menu, Plus, Search, UserRound, X } from 'lucide-react'
 import { Logo } from '@/components/ui/Logo'
 import { ButtonLink } from '@/components/ui/Button'
 import { useSession } from '@/app/store'
@@ -40,7 +40,12 @@ function useHeaderSearch() {
  *  - < 768 px: compact bar (logo · search · menu) from "Ana səhifə · 390".
  */
 export function SiteHeader({ withSections = false }: { withSections?: boolean }) {
-  const { user } = useSession()
+  const { user, signOut } = useSession()
+  const navigate = useNavigate()
+  const handleSignOut = () => {
+    signOut()
+    navigate('/')
+  }
   const { query, setQuery, submit } = useHeaderSearch()
   const location = useLocation()
   const [menuOpen, setMenuOpen] = useState(false)
@@ -70,10 +75,23 @@ export function SiteHeader({ withSections = false }: { withSections?: boolean })
         <Link to="/secilmisler" aria-label="Seçilmişlər" className="shrink-0 text-forest hover:text-olive">
           <Heart aria-hidden size={20} strokeWidth={1.8} absoluteStrokeWidth />
         </Link>
+        {/* 768–1279 px: the Figma 768 header has no "Daxil ol" text, so account access is a compact icon. */}
+        <Link
+          to={user ? '/kabinet' : '/daxil-ol'}
+          aria-label={user ? 'Şəxsi kabinet' : 'Daxil ol'}
+          className="shrink-0 text-forest hover:text-olive xl:hidden"
+        >
+          <UserRound aria-hidden size={20} strokeWidth={1.8} absoluteStrokeWidth />
+        </Link>
         {user ? (
-          <Link to="/kabinet" className="hidden shrink-0 text-sm leading-[normal] whitespace-nowrap text-forest hover:text-olive xl:inline">
-            {user.fullName}
-          </Link>
+          <span className="hidden shrink-0 items-center gap-3 text-sm leading-[normal] whitespace-nowrap xl:inline-flex">
+            <Link to="/kabinet" className="text-forest hover:text-olive">
+              {user.fullName}
+            </Link>
+            <button type="button" onClick={handleSignOut} className="text-muted hover:text-forest">
+              Çıxış
+            </button>
+          </span>
         ) : (
           <Link to="/daxil-ol" className="hidden shrink-0 text-sm leading-[normal] whitespace-nowrap text-forest hover:text-olive xl:inline">
             Daxil ol
@@ -161,6 +179,18 @@ export function SiteHeader({ withSections = false }: { withSections?: boolean })
                   {user ? 'Şəxsi kabinet' : 'Daxil ol'}
                 </NavLink>
               </li>
+              {user && (
+                <li>
+                  <button
+                    type="button"
+                    onClick={handleSignOut}
+                    className="flex w-full items-center gap-2 rounded-lg px-3 py-3 text-left text-muted hover:bg-mint hover:text-forest"
+                  >
+                    <LogOut aria-hidden size={18} strokeWidth={1.8} absoluteStrokeWidth />
+                    Çıxış
+                  </button>
+                </li>
+              )}
             </ul>
             <ButtonLink to="/elan-yerlesdir" fullWidth icon={<Plus aria-hidden size={18} strokeWidth={1.8} absoluteStrokeWidth />}>
               Elan yerləşdir
