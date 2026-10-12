@@ -138,7 +138,7 @@ export default function ServicesPage() {
                 aria-controls="xidmet-elanlari"
                 onClick={() => update({ nov: t.value === 'all' ? undefined : t.value })}
                 className={cn(
-                  'min-h-11 rounded-lg p-3 text-[13px] leading-[normal] whitespace-nowrap transition-colors',
+                  'flex min-h-11 items-start rounded-lg p-3 text-[13px] leading-[normal] whitespace-nowrap transition-colors',
                   active ? 'bg-forest font-semibold text-white' : 'bg-mint text-forest hover:bg-[#dfe8de]',
                 )}
               >

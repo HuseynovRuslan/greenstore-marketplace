@@ -85,7 +85,7 @@ export function KindCard({
   return (
     <label
       className={cn(
-        'flex min-h-[190px] min-w-0 cursor-pointer flex-col items-start gap-4 rounded-xl text-ink transition-colors focus-within:ring-[3px] focus-within:ring-olive',
+        'flex min-h-[150px] min-w-0 cursor-pointer flex-col items-start gap-4 rounded-xl text-ink transition-colors focus-within:ring-[3px] focus-within:ring-olive md:min-h-[190px]',
         selected ? 'border-2 border-forest bg-mint p-[22px]' : 'border bg-surface p-[23px] hover:border-olive',
         !selected && (invalid ? 'border-danger' : 'border-line'),
       )}
@@ -174,7 +174,7 @@ export function DraftSummary({ draft }: { draft: PostAdDraft }) {
   const price = priceLabel(draft)
   const meta = summaryMeta(draft)
   return (
-    <Panel className="w-full text-ink">
+    <Panel className="w-full p-[23px]! text-ink">
       <h2 className="text-[15px] leading-[1.5] font-semibold">Elanınızın xülasəsi</h2>
       <p className="w-full text-sm leading-[1.5] break-words">{draft.title.trim() || 'Yeni elan'}</p>
       {price && <p className="text-[22px] leading-[1.5] font-semibold">{price}</p>}

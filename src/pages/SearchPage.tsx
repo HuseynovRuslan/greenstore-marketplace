@@ -14,6 +14,7 @@ import { FilterSheet } from '@/features/search/FilterSheet'
 import { ListingRow } from '@/features/search/ListingRow'
 import { ActiveFilterChips, SortSelect, ViewToggle } from '@/features/search/SearchControls'
 import { subcategoryName } from '@/features/search/taxonomy'
+import { withSearchCover } from '@/features/search/searchCovers'
 import {
   activeChips,
   activeFilterCount,
@@ -42,7 +43,7 @@ export default function SearchPage() {
   const state = useMemo(() => parseSearchState(new URLSearchParams(search)), [search])
   const sort = parseSort(params.get('siralama'))
   const view: SearchView = params.get('gorunus') === 'siyahi' ? 'list' : 'grid'
-  const results = useMemo(() => runSearch(state, sort), [state, sort])
+  const results = useMemo(() => runSearch(state, sort).map(withSearchCover), [state, sort])
 
   // "Elanlarda axtarış" is edited locally and applied on Enter (or together with the filter panel);
   // it re-syncs whenever the URL query changes from elsewhere (header search, chips, "Hamısını təmizlə").

@@ -1,4 +1,4 @@
-import type { InputHTMLAttributes, ReactNode } from 'react'
+import type { HTMLAttributes, InputHTMLAttributes, ReactNode } from 'react'
 import { cn } from '@/lib/format'
 
 /*
@@ -45,4 +45,13 @@ export function PanelTitle({ children, id, as: Tag = 'h2' }: { children: ReactNo
       {children}
     </Tag>
   )
+}
+
+/**
+ * Figma "Məlumat paneli" with the stroke inside the box: 1 px border + 23 px padding = 24 px from the edge,
+ * so the panel keeps the exact Figma height (the shared `Panel` adds the border on top of p-24).
+ * No default gap — pass the Figma one (gap-5 = 20 px in most panels).
+ */
+export function Card({ className, ...rest }: HTMLAttributes<HTMLDivElement>) {
+  return <div className={cn('flex flex-col items-start rounded-xl border border-line bg-surface p-[23px]', className)} {...rest} />
 }

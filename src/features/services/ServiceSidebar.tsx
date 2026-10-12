@@ -3,11 +3,11 @@ import { Link } from 'react-router'
 import { Check, Heart, MessageCircle, Phone, Share2, Sprout } from 'lucide-react'
 import { Badge } from '@/components/ui/Badge'
 import { Button, buttonClass } from '@/components/ui/Button'
-import { Panel } from '@/components/ui/Panel'
 import { useFavorites } from '@/app/store'
 import { cn } from '@/lib/format'
 import type { Service, ServiceProvider } from '@/types'
 import { telHref, whatsappHref, type ProviderContact } from './contact'
+import { InsetPanel } from './ui'
 
 const icon = { size: 18, strokeWidth: 1.8, absoluteStrokeWidth: true } as const
 
@@ -36,7 +36,7 @@ export function PricePanel({ service, note }: { service: Service; note?: string 
   }
 
   return (
-    <Panel className="w-full">
+    <InsetPanel className="w-full">
       <p className="text-[28px] leading-[1.5] font-semibold text-ink md:text-[32px]">{service.priceLabel}</p>
       {note && <p className="w-full text-sm leading-[1.5] text-muted">{note}</p>}
       <Button
@@ -51,7 +51,7 @@ export function PricePanel({ service, note }: { service: Service; note?: string 
       <Button variant="tertiary" fullWidth onClick={share} icon={copied ? <Check aria-hidden {...icon} /> : <Share2 aria-hidden {...icon} />}>
         <span aria-live="polite">{copied ? 'Keçid kopyalandı' : 'Paylaş'}</span>
       </Button>
-    </Panel>
+    </InsetPanel>
   )
 }
 
@@ -103,7 +103,7 @@ export function ProviderPanel({
   onReveal: () => void
 }) {
   return (
-    <Panel className="w-full">
+    <InsetPanel className="w-full">
       <div className="flex w-full items-start gap-3">
         <Sprout aria-hidden size={32} strokeWidth={1.8} absoluteStrokeWidth className="shrink-0 text-forest" />
         <h2 className="min-w-0 flex-1 text-[15px] leading-[1.5] font-semibold text-ink">
@@ -128,7 +128,7 @@ export function ProviderPanel({
       <p className="w-full text-xs leading-[1.5] text-muted">
         {[contact.hours, 'İlkin məsləhət üçün əlaqə saxlayın.'].filter(Boolean).join(' · ')}
       </p>
-    </Panel>
+    </InsetPanel>
   )
 }
 

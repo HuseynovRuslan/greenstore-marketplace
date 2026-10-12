@@ -12,11 +12,11 @@ import { SectionHeader } from '@/components/ui/SectionHeader'
 import { categoryById } from '@/data/categories'
 import { listingBySlug } from '@/data/listings'
 import { sellerById } from '@/data/sellers'
-import { cn } from '@/lib/format'
 import { ComplaintDialog } from '@/features/seller/ComplaintDialog'
 import { listingComplaintReasons } from '@/features/seller/complaintReasons'
 import { Breadcrumb, InfoNotice } from '@/features/seller/ui'
 import { ListingGallery } from '@/features/listing/ListingGallery'
+import { narrowCardImages, wideCardImages, withCardImage } from '@/features/listing/cardImages'
 import { MobileContactBar, PricePanel, SellerPanel } from '@/features/listing/ListingPanels'
 import {
   listingGallery,
@@ -91,12 +91,7 @@ function ListingDetail({ listing }: { listing: Listing }) {
   return (
     <>
       {/* xl top padding = Figma 15 px spacer under the header + 36 px content padding */}
-      <div
-        className={cn(
-          'page-x mx-auto flex w-full max-w-[1440px] flex-col items-start gap-7 pt-6 pb-9 md:pt-9 xl:pt-[51px]',
-          phone && 'pb-[106px] md:pb-9',
-        )}
-      >
+      <div className="page-x mx-auto flex w-full max-w-[1440px] flex-col items-start gap-7 pt-6 pb-9 md:pt-9 xl:pt-[51px]">
         <Breadcrumb
           items={[
             { label: 'Ana səhifə', to: '/' },
@@ -139,8 +134,8 @@ function ListingDetail({ listing }: { listing: Listing }) {
                 <dl className="grid w-full grid-cols-2 gap-[18px]">
                   {specs.map((s) => (
                     <div key={s.label} className="min-w-0 leading-[1.6] break-words">
-                      <dt className="text-xs text-muted">{s.label}</dt>
-                      <dd className="text-sm font-semibold text-ink">{s.value}</dd>
+                      <dt className="text-[12px] text-muted">{s.label}</dt>
+                      <dd className="text-[14px] font-semibold text-ink">{s.value}</dd>
                     </div>
                   ))}
                 </dl>
@@ -180,7 +175,7 @@ function ListingDetail({ listing }: { listing: Listing }) {
             <SectionHeader title={<span id="satici-diger-elanlari">Satıcının digər elanları</span>} />
             <div className="grid w-full grid-cols-2 gap-3 md:grid-cols-3 md:gap-5">
               {others.map((l) => (
-                <ListingCard key={l.id} listing={l} />
+                <ListingCard key={l.id} listing={withCardImage(l, wideCardImages)} />
               ))}
             </div>
           </section>
@@ -191,7 +186,7 @@ function ListingDetail({ listing }: { listing: Listing }) {
             <SectionHeader title={<span id="oxsar-elanlar">Oxşar elanlar</span>} />
             <div className="grid w-full grid-cols-2 gap-3 md:gap-5 xl:grid-cols-4">
               {similar.map((l) => (
-                <ListingCard key={l.id} listing={l} />
+                <ListingCard key={l.id} listing={withCardImage(l, narrowCardImages)} />
               ))}
             </div>
           </section>

@@ -4,9 +4,8 @@ import { Flag } from 'lucide-react'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { Notice } from '@/components/ui/Notice'
-import { Panel } from '@/components/ui/Panel'
 import { portfolio, providerById, serviceBySlug, serviceCategories, serviceDetails } from '@/data/services'
-import { Breadcrumbs, InfoNotice, PageContent, PageHeading } from '@/features/services/ui'
+import { Breadcrumbs, InfoNotice, InsetPanel, PageContent, PageHeading } from '@/features/services/ui'
 import { ServiceGallery } from '@/features/services/ServiceGallery'
 import { MobileContactBar, PricePanel, ProviderPanel } from '@/features/services/ServiceSidebar'
 import { ComplaintDialog } from '@/features/services/ComplaintDialog'
@@ -28,18 +27,18 @@ function Portfolio({ service }: { service: Service }) {
       </h2>
       <div className="grid w-full grid-cols-1 gap-5 md:grid-cols-2">
         {projects.map((p, i) => (
-          <Panel
+          <InsetPanel
             key={p.title}
             className="relative self-start transition-[border-color,box-shadow] hover:border-olive hover:shadow-card-hover has-[button:focus-visible]:ring-[3px] has-[button:focus-visible]:ring-olive"
           >
             <img src={p.image} alt={p.title} loading="lazy" className="h-[200px] w-full rounded-lg object-cover md:h-[270px]" />
-            <h3 className="w-full text-[15px] leading-[1.5] font-semibold text-ink">
+            <h3 className="w-full text-[15px] leading-[23px] font-semibold text-ink">
               <button type="button" onClick={() => setViewerIndex(i)} className="text-left after:absolute after:inset-0 after:rounded-xl focus-visible:outline-none">
                 {p.title}
               </button>
             </h3>
-            <p className="w-full text-[13px] leading-[1.5] text-muted">{p.description}</p>
-          </Panel>
+            <p className="w-full text-[13px] leading-[20px] text-muted">{p.description}</p>
+          </InsetPanel>
         ))}
       </div>
       <ImageViewer
@@ -106,7 +105,7 @@ export default function ServiceDetailPage() {
       </div>
 
       {Boolean(service.description?.length || service.includes?.length) && (
-        <Panel className="w-full text-ink">
+        <InsetPanel className="w-full text-ink">
           <h2 className="w-full text-[23px] leading-[1.35] font-normal">Xidmət haqqında</h2>
           {service.description?.map((text) => (
             <p key={text} className="w-full text-[15px] leading-[1.5]">
@@ -123,10 +122,10 @@ export default function ServiceDetailPage() {
               ))}
             </ul>
           ) : null}
-        </Panel>
+        </InsetPanel>
       )}
 
-      <Panel className="w-full">
+      <InsetPanel className="w-full">
         <h2 className="w-full text-[23px] leading-[1.35] font-normal text-ink">{details?.process ? 'Xidmət əraziləri və iş prosesi' : 'Xidmət əraziləri'}</h2>
         <ul className="flex w-full flex-wrap items-start gap-2" aria-label="Xidmət əraziləri">
           {service.areas.map((area) => (
@@ -136,7 +135,7 @@ export default function ServiceDetailPage() {
           ))}
         </ul>
         {details?.process && <p className="w-full text-sm leading-[1.5] text-muted">{details.process}</p>}
-      </Panel>
+      </InsetPanel>
 
       <Portfolio key={service.id} service={service} />
 

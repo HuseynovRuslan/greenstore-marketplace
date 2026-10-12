@@ -137,13 +137,16 @@ export function SellerPanel({ listing, seller, revealed, onReveal }: SellerPanel
   )
 }
 
-/** Mobile (< 768) sticky contact bar, sitting on top of the 86 px bottom navigation. */
+/**
+ * Mobile (< 768) contact bar. `sticky` (not fixed): it rides on top of the 86 px bottom navigation while the page
+ * scrolls and settles above the footer at the end, so it never covers content.
+ */
 export function MobileContactBar({ phone, revealed, onReveal }: { phone: string; revealed: boolean; onReveal: () => void }) {
   return (
     <div
       aria-label="Satıcı ilə əlaqə"
       role="region"
-      className="fixed inset-x-0 bottom-[86px] z-30 flex gap-3 border-t border-line bg-surface px-5 py-3 md:hidden"
+      className="sticky bottom-[86px] z-30 flex w-full gap-3 border-t border-line bg-surface px-5 py-3 md:hidden"
     >
       <PhoneReveal variant="bar" phone={phone} revealed={revealed} onReveal={onReveal} className="min-w-0 flex-1 px-3" />
       <WhatsAppLink phone={phone} label="WhatsApp" fullWidth={false} className="min-w-0 flex-1 px-3" />

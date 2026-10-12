@@ -10,6 +10,7 @@ import { categoryById } from '@/data/categories'
 import { cn } from '@/lib/format'
 import { listingSortOptions, type ListingSort } from '@/services/marketplace'
 import type { Seller } from '@/types'
+import { wideCardImages, withCardImage } from '@/features/listing/cardImages'
 import { paginate, sellerListings } from './sellerListings'
 import { sellerStatsFor, type SellerTabStat } from './sellerStats'
 
@@ -106,7 +107,7 @@ export function SellerListings({ seller }: { seller: Seller }) {
             })}
           </div>
 
-          <div className="flex w-full items-start gap-3" role="search">
+          <div className="flex w-full items-end gap-3 md:items-start" role="search">
             <TextField
               containerClassName="min-w-0 flex-1"
               type="search"
@@ -122,7 +123,7 @@ export function SellerListings({ seller }: { seller: Seller }) {
             {items.length > 0 ? (
               <div className="grid w-full grid-cols-2 gap-3 md:grid-cols-3 md:gap-5">
                 {items.map((l) => (
-                  <ListingCard key={l.id} listing={l} />
+                  <ListingCard key={l.id} listing={withCardImage(l, wideCardImages)} />
                 ))}
               </div>
             ) : (

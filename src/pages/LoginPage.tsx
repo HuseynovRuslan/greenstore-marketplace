@@ -5,10 +5,9 @@ import { currentUser } from '@/data/user'
 import { Button } from '@/components/ui/Button'
 import { TextField } from '@/components/ui/Field'
 import { Notice } from '@/components/ui/Notice'
-import { Panel } from '@/components/ui/Panel'
 import { SectionHeader } from '@/components/ui/SectionHeader'
 import { AuthIntro } from '@/features/auth/AuthIntro'
-import { Checkbox } from '@/features/account/ui'
+import { Card, Checkbox } from '@/features/account/ui'
 import { pillClass } from '@/features/account/pill'
 import { emailError, formatPhone, hasErrors, passwordError, phoneError, safeNext } from '@/features/auth/validation'
 
@@ -72,7 +71,7 @@ export default function LoginPage() {
         <div className="flex min-w-0 flex-col items-start gap-6">
           <SectionHeader as="h1" title="Yenidən xoş gəldiniz" subtitle="GreenStore hesabınıza daxil olun." />
 
-          <Panel className="w-full">
+          <Card className="w-full">
             <form noValidate onSubmit={submit} className="flex w-full flex-col items-start gap-5">
               <div role="group" aria-label="Daxil olma üsulu" className="flex flex-wrap items-start gap-2">
                 {(
@@ -165,7 +164,7 @@ export default function LoginPage() {
                 </Link>
               </p>
             </form>
-          </Panel>
+          </Card>
 
           <p className="w-full text-xs leading-[1.5] text-muted">
             Daxil olmaqla İstifadə şərtləri və Məxfilik siyasəti ilə razılaşırsınız. Məlumatlarınız təhlükəsiz saxlanılır.

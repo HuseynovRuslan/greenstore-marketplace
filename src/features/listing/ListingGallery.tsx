@@ -4,7 +4,7 @@ import { ordinal } from './detail'
 /*
  * Figma "Məhsul qalereyası": main photo 926×500 (r 8), 12 px gap, a row of 302×110 thumbnails (10 px gap),
  * caption "3 fotoşəkil · Örtük şəkli" (12 px / 1.5, muted).
- * The thumbnail row always lists the photos that are not on the main stage, so the default state is exactly the
+ * The thumbnail grid (3 per row) always lists the photos that are not on the main stage, so the default state is exactly the
  * Figma frame (cover large + 3 thumbnails); clicking a thumbnail swaps it onto the stage.
  * ← / → on the focused gallery steps through the photos.
  */
@@ -44,7 +44,7 @@ export function ListingGallery({ images, title }: { images: string[]; title: str
         className="h-[240px] w-full shrink-0 rounded-lg bg-disabled object-cover xs:h-[280px] md:h-auto md:aspect-[926/500] xl:h-[500px]"
       />
       {others.length > 0 && (
-        <div className="scrollbar-none grid w-full auto-cols-[calc((100%-20px)/3)] grid-flow-col gap-2.5 overflow-x-auto">
+        <div className="grid w-full grid-cols-3 gap-2.5">
           {others.map(({ src, index }) => (
             <button
               key={src}

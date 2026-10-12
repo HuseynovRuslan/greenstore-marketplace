@@ -1,5 +1,6 @@
-import { Fragment, type ReactNode } from 'react'
+import { Fragment, type HTMLAttributes, type ReactNode } from 'react'
 import { Link } from 'react-router'
+import { Panel } from '@/components/ui/Panel'
 import { cn } from '@/lib/format'
 
 /** Figma breadcrumb line ("Ana səhifə / Xidmətlər / Landşaft dizaynı"): 12 px / 1.5, #727c72. */
@@ -60,4 +61,12 @@ export function PageContent({ children, className }: { children: ReactNode; clas
       {children}
     </div>
   )
+}
+
+/**
+ * Shared `Panel` with the Figma inside-stroke geometry: 1 px border + 23 px padding = content 24 px from the edge
+ * (the shared Panel's p-6 adds the border on top, which makes every panel 2 px taller and 2 px narrower inside).
+ */
+export function InsetPanel({ className, ...rest }: HTMLAttributes<HTMLDivElement>) {
+  return <Panel className={cn('p-[23px]!', className)} {...rest} />
 }

@@ -69,7 +69,7 @@ export function SortSelect({ value, onChange, className }: { value: ListingSort;
   return (
     <div className={cn('group relative shrink-0 rounded-lg has-[:focus-visible]:ring-[3px] has-[:focus-visible]:ring-olive', className)}>
       <span aria-hidden className={buttonClass('secondary', 'pointer-events-none w-full group-hover:border-olive')}>
-        <ChevronDown size={18} strokeWidth={1} absoluteStrokeWidth />
+        <ChevronDown size={18} strokeWidth={1.8} absoluteStrokeWidth />
         {label}
       </span>
       <select

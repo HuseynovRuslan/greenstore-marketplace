@@ -1,6 +1,6 @@
-import { Panel } from '@/components/ui/Panel'
 import { weeklyStats } from '@/data/dashboard'
 import { cn } from '@/lib/format'
+import { Card } from '../ui'
 
 /**
  * Figma "Elan statistikası" panel: 23 px title + 15 px period, 140 px "Baxış qrafiki" of CSS bars
@@ -9,7 +9,7 @@ import { cn } from '@/lib/format'
 export function ViewsChart({ id }: { id?: string }) {
   const lastIndex = weeklyStats.days.length - 1
   return (
-    <Panel id={id} aria-labelledby="stats-title" className="min-w-0 flex-1 scroll-mt-[100px]">
+    <Card id={id} role="region" aria-labelledby="stats-title" className="w-full min-w-0 flex-1 scroll-mt-[100px] gap-5">
       <div className="w-full text-ink">
         <h2 id="stats-title" className="text-[23px] leading-[1.35] font-normal">
           {weeklyStats.title}
@@ -30,6 +30,6 @@ export function ViewsChart({ id }: { id?: string }) {
         </figcaption>
       </figure>
       <p className="w-full text-[13px] leading-[1.5] text-success">{weeklyStats.summary}</p>
-    </Panel>
+    </Card>
   )
 }

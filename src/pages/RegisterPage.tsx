@@ -4,10 +4,9 @@ import { useSession } from '@/app/store'
 import { businessTypes, type AccountProfile } from '@/data/user'
 import { Button } from '@/components/ui/Button'
 import { SelectField, TextField } from '@/components/ui/Field'
-import { Panel } from '@/components/ui/Panel'
 import { SectionHeader } from '@/components/ui/SectionHeader'
 import { AuthIntro } from '@/features/auth/AuthIntro'
-import { Checkbox, InfoNotice } from '@/features/account/ui'
+import { Card, Checkbox, InfoNotice } from '@/features/account/ui'
 import { pillClass } from '@/features/account/pill'
 import {
   emailError,
@@ -160,7 +159,7 @@ export default function RegisterPage() {
             subtitle="Elan yerləşdirmək və seçilmişləri saxlamaq üçün qeydiyyatdan keçin."
           />
 
-          <Panel className="w-full">
+          <Card className="w-full">
             <form noValidate onSubmit={submit} className="flex w-full flex-col items-start gap-5">
               <p id="account-type" className="text-[13px] leading-[1.5] font-semibold text-ink">
                 Hesab növü
@@ -322,7 +321,7 @@ export default function RegisterPage() {
                 </Link>
               </p>
             </form>
-          </Panel>
+          </Card>
         </div>
       </div>
     </div>

@@ -8,8 +8,9 @@ import {
   type DraftPhoto,
   type PostAdDraft,
 } from '@/data/postAd'
+import { sellerById } from '@/data/sellers'
 import { formatNumber, normalizeSearch } from '@/lib/format'
-import type { Listing, Spec } from '@/types'
+import type { Listing, Spec, UserProfile } from '@/types'
 
 /* Pure helpers that turn the wizard draft into display strings and, on submit, into a Listing. */
 
@@ -188,4 +189,19 @@ export function buildListing(d: PostAdDraft, opts: { number: number; sellerId?: 
     status: 'pending',
     views: 0,
   }
+}
+
+/** Contact fields of a fresh draft are pre-filled from the signed-in account. */
+export function contactFromUser(user: UserProfile | null) {
+  if (!user) return undefined
+  return { sellerName: sellerById(user.sellerId)?.name ?? '', contactPerson: user.fullName, phone: user.phone }
+}
+
+/** Card price on the confirmation screen: "38 ₼", services "25 ₼-dən" / "Razılaşma yolu ilə". */
+export function listingPriceLabel(listing: Listing): string {
+  if (listing.categoryId === SERVICE_CATEGORY_ID) {
+    if (listing.priceNote === 'Razılaşma yolu ilə') return listing.priceNote
+    return `${formatAmount(listing.price)}-dən`
+  }
+  return formatAmount(listing.price)
 }
