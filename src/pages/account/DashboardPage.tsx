@@ -3,7 +3,6 @@ import { Plus } from 'lucide-react'
 import { Button, ButtonLink } from '@/components/ui/Button'
 import { Dialog } from '@/components/ui/Dialog'
 import { Notice } from '@/components/ui/Notice'
-import { Panel } from '@/components/ui/Panel'
 import { SectionHeader } from '@/components/ui/SectionHeader'
 import { dashboardStats } from '@/data/dashboard'
 import { formatNumber } from '@/lib/format'
@@ -66,10 +65,10 @@ function Dashboard({ sellerId, name, subtitle }: { sellerId?: string; name: stri
 
       <section aria-label="Hesab göstəriciləri" className="grid w-full grid-cols-2 gap-3 md:gap-4 xl:grid-cols-4">
         {stats.map((s) => (
-          <Panel key={s.label} className="min-w-0 p-5 md:p-6">
+          <div key={s.label} className="flex min-w-0 flex-col items-start gap-5 rounded-xl border border-line bg-surface p-[19px] md:p-[23px]">
             <p className="w-full text-xs leading-[1.5] text-muted">{s.label}</p>
             <p className="text-[30px] leading-[1.5] font-semibold text-ink">{formatNumber(s.value)}</p>
-          </Panel>
+          </div>
         ))}
       </section>
 

@@ -158,8 +158,8 @@ export default function CategoriesAdminPage() {
                       className={rowClass(selected, 'line', 'flex cursor-pointer flex-col gap-3 rounded-lg p-[15px] md:flex-row md:items-start md:gap-4')}
                     >
                       <div className="flex min-w-0 flex-1 flex-col gap-[5px] leading-[1.5]">
-                        <h3 className="text-sm font-semibold text-ink">{row.name}</h3>
-                        {row.subcategories.length > 0 && <p className="text-xs text-muted">{row.subcategories.join(' · ')}</p>}
+                        <h3 className="text-[14px] font-semibold text-ink">{row.name}</h3>
+                        {row.subcategories.length > 0 && <p className="text-[12px] text-muted">{row.subcategories.join(' · ')}</p>}
                         {enabledFilters.length > 0 && (
                           <p className="text-[11px] text-muted">Filtrlər: {enabledFilters.map((f) => f.label).join(' · ')}</p>
                         )}
@@ -240,13 +240,13 @@ export default function CategoriesAdminPage() {
                 <p className="text-[13px] leading-[1.5] text-ink">
                   {checkboxes.map((c, i) => (
                     <span key={c.id}>
-                      {i > 0 && ' · '}
-                      <label className="inline cursor-pointer">
+                      {i > 0 && ' ·\u00a0'}
+                      <label className="inline cursor-pointer whitespace-nowrap">
                         <input
                           type="checkbox"
                           checked={c.checked}
                           onChange={(e) => c.onChange(e.target.checked)}
-                          className="mr-1 inline-block size-[13px] cursor-pointer align-[-2px] accent-forest"
+                          className="m-0 mr-1 inline-block size-[13px] cursor-pointer align-[-2px] accent-forest"
                         />
                         {c.label}
                       </label>

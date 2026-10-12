@@ -49,7 +49,7 @@ export function MyListingRowCard({ row, onDeactivate, onRenew, onActivate }: Pro
     )
 
   return (
-    <article className="flex w-full flex-col gap-4 rounded-xl border border-line bg-surface p-[18px] md:flex-row md:items-start md:gap-5">
+    <article className="flex w-full flex-col gap-4 rounded-xl border border-line bg-surface p-[17px] md:flex-row md:items-start md:gap-5">
       <div className="flex min-w-0 flex-1 items-start gap-3.5 md:gap-5">
         <img
           src={listing.thumbnail ?? listing.cover}
