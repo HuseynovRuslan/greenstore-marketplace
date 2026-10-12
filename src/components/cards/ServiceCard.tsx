@@ -9,7 +9,7 @@ export function ServiceCard({ service, image }: { service: Service; image?: stri
   return (
     <Link
       to={`/xidmetler/${service.slug}`}
-      className="flex flex-col items-start gap-3 self-start overflow-hidden rounded-xl border border-line bg-surface p-3 transition-[border-color,box-shadow] hover:border-olive hover:shadow-card-hover"
+      className="flex flex-col items-start gap-3 self-start overflow-hidden rounded-xl border border-line bg-surface p-[11px] transition-[border-color,box-shadow] hover:border-olive hover:shadow-card-hover"
     >
       <img src={image ?? service.cover} alt={service.title} loading="lazy" className="h-[200px] w-full shrink-0 rounded-lg object-cover" />
       <p className="text-[22px] leading-[1.5] font-semibold whitespace-nowrap text-ink">{service.priceLabel}</p>

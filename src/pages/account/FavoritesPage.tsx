@@ -12,21 +12,9 @@ import { AccountTabs } from '@/features/account/AccountTabs'
 import { AccountPage } from '@/features/account/ui'
 import { pillClass } from '@/features/account/pill'
 import { SavedServiceCard } from '@/features/account/favorites/SavedServiceCard'
-import { useMediaQuery } from '@/features/account/useMediaQuery'
 import type { Service } from '@/types'
 
 type Kind = 'all' | 'listings' | 'services'
-
-/**
- * Photos the "Seçilmişlər · 390" frame uses for the saved cards. They are 1× crops (149×145),
- * so they are only used on phones; wider screens keep the listing cover.
- */
-const savedListingPhotos: Record<string, string> = {
-  'zeytun-agaci': '/images/listings/zeytun-agaci-3.webp',
-  'mavi-kuknar': '/images/listings/mavi-kuknar-3.webp',
-  'monstera-deliciosa': '/images/listings/monstera-deliciosa-3.webp',
-  'terrakota-dibcek': '/images/listings/terrakota-dibcek-3.webp',
-}
 
 /**
  * Figma "Seçilmişlər · 390" (/secilmisler), adapted to tablet/desktop with the cabinet tabs.
@@ -37,7 +25,6 @@ export default function FavoritesPage() {
   const { user } = useSession()
   const { favoriteIds } = useFavorites()
   const [kind, setKind] = useState<Kind>('all')
-  const isPhone = useMediaQuery('(max-width: 767.98px)')
 
   const savedListings = listingsByIds([...favoriteIds('listing')].reverse())
   const savedServices = [...favoriteIds('service')]
@@ -88,7 +75,7 @@ export default function FavoritesPage() {
           {showListings && (
             <section aria-label="Saxlanmış məhsullar" className="grid w-full grid-cols-2 gap-3 md:grid-cols-3 md:gap-5 xl:grid-cols-4">
               {savedListings.map((l) => (
-                <ListingCard key={l.id} listing={isPhone && savedListingPhotos[l.id] ? { ...l, cover: savedListingPhotos[l.id] } : l} />
+                <ListingCard key={l.id} listing={l} />
               ))}
             </section>
           )}

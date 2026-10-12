@@ -152,7 +152,7 @@ function PostAdWizard({ step }: { step: StepNumber }) {
       {/* Figma "Elan forması və kömək" */}
       <div className="flex w-full flex-col items-start gap-7 xl:flex-row">
         <form ref={formRef} noValidate onSubmit={onSubmit} className="flex w-full min-w-0 flex-col gap-6 xl:flex-1" aria-labelledby="post-ad-step-title">
-          <Panel className="w-full p-[23px]!">
+          <Panel className="w-full">
             <h2 id="post-ad-step-title" className="w-full text-[23px] leading-[1.35] font-normal">
               {step}/{STEP_COUNT} · {stepTitle}
             </h2>

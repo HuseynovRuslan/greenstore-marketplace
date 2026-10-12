@@ -17,7 +17,8 @@ export function SectionHeader({ title, subtitle, action, as: Tag = 'h2', classNa
     <div className={cn('flex w-full items-center gap-3 text-ink', className)}>
       <div className="min-w-0 flex-1">
         <Tag className="text-[23px] leading-[1.35] font-normal md:text-[30px]">{title}</Tag>
-        {subtitle && <p className="text-[15px] leading-[1.43] text-muted">{subtitle}</p>}
+        {/* Figma's header box is title + 1.6 subtitle on 390 (79 px) but 2.5 px shorter on 768/1440 (62 px). */}
+        {subtitle && <p className="text-[15px] leading-[1.6] text-muted md:-mb-[2.5px]">{subtitle}</p>}
       </div>
       {action && (
         <Link

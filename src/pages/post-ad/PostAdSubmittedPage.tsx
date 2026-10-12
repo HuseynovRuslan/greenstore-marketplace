@@ -54,7 +54,7 @@ export default function PostAdSubmittedPage() {
         </div>
 
         {listing && (
-          <Panel className="w-full p-[23px]!">
+          <Panel className="w-full">
             <article className="flex w-full flex-col gap-6 md:flex-row">
               <SafeImage
                 src={submittedCardImage(listing)}

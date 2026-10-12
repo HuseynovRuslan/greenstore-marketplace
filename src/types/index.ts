@@ -64,8 +64,12 @@ export interface Listing {
   /** e.g. "Dekorativ ağaclar" (detail page breadcrumb/specs) */
   subcategory?: string
   sellerId?: string
-  /** Image used on listing cards (path under /public) */
+  /** Image used on listing cards (path under /public) — the photo of the 1440 desktop frames */
   cover: string
+  /** Card photo the 768 tablet frame uses for this listing (served by ListingCard below 1280 px) */
+  coverTablet?: string
+  /** Card photo the 390 mobile frames use for this listing (served by ListingCard below 768 px) */
+  coverMobile?: string
   /** Thumbnail used in the seller cabinet list ("Şəxsi kabinet" → "Elanlarım"), when Figma has a dedicated one */
   thumbnail?: string
   /** Gallery images in original order (cover is not repeated unless it is part of the gallery) */

@@ -174,7 +174,7 @@ export function DraftSummary({ draft }: { draft: PostAdDraft }) {
   const price = priceLabel(draft)
   const meta = summaryMeta(draft)
   return (
-    <Panel className="w-full p-[23px]! text-ink">
+    <Panel className="w-full text-ink">
       <h2 className="text-[15px] leading-[1.5] font-semibold">Elanınızın xülasəsi</h2>
       <p className="w-full text-sm leading-[1.5] break-words">{draft.title.trim() || 'Yeni elan'}</p>
       {price && <p className="text-[22px] leading-[1.5] font-semibold">{price}</p>}

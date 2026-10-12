@@ -68,5 +68,5 @@ export function PageContent({ children, className }: { children: ReactNode; clas
  * (the shared Panel's p-6 adds the border on top, which makes every panel 2 px taller and 2 px narrower inside).
  */
 export function InsetPanel({ className, ...rest }: HTMLAttributes<HTMLDivElement>) {
-  return <Panel className={cn('p-[23px]!', className)} {...rest} />
+  return <Panel className={className} {...rest} />
 }

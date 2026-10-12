@@ -3,7 +3,7 @@ import { Panel } from '@/components/ui/Panel'
 import { Button } from '@/components/ui/Button'
 import { SelectField, TextField } from '@/components/ui/Field'
 import { productCategories } from '@/data/categories'
-import { cn, formatNumber } from '@/lib/format'
+import { formatNumber } from '@/lib/format'
 import { CityMultiSelect } from './CityMultiSelect'
 import { speciesOptions, subcategoryOptions } from './taxonomy'
 import {
@@ -53,7 +53,7 @@ export function FilterPanel({ applied, q, onApply, onClear, className }: FilterP
 
   return (
     // p 23 + the 1 px border = Figma's 24 px inset (Figma strokes sit inside the 276 px box).
-    <Panel className={cn('p-[23px]', className)}>
+    <Panel className={className}>
       <form onSubmit={submit} noValidate aria-labelledby={headingId} className="flex w-full flex-col items-start gap-5">
         <h2 id={headingId} className="text-[23px] leading-[1.35] font-normal text-ink">
           Filtrlər

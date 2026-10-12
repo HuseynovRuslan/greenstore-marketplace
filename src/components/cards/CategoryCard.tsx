@@ -8,7 +8,7 @@ export function CategoryCard({ category }: { category: Category }) {
   return (
     <Link
       to={to}
-      className="flex min-h-[132px] flex-col items-start gap-2.5 self-start rounded-xl border border-line bg-surface p-4 transition-[border-color,box-shadow] hover:border-olive hover:shadow-card-hover md:min-h-[112px]"
+      className="flex min-h-[132px] flex-col items-start gap-2.5 self-start rounded-xl border border-line bg-surface p-[15px] transition-[border-color,box-shadow] hover:border-olive hover:shadow-card-hover md:min-h-[112px]"
     >
       <span className="flex w-full items-start justify-between">
         <CategoryIcon name={category.icon} />

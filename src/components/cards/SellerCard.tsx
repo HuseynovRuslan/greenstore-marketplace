@@ -8,7 +8,7 @@ export function SellerCard({ seller }: { seller: Seller }) {
   return (
     <Link
       to={`/saticilar/${seller.slug}`}
-      className="flex flex-col items-start gap-3 self-start overflow-hidden rounded-xl border border-line bg-surface p-4 transition-[border-color,box-shadow] hover:border-olive hover:shadow-card-hover"
+      className="flex flex-col items-start gap-3 self-start overflow-hidden rounded-xl border border-line bg-surface p-[15px] transition-[border-color,box-shadow] hover:border-olive hover:shadow-card-hover"
     >
       <img src={seller.image} alt={seller.name} loading="lazy" className="h-[126px] w-full shrink-0 rounded-lg object-cover" />
       <h3 className="text-[15px] leading-[1.5] font-semibold whitespace-nowrap text-ink">{seller.name}</h3>
