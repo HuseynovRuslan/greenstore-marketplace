@@ -11,19 +11,26 @@ interface DialogProps {
 /* Figma "Dialoqlar": white panel, radius 12, p 24, 23 px title, 20 px gaps */
 export function Dialog({ open, title, onClose, children }: DialogProps) {
   const ref = useRef<HTMLDivElement>(null)
+  // Keep the latest onClose without re-running the open effect (which would steal focus on every parent render).
+  const onCloseRef = useRef(onClose)
+  useEffect(() => {
+    onCloseRef.current = onClose
+  })
 
   useEffect(() => {
     if (!open) return
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose()
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onCloseRef.current()
     document.addEventListener('keydown', onKey)
     const previous = document.body.style.overflow
     document.body.style.overflow = 'hidden'
+    const opener = document.activeElement as HTMLElement | null
     ref.current?.focus()
     return () => {
       document.removeEventListener('keydown', onKey)
       document.body.style.overflow = previous
+      opener?.focus?.()
     }
-  }, [open, onClose])
+  }, [open])
 
   if (!open) return null
   return (
