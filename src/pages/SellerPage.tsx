@@ -91,7 +91,7 @@ function SellerProfile({ seller }: { seller: Seller }) {
           </div>
 
           {/* "Satıcı ilə əlaqə" */}
-          <Panel aria-label="Satıcı ilə əlaqə" className="w-full shrink-0 md:w-[300px] xl:w-[358px]">
+          <Panel role="region" aria-label="Satıcı ilə əlaqə" className="w-full shrink-0 md:w-[300px] xl:w-[358px]">
             {seller.contactPerson && (
               <p className="w-full text-[15px] leading-[1.5] font-semibold text-ink">Əlaqələndirici şəxs: {seller.contactPerson}</p>
             )}

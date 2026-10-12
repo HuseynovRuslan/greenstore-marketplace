@@ -37,22 +37,23 @@ export function ProfileForm({ account, onSave }: { account: AccountProfile; onSa
   }
 
   const phoneUnchanged = formatPhone(values.phone) === account.phone
-  const phoneVerified = Boolean(account.phoneVerified) && phoneUnchanged
+  const phoneVerified = Boolean(account.phoneVerified && account.phone) && phoneUnchanged
 
   const submit = (e: FormEvent) => {
     e.preventDefault()
     const nextErrors: Errors<Field> = {
       company: isBusiness ? requiredError(values.company, messages.companyRequired) : undefined,
       contact: requiredError(values.contact, messages.nameRequired),
-      phone: phoneError(values.phone),
-      email: emailError(values.email),
+      // At least one contact is required (registration allows phone-only or e-mail-only accounts).
+      phone: phoneError(values.phone, !values.email.trim()),
+      email: emailError(values.email, !values.phone.trim()),
     }
     setErrors(nextErrors)
     if (hasErrors(nextErrors)) {
       setSaved(false)
       return
     }
-    const phone = formatPhone(values.phone)
+    const phone = values.phone.trim() ? formatPhone(values.phone) : ''
     onSave({
       companyName: isBusiness ? values.company.trim() : account.companyName,
       businessType: isBusiness ? values.businessType : account.businessType,

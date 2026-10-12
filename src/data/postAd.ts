@@ -80,6 +80,8 @@ export interface PostAdDraft {
   showPhone: boolean
   /* 6 · Önizləmə və dərc */
   rulesAccepted: boolean
+  /** Furthest step opened via "Davam et" / the stepper — deep links beyond it are sent back there. */
+  reachedStep: StepNumber
 }
 
 /** Product categories whose ads describe a living plant (type, growing form, height, age). */
@@ -214,6 +216,7 @@ export const exampleDraft: PostAdDraft = {
   contactHours: 'Hər gün 09:00–18:00',
   showPhone: true,
   rulesAccepted: true,
+  reachedStep: 6,
 }
 
 /** A blank draft ("Yeni elan yerləşdir"). Contact fields can be pre-filled from the account by the caller. */
@@ -251,5 +254,6 @@ export function createEmptyDraft(contact?: Partial<Pick<PostAdDraft, 'sellerName
     contactHours: '',
     showPhone: false,
     rulesAccepted: false,
+    reachedStep: 1,
   }
 }

@@ -92,7 +92,7 @@ interface SellerPanelProps {
 export function SellerPanel({ listing, seller, revealed, onReveal }: SellerPanelProps) {
   if (!seller) {
     return (
-      <Panel aria-label="Satıcı ilə əlaqə">
+      <Panel role="region" aria-label="Satıcı ilə əlaqə">
         <div className="flex w-full flex-col gap-1 leading-[1.5]">
           <p className="text-[15px] font-semibold text-ink">Satıcı məlumatı göstərilmir</p>
           <p className="text-sm text-muted">{cityName(listing.cityId)}</p>
@@ -107,7 +107,7 @@ export function SellerPanel({ listing, seller, revealed, onReveal }: SellerPanel
   const sellerUrl = `/saticilar/${seller.slug}`
 
   return (
-    <Panel aria-label="Satıcı ilə əlaqə">
+    <Panel role="region" aria-label="Satıcı ilə əlaqə">
       <div className="flex w-full items-center gap-3">
         <span className="flex size-12 shrink-0 items-center justify-center rounded-full bg-mint text-forest">
           <Sprout aria-hidden size={25} strokeWidth={1.8} absoluteStrokeWidth />

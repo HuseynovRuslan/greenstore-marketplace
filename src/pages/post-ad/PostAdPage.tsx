@@ -82,12 +82,18 @@ function PostAdWizard({ step }: { step: StepNumber }) {
     }
   }
 
+  /** Moves forward and remembers the furthest step (written directly: this keyed instance unmounts on navigation). */
+  const advanceTo = (target: StepNumber) => {
+    if (target > draft.reachedStep) writeDraft({ ...draft, reachedStep: target })
+    navigate(stepPath(target))
+  }
+
   /** Stepper: earlier steps open directly; later ones require every step before them to validate. */
   const goToStep = (target: StepNumber) => {
     if (target <= step) return navigate(stepPath(target))
     const invalid = firstInvalidStep(draft, (target - 1) as StepNumber)
     if (invalid) return revealErrors(invalid)
-    navigate(stepPath(target))
+    advanceTo(target)
   }
 
   const submitAd = () => {
@@ -115,13 +121,16 @@ function PostAdWizard({ step }: { step: StepNumber }) {
     e.preventDefault()
     if (step === STEP_COUNT) return submitAd()
     if (!isStepValid(step, draft)) return revealErrors(step)
-    navigate(stepPath((step + 1) as StepNumber))
+    advanceTo((step + 1) as StepNumber)
   }
 
   const onBack = () => {
     if (step === 1) navigate(user ? '/kabinet' : '/')
     else navigate(stepPath((step - 1) as StepNumber))
   }
+
+  // Deep links past the furthest step reached (e.g. /elan-yerlesdir/6 on a blank draft) go back to that step.
+  if (step > draft.reachedStep) return <Navigate to={stepPath(draft.reachedStep)} replace />
 
   const stepTitle = POST_AD_STEPS[step - 1].title
   const StepBody = STEP_BODIES[step]
