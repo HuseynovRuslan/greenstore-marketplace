@@ -246,7 +246,7 @@ export default function CategoriesAdminPage() {
                           type="checkbox"
                           checked={c.checked}
                           onChange={(e) => c.onChange(e.target.checked)}
-                          className="m-0 mr-1 inline-block size-[13px] cursor-pointer align-[-2px] accent-forest"
+                          className="m-0 mr-[3px] inline-block size-3 cursor-pointer align-[-1px] accent-forest"
                         />
                         {c.label}
                       </label>
