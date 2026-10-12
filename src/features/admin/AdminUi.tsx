@@ -1,5 +1,8 @@
+'use client'
+
 import type { ButtonHTMLAttributes, ReactNode } from 'react'
-import { Link, useLocation } from 'react-router'
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { SectionHeader } from '@/components/ui/SectionHeader'
 import { chipClass } from './lib'
 
@@ -13,7 +16,7 @@ const sections: Array<{ label: string; to?: string; paths: string[] }> = [
 
 /** Figma "Bölmə seçimləri" — admin section tabs (Moderasiya · Kateqoriyalar · Şikayətlər · İstifadəçilər). */
 export function AdminTabs() {
-  const { pathname } = useLocation()
+  const pathname = usePathname()
   const current = pathname.replace(/\/+$/, '') || '/'
   return (
     <nav aria-label="İdarəetmə bölmələri" className="w-full">
@@ -23,7 +26,7 @@ export function AdminTabs() {
           return (
             <li key={s.label}>
               {s.to ? (
-                <Link to={s.to} aria-current={active ? 'page' : undefined} className={chipClass(active)}>
+                <Link href={s.to} aria-current={active ? 'page' : undefined} className={chipClass(active)}>
                   {s.label}
                 </Link>
               ) : (

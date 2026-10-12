@@ -1,23 +1,16 @@
-import { useState } from 'react'
+'use client'
+
 import { X } from 'lucide-react'
 import { DEMO_MODE } from '@/config/demo'
-
-const DISMISS_KEY = 'greenstore:demo-banner-dismissed'
-
-function readDismissed() {
-  try {
-    return window.sessionStorage.getItem(DISMISS_KEY) === '1'
-  } catch {
-    return false
-  }
-}
+import { useStoredState } from '@/hooks/useLocalStorage'
 
 /**
  * Staging notice: the site runs on sample data and a simulated login (see src/config/demo.ts).
  * Not part of the Figma design — it sits above the header and can be dismissed for the browser session.
+ * Rendered on the server too, so the notice is part of the initial HTML; dismissal applies after hydration.
  */
 export function DemoBanner() {
-  const [dismissed, setDismissed] = useState(readDismissed)
+  const [dismissed, setDismissed] = useStoredState('greenstore:demo-banner-dismissed', false, 'session')
   if (!DEMO_MODE || dismissed) return null
 
   return (
@@ -34,14 +27,7 @@ export function DemoBanner() {
         <button
           type="button"
           aria-label="Demo bildirişini bağla"
-          onClick={() => {
-            setDismissed(true)
-            try {
-              window.sessionStorage.setItem(DISMISS_KEY, '1')
-            } catch {
-              /* storage unavailable — hide for this page view only */
-            }
-          }}
+          onClick={() => setDismissed(true)}
           className="-m-1 shrink-0 rounded p-1 text-muted hover:bg-mint hover:text-forest"
         >
           <X aria-hidden size={16} strokeWidth={1.8} absoluteStrokeWidth />

@@ -1,5 +1,5 @@
 import { publicListings } from '@/data/listings'
-import { normalizeSearch } from '@/lib/format'
+import { compareAz, normalizeSearch } from '@/lib/format'
 import type { Listing } from '@/types'
 
 /** ASCII URL slug for Azerbaijani labels ("İynəyarpaqlılar" → "iyneyarpaqlilar", "Zeytun ağacı" → "zeytun-agaci"). */
@@ -51,7 +51,7 @@ export function speciesOptions(categoryId: string): Array<{ value: string; label
   }
   return [...names]
     .map(([value, label]) => ({ value, label }))
-    .sort((a, b) => a.label.localeCompare(b.label, 'az'))
+    .sort((a, b) => compareAz(a.label, b.label))
 }
 
 export function speciesLabel(slug: string): string | undefined {

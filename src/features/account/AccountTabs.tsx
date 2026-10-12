@@ -1,6 +1,9 @@
-import { Link, useLocation, useNavigate } from 'react-router'
+'use client'
+
+import Link from 'next/link'
+import { usePathname, useRouter } from 'next/navigation'
 import { LogOut } from 'lucide-react'
-import { useSession } from '@/app/store'
+import { useSession } from '@/state/store'
 import { pillClass } from './pill'
 
 export type AccountTab = 'listings' | 'favorites' | 'profile'
@@ -21,8 +24,8 @@ export const STATS_ANCHOR = 'statistika'
  */
 export function AccountTabs({ active }: { active: AccountTab }) {
   const { signOut } = useSession()
-  const navigate = useNavigate()
-  const { pathname } = useLocation()
+  const router = useRouter()
+  const pathname = usePathname()
 
   return (
     <nav aria-label="Şəxsi kabinet" className="flex w-full flex-wrap items-start gap-2">
@@ -31,7 +34,7 @@ export function AccountTabs({ active }: { active: AccountTab }) {
         return (
           <Link
             key={t.key}
-            to={t.to}
+            href={t.to}
             aria-current={isActive ? 'page' : undefined}
             onClick={() => {
               // Same-page anchor: the router does not re-run the hash scroll when the hash is unchanged.
@@ -49,7 +52,7 @@ export function AccountTabs({ active }: { active: AccountTab }) {
         type="button"
         onClick={() => {
           signOut()
-          navigate('/')
+          router.push('/')
         }}
         className="ml-auto inline-flex min-h-11 shrink-0 items-center gap-2 rounded-lg px-3 text-[13px] leading-[normal] whitespace-nowrap text-muted transition-colors hover:bg-mint hover:text-forest"
       >

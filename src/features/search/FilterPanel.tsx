@@ -1,3 +1,5 @@
+'use client'
+
 import { useId, useMemo, useState, type FormEvent } from 'react'
 import { Panel } from '@/components/ui/Panel'
 import { Button } from '@/components/ui/Button'

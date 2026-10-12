@@ -1,13 +1,16 @@
+'use client'
+
 import { useEffect, useRef, useState } from 'react'
-import { Link } from 'react-router'
+import Link from 'next/link'
 import { Check, Heart, MessageCircle, Phone, Share2, Sprout } from 'lucide-react'
 import { Badge } from '@/components/ui/Badge'
 import { Button, buttonClass } from '@/components/ui/Button'
-import { useFavorites } from '@/app/store'
+import { useFavorites } from '@/state/store'
 import { cn } from '@/lib/format'
 import type { Service, ServiceProvider } from '@/types'
 import { telHref, whatsappHref, type ProviderContact } from './contact'
 import { InsetPanel } from './ui'
+import { useReveal } from '@/features/contact/RevealContext'
 
 const icon = { size: 18, strokeWidth: 1.8, absoluteStrokeWidth: true } as const
 
@@ -91,24 +94,15 @@ function PhoneButton({ phone, revealed, onReveal, className }: { phone: string; 
 }
 
 /* Figma "Məlumat paneli" #2: sprout 32 + name 15 px semibold, badge, summary 14 px muted, phone + WhatsApp, hours 12 px muted. */
-export function ProviderPanel({
-  provider,
-  contact,
-  revealed,
-  onReveal,
-}: {
-  provider: ServiceProvider
-  contact: ProviderContact
-  revealed: boolean
-  onReveal: () => void
-}) {
+export function ProviderPanel({ provider, contact }: { provider: ServiceProvider; contact: ProviderContact }) {
+  const { revealed, reveal: onReveal } = useReveal()
   return (
     <InsetPanel className="w-full">
       <div className="flex w-full items-start gap-3">
         <Sprout aria-hidden size={32} strokeWidth={1.8} absoluteStrokeWidth className="shrink-0 text-forest" />
         <h2 className="min-w-0 flex-1 text-[15px] leading-[1.5] font-semibold text-ink">
           {contact.sellerSlug ? (
-            <Link to={`/saticilar/${contact.sellerSlug}`} className="hover:text-olive">
+            <Link href={`/saticilar/${contact.sellerSlug}`} className="hover:text-olive">
               {provider.name}
             </Link>
           ) : (
@@ -133,7 +127,8 @@ export function ProviderPanel({
 }
 
 /** Mobile (< 768) contact bar that sticks above the 86 px bottom navigation while the page content is in view. */
-export function MobileContactBar({ contact, revealed, onReveal }: { contact: ProviderContact; revealed: boolean; onReveal: () => void }) {
+export function MobileContactBar({ contact }: { contact: ProviderContact }) {
+  const { revealed, reveal: onReveal } = useReveal()
   return (
     <div className="sticky bottom-[86px] z-30 -mx-5 -mb-6 flex gap-3 self-stretch border-t border-line bg-surface px-5 py-3 md:hidden">
       <PhoneButton phone={contact.phone} revealed={revealed} onReveal={onReveal} className="min-w-0 flex-1 px-3" />

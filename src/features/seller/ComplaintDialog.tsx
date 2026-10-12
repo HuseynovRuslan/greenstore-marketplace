@@ -1,3 +1,5 @@
+'use client'
+
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { Dialog } from '@/components/ui/Dialog'
 import { Button, buttonClass } from '@/components/ui/Button'

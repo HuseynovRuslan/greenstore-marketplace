@@ -8,9 +8,10 @@
  * - Everything a visitor creates (favourites, posted ads, profile edits, moderation decisions) lives only in that
  *   browser's localStorage.
  *
- * The demo banner is shown unless the build sets `VITE_DEMO_MODE=false` (only do that once a real API is connected).
+ * The demo banner is shown unless the build sets `NEXT_PUBLIC_DEMO_MODE=false` (only do that once a real API is
+ * connected). Indexing is controlled separately and stays off while the data source is mock — see src/seo/env.ts.
  */
-export const DEMO_MODE = import.meta.env.VITE_DEMO_MODE !== 'false'
+export const DEMO_MODE = process.env.NEXT_PUBLIC_DEMO_MODE !== 'false'
 
 /** Pre-filled on the demo login form. NOT a real credential — nothing checks it. */
 export const DEMO_LOGIN_PASSWORD = 'greenstore'

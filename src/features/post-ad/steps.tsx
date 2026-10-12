@@ -1,3 +1,5 @@
+'use client'
+
 import { Shovel, Sprout } from 'lucide-react'
 import { Badge } from '@/components/ui/Badge'
 import { ButtonLink } from '@/components/ui/Button'
@@ -361,7 +363,7 @@ export function PreviewStep({ draft, update, error }: StepProps) {
         <p className="w-full text-sm leading-[1.5] break-words whitespace-pre-line text-ink">{draft.description.trim()}</p>
       )}
       {contact && <p className="w-full text-sm leading-[1.5] text-ink">{contact}</p>}
-      <ButtonLink variant="secondary" to="/elan-yerlesdir/1">
+      <ButtonLink variant="secondary" href="/elan-yerlesdir/1">
         Məlumatları redaktə et
       </ButtonLink>
       <Notice tone="warning" title="Dərcdən əvvəl yoxlama">

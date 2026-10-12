@@ -1,5 +1,6 @@
-import { useId, useRef } from 'react'
-import { useSearchParams } from 'react-router'
+'use client'
+
+import { useId, useRef, useState, type MouseEvent } from 'react'
 import { ArrowDownUp, ChevronRight, Search } from 'lucide-react'
 import { ListingCard } from '@/components/cards/ListingCard'
 import { Button, ButtonLink, buttonClass } from '@/components/ui/Button'
@@ -19,9 +20,13 @@ const icon = { size: 18, strokeWidth: 1.8, absoluteStrokeWidth: true, 'aria-hidd
 /**
  * Figma "Satıcının aktiv elanları": category tabs, in-seller search, sort, 3-column grid (6 per page), pagination.
  * State lives in the URL: ?kateqoriya= · q= · siralama= · sehife=
+ * The server page passes the query it rendered with; later changes update the address bar in place
+ * (`history.replaceState`, which the App Router keeps in sync) without a server round trip per keystroke.
  */
-export function SellerListings({ seller }: { seller: Seller }) {
-  const [params, setParams] = useSearchParams()
+export function SellerListings({ seller, initialQuery = '' }: { seller: Seller; initialQuery?: string }) {
+  const [state, setState] = useState({ from: initialQuery, query: initialQuery })
+  if (state.from !== initialQuery) setState({ from: initialQuery, query: initialQuery })
+  const params = new URLSearchParams(state.query)
   const sectionRef = useRef<HTMLElement>(null)
   const panelId = useId()
   const stats = sellerStatsFor(seller.id)
@@ -55,7 +60,17 @@ export function SellerListings({ seller }: { seller: Seller }) {
       else next.delete(key)
     }
     if (!keepPage) next.delete('sehife')
-    setParams(next, { replace: true, preventScrollReset: true })
+    const query = next.toString()
+    setState((prev) => ({ ...prev, query }))
+    window.history.replaceState(null, '', query ? `?${query}` : window.location.pathname)
+  }
+
+  const pageHref = (p: number) => {
+    const next = new URLSearchParams(params)
+    if (p > 1) next.set('sehife', String(p))
+    else next.delete('sehife')
+    const query = next.toString()
+    return query ? `?${query}` : `/saticilar/${seller.slug}`
   }
 
   const goToPage = (p: number) => {
@@ -78,7 +93,7 @@ export function SellerListings({ seller }: { seller: Seller }) {
           title="Uyğun elan tapılmadı"
           description="Bu satıcının elanları hazırda göstərilmir."
           action={
-            <ButtonLink to="/elanlar" fullWidth>
+            <ButtonLink href="/elanlar" fullWidth>
               Elanlara bax
             </ButtonLink>
           }
@@ -142,7 +157,7 @@ export function SellerListings({ seller }: { seller: Seller }) {
             )}
           </div>
 
-          {items.length > 0 && <Pagination page={page} pageCount={pageCount} onChange={goToPage} />}
+          {items.length > 0 && <Pagination page={page} pageCount={pageCount} hrefFor={pageHref} onChange={goToPage} />}
         </>
       )}
     </section>
@@ -176,27 +191,52 @@ function SortSelect({ value, onChange }: { value: ListingSort; onChange: (value:
   )
 }
 
-/** Figma "Səhifələmə": numbered buttons (current = primary) + "Növbəti". */
-function Pagination({ page, pageCount, onChange }: { page: number; pageCount: number; onChange: (page: number) => void }) {
+/**
+ * Figma "Səhifələmə": numbered buttons (current = primary) + "Növbəti".
+ * Rendered as real links (`?sehife=N`) so the pages are crawlable; clicks are handled in place.
+ */
+function Pagination({
+  page,
+  pageCount,
+  hrefFor,
+  onChange,
+}: {
+  page: number
+  pageCount: number
+  hrefFor: (page: number) => string
+  onChange: (page: number) => void
+}) {
   const pages = Array.from({ length: pageCount }, (_, i) => i + 1)
+  const go = (p: number) => (e: MouseEvent<HTMLAnchorElement>) => {
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return
+    e.preventDefault()
+    if (p !== page) onChange(p)
+  }
   return (
     <nav aria-label="Səhifələmə" className="flex w-full flex-wrap items-start justify-center gap-2">
       {pages.map((p) => (
-        <button
+        <a
           key={p}
-          type="button"
+          href={hrefFor(p)}
           aria-current={p === page ? 'page' : undefined}
           aria-label={`Səhifə ${p}`}
-          onClick={() => p !== page && onChange(p)}
+          onClick={go(p)}
           className={buttonClass(p === page ? 'primary' : 'secondary', 'min-w-[39px]')}
         >
           {p}
-        </button>
+        </a>
       ))}
-      <button type="button" disabled={page >= pageCount} onClick={() => onChange(page + 1)} className={buttonClass('secondary')}>
-        <ChevronRight {...icon} />
-        Növbəti
-      </button>
+      {page >= pageCount ? (
+        <button type="button" disabled className={buttonClass('secondary')}>
+          <ChevronRight {...icon} />
+          Növbəti
+        </button>
+      ) : (
+        <a href={hrefFor(page + 1)} rel="next" onClick={go(page + 1)} className={buttonClass('secondary')}>
+          <ChevronRight {...icon} />
+          Növbəti
+        </a>
+      )}
     </nav>
   )
 }

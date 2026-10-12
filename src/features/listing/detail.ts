@@ -1,7 +1,7 @@
 import { categoryById } from '@/data/categories'
 import { cityName } from '@/data/cities'
 import { ageYears, heightRange, publicListings } from '@/data/listings'
-import { formatFullDate, formatNumber } from '@/lib/format'
+import { formatFullDate, formatNumber, upperAz } from '@/lib/format'
 import { sortListings } from '@/services/marketplace'
 import { sortSellerListings } from '@/features/seller/sellerListings'
 import type { BadgeTone } from '@/components/ui/Badge'
@@ -44,7 +44,7 @@ export function listingMetaLine(listing: Listing): string {
     .join(' · ')
 }
 
-const capitalize = (s: string) => s.charAt(0).toLocaleUpperCase('az') + s.slice(1)
+const capitalize = (s: string) => upperAz(s.charAt(0)) + s.slice(1)
 
 /**
  * "Xüsusiyyətlər": the listing's own specs when the design provides them (Zeytun ağacı); otherwise only facts that

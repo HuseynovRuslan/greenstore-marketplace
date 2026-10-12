@@ -8,7 +8,7 @@
  */
 import { categoryById, productCategories } from '@/data/categories'
 import { cities, cityName } from '@/data/cities'
-import { formatNumber } from '@/lib/format'
+import { formatNumber, lowerAz } from '@/lib/format'
 import { searchListings, type ListingFilters, type ListingSort } from '@/services/marketplace'
 import type { Listing } from '@/types'
 import { speciesLabel, speciesSlug, subcategoryName, slugify } from './taxonomy'
@@ -226,7 +226,7 @@ export function runSearch(state: SearchState, sort: ListingSort = 'newest'): Lis
 /** "Bağınız üçün ağaclar" — Figma heading for the "Ağaclar" category; other states keep the same voice. */
 export function searchHeading(state: SearchState): string {
   const category = state.categoryId ? categoryById(state.categoryId) : undefined
-  if (category) return `Bağınız üçün ${category.name.toLocaleLowerCase('az')}`
+  if (category) return `Bağınız üçün ${lowerAz(category.name)}`
   if (state.vip) return 'VIP elanlar'
   if (state.q) return 'Axtarış nəticələri'
   return 'Bütün elanlar'

@@ -1,3 +1,5 @@
+'use client'
+
 import { useId, useRef, useState, type DragEvent } from 'react'
 import { Upload } from 'lucide-react'
 import { Badge } from '@/components/ui/Badge'

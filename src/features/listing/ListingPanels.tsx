@@ -1,13 +1,16 @@
+'use client'
+
 import { useEffect, useRef, useState } from 'react'
-import { Link } from 'react-router'
+import Link from 'next/link'
 import { Heart, Share2, Sprout } from 'lucide-react'
-import { useFavorites } from '@/app/store'
+import { useFavorites } from '@/state/store'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { Panel } from '@/components/ui/Panel'
 import { cityName } from '@/data/cities'
 import { cn, formatPrice } from '@/lib/format'
 import { PhoneReveal, WhatsAppLink } from '@/features/seller/ContactActions'
+import { useReveal } from '@/features/contact/RevealContext'
 import type { Listing, Seller } from '@/types'
 
 const icon = { size: 18, strokeWidth: 1.8, absoluteStrokeWidth: true, 'aria-hidden': true } as const
@@ -84,12 +87,14 @@ function ShareButton({ title }: { title: string }) {
 interface SellerPanelProps {
   listing: Listing
   seller?: Seller
-  revealed: boolean
-  onReveal: () => void
 }
 
-/** Figma seller & contact panel. Without a known seller only the (disabled) actions are shown — no invented identity. */
-export function SellerPanel({ listing, seller, revealed, onReveal }: SellerPanelProps) {
+/**
+ * Figma seller & contact panel. Without a known seller only the (disabled) actions are shown — no invented identity.
+ * The revealed number is shared with the mobile contact bar through `RevealProvider`.
+ */
+export function SellerPanel({ listing, seller }: SellerPanelProps) {
+  const { revealed, reveal: onReveal } = useReveal()
   if (!seller) {
     return (
       <Panel role="region" aria-label="Satıcı ilə əlaqə">
@@ -113,7 +118,7 @@ export function SellerPanel({ listing, seller, revealed, onReveal }: SellerPanel
           <Sprout aria-hidden size={25} strokeWidth={1.8} absoluteStrokeWidth />
         </span>
         <div className="flex min-w-0 flex-1 flex-col gap-1 leading-[1.5]">
-          <Link to={sellerUrl} className="text-[15px] font-semibold text-ink hover:text-forest">
+          <Link href={sellerUrl} className="text-[15px] font-semibold text-ink hover:text-forest">
             {seller.name}
           </Link>
           {subline && <p className="text-xs text-muted">{subline}</p>}
@@ -130,7 +135,7 @@ export function SellerPanel({ listing, seller, revealed, onReveal }: SellerPanel
       ) : (
         <p className="w-full text-xs leading-[1.5] text-muted">Satıcının əlaqə nömrəsi göstərilmir.</p>
       )}
-      <Link to={sellerUrl} className="text-[13px] leading-[1.5] font-semibold whitespace-nowrap text-forest hover:text-olive">
+      <Link href={sellerUrl} className="text-[13px] leading-[1.5] font-semibold whitespace-nowrap text-forest hover:text-olive">
         Satıcının bütün elanları →
       </Link>
     </Panel>
@@ -141,7 +146,8 @@ export function SellerPanel({ listing, seller, revealed, onReveal }: SellerPanel
  * Mobile (< 768) contact bar. `sticky` (not fixed): it rides on top of the 86 px bottom navigation while the page
  * scrolls and settles above the footer at the end, so it never covers content.
  */
-export function MobileContactBar({ phone, revealed, onReveal }: { phone: string; revealed: boolean; onReveal: () => void }) {
+export function MobileContactBar({ phone }: { phone: string }) {
+  const { revealed, reveal: onReveal } = useReveal()
   return (
     <div
       aria-label="Satıcı ilə əlaqə"

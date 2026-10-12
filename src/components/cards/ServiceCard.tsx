@@ -1,4 +1,4 @@
-import { Link } from 'react-router'
+import Link from 'next/link'
 import { Badge } from '@/components/ui/Badge'
 import { providerName } from '@/data/services'
 import type { Service } from '@/types'
@@ -8,7 +8,7 @@ import type { Service } from '@/types'
 export function ServiceCard({ service, image }: { service: Service; image?: string }) {
   return (
     <Link
-      to={`/xidmetler/${service.slug}`}
+      href={`/xidmetler/${service.slug}`}
       className="flex flex-col items-start gap-3 self-start overflow-hidden rounded-xl border border-line bg-surface p-[11px] transition-[border-color,box-shadow] hover:border-olive hover:shadow-card-hover"
     >
       <img src={image ?? service.cover} alt={service.title} loading="lazy" className="h-[200px] w-full shrink-0 rounded-lg object-cover" />

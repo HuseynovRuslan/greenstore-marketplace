@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { Link } from 'react-router'
+import Link from 'next/link'
 import { cn } from '@/lib/format'
 
 interface SectionHeaderProps {
@@ -22,7 +22,7 @@ export function SectionHeader({ title, subtitle, action, as: Tag = 'h2', classNa
       </div>
       {action && (
         <Link
-          to={action.to}
+          href={action.to}
           className="hidden shrink-0 text-[13px] leading-[1.5] font-semibold whitespace-nowrap hover:text-olive md:inline"
         >
           {action.label}

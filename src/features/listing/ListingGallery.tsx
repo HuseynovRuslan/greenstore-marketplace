@@ -1,3 +1,5 @@
+'use client'
+
 import { useState, type KeyboardEvent } from 'react'
 import { ordinal } from './detail'
 

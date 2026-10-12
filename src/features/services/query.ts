@@ -143,12 +143,7 @@ export function paginate<T>(items: T[], page: number, size = SERVICES_PAGE_SIZE)
   return { items: items.slice((current - 1) * size, current * size), page: current, pageCount }
 }
 
-/** Page numbers shown in "Səhifələmə": a window of up to 3 pages around the current one (Figma: "1 2 3 Növbəti"). */
-export function pageWindow(page: number, pageCount: number, size = 3): number[] {
-  const count = Math.min(size, pageCount)
-  const start = Math.min(Math.max(1, page - 1), pageCount - count + 1)
-  return Array.from({ length: count }, (_, i) => start + i)
-}
+export { pageWindow } from '@/lib/pagination'
 
 export function searchServices(query: ServiceQuery) {
   const filtered = sortServices(filterServices(services, query), query.sort)

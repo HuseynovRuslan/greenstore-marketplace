@@ -1,6 +1,5 @@
-/* eslint-disable react-refresh/only-export-components -- buttonClass is shared with link-styled buttons */
-import type { ButtonHTMLAttributes, ReactNode } from 'react'
-import { Link, type LinkProps } from 'react-router'
+import type { ButtonHTMLAttributes, ComponentProps, ReactNode } from 'react'
+import Link from 'next/link'
 import { cn } from '@/lib/format'
 
 export type ButtonVariant = 'primary' | 'secondary' | 'tertiary' | 'danger'
@@ -43,7 +42,7 @@ export function Button({ variant = 'primary', icon, fullWidth, className, childr
   )
 }
 
-interface ButtonLinkProps extends LinkProps {
+interface ButtonLinkProps extends ComponentProps<typeof Link> {
   variant?: ButtonVariant
   icon?: ReactNode
   fullWidth?: boolean
@@ -51,7 +50,7 @@ interface ButtonLinkProps extends LinkProps {
 
 export function ButtonLink({ variant = 'primary', icon, fullWidth, className, children, ...rest }: ButtonLinkProps) {
   return (
-    <Link className={buttonClass(variant, cn(fullWidth && 'w-full', className as string))} {...rest}>
+    <Link className={buttonClass(variant, cn(fullWidth && 'w-full', className))} {...rest}>
       {icon}
       {children}
     </Link>

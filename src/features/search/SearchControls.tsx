@@ -1,3 +1,5 @@
+'use client'
+
 import { ChevronDown } from 'lucide-react'
 import { buttonClass } from '@/components/ui/Button'
 import { cn } from '@/lib/format'

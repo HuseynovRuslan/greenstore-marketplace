@@ -65,6 +65,7 @@ export type Errors<K extends string> = Partial<Record<K, string>>
 export const hasErrors = (errors: Record<string, string | undefined>) => Object.values(errors).some(Boolean)
 
 /** Only internal paths are accepted for `?next=` (no open redirects). */
-export function safeNext(next: string | null, fallback = '/kabinet') {
-  return next && next.startsWith('/') && !next.startsWith('//') ? next : fallback
+export function safeNext(next: string | null | undefined, fallback = '/kabinet') {
+  // Same-origin paths only: "//host" and "/\\host" are protocol-relative URLs in browsers.
+  return next && next.startsWith('/') && !next.startsWith('//') && !next.startsWith('/\\') ? next : fallback
 }

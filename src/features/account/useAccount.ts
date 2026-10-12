@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { useSession } from '@/app/store'
+import { useSession } from '@/state/store'
 import { currentUser, type AccountProfile } from '@/data/user'
 
 /**

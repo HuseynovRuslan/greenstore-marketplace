@@ -1,3 +1,5 @@
+'use client'
+
 import { useId } from 'react'
 import { ArrowDownUp } from 'lucide-react'
 import { buttonClass } from '@/components/ui/Button'

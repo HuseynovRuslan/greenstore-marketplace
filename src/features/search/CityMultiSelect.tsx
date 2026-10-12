@@ -1,3 +1,5 @@
+'use client'
+
 import { useEffect, useId, useRef, useState, type KeyboardEvent } from 'react'
 import { ChevronDown } from 'lucide-react'
 import { FieldShell, controlClass } from '@/components/ui/Field'

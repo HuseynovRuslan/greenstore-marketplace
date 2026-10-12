@@ -1,5 +1,5 @@
 import { Fragment, type HTMLAttributes, type ReactNode } from 'react'
-import { Link } from 'react-router'
+import Link from 'next/link'
 import { Panel } from '@/components/ui/Panel'
 import { cn } from '@/lib/format'
 
@@ -17,7 +17,7 @@ export function Breadcrumbs({ items, className }: { items: Array<{ label: string
             )}
             <li>
               {item.to ? (
-                <Link to={item.to} className="hover:text-forest">
+                <Link href={item.to} className="hover:text-forest">
                   {item.label}
                 </Link>
               ) : (

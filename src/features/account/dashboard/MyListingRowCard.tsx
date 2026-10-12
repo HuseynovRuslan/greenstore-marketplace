@@ -1,4 +1,6 @@
-import { Link } from 'react-router'
+'use client'
+
+import Link from 'next/link'
 import { Badge } from '@/components/ui/Badge'
 import { Button, ButtonLink } from '@/components/ui/Button'
 import { formatPrice } from '@/lib/format'
@@ -43,7 +45,7 @@ export function MyListingRowCard({ row, onDeactivate, onRenew, onActivate }: Pro
     )
   else
     secondary = (
-      <ButtonLink to={detailHref} variant="tertiary">
+      <ButtonLink href={detailHref} variant="tertiary">
         Bax
       </ButtonLink>
     )
@@ -63,7 +65,7 @@ export function MyListingRowCard({ row, onDeactivate, onRenew, onActivate }: Pro
             {listing.vip && <Badge tone="vip">VIP</Badge>}
           </div>
           <h3 className="w-full text-[15px] leading-[1.5] font-semibold break-words text-ink">
-            <Link to={detailHref} className="hover:text-olive">
+            <Link href={detailHref} className="hover:text-olive">
               {listing.title}
             </Link>
           </h3>
@@ -73,7 +75,7 @@ export function MyListingRowCard({ row, onDeactivate, onRenew, onActivate }: Pro
       <div className="flex shrink-0 flex-col items-start gap-2.5 md:w-[220px] xl:w-[300px]">
         <p className="text-[22px] leading-[1.5] font-semibold whitespace-nowrap text-ink">{formatPrice(listing.price)}</p>
         <div className="flex w-full flex-wrap items-start gap-2">
-          <ButtonLink to="/elan-yerlesdir/1" variant="secondary">
+          <ButtonLink href="/elan-yerlesdir/1" variant="secondary">
             Redaktə et
           </ButtonLink>
           {secondary}

@@ -1,4 +1,4 @@
-import { Link } from 'react-router'
+import Link from 'next/link'
 
 const platform = [
   { label: 'Məhsullar', to: '/elanlar' },
@@ -24,7 +24,7 @@ export function SiteFooter() {
             <ul>
               {platform.map((l) => (
                 <li key={l.label}>
-                  <Link to={l.to} className="hover:text-white">
+                  <Link href={l.to} className="hover:text-white">
                     {l.label}
                   </Link>
                 </li>
@@ -34,12 +34,9 @@ export function SiteFooter() {
           <nav aria-label="Dəstək" className="min-w-0 flex-1 text-sm leading-[2]">
             <p className="font-bold text-white">Dəstək</p>
             <ul>
+              {/* These help pages are not designed yet, so they are plain text rather than dead "#" links. */}
               {support.map((l) => (
-                <li key={l}>
-                  <a href="#" onClick={(e) => e.preventDefault()} className="hover:text-white">
-                    {l}
-                  </a>
-                </li>
+                <li key={l}>{l}</li>
               ))}
             </ul>
           </nav>

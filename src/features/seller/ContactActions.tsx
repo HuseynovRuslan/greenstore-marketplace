@@ -1,8 +1,11 @@
+'use client'
+
 import { useEffect, useRef } from 'react'
 import { MessageCircle, Phone } from 'lucide-react'
 import { Button, buttonClass } from '@/components/ui/Button'
 import { cn } from '@/lib/format'
 import { telHref, whatsappHref } from './contact'
+import { useReveal } from '@/features/contact/RevealContext'
 
 const icon = { size: 18, strokeWidth: 1.8, absoluteStrokeWidth: true, 'aria-hidden': true } as const
 
@@ -88,4 +91,10 @@ export function WhatsAppLink({ phone, label = 'WhatsApp ilə əlaqə', fullWidth
       {label}
     </a>
   )
+}
+
+/** `PhoneReveal` with its own (or the page's shared) reveal state — for server-rendered panels. */
+export function RevealablePhone(props: Omit<PhoneRevealProps, 'revealed' | 'onReveal'>) {
+  const { revealed, reveal } = useReveal()
+  return <PhoneReveal {...props} revealed={revealed} onReveal={reveal} />
 }

@@ -9,7 +9,7 @@ import {
   type PostAdDraft,
 } from '@/data/postAd'
 import { sellerById } from '@/data/sellers'
-import { formatNumber, normalizeSearch } from '@/lib/format'
+import { formatNumber, lowerAz, normalizeSearch } from '@/lib/format'
 import type { Listing, Spec, UserProfile } from '@/types'
 
 /* Pure helpers that turn the wizard draft into display strings and, on submit, into a Listing. */
@@ -68,7 +68,7 @@ export function categoryName(d: PostAdDraft): string {
 }
 
 const join = (parts: Array<string | false | undefined>, sep = ' · ') => parts.filter(Boolean).join(sep)
-const lower = (s: string) => s.toLocaleLowerCase('az')
+const lower = (s: string) => lowerAz(s)
 
 /** "Ağaclar · Abşeron · Abşeron Tingçilik" */
 export function summaryMeta(d: PostAdDraft): string {

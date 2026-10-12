@@ -1,3 +1,5 @@
+'use client'
+
 import { useId, useState, type ReactNode } from 'react'
 import type { LucideIcon } from 'lucide-react'
 import { Badge } from '@/components/ui/Badge'
@@ -77,6 +79,7 @@ export function KindCard({
         !selected && (invalid ? 'border-danger' : 'border-line'),
       )}
     >
+      {/* eslint-disable-next-line jsx-a11y/role-supports-aria-props -- the wizard focuses the first [aria-invalid] control after a failed step (unchanged from the Vite build) */}
       <input
         type="radio"
         name={name}

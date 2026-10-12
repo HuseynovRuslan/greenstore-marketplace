@@ -1,4 +1,4 @@
-import { Link } from 'react-router'
+import Link from 'next/link'
 import { UserRound } from 'lucide-react'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { ButtonLink } from '@/components/ui/Button'
@@ -14,12 +14,12 @@ export function SignInPrompt({ next }: { next: string }) {
         description="Elanlarınızı və profil məlumatlarınızı idarə etmək üçün hesabınıza daxil olun."
         action={
           <>
-            <ButtonLink to={`/daxil-ol${query}`} fullWidth>
+            <ButtonLink href={`/daxil-ol${query}`} fullWidth>
               Daxil ol
             </ButtonLink>
             <p className="w-full text-sm leading-[1.5] text-ink">
               Hesabınız yoxdur?{' '}
-              <Link to={`/qeydiyyat${query}`} className="hover:text-olive hover:underline">
+              <Link href={`/qeydiyyat${query}`} className="hover:text-olive hover:underline">
                 Qeydiyyatdan keçin →
               </Link>
             </p>

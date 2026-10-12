@@ -1,4 +1,4 @@
-import { Link } from 'react-router'
+import Link from 'next/link'
 import { Badge } from '@/components/ui/Badge'
 import { FavoriteButton } from './FavoriteButton'
 import { cityName } from '@/data/cities'
@@ -24,7 +24,7 @@ export function ListingCard({ listing, compact, className }: ListingCardProps) {
   const meta = listing.attributes.join(' · ')
   return (
     <Link
-      to={`/elanlar/${listing.slug}`}
+      href={`/elanlar/${listing.slug}`}
       className={cn(
         'group relative flex w-full flex-col items-start gap-2 self-start overflow-hidden rounded-xl border border-line bg-surface transition-[border-color,box-shadow] hover:border-olive hover:shadow-card-hover',
         compact ? 'p-[9px]' : 'p-[9px] md:p-[13px]',

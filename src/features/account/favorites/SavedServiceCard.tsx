@@ -1,5 +1,7 @@
+'use client'
+
 import { Heart } from 'lucide-react'
-import { useFavorites } from '@/app/store'
+import { useFavorites } from '@/state/store'
 import { Badge } from '@/components/ui/Badge'
 import { Button, ButtonLink } from '@/components/ui/Button'
 import { providerName } from '@/data/services'
@@ -35,7 +37,7 @@ export function SavedServiceCard({ service }: { service: Service }) {
         </p>
         {/* 6 px instead of Figma's 8 px so both buttons still fit one row on a 390 px screen with browser text metrics */}
         <div className="flex w-full flex-wrap items-start gap-x-1.5 gap-y-2">
-          <ButtonLink to={`/xidmetler/${service.slug}`}>Xidmətə bax</ButtonLink>
+          <ButtonLink href={`/xidmetler/${service.slug}`}>Xidmətə bax</ButtonLink>
           <Button
             variant="secondary"
             icon={<Heart aria-hidden size={18} strokeWidth={1.8} absoluteStrokeWidth />}

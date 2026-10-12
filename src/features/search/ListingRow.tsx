@@ -1,4 +1,4 @@
-import { Link } from 'react-router'
+import Link from 'next/link'
 import { Badge } from '@/components/ui/Badge'
 import { FavoriteButton } from '@/components/cards/FavoriteButton'
 import { cityName } from '@/data/cities'
@@ -13,7 +13,7 @@ import type { Listing } from '@/types'
 export function ListingRow({ listing }: { listing: Listing }) {
   return (
     <Link
-      to={`/elanlar/${listing.slug}`}
+      href={`/elanlar/${listing.slug}`}
       className="group relative flex w-full items-start gap-3.5 rounded-xl border border-line bg-surface p-2.5 transition-[border-color,box-shadow] hover:border-olive hover:shadow-card-hover md:gap-5 md:p-[18px]"
     >
       <div className="relative shrink-0">

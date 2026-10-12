@@ -1,4 +1,4 @@
-import { Link } from 'react-router'
+import Link from 'next/link'
 import { Badge } from '@/components/ui/Badge'
 import { ButtonLink } from '@/components/ui/Button'
 import { providerName } from '@/data/services'
@@ -15,12 +15,12 @@ export function ServiceListingCard({ service }: { service: Service }) {
   const to = `/xidmetler/${service.slug}`
   return (
     <article className="flex w-full min-w-0 flex-col items-start gap-3 self-start overflow-hidden rounded-xl border border-line bg-surface p-[13px] transition-[border-color,box-shadow] hover:border-olive hover:shadow-card-hover">
-      <Link to={to} tabIndex={-1} aria-hidden className="block w-full shrink-0">
+      <Link href={to} tabIndex={-1} aria-hidden className="block w-full shrink-0">
         <img src={service.cover} alt={service.title} loading="lazy" className="h-[230px] w-full rounded-lg object-cover" />
       </Link>
       <p className="w-full text-[21px] leading-[32px] font-semibold text-ink">{service.priceLabel}</p>
       <h3 className="w-full text-[15px] leading-[23px] font-semibold text-ink">
-        <Link to={to} className="hover:text-forest-hover">
+        <Link href={to} className="hover:text-forest-hover">
           {service.title}
         </Link>
       </h3>
@@ -28,7 +28,7 @@ export function ServiceListingCard({ service }: { service: Service }) {
         {providerName(service.providerId)} · {service.areas.join(', ')}
       </p>
       {service.verified && <Badge tone="success">Təsdiqlənmiş xidmət göstərən</Badge>}
-      <ButtonLink to={to} variant="secondary" fullWidth aria-label={`${service.title} — xidmətə bax`}>
+      <ButtonLink href={to} variant="secondary" fullWidth aria-label={`${service.title} — xidmətə bax`}>
         Xidmətə bax
       </ButtonLink>
     </article>

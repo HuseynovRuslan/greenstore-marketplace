@@ -1,3 +1,5 @@
+'use client'
+
 import { useCallback, useState } from 'react'
 import { cn } from '@/lib/format'
 import { ImageViewer } from './ImageViewer'

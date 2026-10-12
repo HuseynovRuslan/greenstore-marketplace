@@ -1,5 +1,7 @@
+'use client'
+
 import { Heart } from 'lucide-react'
-import { useFavorites, type FavoriteKind } from '@/app/store'
+import { useFavorites, type FavoriteKind } from '@/state/store'
 import { cn } from '@/lib/format'
 
 /* Figma "Seçilmişlər düyməsi": 34 px white circle, 18 px heart (1 px stroke).
