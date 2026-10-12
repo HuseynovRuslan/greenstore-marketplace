@@ -142,6 +142,18 @@ export const portfolio: Record<string, Array<{ title: string; description: strin
   ],
 }
 
+/**
+ * Extra copy that exists in Figma only for some services ("Landşaft dizaynı · 1440"):
+ *  - `priceNote`  — text under the price in the price panel
+ *  - `process`    — work-process line in "Xidmət əraziləri və iş prosesi"
+ */
+export const serviceDetails: Record<string, { priceNote?: string; process?: string }> = {
+  'landsaft-dizayni': {
+    priceNote: 'Başlanğıc qiymət. Yekun təklif sahənin ölçüsünə, layihəyə və seçilən materiallara görə razılaşdırılır.',
+    process: 'İlkin əlaqə → sahəyə baxış → fərdi təklif → razılaşdırılmış iş qrafiki. Bölgələrdə iri layihələr ayrıca müzakirə olunur.',
+  },
+}
+
 /** Home "Bağınıza peşəkar toxunuş" order (Figma columns 1 → 3) and the photo used there. */
 export const homeServices: Array<{ id: string; image: string }> = [
   { id: 'landsaft-dizayni', image: img('landsaft-dizayni-1') },
