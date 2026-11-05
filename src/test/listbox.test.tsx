@@ -136,16 +136,27 @@ describe('Listbox (select-only combobox)', () => {
     expect(activeLabel()).toBe('Lənkəran')
   })
 
-  it('closes on Tab without changing the value and moves focus on', async () => {
+  it('selects the active option on Tab, closes and moves focus on (WAI-ARIA)', async () => {
     const user = userEvent.setup()
     const onChange = vi.fn()
     render(<CityField onChange={onChange} />)
     combobox().focus()
     await user.keyboard('{ArrowDown}{ArrowDown}')
     await user.tab()
+    expect(onChange).toHaveBeenCalledWith('baki')
+    expect(combobox()).toHaveTextContent('Bakı')
     expect(combobox()).toHaveAttribute('aria-expanded', 'false')
     expect(screen.getByRole('button', { name: 'Axtar' })).toHaveFocus()
+  })
+
+  it('leaves the value alone when Tab passes a closed listbox', async () => {
+    const user = userEvent.setup()
+    const onChange = vi.fn()
+    render(<CityField onChange={onChange} />)
+    combobox().focus()
+    await user.tab()
     expect(onChange).not.toHaveBeenCalled()
+    expect(screen.getByRole('button', { name: 'Axtar' })).toHaveFocus()
   })
 
   it('selects an option by click and closes on a press outside', async () => {

@@ -47,7 +47,8 @@ const PAGE = 10
  * Closed: Enter, Space, ↓ or ↑ open at the selected option; Home / End open at the first / last option;
  *         a letter opens at the next option starting with it.
  * Open:   ↑ ↓ PageUp PageDown Home End move; letters search (Azerbaijani letters are distinct: ş ≠ s, ı ≠ i);
- *         Enter or Space select and close; Esc closes without changing the value; Tab closes and moves on.
+ *         Enter or Space select and close; Tab selects, closes and moves on (as in the APG);
+ *         Esc closes without changing the value.
  * Pointer: click the trigger to toggle, click an option to select it, press outside to close.
  */
 export function Listbox({ label, value, onChange, options, icon, name, align, className, triggerClassName }: ListboxProps) {
@@ -84,10 +85,14 @@ export function Listbox({ label, value, onChange, options, icon, name, align, cl
     setOpen(true)
   }
 
-  const choose = (index: number) => {
+  const commit = (index: number) => {
     const option = options[index]
     if (option && option.value !== value) onChange(option.value)
     setOpen(false)
+  }
+
+  const choose = (index: number) => {
+    commit(index)
     triggerRef.current?.focus()
   }
 
@@ -152,7 +157,8 @@ export function Listbox({ label, value, onChange, options, icon, name, align, cl
         setOpen(false)
         return
       case 'Tab':
-        setOpen(false)
+        // No preventDefault: focus moves on to the next control.
+        commit(active)
         return
     }
     if (e.key === ' ' && !typing()) {
