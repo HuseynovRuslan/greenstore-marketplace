@@ -85,20 +85,20 @@ export interface PostAdDraft {
 }
 
 /** Product categories whose ads describe a living plant (type, growing form, height, age). */
-export const PLANT_CATEGORY_IDS = ['agaclar', 'dekorativ-bitkiler', 'guller', 'tingler-fidanlar']
+export const PLANT_CATEGORY_IDS = ['agaclar', 'kollar', 'guller', 'otaq-bitkileri', 'tingler-fidanlar']
 export const SERVICE_CATEGORY_ID = 'landsaft-xidmetleri'
 
-/** Alt kateqoriyalar — Figma "İdarəetmə · Kateqoriyalar" rows. */
+/** Alt kateqoriyalar — Figma "İdarəetmə · Kateqoriyalar" rows, with the Variant 2 categories (see search/taxonomy). */
 export const subcategoriesByCategory: Record<string, string[]> = {
   agaclar: ['Dekorativ ağaclar', 'Meyvə ağacları', 'İynəyarpaqlılar'],
-  'dekorativ-bitkiler': ['Otaq bitkiləri', 'Kollar', 'Sarmaşıqlar'],
+  kollar: ['Həmişəyaşıl kollar', 'Çiçəkli kollar', 'Sarmaşıqlar'],
   guller: ['Qızılgüllər', 'Mövsümi güllər', 'Çoxillik güllər'],
+  'otaq-bitkileri': ['Dekorativ yarpaqlı bitkilər', 'Çiçəkli otaq bitkiləri', 'Sukkulentlər'],
   'tingler-fidanlar': ['Meyvə fidanları', 'Üzüm tingləri', 'Giləmeyvə tingləri'],
   'cim-toxumlar': ['Rulon çim', 'Çim toxumu', 'Çiçək toxumu'],
   'torpaq-gubreler': ['Torpaq qarışıqları', 'Kompost', 'Mineral gübrələr'],
-  'dibcekler-dekorasiya': ['Dibçəklər', 'Bağ dekoru', 'Çiçək qutuları'],
+  'bag-avadanliqlari': ['Əl alətləri', 'Çim biçənlər', 'Bağ qayçıları', 'Dibçəklər və dekor'],
   'suvarma-sistemleri': ['Damcı suvarma', 'Çiləyicilər', 'İdarəedicilər'],
-  'bag-avadanliqlari': ['Əl alətləri', 'Çim biçənlər', 'Bağ qayçıları'],
 }
 
 /** Bitki növü — plant names used by the listings in the Figma file, per category, plus "Digər". */
@@ -114,7 +114,7 @@ export const plantTypesByCategory: Record<string, string[]> = {
     'İtalyan şamı',
     'Qaraçöhrə',
   ],
-  'dekorativ-bitkiler': ['Monstera deliciosa'],
+  'otaq-bitkileri': ['Monstera deliciosa'],
   guller: ['Qızılgül'],
   'tingler-fidanlar': ['Alma fidanı', 'Nar fidanı', 'Lavanda fidanı'],
 }

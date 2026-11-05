@@ -34,7 +34,7 @@ describe('HomePage', () => {
       expect(screen.getByRole('heading', { level: 2, name: title })).toBeInTheDocument()
     }
     expect(screen.getByText('Zeytun ağacı — Olea europaea')).toBeInTheDocument()
-    expect(screen.getByText('428 elan')).toBeInTheDocument()
+    expect(screen.getByText('1240 elan')).toBeInTheDocument()
     expect(screen.getAllByText('Təsdiqlənmiş satıcı')).toHaveLength(3)
     expect(screen.getAllByText('Vitrin').length).toBeGreaterThan(0)
     expect(screen.queryByText('VIP')).not.toBeInTheDocument()

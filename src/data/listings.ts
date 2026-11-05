@@ -110,7 +110,7 @@ export const listings: Listing[] = [
     attributes: ['80–100 sm', 'meyvəli'],
     cityId: 'lenkeran',
     publishedAt: '2026-10-12T12:00:00',
-    vip: false,
+    vip: true,
     categoryId: 'agaclar',
     cover: img('limon-agaci-1'),
     coverTablet: img('limon-agaci-2'),
@@ -159,7 +159,7 @@ export const listings: Listing[] = [
     cityId: 'baki',
     publishedAt: '2026-10-12T11:45:00',
     vip: false,
-    categoryId: 'dekorativ-bitkiler',
+    categoryId: 'otaq-bitkileri',
     cover: img('monstera-deliciosa-1'),
     coverTablet: img('monstera-deliciosa-2'),
     coverMobile: img('monstera-deliciosa-3'),
@@ -191,7 +191,7 @@ export const listings: Listing[] = [
     cityId: 'baki',
     publishedAt: '2026-10-12T11:35:00',
     vip: false,
-    categoryId: 'dibcekler-dekorasiya',
+    categoryId: 'bag-avadanliqlari',
     cover: img('terrakota-dibcek-1'),
     coverTablet: img('terrakota-dibcek-2'),
     coverMobile: img('terrakota-dibcek-3'),
@@ -363,18 +363,22 @@ export const listings: Listing[] = [
 /** Listings visible to buyers (search, home, seller page). */
 export const publicListings = listings.filter((l) => l.status === 'active')
 
-/** Home "Bağ vitrini" order (Figma "VIP elanlar", columns 1 → 3). */
-export const vipListingIds = ['zeytun-agaci', 'mavi-kuknar', 'yapon-agcaqayini']
+/** Home "Bağ vitrini" order (Variant 2 mockup: 4 cards, Limon ağacı joined the three from Figma "VIP elanlar"). */
+export const vipListingIds = ['zeytun-agaci', 'mavi-kuknar', 'yapon-agcaqayini', 'limon-agaci']
 
-/** Home "Son elanlar" order (Figma rows/columns, 7 cards). */
+/**
+ * Home "Son elanlar" order: the Figma cards newest first, without Limon ağacı (now in "Bağ vitrini"),
+ * plus Tuya Smaraqd and Dəfnə ağacı so the four-column grid ends on a full row (8 cards).
+ */
 export const latestListingIds = [
-  'limon-agaci',
   'leyland-servi',
   'qizilgul-fidani',
   'monstera-deliciosa',
   'alma-fidani',
   'terrakota-dibcek',
   'torpaq-qarisigi',
+  'tuya-smaragd',
+  'defne-agaci',
 ]
 
 const byId = new Map(listings.map((l) => [l.id, l]))

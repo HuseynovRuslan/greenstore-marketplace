@@ -10,19 +10,21 @@ export function slugify(value: string): string {
 }
 
 /**
- * Sub-categories per product category, verbatim from Figma "İdarəetmə · Kateqoriyalar" (second line of each row).
- * Used by the "Alt kateqoriya seçin" filter.
+ * Sub-categories per product category, from Figma "İdarəetmə · Kateqoriyalar" (second line of each row).
+ * Variant 2: `kollar` and `otaq-bitkileri` replace "Dekorativ bitkilər" (their lists are placeholders until the
+ * backend taxonomy exists) and "Dibçəklər və dekor" moved to `bag-avadanliqlari`. The same lists are kept in
+ * @/data/postAd and @/data/admin. Used by the "Alt kateqoriya seçin" filter.
  */
 export const subcategoriesByCategory: Record<string, string[]> = {
   agaclar: ['Dekorativ ağaclar', 'Meyvə ağacları', 'İynəyarpaqlılar'],
-  'dekorativ-bitkiler': ['Otaq bitkiləri', 'Kollar', 'Sarmaşıqlar'],
+  kollar: ['Həmişəyaşıl kollar', 'Çiçəkli kollar', 'Sarmaşıqlar'],
   guller: ['Qızılgüllər', 'Mövsümi güllər', 'Çoxillik güllər'],
+  'otaq-bitkileri': ['Dekorativ yarpaqlı bitkilər', 'Çiçəkli otaq bitkiləri', 'Sukkulentlər'],
   'tingler-fidanlar': ['Meyvə fidanları', 'Üzüm tingləri', 'Giləmeyvə tingləri'],
   'cim-toxumlar': ['Rulon çim', 'Çim toxumu', 'Çiçək toxumu'],
   'torpaq-gubreler': ['Torpaq qarışıqları', 'Kompost', 'Mineral gübrələr'],
-  'dibcekler-dekorasiya': ['Dibçəklər', 'Bağ dekoru', 'Çiçək qutuları'],
+  'bag-avadanliqlari': ['Əl alətləri', 'Çim biçənlər', 'Bağ qayçıları', 'Dibçəklər və dekor'],
   'suvarma-sistemleri': ['Damcı suvarma', 'Çiləyicilər', 'İdarəedicilər'],
-  'bag-avadanliqlari': ['Əl alətləri', 'Çim biçənlər', 'Bağ qayçıları'],
 }
 
 export function subcategoryOptions(categoryId: string): Array<{ value: string; label: string }> {

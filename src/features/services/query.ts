@@ -22,10 +22,10 @@ export const providerTabs: Array<{ value: ProviderTab; label: string }> = [
   { value: 'ustalar', label: 'Fərdi ustalar' },
 ]
 
-/** Umbrella category on the home page ("Landşaft və bağçılıq xidmətləri · 252 elan"). */
+/** Umbrella category on the home page ("Bağ xidmətləri · 95"; Figma: "Landşaft və bağçılıq xidmətləri · 252 elan"). */
 const UMBRELLA_CATEGORY = 'landsaft-xidmetleri'
 
-/** Platform-wide number of service listings shown in Figma ("252 xidmət elanı"). */
+/** Platform-wide number of service listings ("95 xidmət elanı"): the umbrella category's count. */
 export const platformServiceTotal = categoryById(UMBRELLA_CATEGORY)?.listingCount ?? services.length
 
 export const SERVICES_PAGE_SIZE = 6

@@ -29,7 +29,7 @@ describe('searchListings', () => {
 
   it('filters by price, VIP and seller type', () => {
     expect(searchListings({ minPrice: 100 }).every((l) => l.price >= 100)).toBe(true)
-    expect(titles(searchListings({ vipOnly: true }))).toEqual(['Zeytun ağacı — Olea europaea', 'Mavi küknar — Picea pungens', 'Yapon ağcaqayını'])
+    expect(titles(searchListings({ vipOnly: true }))).toEqual(['Limon ağacı', 'Zeytun ağacı — Olea europaea', 'Mavi küknar — Picea pungens', 'Yapon ağcaqayını'])
     expect(searchListings({ sellerType: 'business' }).every((l) => l.sellerId === 'abseron-tingcilik')).toBe(true)
   })
 

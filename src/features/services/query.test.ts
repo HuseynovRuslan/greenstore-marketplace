@@ -19,7 +19,7 @@ describe('services query', () => {
   })
 
   it('shows the platform total only while nothing is filtered', () => {
-    expect(searchServices(q(''))).toMatchObject({ total: 6, displayTotal: 252, active: false })
+    expect(searchServices(q(''))).toMatchObject({ total: 6, displayTotal: 95, active: false })
     expect(searchServices(q('kateqoriya=cim-salinmasi'))).toMatchObject({ total: 1, displayTotal: 1, active: true })
   })
 
