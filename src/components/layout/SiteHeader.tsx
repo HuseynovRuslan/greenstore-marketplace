@@ -96,12 +96,25 @@ function HeaderSearchForm({ variant, urlQuery, onSubmitted }: SearchFormProps & 
   )
 }
 
+/** Home header nav (Variant 2); "Bağ vitrini" follows with its olive dot. */
+const homeNav = [
+  { label: 'Məhsullar', to: '/elanlar' },
+  { label: 'Xidmətlər', to: '/xidmetler' },
+  { label: 'Satıcılar', to: '/#saticilar' },
+]
+
+const iconButton =
+  'flex size-11 shrink-0 items-center justify-center rounded-option text-ink transition-colors duration-(--dur-fast) hover:bg-mint hover:text-forest'
+
 /**
  * Figma "Başlıq naviqasiyası".
- *  - `withSections` adds the second row ("Bölmələr") used on the home page (1440/768).
- *  - < 768 px: compact bar (logo · search · menu) from "Ana səhifə · 390".
+ *  - `default`: logo · search · favourites · account · «Elan yerləşdir»; < 768 px a compact bar (logo · search · menu).
+ *  - `home` (docs/design/variant-2): one row, logo · nav (Məhsullar, Xidmətlər, Satıcılar, Bağ vitrini) · favourites ·
+ *    account · «Elan yerləşdir». The nav needs 1024 px; 768–1023 px get the menu button, < 768 px logo · ♡ · menu.
+ *    The hero search replaces the header search there.
  */
-export function SiteHeader({ withSections = false }: { withSections?: boolean }) {
+export function SiteHeader({ variant = 'default' }: { variant?: 'default' | 'home' }) {
+  const home = variant === 'home'
   const { user, signOut } = useSession()
   const router = useRouter()
   const pathname = usePathname()
@@ -122,87 +135,131 @@ export function SiteHeader({ withSections = false }: { withSections?: boolean })
   const showGuest = !hydrated || !user
   const preClass = (variant: 'user' | 'guest') => (hydrated ? undefined : preHydrationClass(variant))
 
+  // 768–1279 px: the Figma 768 header has no "Daxil ol" text, so account access is a compact icon.
+  // Before hydration both session variants are rendered and CSS shows the one the browser knows (bootstrap.ts).
+  const accountIcon = home ? iconButton : 'shrink-0 text-forest hover:text-olive-text'
+  const account = (
+    <>
+      {showUser && (
+        <Link href="/kabinet" aria-label="Şəxsi kabinet" className={cn(accountIcon, 'xl:hidden', preClass('user'))}>
+          <UserRound aria-hidden size={20} strokeWidth={1.8} absoluteStrokeWidth />
+        </Link>
+      )}
+      {showGuest && (
+        <Link href="/daxil-ol" aria-label="Daxil ol" className={cn(accountIcon, 'xl:hidden', preClass('guest'))}>
+          <UserRound aria-hidden size={20} strokeWidth={1.8} absoluteStrokeWidth />
+        </Link>
+      )}
+      {showUser && (
+        <span className={cn('hidden shrink-0 items-center gap-3 text-sm leading-[normal] whitespace-nowrap xl:inline-flex', home && 'px-2', preClass('user'))}>
+          <Link href="/kabinet" className={cn('text-forest hover:text-olive-text', !hydrated && 'auth-user-name')}>
+            {hydrated ? user?.fullName : null}
+          </Link>
+          <button type="button" onClick={handleSignOut} className="text-muted hover:text-forest">
+            Çıxış
+          </button>
+        </span>
+      )}
+      {showGuest && (
+        <Link
+          href="/daxil-ol"
+          className={cn(
+            'hidden shrink-0 leading-[normal] whitespace-nowrap',
+            home
+              ? 'h-11 items-center px-3.5 text-[15px] font-medium text-ink transition-colors duration-(--dur-fast) hover:text-forest xl:flex'
+              : 'text-sm text-forest hover:text-olive-text xl:inline',
+            preClass('guest'),
+          )}
+        >
+          Daxil ol
+        </Link>
+      )}
+    </>
+  )
+  const postAd = (
+    <ButtonLink href="/elan-yerlesdir" icon={<Plus aria-hidden size={18} strokeWidth={1.8} absoluteStrokeWidth />}>
+      Elan yerləşdir
+    </ButtonLink>
+  )
+  const menuButton = (className: string) => (
+    <button type="button" aria-label="Menyu" aria-expanded={menuOpen} onClick={() => setMenuPath(pathname)} className={className}>
+      <Menu aria-hidden size={home ? 22 : 20} strokeWidth={1.8} absoluteStrokeWidth />
+    </button>
+  )
+  const favorites = (
+    <Link href="/secilmisler" aria-label="Seçilmişlər" className={home ? iconButton : 'shrink-0 text-forest hover:text-olive-text'}>
+      <Heart aria-hidden size={home ? 21 : 20} strokeWidth={1.8} absoluteStrokeWidth />
+    </Link>
+  )
+
   return (
     <header className="sticky top-0 z-40 w-full bg-surface shadow-[inset_0_-1px_0_var(--color-line)]">
-      {/* Desktop / tablet main row */}
-      <div className="page-x mx-auto hidden w-full max-w-[1440px] items-center gap-[18px] py-[18px] md:flex">
-        <Logo />
-        <HeaderSearch variant="bar" />
-        <Link href="/secilmisler" aria-label="Seçilmişlər" className="shrink-0 text-forest hover:text-olive-text">
-          <Heart aria-hidden size={20} strokeWidth={1.8} absoluteStrokeWidth />
-        </Link>
-        {/* 768–1279 px: the Figma 768 header has no "Daxil ol" text, so account access is a compact icon.
-            Before hydration both session variants are rendered and CSS shows the one the browser knows (bootstrap.ts). */}
-        {showUser && (
-          <Link href="/kabinet" aria-label="Şəxsi kabinet" className={cn('shrink-0 text-forest hover:text-olive-text xl:hidden', preClass('user'))}>
-            <UserRound aria-hidden size={20} strokeWidth={1.8} absoluteStrokeWidth />
-          </Link>
-        )}
-        {showGuest && (
-          <Link href="/daxil-ol" aria-label="Daxil ol" className={cn('shrink-0 text-forest hover:text-olive-text xl:hidden', preClass('guest'))}>
-            <UserRound aria-hidden size={20} strokeWidth={1.8} absoluteStrokeWidth />
-          </Link>
-        )}
-        {showUser && (
-          <span className={cn('hidden shrink-0 items-center gap-3 text-sm leading-[normal] whitespace-nowrap xl:inline-flex', preClass('user'))}>
-            <Link href="/kabinet" className={cn('text-forest hover:text-olive-text', !hydrated && 'auth-user-name')}>
-              {hydrated ? user?.fullName : null}
-            </Link>
-            <button type="button" onClick={handleSignOut} className="text-muted hover:text-forest">
-              Çıxış
-            </button>
-          </span>
-        )}
-        {showGuest && (
-          <Link
-            href="/daxil-ol"
-            className={cn('hidden shrink-0 text-sm leading-[normal] whitespace-nowrap text-forest hover:text-olive-text xl:inline', preClass('guest'))}
-          >
-            Daxil ol
-          </Link>
-        )}
-        <ButtonLink href="/elan-yerlesdir" icon={<Plus aria-hidden size={18} strokeWidth={1.8} absoluteStrokeWidth />}>
-          Elan yerləşdir
-        </ButtonLink>
-      </div>
-
-      {/* Second row ("Bölmələr") — home page only */}
-      {withSections && (
-        <nav aria-label="Bölmələr" className="page-x mx-auto hidden w-full max-w-[1440px] items-start py-3 text-[13px] leading-[normal] text-forest md:flex">
-          <ul className="flex items-start gap-[18px] whitespace-nowrap">
-            {sectionLinks.map((l, i) => (
-              <li key={l.label}>
-                <Link href={l.to} className={cn('hover:text-olive-text', i === 0 && 'font-semibold')}>
+      {home ? (
+        <>
+          {/* Home: one row (76 px) */}
+          <div className="page-x mx-auto hidden w-full max-w-[1440px] items-center gap-2 py-[15px] md:flex">
+            <Logo className="mr-auto lg:mr-6 xl:mr-10" />
+            <nav aria-label="Əsas bölmələr" className="hidden flex-1 items-center gap-1 lg:flex">
+              {homeNav.map((l) => (
+                <Link
+                  key={l.to}
+                  href={l.to}
+                  className="flex h-11 items-center rounded-option px-3.5 text-[15px] leading-[normal] font-medium whitespace-nowrap text-ink transition-colors duration-(--dur-fast) hover:text-forest"
+                >
                   {l.label}
                 </Link>
-              </li>
-            ))}
-            <li>
-              <Link href="/elanlar?vip=1" className="text-olive-text hover:text-forest">
+              ))}
+              <Link
+                href="/elanlar?vip=1"
+                className="flex h-11 items-center gap-2 rounded-option px-3.5 text-[15px] leading-[normal] font-medium whitespace-nowrap text-olive-text transition-colors duration-(--dur-fast) hover:text-forest"
+              >
+                <span aria-hidden className="size-[7px] rounded-full bg-olive" />
                 Bağ vitrini
               </Link>
-            </li>
-          </ul>
-        </nav>
-      )}
+            </nav>
+            {favorites}
+            {account}
+            {postAd}
+            {menuButton(cn(iconButton, 'lg:hidden'))}
+          </div>
 
-      {/* Mobile bar */}
-      <div className="flex items-center gap-3 px-5 py-[18px] md:hidden">
-        <Logo />
-        <div className="flex flex-1 items-center justify-between">
-          <button type="button" aria-label="Axtarış" aria-expanded={mobileSearch} onClick={() => setSearchPath(mobileSearch ? null : pathname)} className="text-forest">
-            <Search aria-hidden size={20} strokeWidth={1.8} absoluteStrokeWidth />
-          </button>
-          <button type="button" aria-label="Menyu" aria-expanded={menuOpen} onClick={() => setMenuPath(pathname)} className="text-forest">
-            <Menu aria-hidden size={20} strokeWidth={1.8} absoluteStrokeWidth />
-          </button>
-        </div>
-      </div>
-      {mobileSearch && <HeaderSearch variant="mobile" onSubmitted={() => setSearchPath(null)} />}
+          {/* Home, < 768 px: logo · favourites · menu (58 px) */}
+          <div className="flex h-[58px] items-center justify-between pr-1 pl-5 md:hidden">
+            <Logo />
+            <div className="flex">
+              {favorites}
+              {menuButton(iconButton)}
+            </div>
+          </div>
+        </>
+      ) : (
+        <>
+          {/* Desktop / tablet main row */}
+          <div className="page-x mx-auto hidden w-full max-w-[1440px] items-center gap-[18px] py-[18px] md:flex">
+            <Logo />
+            <HeaderSearch variant="bar" />
+            {favorites}
+            {account}
+            {postAd}
+          </div>
+
+          {/* Mobile bar */}
+          <div className="flex items-center gap-3 px-5 py-[18px] md:hidden">
+            <Logo />
+            <div className="flex flex-1 items-center justify-between">
+              <button type="button" aria-label="Axtarış" aria-expanded={mobileSearch} onClick={() => setSearchPath(mobileSearch ? null : pathname)} className="text-forest">
+                <Search aria-hidden size={20} strokeWidth={1.8} absoluteStrokeWidth />
+              </button>
+              {menuButton('text-forest')}
+            </div>
+          </div>
+          {mobileSearch && <HeaderSearch variant="mobile" onSubmitted={() => setSearchPath(null)} />}
+        </>
+      )}
 
       {/* Mobile drawer menu */}
       {menuOpen && (
-        <div className="fixed inset-0 z-50 bg-ink/40 md:hidden" onClick={closeMenu}>
+        <div className={cn('fixed inset-0 z-50 bg-ink/40', home ? 'lg:hidden' : 'md:hidden')} onClick={closeMenu}>
           <nav
             aria-label="Əsas menyu"
             onClick={(e) => e.stopPropagation()}

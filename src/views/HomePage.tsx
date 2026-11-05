@@ -1,8 +1,7 @@
 import type { ReactNode } from 'react'
-import { Eye, MessageCircle, ShieldCheck } from 'lucide-react'
-import { categories } from '@/data/categories'
+import Link from 'next/link'
+import { ArrowRight, Eye, MessageCircle, ShieldCheck } from 'lucide-react'
 import { ListingCard } from '@/components/cards/ListingCard'
-import { CategoryCard } from '@/components/cards/CategoryCard'
 import { ServiceCard } from '@/components/cards/ServiceCard'
 import { SellerCard } from '@/components/cards/SellerCard'
 import { SectionHeader } from '@/components/ui/SectionHeader'
@@ -68,24 +67,35 @@ export default function HomePage({ content }: { content: HomeContent }) {
     <>
       <Hero />
 
-      <Section id="kateqoriyalar">
-        <SectionHeader title="Kateqoriyalar" subtitle="Ağacdan bağ avadanlığına — ehtiyacınız olanı seçin." />
-        <div className="grid w-full grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-5">
-          {categories.map((c) => (
-            <CategoryCard key={c.id} category={c} />
-          ))}
+      <section
+        id="bag-vitrini"
+        aria-labelledby="bag-vitrini-title"
+        className="page-x mx-auto flex w-full max-w-[1440px] scroll-mt-24 flex-col gap-1 pt-3.5 pb-5 md:gap-4 md:pt-8 md:pb-12"
+      >
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex min-w-0 items-baseline gap-3">
+            <h2 id="bag-vitrini-title" className="text-lg leading-[1.3] font-semibold text-forest md:text-[22px]">
+              Bağ vitrini
+            </h2>
+            <p className="text-sm leading-[normal] text-muted max-md:hidden">Satıcıların önə çıxardığı elanlar</p>
+          </div>
+          {/* «Hamısı» on phones, «Hamısına bax» from md (Variant 2 mockups); the name says which list it opens. */}
+          <Link
+            href="/elanlar?vip=1"
+            aria-label="Hamısına bax — Bağ vitrini"
+            className="flex h-11 shrink-0 items-center gap-1.5 text-sm leading-[normal] font-semibold text-forest hover:text-olive-text"
+          >
+            <span className="md:hidden">Hamısı</span>
+            <span className="max-md:hidden">Hamısına bax</span>
+            <ArrowRight aria-hidden size={16} strokeWidth={2} className="max-md:hidden" />
+          </Link>
         </div>
-      </Section>
-
-      <Section id="bag-vitrini">
-        <SectionHeader title="Bağ vitrini" subtitle="Bağınız üçün önə çıxan təkliflər" action={{ label: 'Bütün vitrin elanları', to: '/elanlar?vip=1' }} />
-        <div className="grid w-full grid-cols-2 gap-3 md:grid-cols-3 md:gap-5">
+        <div className="grid w-full grid-cols-2 gap-2.5 lg:grid-cols-4 lg:gap-5">
           {vip.map((l) => (
             <ListingCard key={l.id} listing={l} />
           ))}
         </div>
-        <MobileMore to="/elanlar?vip=1" label="Bütün vitrin elanları" />
-      </Section>
+      </section>
 
       <Section id="son-elanlar">
         <SectionHeader title="Son elanlar" subtitle="Azərbaycanda yeni yerləşdirilən elanlar" action={{ label: 'Bütün elanlara bax', to: '/elanlar' }} />

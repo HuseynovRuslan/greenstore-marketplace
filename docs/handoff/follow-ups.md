@@ -17,6 +17,8 @@ Kept up to date as steps land; remove an item when it is done.
   - Photo: the mockup uses a 4:3 ratio; today the height is fixed (145 / 210 px).
   - «Vitrin» badge: the mockup has a leaf icon; today it is text only.
   - Date: the mockup shows the city only; today it shows «city · date».
+  - Favourite button: 34 px today; the mockup keeps a 32 px circle inside a 44 px touch target.
+  - Phones: the mockup card is compact (square photo, 17 px price, one-line title, city only).
 
 ## Backend (Ruslan) — see [categories.md](categories.md)
 

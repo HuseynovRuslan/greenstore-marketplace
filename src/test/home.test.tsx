@@ -34,7 +34,7 @@ describe('HomePage', () => {
       expect(screen.getByRole('heading', { level: 2, name: title })).toBeInTheDocument()
     }
     expect(screen.getByText('Zeytun ağacı — Olea europaea')).toBeInTheDocument()
-    expect(screen.getByText('1240 elan')).toBeInTheDocument()
+    expect(screen.getByText('Satıcıların önə çıxardığı elanlar')).toBeInTheDocument()
     expect(screen.getAllByText('Təsdiqlənmiş satıcı')).toHaveLength(3)
     expect(screen.getAllByText('Vitrin').length).toBeGreaterThan(0)
     expect(screen.queryByText('VIP')).not.toBeInTheDocument()
@@ -42,8 +42,10 @@ describe('HomePage', () => {
 
   it('names each section link after where it leads', async () => {
     await renderHome()
+    // «Bağ vitrini»: one link, «Hamısına bax» (≥ 768 px) / «Hamısı» (phones), named with its section
+    expect(screen.getByRole('link', { name: 'Hamısına bax — Bağ vitrini' })).toHaveAttribute('href', '/elanlar?vip=1')
+    expect(screen.queryByRole('link', { name: 'Bütün vitrin elanları' })).not.toBeInTheDocument()
     for (const [name, href] of [
-      ['Bütün vitrin elanları', '/elanlar?vip=1'],
       ['Bütün elanlara bax', '/elanlar'],
       ['Bütün xidmətlər', '/xidmetler'],
       ['Biznes satıcıların elanları', '/elanlar?saticiNovu=biznes'],
@@ -57,10 +59,33 @@ describe('HomePage', () => {
     expect(screen.queryByText(/→/)).not.toBeInTheDocument()
   })
 
-  it('links categories to their category pages', async () => {
+  it('shows the ten categories in the hero, linked to their pages', async () => {
     await renderHome()
-    for (const link of screen.getAllByRole('link', { name: /^Ağaclar/ })) expect(link).toHaveAttribute('href', '/kateqoriyalar/agaclar')
+    const list = screen.getByRole('heading', { level: 2, name: 'Kateqoriyalar' }).nextElementSibling as HTMLElement
+    expect(within(list).getAllByRole('link').map((l) => l.getAttribute('href'))).toEqual([
+      '/kateqoriyalar/agaclar',
+      '/kateqoriyalar/kollar',
+      '/kateqoriyalar/guller',
+      '/kateqoriyalar/otaq-bitkileri',
+      '/kateqoriyalar/tingler-fidanlar',
+      '/kateqoriyalar/cim-toxumlar',
+      '/kateqoriyalar/torpaq-gubreler',
+      '/kateqoriyalar/bag-avadanliqlari',
+      '/kateqoriyalar/suvarma-sistemleri',
+      '/xidmetler',
+    ])
+    expect(screen.getByRole('link', { name: 'Ağaclar 1 240 elan' })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Bağ xidmətləri 95 elan' })).toHaveAttribute('href', '/xidmetler')
+  })
+
+  it('marks the category chosen in the Kateqoriya filter', async () => {
+    await renderHome()
+    const circle = () => screen.getByRole('link', { name: 'Kollar 860 elan' }).querySelector('span')!
+    expect(circle()).not.toHaveClass('bg-forest')
+    const form = screen.getByRole('search', { name: 'Elan axtarışı' })
+    await userEvent.click(within(form).getByRole('button', { name: 'Kateqoriya' }))
+    await userEvent.click(within(form).getByRole('button', { name: 'Kollar' }))
+    expect(circle()).toHaveClass('bg-forest')
   })
 
   it('toggles a favorite from a listing card', async () => {

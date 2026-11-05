@@ -10,12 +10,12 @@ import { DemoBanner } from './DemoBanner'
  * (Formerly src/layouts/Layouts.tsx; Next.js restores scroll and follows "#hash" links itself.)
  */
 
-/** Home page: header with section row + full footer (Figma "Ana səhifə"). */
+/** Home page: the one-row home header (Variant 2) + full footer (Figma "Ana səhifə"). */
 export function HomeFrame({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-dvh flex-col pb-[86px] md:pb-0">
       <DemoBanner />
-      <SiteHeader withSections />
+      <SiteHeader variant="home" />
       <main className="flex-1">{children}</main>
       <SiteFooter />
       <MobileNav />

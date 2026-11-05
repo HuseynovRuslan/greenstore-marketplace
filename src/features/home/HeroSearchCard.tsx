@@ -123,7 +123,7 @@ export function HeroSearchCard() {
         onSearch={search}
       />
 
-      <HeroCategories selected={filters.category} className="-mx-5 self-stretch border-t border-line px-2.5 pt-4 md:-mx-7 md:px-5 lg:hidden" />
+      <HeroCategories selected={filters.category} className="-mx-5 self-stretch border-t border-line pt-4 md:-mx-7 lg:mx-0 lg:pt-[22px]" />
     </>
   )
 }
