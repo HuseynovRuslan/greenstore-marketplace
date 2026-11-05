@@ -8,7 +8,9 @@ import { listingTotals } from '@/data/categories'
 import { cities, cityListingCounts } from '@/data/cities'
 import { cn, formatNumber } from '@/lib/format'
 import { FilterChips } from './FilterChips'
-import { emptyHeroFilters, filtersForTab, heroSearchUrl, heroTabs, priceError, type HeroFilters, type HeroTab } from './heroSearch'
+import { HeroCategories } from './HeroCategories'
+import { HeroFilterSheet, MobileFilterRow } from './HeroFilterSheet'
+import { emptyHeroFilters, filtersForTab, heroSearchUrl, heroTabs, priceError, type FilterId, type HeroFilters, type HeroTab } from './heroSearch'
 
 /** Ids the header uses to bring the visitor back to the search (compact search pill). */
 export const HERO_SEARCH_ID = 'hero-search'
@@ -20,9 +22,10 @@ const cityOptions = [
 ]
 
 /**
- * Home hero search card (docs/design/variant-2): Hamısı / Məhsullar / Xidmətlər, the search row
- * (text · city · «Axtar») and the filter chips. Submitting opens the catalogue with its own URL params
- * (heroSearch.ts); without JavaScript the form is a plain GET to /elanlar.
+ * Home hero search (docs/design/variant-2): the card with Hamısı / Məhsullar / Xidmətlər, the search row
+ * (text · city · «Axtar») and the filter chips (≥ md); on phones the scrolling chip row and the «Filtrlər» sheet;
+ * then the categories row, whose selected item follows the Kateqoriya filter. Submitting opens the catalogue with
+ * its own URL params (heroSearch.ts); without JavaScript the form is a plain GET to /elanlar.
  */
 export function HeroSearchCard() {
   const router = useRouter()
@@ -31,6 +34,7 @@ export function HeroSearchCard() {
   const [city, setCity] = useState('')
   const [filters, setFilters] = useState<HeroFilters>(emptyHeroFilters)
   const [showError, setShowError] = useState(false)
+  const [sheet, setSheet] = useState<{ open: boolean; focus?: FilterId }>({ open: false })
   const errorId = useId()
   const error = showError ? priceError(filters) : undefined
   const placeholder = heroTabs.find((t) => t.value === tab)?.placeholder
@@ -40,56 +44,87 @@ export function HeroSearchCard() {
     setFilters((current) => filtersForTab(next, current))
   }
 
-  const submit = (e: FormEvent) => {
-    e.preventDefault()
-    if (priceError(filters)) return setShowError(true)
+  /** Opens the catalogue; false (and the error shown) when the price range is invalid. */
+  const search = () => {
+    if (priceError(filters)) {
+      setShowError(true)
+      return false
+    }
     setShowError(false)
     router.push(heroSearchUrl({ tab, q, city, filters }))
+    return true
+  }
+
+  const submit = (e: FormEvent) => {
+    e.preventDefault()
+    search()
   }
 
   return (
-    <div id={HERO_SEARCH_ID} className="w-full max-w-[1080px] scroll-mt-28 rounded-search border border-line-strong bg-surface shadow-search">
-      <TypeTabs value={tab} onChange={changeTab} />
+    <>
+      <div id={HERO_SEARCH_ID} className="w-full max-w-[1080px] scroll-mt-28 rounded-2xl border border-line-strong bg-surface shadow-search md:rounded-search">
+        <TypeTabs value={tab} onChange={changeTab} />
 
-      <form role="search" aria-label="Elan axtarışı" action="/elanlar" method="get" onSubmit={submit} noValidate>
-        <div className="flex flex-col gap-2 p-2.5 md:flex-row md:items-center md:gap-2.5 md:pt-3.5 md:pr-3.5 md:pb-2.5 md:pl-[22px]">
-          <label
-            htmlFor={HERO_QUERY_ID}
-            className="flex h-12 min-w-0 cursor-text items-center gap-2.5 rounded-option border border-line bg-cream px-3 has-[input:focus-visible]:outline-2 has-[input:focus-visible]:outline-offset-2 has-[input:focus-visible]:outline-olive md:h-[52px] md:flex-1 md:gap-3 md:border-0 md:bg-transparent md:px-0"
-          >
-            <Search aria-hidden size={20} strokeWidth={2} className="shrink-0 text-muted" />
-            <span className="sr-only">Axtarış sözü</span>
-            <input
-              id={HERO_QUERY_ID}
-              type="search"
-              name="q"
-              autoComplete="off"
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              placeholder={placeholder}
-              className="h-full min-w-0 flex-1 bg-transparent text-base text-ink outline-none placeholder:text-muted md:text-[17px]"
-            />
-          </label>
-          <div className="flex gap-2 md:contents">
-            <CityField value={city} onChange={setCity} />
-            <button
-              type="submit"
-              aria-describedby={error ? errorId : undefined}
-              className="h-12 shrink-0 rounded-option bg-forest px-6 text-base leading-[normal] font-semibold text-white transition-colors duration-(--dur-fast) hover:bg-forest-hover md:h-[52px] md:rounded-xl md:px-[30px]"
+        <form role="search" aria-label="Elan axtarışı" action="/elanlar" method="get" onSubmit={submit} noValidate>
+          <div className="flex flex-col gap-2 p-2.5 md:flex-row md:items-center md:gap-2.5 md:pt-3.5 md:pr-3.5 md:pb-2.5 md:pl-[22px]">
+            <label
+              htmlFor={HERO_QUERY_ID}
+              className="flex h-12 min-w-0 cursor-text items-center gap-2.5 rounded-option border border-line bg-cream px-3 has-[input:focus-visible]:outline-2 has-[input:focus-visible]:outline-offset-2 has-[input:focus-visible]:outline-olive md:h-[52px] md:flex-1 md:gap-3 md:border-0 md:bg-transparent md:px-0"
             >
-              Axtar
-            </button>
+              <Search aria-hidden size={20} strokeWidth={2} className="shrink-0 text-muted" />
+              <span className="sr-only">Axtarış sözü</span>
+              <input
+                id={HERO_QUERY_ID}
+                type="search"
+                name="q"
+                autoComplete="off"
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder={placeholder}
+                className="h-full min-w-0 flex-1 bg-transparent text-base text-ink outline-none placeholder:text-muted md:text-[17px]"
+              />
+            </label>
+            <div className="flex gap-2 md:contents">
+              <CityField value={city} onChange={setCity} />
+              <button
+                type="submit"
+                aria-describedby={error ? errorId : undefined}
+                className="h-12 shrink-0 rounded-option bg-forest px-6 text-base leading-[normal] font-semibold text-white transition-colors duration-(--dur-fast) hover:bg-forest-hover md:h-[52px] md:rounded-xl md:px-[30px]"
+              >
+                Axtar
+              </button>
+            </div>
           </div>
-        </div>
 
-        <FilterChips tab={tab} filters={filters} onChange={setFilters} className="hidden px-[22px] pt-1 pb-4 md:flex" />
-        {error && (
-          <p id={errorId} role="alert" className="px-3 pb-3 text-xs leading-[1.5] text-danger md:-mt-1.5 md:px-[22px] md:pb-4">
-            {error}
-          </p>
-        )}
-      </form>
-    </div>
+          <FilterChips tab={tab} filters={filters} onChange={setFilters} className="hidden px-[22px] pt-1 pb-4 md:flex" />
+          {error && (
+            <p id={errorId} role="alert" className="px-3 pb-3 text-xs leading-[1.5] text-danger md:-mt-1.5 md:px-[22px] md:pb-4">
+              {error}
+            </p>
+          )}
+        </form>
+      </div>
+
+      <MobileFilterRow
+        tab={tab}
+        filters={filters}
+        onChange={setFilters}
+        sheetOpen={sheet.open}
+        onOpenSheet={(focus) => setSheet({ open: true, focus })}
+        className="-mx-5 self-stretch px-5 md:hidden"
+      />
+      <HeroFilterSheet
+        open={sheet.open}
+        focus={sheet.focus}
+        tab={tab}
+        filters={filters}
+        onChange={setFilters}
+        onClose={() => setSheet({ open: false })}
+        onSearch={search}
+      />
+
+      <HeroCategories selected={filters.category} className="-mx-5 self-stretch border-t border-line px-2.5 pt-4 md:-mx-7 md:px-5 lg:hidden" />
+    </>
   )
 }
 

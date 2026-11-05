@@ -21,7 +21,8 @@ Kept up to date as steps land; remove an item when it is done.
 ## Backend (Ruslan) — see [categories.md](categories.md)
 
 - Proposed params for the pending filters: `kok`, `movcudluq`, `ekin`, and `catdirilma` on services.
-- A combined «Hamısı» results page, or keep sending «Hamısı» to `/elanlar`.
+- **«Hamısı» searches only `/elanlar`**, so services are left out of its results. A combined results page (or API
+  support for one search across products and services) is needed; discuss with Ruslan.
 - Real sub-categories for `kollar` and `otaq-bitkileri` (the current lists are placeholders).
 - Redirects for the removed category URLs `/kateqoriyalar/dekorativ-bitkiler` and `/kateqoriyalar/dibcekler-dekorasiya`.
 - Category and city counts from the API instead of `src/data` (contract change).

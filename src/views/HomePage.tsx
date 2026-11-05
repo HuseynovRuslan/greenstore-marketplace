@@ -12,13 +12,13 @@ import { cn } from '@/lib/format'
 import type { HomeContent } from '@/services/repository'
 
 /**
- * Variant 2 hero (docs/design/variant-2): centred heading on mint and the search card (a client island).
- * The heading is the LCP element, so it is never faded in.
+ * Variant 2 hero (docs/design/variant-2): heading on mint, then the search island (card, phone filter row,
+ * categories row). The heading is the LCP element, so it is never faded in.
  */
 function Hero() {
   return (
     <section aria-labelledby="hero-title" className="w-full bg-mint">
-      <div className="page-x mx-auto flex w-full max-w-[1440px] flex-col items-center gap-[26px] pt-[18px] pb-4 md:pt-11 md:pb-[30px]">
+      <div className="page-x mx-auto flex w-full max-w-[1440px] flex-col items-center gap-3.5 pt-[18px] pb-3.5 md:gap-[26px] md:pt-11 lg:pb-[30px]">
         <div className="flex w-full flex-col gap-1.5 md:items-center md:gap-2.5 md:text-center">
           <h1
             id="hero-title"
@@ -26,7 +26,9 @@ function Hero() {
           >
             Azərbaycanda bitki və bağ elanları
           </h1>
-          <p className="text-[15px] leading-[1.45] text-ink-soft md:text-lg md:leading-[1.5]">
+          {/* Phones get the short line of the 390 mockup. */}
+          <p className="text-[15px] leading-[1.45] text-ink-soft md:hidden">Satıcı ilə birbaşa əlaqə saxlayın.</p>
+          <p className="text-lg leading-[1.5] text-ink-soft max-md:hidden">
             Ağac, gül, tinglər və bağçılıq xidmətləri — satıcı ilə birbaşa əlaqə saxlayın.
           </p>
         </div>

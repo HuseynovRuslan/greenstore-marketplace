@@ -19,10 +19,14 @@ import {
   type HeroTab,
 } from './heroSearch'
 
-/* Variant 2 "filter chips": 38 px pills; a chip with a value is forest-filled and shows it ("Qiymət: 50–150 ₼"). */
-function chipClass(state: { on: boolean; open?: boolean }) {
+/*
+ * Variant 2 "filter chips": 38 px pills (44 px on phones, the touch-target minimum); a chip with a value is
+ * forest-filled and shows it ("Qiymət: 50–150 ₼").
+ */
+export function chipClass(state: { on: boolean; open?: boolean; touch?: boolean }) {
   return cn(
-    'flex h-[38px] items-center gap-[7px] rounded-full border px-3.5 text-sm leading-[normal] font-medium whitespace-nowrap',
+    'flex shrink-0 items-center gap-[7px] rounded-full border px-3.5 text-sm leading-[normal] font-medium whitespace-nowrap',
+    state.touch ? 'h-11' : 'h-[38px]',
     'transition-[background-color,border-color,color,transform] duration-(--dur-fast) active:scale-[0.97] motion-reduce:active:scale-100',
     state.on
       ? 'border-forest bg-forest text-white hover:border-forest-hover hover:bg-forest-hover'
@@ -42,6 +46,11 @@ const panelWidth: Record<Exclude<FilterId, 'delivery' | 'planting'>, string> = {
 }
 
 const digitsOnly = (value: string) => value.replace(/\D/g, '').slice(0, 7)
+
+/** Check mark of an active toggle chip; it pops in from .6 (no motion under reduced motion). */
+export function ToggleCheck() {
+  return <Check aria-hidden size={14} strokeWidth={2.6} className="shrink-0 animate-pop-in motion-reduce:animate-none" />
+}
 
 interface FilterChipsProps {
   tab: HeroTab
@@ -72,7 +81,7 @@ export function FilterChips({ tab, filters, onChange, className }: FilterChipsPr
           const id = def.id as 'delivery' | 'planting'
           return (
             <button key={id} type="button" aria-pressed={on} onClick={() => onChange({ ...filters, [id]: !on })} className={chipClass({ on })}>
-              {on && <Check aria-hidden size={14} strokeWidth={2.6} className="shrink-0 animate-pop-in motion-reduce:animate-none" />}
+              {on && <ToggleCheck />}
               {def.label}
             </button>
           )
@@ -142,15 +151,23 @@ export function FilterChips({ tab, filters, onChange, className }: FilterChipsPr
   )
 }
 
-function optionClass(on: boolean) {
+export function optionClass(on: boolean, touch?: boolean) {
   return cn(
-    'h-[38px] rounded-full border px-3.5 text-sm leading-[normal] font-medium whitespace-nowrap transition-colors duration-(--dur-fast)',
+    'rounded-full border px-3.5 text-sm leading-[normal] font-medium whitespace-nowrap transition-colors duration-(--dur-fast)',
+    touch ? 'h-11' : 'h-[38px]',
     on ? 'border-forest bg-forest text-white' : 'border-line-strong bg-surface text-ink hover:border-forest',
   )
 }
 
+interface ChoiceOptionsProps {
+  options: Array<{ value: string; label: string }>
+  value: string
+  onPick: (value: string) => void
+  touch?: boolean
+}
+
 /** Single-choice pills; picking the chosen one again clears the filter. */
-function ChoiceOptions({ options, value, onPick }: { options: Array<{ value: string; label: string }>; value: string; onPick: (value: string) => void }) {
+export function ChoiceOptions({ options, value, onPick, touch }: ChoiceOptionsProps) {
   const autofocus = options.some((o) => o.value === value) ? value : options[0]?.value
   return (
     <div className="flex flex-wrap gap-2">
@@ -161,7 +178,7 @@ function ChoiceOptions({ options, value, onPick }: { options: Array<{ value: str
           aria-pressed={o.value === value}
           data-autofocus={o.value === autofocus || undefined}
           onClick={() => onPick(o.value === value ? '' : o.value)}
-          className={optionClass(o.value === value)}
+          className={optionClass(o.value === value, touch)}
         >
           {o.label}
         </button>
@@ -173,20 +190,22 @@ function ChoiceOptions({ options, value, onPick }: { options: Array<{ value: str
 interface PriceFieldsProps {
   filters: HeroFilters
   onChange: (filters: HeroFilters) => void
-  close: () => void
+  /** Popover only: Enter and a preset close it and return focus to the chip. */
+  close?: () => void
   error?: string
   errorId: string
+  touch?: boolean
 }
 
-function PriceFields({ filters, onChange, close, error, errorId }: PriceFieldsProps) {
+export function PriceFields({ filters, onChange, close, error, errorId, touch }: PriceFieldsProps) {
   // Enter applies the typed range and returns to the chip instead of submitting the search.
   const onKeyDown = (e: ReactKeyboardEvent<HTMLInputElement>) => {
-    if (e.key !== 'Enter') return
+    if (e.key !== 'Enter' || !close) return
     e.preventDefault()
     close()
   }
   const field = (key: 'min' | 'max', prefix: string, label: string) => (
-    <label className="flex h-[42px] min-w-0 flex-1 items-center gap-1.5 rounded-option border border-line-strong px-3 text-[13px] leading-[normal] text-muted has-[input:focus-visible]:border-olive has-[input:focus-visible]:outline-1 has-[input:focus-visible]:outline-olive has-[[aria-invalid=true]]:border-danger">
+    <label className="flex h-11 min-w-0 flex-1 items-center gap-1.5 rounded-option border border-line-strong px-3 text-[13px] leading-[normal] text-muted md:h-[42px] has-[input:focus-visible]:border-olive has-[input:focus-visible]:outline-1 has-[input:focus-visible]:outline-olive has-aria-invalid:border-danger">
       {prefix}
       <input
         type="text"
@@ -227,9 +246,9 @@ function PriceFields({ filters, onChange, close, error, errorId }: PriceFieldsPr
               aria-pressed={on}
               onClick={() => {
                 onChange({ ...filters, min: on ? '' : p.min, max: on ? '' : p.max })
-                close()
+                close?.()
               }}
-              className={optionClass(on)}
+              className={optionClass(on, touch)}
             >
               {p.label}
             </button>

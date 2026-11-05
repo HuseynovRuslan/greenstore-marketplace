@@ -57,9 +57,10 @@ describe('HomePage', () => {
     expect(screen.queryByText(/→/)).not.toBeInTheDocument()
   })
 
-  it('links category cards to their category pages', async () => {
+  it('links categories to their category pages', async () => {
     await renderHome()
-    expect(screen.getByRole('link', { name: /Ağaclar/ })).toHaveAttribute('href', '/kateqoriyalar/agaclar')
+    for (const link of screen.getAllByRole('link', { name: /^Ağaclar/ })) expect(link).toHaveAttribute('href', '/kateqoriyalar/agaclar')
+    expect(screen.getByRole('link', { name: 'Bağ xidmətləri 95 elan' })).toHaveAttribute('href', '/xidmetler')
   })
 
   it('toggles a favorite from a listing card', async () => {
