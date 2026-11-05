@@ -69,9 +69,11 @@ export function HeroSearchCard() {
 
         <form role="search" aria-label="Elan axtarışı" action="/elanlar" method="get" onSubmit={submit} noValidate>
           <div className="flex flex-col gap-2 p-2.5 md:flex-row md:items-center md:gap-2.5 md:pt-3.5 md:pr-3.5 md:pb-2.5 md:pl-[22px]">
+            {/* No focus ring here (as in the mockup): a text field matches :focus-visible on a click too, and the
+                caret already shows where focus is. */}
             <label
               htmlFor={HERO_QUERY_ID}
-              className="flex h-12 min-w-0 cursor-text items-center gap-2.5 rounded-option border border-line bg-cream px-3 has-[input:focus-visible]:outline-2 has-[input:focus-visible]:outline-offset-2 has-[input:focus-visible]:outline-olive md:h-[52px] md:flex-1 md:gap-3 md:border-0 md:bg-transparent md:px-0"
+              className="flex h-12 min-w-0 cursor-text items-center gap-2.5 rounded-option border border-line bg-cream px-3 md:h-[52px] md:flex-1 md:gap-3 md:border-0 md:bg-transparent md:px-0"
             >
               <Search aria-hidden size={20} strokeWidth={2} className="shrink-0 text-muted" />
               <span className="sr-only">Axtarış sözü</span>
