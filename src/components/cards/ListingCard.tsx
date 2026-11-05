@@ -17,7 +17,8 @@ interface ListingCardProps {
  * Figma "Elan kartı" (components frame + home 1440/768/390):
  *  desktop/tablet: p 14, gap 8, radius 12, photo h 210 radius 8, price 23 px, title 15 px semibold, meta 12 px muted (leading 1.6)
  *  mobile (390):   p 10, photo h 145, price 20 px, title 13 px, meta 11 px
- *  hover: border #788149 + shadow 0 8 24 rgba(23,63,50,.1); overlays sit 7 px inside the photo.
+ *  hover: border #788149 + shadow 0 8 24 rgba(23,63,50,.1), the photo zooms to 1.03 inside its frame (not under
+ *  reduced motion); overlays sit 7 px inside the photo.
  *  Figma strokes are inside the box, so padding/offsets here are 1 px smaller to make room for the CSS border.
  */
 export function ListingCard({ listing, compact, className }: ListingCardProps) {
@@ -32,14 +33,17 @@ export function ListingCard({ listing, compact, className }: ListingCardProps) {
       )}
     >
       {/* Art direction: the 390 / 768 Figma frames show their own photo of the product. */}
-      <picture className="block w-full shrink-0">
+      <picture className="block w-full shrink-0 overflow-hidden rounded-lg">
         {listing.coverMobile && <source media={compact ? undefined : '(max-width: 767.98px)'} srcSet={listing.coverMobile} />}
         {!compact && listing.coverTablet && <source media="(max-width: 1279.98px)" srcSet={listing.coverTablet} />}
         <img
           src={listing.cover}
           alt={listing.title}
           loading="lazy"
-          className={cn('block w-full rounded-lg object-cover', compact ? 'h-[145px]' : 'h-[145px] md:h-[210px]')}
+          className={cn(
+            'block w-full rounded-lg object-cover transition-transform duration-(--dur-slow) ease-out motion-safe:group-hover:scale-[1.03]',
+            compact ? 'h-[145px]' : 'h-[145px] md:h-[210px]',
+          )}
         />
       </picture>
       {listing.vip && (

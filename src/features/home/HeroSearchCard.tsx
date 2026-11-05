@@ -60,7 +60,11 @@ export function HeroSearchCard() {
 
   return (
     <>
-      <div id={HERO_SEARCH_ID} className="w-full max-w-[1080px] scroll-mt-28 rounded-2xl border border-line-strong bg-surface shadow-search md:rounded-search">
+      <div
+        id={HERO_SEARCH_ID}
+        // relative z-10: its popovers paint above the categories row, which also animates in.
+        className="relative z-10 w-full max-w-[1080px] animate-fade-up scroll-mt-28 rounded-2xl border border-line-strong bg-surface shadow-search motion-reduce:animate-none md:rounded-search"
+      >
         <TypeTabs value={tab} onChange={changeTab} />
 
         <form role="search" aria-label="Elan axtarışı" action="/elanlar" method="get" onSubmit={submit} noValidate>
@@ -109,7 +113,7 @@ export function HeroSearchCard() {
         onChange={setFilters}
         sheetOpen={sheet.open}
         onOpenSheet={(focus) => setSheet({ open: true, focus })}
-        className="-mx-5 self-stretch px-5 md:hidden"
+        className="-mx-5 animate-fade-up self-stretch px-5 [animation-delay:60ms] motion-reduce:animate-none md:hidden"
       />
       <HeroFilterSheet
         open={sheet.open}

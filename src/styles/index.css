@@ -84,6 +84,33 @@
     }
   }
 
+  /*
+   * Home hero entrance (first paint). The heading only rises (it is the LCP element and stays fully opaque); the
+   * search card and the categories fade up. `backwards` holds the start frame during a stagger delay and drops the
+   * transform afterwards, so no stacking context or containing block is left behind. Off under reduced motion.
+   */
+  --animate-rise: gs-rise var(--dur-reveal) var(--ease-out) backwards;
+  --animate-fade-up: gs-fade-up var(--dur-reveal) var(--ease-out) backwards;
+  @keyframes gs-rise {
+    from {
+      transform: translateY(8px);
+    }
+  }
+  @keyframes gs-fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+  }
+
+  /* Favourite heart when switched on */
+  --animate-heart-pop: gs-heart-pop 240ms var(--ease-out);
+  @keyframes gs-heart-pop {
+    50% {
+      transform: scale(1.25);
+    }
+  }
+
   --breakpoint-xs: 26rem;
 }
 
@@ -201,6 +228,30 @@
       transform: none;
       opacity: 0;
       pointer-events: none;
+    }
+  }
+}
+
+/*
+ * Scroll reveal of card grids (useRevealOnce + Reveal): items below the fold start 16 px low and transparent and
+ * come in once, 60 ms apart. Reduced motion: shown at once, no fade.
+ */
+@layer components {
+  [data-reveal] > .gs-reveal-item {
+    transition:
+      opacity var(--dur-reveal) var(--ease-out),
+      transform var(--dur-reveal) var(--ease-out);
+    transition-delay: calc(var(--i, 0) * 60ms);
+  }
+  [data-reveal='pending'] > .gs-reveal-item {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    [data-reveal] > .gs-reveal-item {
+      opacity: 1;
+      transform: none;
+      transition: none;
     }
   }
 }

@@ -6,6 +6,7 @@ import { ServiceCard } from '@/components/cards/ServiceCard'
 import { SellerCard } from '@/components/cards/SellerCard'
 import { SectionHeader } from '@/components/ui/SectionHeader'
 import { ButtonLink } from '@/components/ui/Button'
+import { Reveal } from '@/components/ui/Reveal'
 import { HeroSearchCard } from '@/features/home/HeroSearchCard'
 import { cn } from '@/lib/format'
 import type { HomeContent } from '@/services/repository'
@@ -18,7 +19,8 @@ function Hero() {
   return (
     <section aria-labelledby="hero-title" className="w-full bg-mint">
       <div className="page-x mx-auto flex w-full max-w-[1440px] flex-col items-center gap-3.5 pt-[18px] pb-3.5 md:gap-[26px] md:pt-11 lg:pb-[30px]">
-        <div className="flex w-full flex-col gap-1.5 md:items-center md:gap-2.5 md:text-center">
+        {/* Rises 8 px on first paint but never fades: the heading is the LCP element. */}
+        <div className="flex w-full animate-rise flex-col gap-1.5 motion-reduce:animate-none md:items-center md:gap-2.5 md:text-center">
           <h1
             id="hero-title"
             className="text-[25px] leading-[1.15] font-semibold tracking-[-0.015em] text-balance text-forest md:text-[44px] md:leading-[1.12] md:tracking-[-0.02em]"
@@ -90,20 +92,20 @@ export default function HomePage({ content }: { content: HomeContent }) {
             <ArrowRight aria-hidden size={16} strokeWidth={2} className="max-md:hidden" />
           </Link>
         </div>
-        <div className="grid w-full grid-cols-2 gap-2.5 lg:grid-cols-4 lg:gap-5">
+        <Reveal className="grid w-full grid-cols-2 gap-2.5 lg:grid-cols-4 lg:gap-5">
           {vip.map((l) => (
             <ListingCard key={l.id} listing={l} />
           ))}
-        </div>
+        </Reveal>
       </section>
 
       <Section id="son-elanlar">
         <SectionHeader title="Son elanlar" subtitle="Azərbaycanda yeni yerləşdirilən elanlar" action={{ label: 'Bütün elanlara bax', to: '/elanlar' }} />
-        <div className="grid w-full grid-cols-2 gap-3 md:grid-cols-3 md:gap-5 xl:grid-cols-4">
+        <Reveal className="grid w-full grid-cols-2 gap-3 md:grid-cols-3 md:gap-5 xl:grid-cols-4">
           {latest.map((l) => (
             <ListingCard key={l.id} listing={l} />
           ))}
-        </div>
+        </Reveal>
         <MobileMore to="/elanlar" label="Bütün elanlara bax" />
       </Section>
 

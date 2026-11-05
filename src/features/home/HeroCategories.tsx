@@ -18,10 +18,15 @@ export function HeroCategories({ selected, className }: { selected?: string; cla
       <h2 className="sr-only">Kateqoriyalar</h2>
       {/* relative: the visually hidden " elan" labels are absolutely positioned and must be clipped by this scroller. */}
       <ul className="scrollbar-none relative flex gap-1 overflow-x-auto px-2.5 md:px-5 lg:grid lg:grid-cols-10 lg:gap-2 lg:overflow-visible lg:px-0">
-        {categories.map((c) => {
+        {categories.map((c, i) => {
           const on = c.id === selected
           return (
-            <li key={c.id} className="flex w-[78px] shrink-0 lg:w-auto lg:min-w-0">
+            // Fades up after the search card, 40 ms apart.
+            <li
+              key={c.id}
+              style={{ animationDelay: `${120 + i * 40}ms` }}
+              className="flex w-[78px] shrink-0 animate-fade-up motion-reduce:animate-none lg:w-auto lg:min-w-0"
+            >
               <Link href={categoryHref(c)} className="group flex w-full min-w-0 flex-col items-center gap-1.5 rounded-option p-0.5 lg:gap-2 lg:p-1">
                 <span
                   aria-hidden
