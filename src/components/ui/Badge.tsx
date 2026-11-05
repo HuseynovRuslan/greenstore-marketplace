@@ -5,7 +5,7 @@ export type BadgeTone = 'vip' | 'success' | 'warning' | 'danger' | 'neutral'
 
 /* Figma "Nişan": 12 px semibold, px 9 / py 5, radius 5 */
 const tones: Record<BadgeTone, string> = {
-  vip: 'bg-vip text-olive',
+  vip: 'bg-vip text-olive-text',
   success: 'bg-success-soft text-success',
   warning: 'bg-warning-soft text-warning',
   danger: 'bg-danger-soft text-danger',

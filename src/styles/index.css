@@ -10,12 +10,15 @@
   /* Palette (Figma name in comment) */
   --color-forest: #173f32; /* Meşə yaşılı — primary, logo, buttons */
   --color-forest-hover: #285541; /* Düymə · üzərinə gətirilmiş */
-  --color-olive: #788149; /* Zeytun — focus ring, VIP text, hover border */
+  --color-olive: #788149; /* Zeytun — focus ring, hover border, decorative dot (3.7:1 on vip: not for text) */
+  --color-olive-text: #646b3b; /* olive as text: "Bağ vitrini", "Vitrin" badge (5.0:1 on vip, 5.7:1 on white) */
   --color-cream: #fafaf6; /* İsti ağ — page background */
   --color-surface: #ffffff; /* Səth */
   --color-line: #dee3d9; /* Sərhəd */
+  --color-line-strong: #cfd8cc; /* chip, price input and search card outlines (Variant 2) */
   --color-ink: #20352b; /* Mətn */
-  --color-muted: #727c72; /* Köməkçi mətn */
+  --color-ink-soft: #4f5a51; /* secondary text on mint: hero subtitle, inactive tabs (6.2:1 on mint) */
+  --color-muted: #646d64; /* Köməkçi mətn — Figma #727c72 darkened to reach 4.5:1 on mint (4.6:1) */
   --color-mint: #eaf0e9; /* search band, chips, secondary button */
   --color-sand: #f0eee4; /* "Daha rahat və təhlükəsiz seçim" band */
   --color-disabled: #e8ebe5; /* disabled button / field, skeleton */
@@ -29,6 +32,27 @@
   --color-footer-text: #d6dfd2;
 
   --shadow-card-hover: 0px 8px 24px 0px rgba(23, 63, 50, 0.1);
+  --shadow-search: 0px 10px 30px 0px rgba(23, 63, 50, 0.08); /* hero search card */
+  --shadow-popover: 0px 16px 40px 0px rgba(23, 63, 50, 0.18); /* listbox and filter popovers */
+  --shadow-header: 0px 6px 20px 0px rgba(23, 63, 50, 0.06); /* header once the page is scrolled */
+
+  /* Radii added for Variant 2 (rounded-option / rounded-panel / rounded-search) */
+  --radius-option: 10px; /* listbox options, header icon buttons */
+  --radius-panel: 14px; /* listbox and popover panels */
+  --radius-search: 18px; /* hero search card */
+
+  /*
+   * Motion. Exit is faster than enter; only transform and opacity move (colour and shadow may fade).
+   * Everything is switched off or reduced to a fade under prefers-reduced-motion (see the end of this file).
+   */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1); /* arriving: decelerate */
+  --ease-in: cubic-bezier(0.4, 0, 1, 1); /* leaving: accelerate */
+  --dur-fast: 120ms; /* chips, press feedback */
+  --dur-base: 180ms; /* header state, tab indicator, hiding the header */
+  --dur-slow: 280ms; /* showing the header, card image zoom */
+  --dur-reveal: 420ms; /* hero entrance, card reveal */
+  --dur-panel-in: 160ms; /* listbox / popover open */
+  --dur-panel-out: 110ms; /* listbox / popover close */
 
   --breakpoint-xs: 26rem;
 }
@@ -53,6 +77,11 @@
   :focus-visible {
     outline: 2px solid var(--color-olive);
     outline-offset: 2px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
   }
 }
 
