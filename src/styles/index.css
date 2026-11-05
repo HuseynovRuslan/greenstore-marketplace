@@ -99,6 +99,45 @@
 }
 
 /*
+ * Floating panels (Listbox, filter popovers — src/components/ui/Popover.tsx). A panel enters with
+ * data-state="open" from @starting-style and leaves with data-state="closed" (faster, accelerating);
+ * the component unmounts or hides it once the exit is over. Reduced motion: opacity only.
+ */
+@layer components {
+  .gs-panel {
+    transform-origin: top;
+    transition-property: opacity, transform;
+    transition-duration: var(--dur-panel-in);
+    transition-timing-function: var(--ease-out);
+  }
+  .gs-panel[data-state='closed'] {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+    transition-duration: var(--dur-panel-out);
+    transition-timing-function: var(--ease-in);
+  }
+  @starting-style {
+    .gs-panel[data-state='open'] {
+      opacity: 0;
+      transform: translateY(-4px) scale(0.98);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .gs-panel {
+      transition-property: opacity;
+    }
+    .gs-panel[data-state='closed'] {
+      transform: none;
+    }
+    @starting-style {
+      .gs-panel[data-state='open'] {
+        transform: none;
+      }
+    }
+  }
+}
+
+/*
  * Before hydration the header and the private pages' loading frames render both session variants; the
  * pre-hydration script (src/state/bootstrap.ts) marks <html> so only the right one is painted.
  */
