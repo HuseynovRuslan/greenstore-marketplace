@@ -1,5 +1,4 @@
 import type { ReactNode } from 'react'
-import Link from 'next/link'
 import { Eye, MessageCircle, ShieldCheck } from 'lucide-react'
 import { categories } from '@/data/categories'
 import { ListingCard } from '@/components/cards/ListingCard'
@@ -8,54 +7,30 @@ import { ServiceCard } from '@/components/cards/ServiceCard'
 import { SellerCard } from '@/components/cards/SellerCard'
 import { SectionHeader } from '@/components/ui/SectionHeader'
 import { ButtonLink } from '@/components/ui/Button'
-import { HeroSearchForm } from '@/features/home/HeroSearchForm'
+import { HeroSearchCard } from '@/features/home/HeroSearchCard'
 import { cn } from '@/lib/format'
 import type { HomeContent } from '@/services/repository'
 
-/** Figma "Axtarış sahəsi" — hero search band (#eaf0e9). The tabs and form are a client island. */
-function HeroSearch() {
+/**
+ * Variant 2 hero (docs/design/variant-2): centred heading on mint and the search card (a client island).
+ * The heading is the LCP element, so it is never faded in.
+ */
+function Hero() {
   return (
-    <section className="w-full bg-mint">
-      <div className="page-x mx-auto flex w-full max-w-[1440px] items-start gap-7 py-8">
-        <div className="flex min-w-0 flex-1 flex-col items-start gap-5">
-          <h1 className="w-full text-[30px] leading-[1.15] font-normal text-forest md:text-[40px]">Azərbaycanda bitki və bağ elanları</h1>
-          <p className="w-full text-[15px] leading-[1.5] text-muted">
-            Ağac, gül, tinglər, bağ məhsulları və bağçılıq xidmətləri. Satıcı ilə birbaşa əlaqə saxlayın.
-          </p>
-
-          <HeroSearchForm />
-
-          <p className="w-full text-xs leading-[1.5] text-muted">
-            Populyar:{' '}
-            {/* No prefetch: Next.js 16 leaves the prefetch of a non-ASCII query string unread (an open request). */}
-            <Link className="hover:text-forest" href={`/elanlar?q=${encodeURIComponent('Zeytun ağacı')}`} prefetch={false}>
-              Zeytun ağacı
-            </Link>{' '}
-            ·{' '}
-            <Link className="hover:text-forest" href="/xidmetler?kateqoriya=cim-salinmasi">
-              Çim
-            </Link>{' '}
-            ·{' '}
-            <Link className="hover:text-forest" href="/xidmetler?kateqoriya=bag-baximi">
-              Bağ baxımı
-            </Link>
+    <section aria-labelledby="hero-title" className="w-full bg-mint">
+      <div className="page-x mx-auto flex w-full max-w-[1440px] flex-col items-center gap-[26px] pt-[18px] pb-4 md:pt-11 md:pb-[30px]">
+        <div className="flex w-full flex-col gap-1.5 md:items-center md:gap-2.5 md:text-center">
+          <h1
+            id="hero-title"
+            className="text-[25px] leading-[1.15] font-semibold tracking-[-0.015em] text-balance text-forest md:text-[44px] md:leading-[1.12] md:tracking-[-0.02em]"
+          >
+            Azərbaycanda bitki və bağ elanları
+          </h1>
+          <p className="text-[15px] leading-[1.45] text-ink-soft md:text-lg md:leading-[1.5]">
+            Ağac, gül, tinglər və bağçılıq xidmətləri — satıcı ilə birbaşa əlaqə saxlayın.
           </p>
         </div>
-
-        {/* "Botanika vitrini" — desktop only (absent from the 768 and 390 frames) */}
-        <div className="hidden w-[368px] shrink-0 flex-col gap-4 xl:flex">
-          <img src="/images/home/hero-botanika.webp" alt="Bağ mərkəzində dibçəkdə zeytun ağacları" className="h-[302px] w-full rounded-lg object-cover" />
-          <dl className="flex items-start gap-7 leading-[1.5] whitespace-nowrap">
-            <div className="flex flex-col-reverse">
-              <dt className="text-xs text-muted">aktiv elan</dt>
-              <dd className="text-[26px] font-semibold text-ink">2 480+</dd>
-            </div>
-            <div className="flex flex-col-reverse">
-              <dt className="text-xs text-muted">peşəkar və fərdi satıcı</dt>
-              <dd className="text-[26px] font-semibold text-ink">340+</dd>
-            </div>
-          </dl>
-        </div>
+        <HeroSearchCard />
       </div>
     </section>
   )
@@ -89,7 +64,7 @@ export default function HomePage({ content }: { content: HomeContent }) {
 
   return (
     <>
-      <HeroSearch />
+      <Hero />
 
       <Section id="kateqoriyalar">
         <SectionHeader title="Kateqoriyalar" subtitle="Ağacdan bağ avadanlığına — ehtiyacınız olanı seçin." />

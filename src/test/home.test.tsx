@@ -70,18 +70,12 @@ describe('HomePage', () => {
     expect(screen.getByRole('button', { name: /Zeytun ağacı — Olea europaea — seçilmişlərdən çıxar/ })).toHaveAttribute('aria-pressed', 'true')
   })
 
-  it('validates the price range and submits the hero search to the catalog', async () => {
+  it('submits the hero search to the catalogue (details in heroSearch.test.tsx)', async () => {
     await renderHome()
-    const form = screen.getByRole('button', { name: 'Elanları tap' }).closest('form')!
-    await userEvent.type(within(form).getByLabelText('Min. qiymət, ₼'), '200')
-    await userEvent.type(within(form).getByLabelText('Maks. qiymət, ₼'), '100')
-    await userEvent.click(screen.getByRole('button', { name: 'Elanları tap' }))
-    expect(screen.getByRole('alert')).toHaveTextContent('Minimum qiymət maksimumdan böyük ola bilməz.')
-    expect(push).not.toHaveBeenCalled()
-
-    await userEvent.clear(within(form).getByLabelText('Maks. qiymət, ₼'))
-    await userEvent.type(within(form).getByLabelText('Nə axtarırsınız?'), 'zeytun')
-    await userEvent.click(screen.getByRole('button', { name: 'Elanları tap' }))
-    expect(push).toHaveBeenCalledWith('/elanlar?q=zeytun&min=200')
+    const form = screen.getByRole('search', { name: 'Elan axtarışı' })
+    expect(screen.getByText('Ağac, gül, tinglər və bağçılıq xidmətləri — satıcı ilə birbaşa əlaqə saxlayın.')).toBeInTheDocument()
+    await userEvent.type(within(form).getByRole('searchbox', { name: 'Axtarış sözü' }), 'zeytun')
+    await userEvent.click(within(form).getByRole('button', { name: 'Axtar' }))
+    expect(push).toHaveBeenCalledWith('/elanlar?q=zeytun')
   })
 })

@@ -54,6 +54,15 @@
   --dur-panel-in: 160ms; /* listbox / popover open */
   --dur-panel-out: 110ms; /* listbox / popover close */
 
+  /* Check mark of an active toggle chip (animate-pop-in; off under reduced motion) */
+  --animate-pop-in: gs-pop-in var(--dur-fast) var(--ease-out);
+  @keyframes gs-pop-in {
+    from {
+      opacity: 0;
+      transform: scale(0.6);
+    }
+  }
+
   --breakpoint-xs: 26rem;
 }
 
