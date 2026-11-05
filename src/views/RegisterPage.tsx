@@ -318,7 +318,7 @@ export default function RegisterPage({ next }: { next?: string }) {
 
               <p className="w-full text-sm leading-[1.5] text-ink">
                 Artıq hesabınız var?{' '}
-                <Link href={loginHref} className="hover:text-olive hover:underline">
+                <Link href={loginHref} className="hover:text-olive-text hover:underline">
                   Daxil olun →
                 </Link>
               </p>

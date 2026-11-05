@@ -28,7 +28,7 @@ export function ActiveFilterChips({ chips, showClearAll, onRemove, onClearAll }:
         </button>
       ))}
       {showClearAll && (
-        <button type="button" onClick={onClearAll} className="text-xs leading-[1.5] whitespace-nowrap text-forest hover:text-olive hover:underline">
+        <button type="button" onClick={onClearAll} className="text-xs leading-[1.5] whitespace-nowrap text-forest hover:text-olive-text hover:underline">
           Hamısını təmizlə
         </button>
       )}

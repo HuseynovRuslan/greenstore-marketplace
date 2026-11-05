@@ -66,7 +66,7 @@ export function MyListingRowCard({ row, onDeactivate, onRenew, onActivate }: Pro
             {listing.vip && <Badge tone="vip">Vitrin</Badge>}
           </div>
           <h3 className="w-full text-[15px] leading-[1.5] font-semibold break-words text-ink">
-            <Link href={detailHref} className="hover:text-olive">
+            <Link href={detailHref} className="hover:text-olive-text">
               {listing.title}
             </Link>
           </h3>

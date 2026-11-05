@@ -128,24 +128,24 @@ export function SiteHeader({ withSections = false }: { withSections?: boolean })
       <div className="page-x mx-auto hidden w-full max-w-[1440px] items-center gap-[18px] py-[18px] md:flex">
         <Logo />
         <HeaderSearch variant="bar" />
-        <Link href="/secilmisler" aria-label="Seçilmişlər" className="shrink-0 text-forest hover:text-olive">
+        <Link href="/secilmisler" aria-label="Seçilmişlər" className="shrink-0 text-forest hover:text-olive-text">
           <Heart aria-hidden size={20} strokeWidth={1.8} absoluteStrokeWidth />
         </Link>
         {/* 768–1279 px: the Figma 768 header has no "Daxil ol" text, so account access is a compact icon.
             Before hydration both session variants are rendered and CSS shows the one the browser knows (bootstrap.ts). */}
         {showUser && (
-          <Link href="/kabinet" aria-label="Şəxsi kabinet" className={cn('shrink-0 text-forest hover:text-olive xl:hidden', preClass('user'))}>
+          <Link href="/kabinet" aria-label="Şəxsi kabinet" className={cn('shrink-0 text-forest hover:text-olive-text xl:hidden', preClass('user'))}>
             <UserRound aria-hidden size={20} strokeWidth={1.8} absoluteStrokeWidth />
           </Link>
         )}
         {showGuest && (
-          <Link href="/daxil-ol" aria-label="Daxil ol" className={cn('shrink-0 text-forest hover:text-olive xl:hidden', preClass('guest'))}>
+          <Link href="/daxil-ol" aria-label="Daxil ol" className={cn('shrink-0 text-forest hover:text-olive-text xl:hidden', preClass('guest'))}>
             <UserRound aria-hidden size={20} strokeWidth={1.8} absoluteStrokeWidth />
           </Link>
         )}
         {showUser && (
           <span className={cn('hidden shrink-0 items-center gap-3 text-sm leading-[normal] whitespace-nowrap xl:inline-flex', preClass('user'))}>
-            <Link href="/kabinet" className={cn('text-forest hover:text-olive', !hydrated && 'auth-user-name')}>
+            <Link href="/kabinet" className={cn('text-forest hover:text-olive-text', !hydrated && 'auth-user-name')}>
               {hydrated ? user?.fullName : null}
             </Link>
             <button type="button" onClick={handleSignOut} className="text-muted hover:text-forest">
@@ -156,7 +156,7 @@ export function SiteHeader({ withSections = false }: { withSections?: boolean })
         {showGuest && (
           <Link
             href="/daxil-ol"
-            className={cn('hidden shrink-0 text-sm leading-[normal] whitespace-nowrap text-forest hover:text-olive xl:inline', preClass('guest'))}
+            className={cn('hidden shrink-0 text-sm leading-[normal] whitespace-nowrap text-forest hover:text-olive-text xl:inline', preClass('guest'))}
           >
             Daxil ol
           </Link>
@@ -172,13 +172,13 @@ export function SiteHeader({ withSections = false }: { withSections?: boolean })
           <ul className="flex items-start gap-[18px] whitespace-nowrap">
             {sectionLinks.map((l, i) => (
               <li key={l.label}>
-                <Link href={l.to} className={cn('hover:text-olive', i === 0 && 'font-semibold')}>
+                <Link href={l.to} className={cn('hover:text-olive-text', i === 0 && 'font-semibold')}>
                   {l.label}
                 </Link>
               </li>
             ))}
             <li>
-              <Link href="/elanlar?vip=1" className="text-olive hover:text-forest">
+              <Link href="/elanlar?vip=1" className="text-olive-text hover:text-forest">
                 Bağ vitrini
               </Link>
             </li>

@@ -86,7 +86,7 @@ export function CityMultiSelect({ label, value, onChange }: CityMultiSelectProps
             </p>
             <ul className="flex flex-col text-sm leading-[1.5] text-ink">
               <li>
-                <label className="flex cursor-pointer items-center rounded py-1 whitespace-pre hover:text-olive has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-olive">
+                <label className="flex cursor-pointer items-center rounded py-1 whitespace-pre hover:text-olive-text has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-olive">
                   <input type="checkbox" className="sr-only" checked={value.length === 0} onChange={() => onChange([])} />
                   <CheckMark checked={value.length === 0} />
                   Bütün Azərbaycan
@@ -96,7 +96,7 @@ export function CityMultiSelect({ label, value, onChange }: CityMultiSelectProps
                 const checked = value.includes(c.id)
                 return (
                   <li key={c.id}>
-                    <label className="flex cursor-pointer items-center rounded py-1 whitespace-pre hover:text-olive has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-olive">
+                    <label className="flex cursor-pointer items-center rounded py-1 whitespace-pre hover:text-olive-text has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-olive">
                       <input type="checkbox" className="sr-only" checked={checked} onChange={() => toggle(c.id)} />
                       <CheckMark checked={checked} />
                       {c.name}

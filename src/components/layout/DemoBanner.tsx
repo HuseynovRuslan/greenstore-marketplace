@@ -19,7 +19,7 @@ export function DemoBanner() {
     <div role="note" aria-label="Demo versiya" className="demo-banner w-full border-b border-line bg-vip text-ink">
       <div className="page-x mx-auto flex w-full max-w-[1440px] items-start gap-3 py-2 text-xs leading-[1.5]">
         <p className="min-w-0 flex-1">
-          <span className="font-semibold text-olive">Demo versiya.</span>{' '}
+          <span className="font-semibold text-olive-text">Demo versiya.</span>{' '}
           <span className="md:hidden">Məlumatlar nümunədir, giriş sınaq üçündür.</span>
           <span className="hidden md:inline">
             Elanlar, satıcılar və hesablar nümunə məlumatlardır. Giriş və qeydiyyat sınaq üçündür, real hesab yaradılmır;

@@ -140,7 +140,7 @@ export default function LoginPage({ next }: { next?: string }) {
                   type="button"
                   aria-expanded={forgotOpen}
                   onClick={() => setForgotOpen((v) => !v)}
-                  className="font-semibold text-forest hover:text-olive"
+                  className="font-semibold text-forest hover:text-olive-text"
                 >
                   Şifrəni unutmusunuz?
                 </button>
@@ -161,7 +161,7 @@ export default function LoginPage({ next }: { next?: string }) {
 
               <p className="w-full text-sm leading-[1.5] text-ink">
                 Hesabınız yoxdur?{' '}
-                <Link href={registerHref} className="hover:text-olive hover:underline">
+                <Link href={registerHref} className="hover:text-olive-text hover:underline">
                   Qeydiyyatdan keçin →
                 </Link>
               </p>

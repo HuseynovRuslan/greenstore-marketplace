@@ -135,7 +135,7 @@ export function SellerPanel({ listing, seller }: SellerPanelProps) {
       ) : (
         <p className="w-full text-xs leading-[1.5] text-muted">Satıcının əlaqə nömrəsi göstərilmir.</p>
       )}
-      <Link href={sellerUrl} className="text-[13px] leading-[1.5] font-semibold whitespace-nowrap text-forest hover:text-olive">
+      <Link href={sellerUrl} className="text-[13px] leading-[1.5] font-semibold whitespace-nowrap text-forest hover:text-olive-text">
         Satıcının bütün elanları →
       </Link>
     </Panel>

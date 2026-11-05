@@ -102,7 +102,7 @@ export function ProviderPanel({ provider, contact }: { provider: ServiceProvider
         <Sprout aria-hidden size={32} strokeWidth={1.8} absoluteStrokeWidth className="shrink-0 text-forest" />
         <h2 className="min-w-0 flex-1 text-[15px] leading-[1.5] font-semibold text-ink">
           {contact.sellerSlug ? (
-            <Link href={`/saticilar/${contact.sellerSlug}`} className="hover:text-olive">
+            <Link href={`/saticilar/${contact.sellerSlug}`} className="hover:text-olive-text">
               {provider.name}
             </Link>
           ) : (

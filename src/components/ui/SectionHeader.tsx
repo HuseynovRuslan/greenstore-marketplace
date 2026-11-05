@@ -24,7 +24,7 @@ export function SectionHeader({ title, subtitle, action, as: Tag = 'h2', classNa
       {action && (
         <Link
           href={action.to}
-          className="hidden shrink-0 items-center gap-1 text-[13px] leading-[1.5] font-semibold whitespace-nowrap hover:text-olive md:inline-flex"
+          className="hidden shrink-0 items-center gap-1 text-[13px] leading-[1.5] font-semibold whitespace-nowrap hover:text-olive-text md:inline-flex"
         >
           {action.label}
           <ArrowRight aria-hidden size={14} strokeWidth={1.8} absoluteStrokeWidth />

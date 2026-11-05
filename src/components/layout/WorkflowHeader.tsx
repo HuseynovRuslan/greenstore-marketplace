@@ -19,16 +19,16 @@ export function WorkflowHeader({ right }: { right?: ReactNode }) {
         <div className="truncate pt-1.5 text-sm md:pt-[9px]">
           {right ??
             (hydrated ? (
-              <Link href={user ? '/kabinet' : '/daxil-ol'} className="hover:text-olive">
+              <Link href={user ? '/kabinet' : '/daxil-ol'} className="hover:text-olive-text">
                 {user ? `${user.fullName} · Şəxsi kabinet` : 'Daxil ol'}
               </Link>
             ) : (
               // Before hydration: both variants, CSS shows the one the browser knows (src/state/bootstrap.ts).
               <>
-                <Link href="/kabinet" className={`hover:text-olive ${preHydrationClass('user')}`}>
+                <Link href="/kabinet" className={`hover:text-olive-text ${preHydrationClass('user')}`}>
                   <span className="auth-user-name" /> · Şəxsi kabinet
                 </Link>
-                <Link href="/daxil-ol" className={`hover:text-olive ${preHydrationClass('guest')}`}>
+                <Link href="/daxil-ol" className={`hover:text-olive-text ${preHydrationClass('guest')}`}>
                   Daxil ol
                 </Link>
               </>

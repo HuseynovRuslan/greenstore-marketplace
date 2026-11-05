@@ -156,7 +156,7 @@ export function PhotoUploader({ draft, update, error }: PhotoUploaderProps) {
                       type="button"
                       onClick={() => update({ coverId: photo.id })}
                       aria-label={`Şəkil ${i + 1}: örtük et`}
-                      className="rounded-sm hover:text-olive hover:underline"
+                      className="rounded-sm hover:text-olive-text hover:underline"
                     >
                       Örtük et
                     </button>
