@@ -4,9 +4,10 @@
  * so the mock data modules in `src/data` can later be swapped for HTTP calls in `src/services`.
  */
 
-/** Lucide icon names used by the Figma design (e.g. category cards). */
+/** Lucide icon names used by the Figma design (e.g. category cards). `shrub` was added for "Kollar" (Variant 2). */
 export type IconName =
   | 'trees'
+  | 'shrub'
   | 'flower-2'
   | 'flower'
   | 'sprout'

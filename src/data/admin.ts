@@ -212,6 +212,7 @@ export const categoriesUpdatedAt = '2026-10-12'
 /** "Kateqoriya işarəsi seçin" labels for the Lucide category icons. Figma shows "Ağac" (trees); the rest are added. */
 export const categoryIconLabels: Record<IconName, string> = {
   trees: 'Ağac',
+  shrub: 'Kol',
   'flower-2': 'Dekorativ bitki',
   flower: 'Gül',
   sprout: 'Ting',

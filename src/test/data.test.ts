@@ -21,6 +21,7 @@ describe('Variant 2 category data', () => {
       ['landsaft-xidmetleri', 'Bağ xidmətləri', 95],
     ])
     expect(new Set(categories.map((c) => c.icon)).size).toBe(categories.length)
+    expect(categoryById('kollar')?.icon).toBe('shrub')
   })
 
   it('derives the search tab counts from the categories', () => {

@@ -9,7 +9,7 @@ import type { Category } from '@/types'
  */
 export const categories: Category[] = [
   { id: 'agaclar', slug: 'agaclar', name: 'Ağaclar', icon: 'trees', listingCount: 1240, kind: 'product', description: 'Dekorativ ağaclar, meyvə ağacları, iynəyarpaqlılar' },
-  { id: 'kollar', slug: 'kollar', name: 'Kollar', icon: 'flower-2', listingCount: 860, kind: 'product' },
+  { id: 'kollar', slug: 'kollar', name: 'Kollar', icon: 'shrub', listingCount: 860, kind: 'product' },
   { id: 'guller', slug: 'guller', name: 'Güllər və çiçəklər', icon: 'flower', listingCount: 530, kind: 'product' },
   { id: 'otaq-bitkileri', slug: 'otaq-bitkileri', name: 'Otaq bitkiləri', icon: 'amphora', listingCount: 410, kind: 'product' },
   { id: 'tingler-fidanlar', slug: 'tingler-fidanlar', name: 'Fidan və toxum', icon: 'sprout', listingCount: 290, kind: 'product' },

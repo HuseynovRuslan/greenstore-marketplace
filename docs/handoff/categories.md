@@ -1,7 +1,8 @@
 # Categories and home search filters — backend handoff
 
 For: Ruslan (backend). Frontend commit: `9bcb5d9 feat(data): Variant 2 categories…` (branch `nextjs-migration`).
-Status: mock data only (`src/data`). No change to `src/types` or `src/services/repository.ts`.
+Status: mock data only (`src/data`). One small type change, see [Type changes](#type-changes);
+`src/services/repository.ts` is unchanged.
 
 ## Category list (Variant 2 home page)
 
@@ -11,7 +12,7 @@ URLs still work; only the display names and counts changed. Counts are mock plat
 | # | id | Name | Kind | Mock count | Icon (`IconName`) |
 |---|---|---|---|---|---|
 | 1 | `agaclar` | Ağaclar | product | 1 240 | `trees` |
-| 2 | `kollar` | Kollar | product | 860 | `flower-2` |
+| 2 | `kollar` | Kollar | product | 860 | `shrub` (new) |
 | 3 | `guller` | Güllər və çiçəklər | product | 530 | `flower` |
 | 4 | `otaq-bitkileri` | Otaq bitkiləri | product | 410 | `amphora` |
 | 5 | `tingler-fidanlar` | Fidan və toxum | product | 290 | `sprout` |
@@ -32,6 +33,14 @@ URLs still work; only the display names and counts changed. Counts are mock plat
   taxonomy. The other lists are unchanged.
 - **Real data:** if real listings already use the two removed ids, they need the same mapping. Also decide whether
   to redirect the old URLs.
+
+## Type changes
+
+| Type | Change | Why |
+|---|---|---|
+| `IconName` (`src/types/index.ts`) | added `'shrub'` (Lucide `Shrub`) | icon for «Kollar». The other nine categories keep their icons. `'flower-2'` stays valid but no category uses it now. |
+
+If the API sends the category icon as a string, it must accept `shrub` too. The admin icon picker labels it «Kol».
 
 ## Counts the home page shows
 

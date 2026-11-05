@@ -368,7 +368,7 @@ export const vipListingIds = ['zeytun-agaci', 'mavi-kuknar', 'yapon-agcaqayini',
 
 /**
  * Home "Son elanlar" order: the Figma cards newest first, without Limon ağacı (now in "Bağ vitrini"),
- * plus Tuya Smaraqd and Dəfnə ağacı so the four-column grid ends on a full row (8 cards).
+ * plus Tuya — Smaragd and Dəfnə ağacı so the four-column grid ends on a full row (8 cards).
  */
 export const latestListingIds = [
   'leyland-servi',
