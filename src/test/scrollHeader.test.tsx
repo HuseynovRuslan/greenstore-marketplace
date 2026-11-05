@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { useRef } from 'react'
-import { act, render, screen } from '@testing-library/react'
+import { act, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { Listbox } from '@/components/ui/Listbox'
 import { SiteHeader } from '@/components/layout/SiteHeader'
@@ -135,37 +135,80 @@ describe('home header search pill', () => {
   }
   const pillButtons = () => screen.getAllByRole('button', { name: 'Bitki, ağac və ya xidmət axtar' })
   const nav = () => screen.getByRole('navigation', { name: 'Əsas bölmələr' })
+  /** The ≥ lg pill's wrapper, which shares the nav's grid cell and fades with it. */
+  const pillCell = () => pillButtons()[0].parentElement!
+  const heroSearch = (gone: boolean) =>
+    act(() =>
+      observed?.(
+        [{ isIntersecting: !gone, boundingClientRect: { top: gone ? -200 : 300 } } as IntersectionObserverEntry],
+        {} as IntersectionObserver,
+      ),
+    )
 
   it('replaces the nav with the pill once the hero search has scrolled away, and leads back to it', async () => {
     const user = userEvent.setup()
     renderHome()
     expect(pillButtons()).toHaveLength(3) // ≥ lg pill, 768–1023 px icon, phone icon
     for (const b of pillButtons()) expect(b.closest('[inert]')).not.toBeNull()
-    expect(nav()).not.toHaveAttribute('inert')
+    expect(pillCell()).toHaveClass('opacity-0')
+    expect(nav()).not.toHaveClass('opacity-0')
 
-    act(() => observed?.([{ isIntersecting: false, boundingClientRect: { top: -200 } } as IntersectionObserverEntry], {} as IntersectionObserver))
+    heroSearch(true)
     for (const b of pillButtons()) expect(b.closest('[inert]')).toBeNull()
-    expect(nav()).toHaveAttribute('inert')
+    expect(pillCell()).not.toHaveClass('opacity-0')
+    expect(nav()).toHaveClass('opacity-0')
 
     await user.click(pillButtons()[0])
     expect(scrollIntoView).toHaveBeenCalledWith({ block: 'center' })
     expect(screen.getByRole('textbox', { name: 'Axtarış sözü' })).toHaveFocus()
 
-    act(() => observed?.([{ isIntersecting: true, boundingClientRect: { top: 300 } } as IntersectionObserverEntry], {} as IntersectionObserver))
-    expect(nav()).not.toHaveAttribute('inert')
+    heroSearch(false)
+    expect(nav()).not.toHaveClass('opacity-0')
+    for (const b of pillButtons()) expect(b.closest('[inert]')).not.toBeNull()
   })
 
-  it('keeps a focused nav link live when the hero search scrolls away', () => {
+  it('keeps a focused nav link shown when the hero search scrolls away', () => {
     renderHome()
     const link = screen.getByRole('link', { name: 'Məhsullar' })
     act(() => link.focus())
-    act(() => observed?.([{ isIntersecting: false, boundingClientRect: { top: -200 } } as IntersectionObserverEntry], {} as IntersectionObserver))
-    expect(nav()).not.toHaveAttribute('inert')
+    heroSearch(true)
+    expect(nav()).not.toHaveClass('opacity-0')
     expect(link).toHaveFocus()
     // Once focus leaves the nav, the pill takes its place.
     act(() => link.blur())
-    expect(nav()).toHaveAttribute('inert')
-    for (const b of pillButtons()) expect(b.closest('[inert]')).toBeNull()
+    expect(nav()).toHaveClass('opacity-0')
+    expect(pillCell()).not.toHaveClass('opacity-0')
+  })
+
+  it('keeps the four nav links in the Tab order while the pill shows; focusing one brings the nav back', async () => {
+    const user = userEvent.setup()
+    renderHome()
+    heroSearch(true)
+    const links = within(nav()).getAllByRole('link')
+    expect(links.map((l) => l.textContent)).toEqual(['Məhsullar', 'Xidmətlər', 'Satıcılar', 'Bağ vitrini'])
+    // user-event ignores `inert`, so the attribute itself is what keeps the links reachable in a browser.
+    expect(nav().closest('[inert]')).toBeNull()
+    expect(nav()).toHaveClass('opacity-0')
+
+    act(() => screen.getAllByRole('link', { name: 'GreenStore — ana səhifə' })[0].focus())
+    for (const link of links) {
+      await user.tab()
+      expect(link).toHaveFocus()
+      expect(nav()).not.toHaveClass('opacity-0')
+      expect(nav()).not.toHaveClass('pointer-events-none')
+      expect(pillCell()).toHaveClass('opacity-0')
+      // The pill stays reachable while it is faded out
+      expect(pillCell().closest('[inert]')).toBeNull()
+    }
+
+    // Tab goes on to the pill, which fades back in; Shift+Tab returns to the nav.
+    await user.tab()
+    expect(pillButtons()[0]).toHaveFocus()
+    expect(pillCell()).not.toHaveClass('opacity-0')
+    expect(nav()).toHaveClass('opacity-0')
+    await user.tab({ shift: true })
+    expect(links[3]).toHaveFocus()
+    expect(nav()).not.toHaveClass('opacity-0')
   })
 
   it('sets the scrolled state on the home header', async () => {

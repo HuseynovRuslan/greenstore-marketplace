@@ -42,8 +42,14 @@ describe('HomePage', () => {
 
   it('names each section link after where it leads', async () => {
     await renderHome()
-    // «Bağ vitrini»: one link, «Hamısına bax» (≥ 768 px) / «Hamısı» (phones), named with its section
-    expect(screen.getByRole('link', { name: 'Hamısına bax — Bağ vitrini' })).toHaveAttribute('href', '/elanlar?vip=1')
+    // «Bağ vitrini»: one link, «Hamısına bax» (≥ 768 px) / «Hamısı» (phones). No aria-label: the name is the visible
+    // text of the width plus a hidden « — Bağ vitrini» (jsdom has no CSS, so it sees both texts).
+    const vitrinAll = screen.getByRole('link', { name: 'Hamısı Hamısına bax — Bağ vitrini' })
+    expect(vitrinAll).toHaveAttribute('href', '/elanlar?vip=1')
+    expect(vitrinAll).not.toHaveAttribute('aria-label')
+    expect(within(vitrinAll).getByText('Hamısı')).toHaveClass('md:hidden')
+    expect(within(vitrinAll).getByText('Hamısına bax')).toHaveClass('max-md:hidden')
+    expect(within(vitrinAll).getByText('— Bağ vitrini')).toHaveClass('sr-only')
     expect(screen.queryByRole('link', { name: 'Bütün vitrin elanları' })).not.toBeInTheDocument()
     for (const [name, href] of [
       ['Bütün elanlara bax', '/elanlar'],

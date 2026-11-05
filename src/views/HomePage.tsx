@@ -81,14 +81,15 @@ export default function HomePage({ content }: { content: HomeContent }) {
             </h2>
             <p className="text-sm leading-[normal] text-muted max-md:hidden">Satıcıların önə çıxardığı elanlar</p>
           </div>
-          {/* «Hamısı» on phones, «Hamısına bax» from md (Variant 2 mockups); the name says which list it opens. */}
+          {/* «Hamısı» on phones, «Hamısına bax» from md (Variant 2 mockups). The name starts with the visible text
+              of the width («Hamısı — Bağ vitrini»), then says which list it opens (label in name, WCAG 2.5.3). */}
           <Link
             href="/elanlar?vip=1"
-            aria-label="Hamısına bax — Bağ vitrini"
             className="flex h-11 shrink-0 items-center gap-1.5 text-sm leading-[normal] font-semibold text-forest hover:text-olive-text"
           >
             <span className="md:hidden">Hamısı</span>
             <span className="max-md:hidden">Hamısına bax</span>
+            <span className="sr-only"> — Bağ vitrini</span>
             <ArrowRight aria-hidden size={16} strokeWidth={2} className="max-md:hidden" />
           </Link>
         </div>

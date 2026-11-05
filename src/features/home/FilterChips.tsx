@@ -225,11 +225,12 @@ export function PriceFields({ filters, onChange, close, error, errorId, touch }:
   return (
     <>
       <div className="flex items-center gap-2">
-        {field('min', 'min.', 'Minimum qiymət')}
+        {/* Each name starts with the field's visible prefix (label in name, WCAG 2.5.3). */}
+        {field('min', 'min.', 'min. qiymət, ₼')}
         <span aria-hidden className="text-muted">
           –
         </span>
-        {field('max', 'maks.', 'Maksimum qiymət')}
+        {field('max', 'maks.', 'maks. qiymət, ₼')}
       </div>
       {error && (
         <p id={errorId} role="alert" className="text-xs leading-[1.5] text-danger">

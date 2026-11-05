@@ -116,6 +116,7 @@ const iconButton =
  *    The hero search replaces the header search there. On scroll (useScrollHeader) the header turns translucent with a
  *    shadow, hides while you scroll down past 320 px and comes back on any upward scroll; once the hero search has
  *    scrolled away, a compact search pill takes the nav's place (an icon button below 1024 px) and leads back to it.
+ *    Keyboard users can still Tab to the nav links then: focusing one brings the nav back, Tab goes on to the pill.
  */
 export function SiteHeader({ variant = 'default' }: { variant?: 'default' | 'home' }) {
   const home = variant === 'home'
@@ -142,9 +143,11 @@ export function SiteHeader({ variant = 'default' }: { variant?: 'default' | 'hom
   const headerRef = useRef<HTMLElement>(null)
   const { scrolled, hidden } = useScrollHeader(headerRef, { enabled: home, paused: menuOpen })
   const heroSearchGone = useScrolledPast(HERO_SEARCH_ID, headerRef, home)
-  // Whichever of nav / pill holds keyboard focus stays live: making it inert would drop focus to <body>.
+  // Whichever of nav / pill holds keyboard focus is the one shown. The nav links are always in the Tab order (a link
+  // that gets focus cross-fades the nav back); the pill is reachable once the hero search is gone, or while focused.
   const [focusIn, setFocusIn] = useState<'nav' | 'pill' | null>(null)
   const pill = focusIn ? focusIn === 'pill' : heroSearchGone
+  const pillReachable = heroSearchGone || focusIn === 'pill'
   const trackFocus = (zone: 'nav' | 'pill') => ({
     onFocus: () => setFocusIn(zone),
     onBlur: (e: ReactFocusEvent<HTMLElement>) => {
@@ -164,7 +167,7 @@ export function SiteHeader({ variant = 'default' }: { variant?: 'default' | 'hom
     <button
       type="button"
       aria-label={searchPlaceholder}
-      inert={!pill}
+      inert={!pillReachable}
       onClick={toHeroSearch}
       {...trackFocus('pill')}
       className={cn(iconButton, pillState, className)}
@@ -247,9 +250,8 @@ export function SiteHeader({ variant = 'default' }: { variant?: 'default' | 'hom
               <div className="hidden min-w-0 flex-1 lg:grid">
                 <nav
                   aria-label="Əsas bölmələr"
-                  inert={pill}
                   {...trackFocus('nav')}
-                  className={cn('flex items-center gap-1 [grid-area:1/1] transition-opacity duration-(--dur-base)', pill && 'opacity-0')}
+                  className={cn('flex items-center gap-1 [grid-area:1/1] transition-opacity duration-(--dur-base)', pill && 'pointer-events-none opacity-0')}
                 >
                   {homeNav.map((l) => (
                     <Link
@@ -268,7 +270,7 @@ export function SiteHeader({ variant = 'default' }: { variant?: 'default' | 'hom
                     Bağ vitrini
                   </Link>
                 </nav>
-                <div inert={!pill} {...trackFocus('pill')} className={cn('flex items-center justify-center [grid-area:1/1]', pillState)}>
+                <div inert={!pillReachable} {...trackFocus('pill')} className={cn('flex items-center justify-center [grid-area:1/1]', pillState)}>
                   <button
                     type="button"
                     onClick={toHeroSearch}
