@@ -13,5 +13,6 @@ export default defineConfig([
       '@next/next/no-img-element': 'off',
     },
   },
-  globalIgnores(['.next/**', 'out/**', 'dist/**', 'next-env.d.ts', 'coverage/**']),
+  // .claude/** holds Claude Code skills (third-party CommonJS helper scripts), not application code.
+  globalIgnores(['.next/**', 'out/**', 'dist/**', 'next-env.d.ts', 'coverage/**', '.claude/**']),
 ])

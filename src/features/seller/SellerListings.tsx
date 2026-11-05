@@ -12,7 +12,7 @@ import { cn } from '@/lib/format'
 import { listingSortOptions, type ListingSort } from '@/services/marketplace'
 import type { Seller } from '@/types'
 import { wideCardImages, withCardImage } from '@/features/listing/cardImages'
-import { paginate, sellerListings } from './sellerListings'
+import { paginate, sellerListings } from './sellerListingQuery'
 import { sellerStatsFor, type SellerTabStat } from './sellerStats'
 
 const icon = { size: 18, strokeWidth: 1.8, absoluteStrokeWidth: true, 'aria-hidden': true } as const
