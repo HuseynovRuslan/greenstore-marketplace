@@ -99,10 +99,10 @@ describe('HeroSearchCard', () => {
       'Xidmətlər 95 elan',
     ])
     expect(within(group).getByRole('radio', { name: /Hamısı/ })).toBeChecked()
-    expect(screen.getByRole('searchbox', { name: 'Axtarış sözü' })).toHaveAttribute('placeholder', 'Nə axtarırsınız? Məsələn, zeytun ağacı')
+    expect(screen.getByRole('searchbox', { name: 'Axtarış sözü' })).toHaveAttribute('placeholder', 'Məsələn, zeytun ağacı')
 
     await user.click(within(group).getByRole('radio', { name: /Xidmətlər/ }))
-    expect(screen.getByRole('searchbox', { name: 'Axtarış sözü' })).toHaveAttribute('placeholder', 'Hansı xidmət lazımdır? Məsələn, çim salınması')
+    expect(screen.getByRole('searchbox', { name: 'Axtarış sözü' })).toHaveAttribute('placeholder', 'Məsələn, çim salınması')
     expect(within(form()).queryByRole('button', { name: /Hündürlük/ })).not.toBeInTheDocument()
     expect(within(form()).queryByRole('button', { name: /Kök sistemi/ })).not.toBeInTheDocument()
     expect(chip('Qiymət')).toBeInTheDocument()

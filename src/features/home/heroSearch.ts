@@ -17,10 +17,11 @@ export const SHOW_PENDING_FILTERS = true
 
 export type HeroTab = 'all' | 'products' | 'services'
 
+/** The placeholder is an example only; the field keeps its visually hidden label «Axtarış sözü». */
 export const heroTabs: Array<{ value: HeroTab; label: string; count: number; placeholder: string }> = [
-  { value: 'all', label: 'Hamısı', count: listingTotals.all, placeholder: 'Nə axtarırsınız? Məsələn, zeytun ağacı' },
-  { value: 'products', label: 'Məhsullar', count: listingTotals.products, placeholder: 'Nə axtarırsınız? Məsələn, zeytun ağacı' },
-  { value: 'services', label: 'Xidmətlər', count: listingTotals.services, placeholder: 'Hansı xidmət lazımdır? Məsələn, çim salınması' },
+  { value: 'all', label: 'Hamısı', count: listingTotals.all, placeholder: 'Məsələn, zeytun ağacı' },
+  { value: 'products', label: 'Məhsullar', count: listingTotals.products, placeholder: 'Məsələn, zeytun ağacı' },
+  { value: 'services', label: 'Xidmətlər', count: listingTotals.services, placeholder: 'Məsələn, çim salınması' },
 ]
 
 /* ---------- Filters ---------- */
