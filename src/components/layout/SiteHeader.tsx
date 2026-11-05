@@ -1,6 +1,6 @@
 'use client'
 
-import { Suspense, useRef, useState, type FormEvent } from 'react'
+import { Suspense, useRef, useState, type FocusEvent as ReactFocusEvent, type FormEvent } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { Heart, LogOut, Menu, Plus, Search, UserRound, X } from 'lucide-react'
@@ -141,7 +141,16 @@ export function SiteHeader({ variant = 'default' }: { variant?: 'default' | 'hom
 
   const headerRef = useRef<HTMLElement>(null)
   const { scrolled, hidden } = useScrollHeader(headerRef, { enabled: home, paused: menuOpen })
-  const pill = useScrolledPast(HERO_SEARCH_ID, headerRef, home)
+  const heroSearchGone = useScrolledPast(HERO_SEARCH_ID, headerRef, home)
+  // Whichever of nav / pill holds keyboard focus stays live: making it inert would drop focus to <body>.
+  const [focusIn, setFocusIn] = useState<'nav' | 'pill' | null>(null)
+  const pill = focusIn ? focusIn === 'pill' : heroSearchGone
+  const trackFocus = (zone: 'nav' | 'pill') => ({
+    onFocus: () => setFocusIn(zone),
+    onBlur: (e: ReactFocusEvent<HTMLElement>) => {
+      if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setFocusIn(null)
+    },
+  })
   // Back to the hero search; the scroll follows the page's scroll-behavior (instant under reduced motion).
   const toHeroSearch = () => {
     document.getElementById(HERO_SEARCH_ID)?.scrollIntoView({ block: 'center' })
@@ -152,7 +161,14 @@ export function SiteHeader({ variant = 'default' }: { variant?: 'default' | 'hom
     pill ? 'opacity-100' : 'pointer-events-none translate-y-1 opacity-0 motion-reduce:translate-y-0',
   )
   const pillIcon = (className?: string) => (
-    <button type="button" aria-label={searchPlaceholder} inert={!pill} onClick={toHeroSearch} className={cn(iconButton, pillState, className)}>
+    <button
+      type="button"
+      aria-label={searchPlaceholder}
+      inert={!pill}
+      onClick={toHeroSearch}
+      {...trackFocus('pill')}
+      className={cn(iconButton, pillState, className)}
+    >
       <Search aria-hidden size={21} strokeWidth={1.8} absoluteStrokeWidth />
     </button>
   )
@@ -232,6 +248,7 @@ export function SiteHeader({ variant = 'default' }: { variant?: 'default' | 'hom
                 <nav
                   aria-label="Əsas bölmələr"
                   inert={pill}
+                  {...trackFocus('nav')}
                   className={cn('flex items-center gap-1 [grid-area:1/1] transition-opacity duration-(--dur-base)', pill && 'opacity-0')}
                 >
                   {homeNav.map((l) => (
@@ -251,7 +268,7 @@ export function SiteHeader({ variant = 'default' }: { variant?: 'default' | 'hom
                     Bağ vitrini
                   </Link>
                 </nav>
-                <div inert={!pill} className={cn('flex items-center justify-center [grid-area:1/1]', pillState)}>
+                <div inert={!pill} {...trackFocus('pill')} className={cn('flex items-center justify-center [grid-area:1/1]', pillState)}>
                   <button
                     type="button"
                     onClick={toHeroSearch}

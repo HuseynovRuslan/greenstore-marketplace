@@ -155,6 +155,19 @@ describe('home header search pill', () => {
     expect(nav()).not.toHaveAttribute('inert')
   })
 
+  it('keeps a focused nav link live when the hero search scrolls away', () => {
+    renderHome()
+    const link = screen.getByRole('link', { name: 'Məhsullar' })
+    act(() => link.focus())
+    act(() => observed?.([{ isIntersecting: false, boundingClientRect: { top: -200 } } as IntersectionObserverEntry], {} as IntersectionObserver))
+    expect(nav()).not.toHaveAttribute('inert')
+    expect(link).toHaveFocus()
+    // Once focus leaves the nav, the pill takes its place.
+    act(() => link.blur())
+    expect(nav()).toHaveAttribute('inert')
+    for (const b of pillButtons()) expect(b.closest('[inert]')).toBeNull()
+  })
+
   it('sets the scrolled state on the home header', async () => {
     renderHome()
     await scrollTo(40)
