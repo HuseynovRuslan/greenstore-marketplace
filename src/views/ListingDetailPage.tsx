@@ -78,7 +78,7 @@ export function ListingDetail({ listing, seller, category, others, similar }: Li
         )}
 
         <div className="flex flex-wrap items-start gap-2">
-          {listing.vip && <Badge tone="vip">VIP</Badge>}
+          {listing.vip && <Badge tone="vip">Vitrin</Badge>}
           <Badge tone={status.badge.tone}>{status.badge.label}</Badge>
         </div>
 

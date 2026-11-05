@@ -44,7 +44,7 @@ export function ListingCard({ listing, compact, className }: ListingCardProps) {
       </picture>
       {listing.vip && (
         <Badge tone="vip" className={cn('absolute top-5', compact ? 'left-4' : 'left-4 md:left-5')}>
-          VIP
+          Vitrin
         </Badge>
       )}
       <FavoriteButton

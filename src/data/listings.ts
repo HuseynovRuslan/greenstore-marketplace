@@ -363,7 +363,7 @@ export const listings: Listing[] = [
 /** Listings visible to buyers (search, home, seller page). */
 export const publicListings = listings.filter((l) => l.status === 'active')
 
-/** Home "VIP elanlar" order (Figma columns 1 → 3). */
+/** Home "Bağ vitrini" order (Figma "VIP elanlar", columns 1 → 3). */
 export const vipListingIds = ['zeytun-agaci', 'mavi-kuknar', 'yapon-agcaqayini']
 
 /** Home "Son elanlar" order (Figma rows/columns, 7 cards). */

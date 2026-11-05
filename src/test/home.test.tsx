@@ -29,13 +29,32 @@ describe('HomePage', () => {
 
   it('renders the Figma sections and content', async () => {
     await renderHome()
-    expect(screen.getByRole('heading', { level: 1, name: 'Bağınız üçün doğru seçim.' })).toBeInTheDocument()
-    for (const title of ['Kateqoriyalar', 'VIP elanlar', 'Son elanlar', 'Bağınıza peşəkar toxunuş', 'Etibar etdiyiniz satıcılar']) {
+    expect(screen.getByRole('heading', { level: 1, name: 'Azərbaycanda bitki və bağ elanları' })).toBeInTheDocument()
+    for (const title of ['Kateqoriyalar', 'Bağ vitrini', 'Son elanlar', 'Bağınıza peşəkar toxunuş', 'Etibar etdiyiniz satıcılar']) {
       expect(screen.getByRole('heading', { level: 2, name: title })).toBeInTheDocument()
     }
     expect(screen.getByText('Zeytun ağacı — Olea europaea')).toBeInTheDocument()
     expect(screen.getByText('428 elan')).toBeInTheDocument()
     expect(screen.getAllByText('Təsdiqlənmiş satıcı')).toHaveLength(3)
+    expect(screen.getAllByText('Vitrin').length).toBeGreaterThan(0)
+    expect(screen.queryByText('VIP')).not.toBeInTheDocument()
+  })
+
+  it('names each section link after where it leads', async () => {
+    await renderHome()
+    for (const [name, href] of [
+      ['Bütün vitrin elanları', '/elanlar?vip=1'],
+      ['Bütün elanlara bax', '/elanlar'],
+      ['Bütün xidmətlər', '/xidmetler'],
+      ['Biznes satıcıların elanları', '/elanlar?saticiNovu=biznes'],
+    ]) {
+      // Header link (≥ 768 px) and the full-width mobile button
+      const links = screen.getAllByRole('link', { name })
+      expect(links).toHaveLength(2)
+      for (const link of links) expect(link).toHaveAttribute('href', href)
+    }
+    // The arrow is a decorative icon, not text read out by screen readers
+    expect(screen.queryByText(/→/)).not.toBeInTheDocument()
   })
 
   it('links category cards to their category pages', async () => {

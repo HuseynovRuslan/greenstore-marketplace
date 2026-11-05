@@ -58,7 +58,7 @@ export interface Listing {
   cityId: string
   /** ISO date the listing was published */
   publishedAt: string
-  /** Promoted ("VIP") listing */
+  /** Promoted listing — shown in "Bağ vitrini" with the "Vitrin" badge (`?vip=1` in URLs) */
   vip: boolean
   categoryId: string
   /** e.g. "Dekorativ ağaclar" (detail page breadcrumb/specs) */

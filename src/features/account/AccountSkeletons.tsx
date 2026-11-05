@@ -114,7 +114,7 @@ export function DashboardSkeleton() {
             <InfoNotice title="Biznes üçün daha çox imkan">
               Genişləndirilmiş satıcı profili və ətraflı statistika ilə abunə paketləri tezliklə təqdim ediləcək.
             </InfoNotice>
-            <p className="w-full text-xs leading-[1.5] text-muted">VIP təşviqi yalnız seçilən elanlarda göstərilir.</p>
+            <p className="w-full text-xs leading-[1.5] text-muted">Vitrin təşviqi yalnız seçilən elanlarda göstərilir.</p>
           </div>
         </div>
       </AccountPage>

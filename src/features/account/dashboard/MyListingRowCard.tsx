@@ -63,7 +63,7 @@ export function MyListingRowCard({ row, onDeactivate, onRenew, onActivate }: Pro
         <div className="flex min-w-0 flex-1 flex-col items-start gap-2">
           <div className="flex flex-wrap items-start gap-2">
             <Badge tone={badge.tone}>{badge.label}</Badge>
-            {listing.vip && <Badge tone="vip">VIP</Badge>}
+            {listing.vip && <Badge tone="vip">Vitrin</Badge>}
           </div>
           <h3 className="w-full text-[15px] leading-[1.5] font-semibold break-words text-ink">
             <Link href={detailHref} className="hover:text-olive">

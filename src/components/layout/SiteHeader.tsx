@@ -179,11 +179,10 @@ export function SiteHeader({ withSections = false }: { withSections?: boolean })
             ))}
             <li>
               <Link href="/elanlar?vip=1" className="text-olive hover:text-forest">
-                VIP elanlar
+                Bağ vitrini
               </Link>
             </li>
           </ul>
-          <p className="ml-9 hidden whitespace-nowrap xl:block">Azərbaycanda bağınız üçün hər şey</p>
         </nav>
       )}
 
@@ -216,7 +215,7 @@ export function SiteHeader({ withSections = false }: { withSections?: boolean })
               </button>
             </div>
             <ul className="flex flex-col gap-2 text-[15px] text-forest">
-              {[...sectionLinks, { label: 'VIP elanlar', to: '/elanlar?vip=1' }, { label: 'Seçilmişlər', to: '/secilmisler' }].map((l) => (
+              {[...sectionLinks, { label: 'Bağ vitrini', to: '/elanlar?vip=1' }, { label: 'Seçilmişlər', to: '/secilmisler' }].map((l) => (
                 <li key={l.label}>
                   <Link href={l.to} onClick={closeMenu} className="block rounded-lg px-3 py-3 hover:bg-mint">
                     {l.label}

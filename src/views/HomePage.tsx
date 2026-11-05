@@ -18,8 +18,10 @@ function HeroSearch() {
     <section className="w-full bg-mint">
       <div className="page-x mx-auto flex w-full max-w-[1440px] items-start gap-7 py-8">
         <div className="flex min-w-0 flex-1 flex-col items-start gap-5">
-          <h1 className="w-full text-[30px] leading-[1.15] font-normal text-forest md:text-[40px]">Bağınız üçün doğru seçim.</h1>
-          <p className="w-full text-[15px] leading-[1.5] text-muted">Bitkilər, bağ məhsulları və peşəkar xidmətlər — satıcıdan birbaşa.</p>
+          <h1 className="w-full text-[30px] leading-[1.15] font-normal text-forest md:text-[40px]">Azərbaycanda bitki və bağ elanları</h1>
+          <p className="w-full text-[15px] leading-[1.5] text-muted">
+            Ağac, gül, tinglər, bağ məhsulları və bağçılıq xidmətləri. Satıcı ilə birbaşa əlaqə saxlayın.
+          </p>
 
           <HeroSearchForm />
 
@@ -98,18 +100,18 @@ export default function HomePage({ content }: { content: HomeContent }) {
         </div>
       </Section>
 
-      <Section id="vip-elanlar">
-        <SectionHeader title="VIP elanlar" subtitle="Bağınız üçün önə çıxan təkliflər" action={{ label: 'Bütün elanlara bax →', to: '/elanlar?vip=1' }} />
+      <Section id="bag-vitrini">
+        <SectionHeader title="Bağ vitrini" subtitle="Bağınız üçün önə çıxan təkliflər" action={{ label: 'Bütün vitrin elanları', to: '/elanlar?vip=1' }} />
         <div className="grid w-full grid-cols-2 gap-3 md:grid-cols-3 md:gap-5">
           {vip.map((l) => (
             <ListingCard key={l.id} listing={l} />
           ))}
         </div>
-        <MobileMore to="/elanlar?vip=1" label="Bütün elanlara bax" />
+        <MobileMore to="/elanlar?vip=1" label="Bütün vitrin elanları" />
       </Section>
 
       <Section id="son-elanlar">
-        <SectionHeader title="Son elanlar" subtitle="Azərbaycanda yeni yerləşdirilən elanlar" action={{ label: 'Bütün elanlara bax →', to: '/elanlar' }} />
+        <SectionHeader title="Son elanlar" subtitle="Azərbaycanda yeni yerləşdirilən elanlar" action={{ label: 'Bütün elanlara bax', to: '/elanlar' }} />
         <div className="grid w-full grid-cols-2 gap-3 md:grid-cols-3 md:gap-5 xl:grid-cols-4">
           {latest.map((l) => (
             <ListingCard key={l.id} listing={l} />
@@ -119,7 +121,7 @@ export default function HomePage({ content }: { content: HomeContent }) {
       </Section>
 
       <Section id="xidmetler">
-        <SectionHeader title="Bağınıza peşəkar toxunuş" subtitle="Landşaft və bağçılıq xidmətləri" action={{ label: 'Bütün xidmətlər →', to: '/xidmetler' }} />
+        <SectionHeader title="Bağınıza peşəkar toxunuş" subtitle="Landşaft və bağçılıq xidmətləri" action={{ label: 'Bütün xidmətlər', to: '/xidmetler' }} />
         <div className="grid w-full grid-cols-1 gap-5 md:grid-cols-3">
           {content.services.map(({ service, image }) => (
             <ServiceCard key={service.id} service={service} image={image} />
@@ -132,14 +134,14 @@ export default function HomePage({ content }: { content: HomeContent }) {
         <SectionHeader
           title="Etibar etdiyiniz satıcılar"
           subtitle="Tingçilik təsərrüfatları və peşəkar bağ mərkəzləri"
-          action={{ label: 'Bütün satıcılar →', to: '/elanlar?saticiNovu=biznes' }}
+          action={{ label: 'Biznes satıcıların elanları', to: '/elanlar?saticiNovu=biznes' }}
         />
         <div className="grid w-full grid-cols-1 gap-5 md:grid-cols-3">
           {sellers.map((s) => (
             <SellerCard key={s.id} seller={s} />
           ))}
         </div>
-        <MobileMore to="/elanlar?saticiNovu=biznes" label="Bütün satıcılar" />
+        <MobileMore to="/elanlar?saticiNovu=biznes" label="Biznes satıcıların elanları" />
       </Section>
 
       <section className="w-full bg-sand">

@@ -1,11 +1,12 @@
 import type { ReactNode } from 'react'
 import Link from 'next/link'
+import { ArrowRight } from 'lucide-react'
 import { cn } from '@/lib/format'
 
 interface SectionHeaderProps {
   title: ReactNode
   subtitle?: ReactNode
-  /** "Bütün elanlara bax →" style link, hidden on mobile where a full-width button is used instead */
+  /** "Bütün elanlara bax" style link (the arrow is a decorative icon), hidden on mobile where a full-width button is used instead */
   action?: { label: string; to: string }
   as?: 'h1' | 'h2'
   className?: string
@@ -23,9 +24,10 @@ export function SectionHeader({ title, subtitle, action, as: Tag = 'h2', classNa
       {action && (
         <Link
           href={action.to}
-          className="hidden shrink-0 text-[13px] leading-[1.5] font-semibold whitespace-nowrap hover:text-olive md:inline"
+          className="hidden shrink-0 items-center gap-1 text-[13px] leading-[1.5] font-semibold whitespace-nowrap hover:text-olive md:inline-flex"
         >
           {action.label}
+          <ArrowRight aria-hidden size={14} strokeWidth={1.8} absoluteStrokeWidth />
         </Link>
       )}
     </div>

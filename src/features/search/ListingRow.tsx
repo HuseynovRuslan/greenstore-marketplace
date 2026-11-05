@@ -25,7 +25,7 @@ export function ListingRow({ listing }: { listing: Listing }) {
         />
         {listing.vip && (
           <Badge tone="vip" className="absolute top-[7px] left-[7px]">
-            VIP
+            Vitrin
           </Badge>
         )}
       </div>
