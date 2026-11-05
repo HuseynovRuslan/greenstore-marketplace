@@ -1,6 +1,6 @@
 'use client'
 
-import { Suspense, useState, type FormEvent } from 'react'
+import { Suspense, useRef, useState, type FormEvent } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { Heart, LogOut, Menu, Plus, Search, UserRound, X } from 'lucide-react'
@@ -10,6 +10,8 @@ import { useSession } from '@/state/store'
 import { preHydrationClass } from '@/state/bootstrap'
 import { useHydrated } from './ClientGate'
 import { cn } from '@/lib/format'
+import { useScrolledPast, useScrollHeader } from '@/hooks/useScrollHeader'
+import { HERO_QUERY_ID, HERO_SEARCH_ID } from '@/features/home/ids'
 
 const sectionLinks = [
   { label: 'Kateqoriyalar', to: '/#kateqoriyalar' },
@@ -111,7 +113,9 @@ const iconButton =
  *  - `default`: logo · search · favourites · account · «Elan yerləşdir»; < 768 px a compact bar (logo · search · menu).
  *  - `home` (docs/design/variant-2): one row, logo · nav (Məhsullar, Xidmətlər, Satıcılar, Bağ vitrini) · favourites ·
  *    account · «Elan yerləşdir». The nav needs 1024 px; 768–1023 px get the menu button, < 768 px logo · ♡ · menu.
- *    The hero search replaces the header search there.
+ *    The hero search replaces the header search there. On scroll (useScrollHeader) the header turns translucent with a
+ *    shadow, hides while you scroll down past 320 px and comes back on any upward scroll; once the hero search has
+ *    scrolled away, a compact search pill takes the nav's place (an icon button below 1024 px) and leads back to it.
  */
 export function SiteHeader({ variant = 'default' }: { variant?: 'default' | 'home' }) {
   const home = variant === 'home'
@@ -134,6 +138,24 @@ export function SiteHeader({ variant = 'default' }: { variant?: 'default' | 'hom
   const showUser = !hydrated || Boolean(user)
   const showGuest = !hydrated || !user
   const preClass = (variant: 'user' | 'guest') => (hydrated ? undefined : preHydrationClass(variant))
+
+  const headerRef = useRef<HTMLElement>(null)
+  const { scrolled, hidden } = useScrollHeader(headerRef, { enabled: home, paused: menuOpen })
+  const pill = useScrolledPast(HERO_SEARCH_ID, headerRef, home)
+  // Back to the hero search; the scroll follows the page's scroll-behavior (instant under reduced motion).
+  const toHeroSearch = () => {
+    document.getElementById(HERO_SEARCH_ID)?.scrollIntoView({ block: 'center' })
+    document.getElementById(HERO_QUERY_ID)?.focus({ preventScroll: true })
+  }
+  const pillState = cn(
+    'transition-[opacity,translate] duration-(--dur-base) ease-out motion-reduce:transition-opacity',
+    pill ? 'opacity-100' : 'pointer-events-none translate-y-1 opacity-0 motion-reduce:translate-y-0',
+  )
+  const pillIcon = (className?: string) => (
+    <button type="button" aria-label={searchPlaceholder} inert={!pill} onClick={toHeroSearch} className={cn(iconButton, pillState, className)}>
+      <Search aria-hidden size={21} strokeWidth={1.8} absoluteStrokeWidth />
+    </button>
+  )
 
   // 768–1279 px: the Figma 768 header has no "Daxil ol" text, so account access is a compact icon.
   // Before hydration both session variants are rendered and CSS shows the one the browser knows (bootstrap.ts).
@@ -193,71 +215,97 @@ export function SiteHeader({ variant = 'default' }: { variant?: 'default' | 'hom
   )
 
   return (
-    <header className="sticky top-0 z-40 w-full bg-surface shadow-[inset_0_-1px_0_var(--color-line)]">
-      {home ? (
-        <>
-          {/* Home: one row (76 px) */}
-          <div className="page-x mx-auto hidden w-full max-w-[1440px] items-center gap-2 py-[15px] md:flex">
-            <Logo className="mr-auto lg:mr-6 xl:mr-10" />
-            <nav aria-label="Əsas bölmələr" className="hidden flex-1 items-center gap-1 lg:flex">
-              {homeNav.map((l) => (
-                <Link
-                  key={l.to}
-                  href={l.to}
-                  className="flex h-11 items-center rounded-option px-3.5 text-[15px] leading-[normal] font-medium whitespace-nowrap text-ink transition-colors duration-(--dur-fast) hover:text-forest"
+    <>
+      <header
+        ref={headerRef}
+        data-scrolled={(home && scrolled) || undefined}
+        data-hidden={(home && hidden) || undefined}
+        className={cn('sticky top-0 z-40 w-full', home ? 'gs-header' : 'bg-surface shadow-[inset_0_-1px_0_var(--color-line)]')}
+      >
+        {home ? (
+          <>
+            {/* Home: one row (76 px) */}
+            <div className="page-x mx-auto hidden w-full max-w-[1440px] items-center gap-2 py-[15px] md:flex">
+              <Logo className="mr-auto lg:mr-6 xl:mr-10" />
+              {/* The nav and the search pill share one grid cell and cross-fade, so the row never changes size. */}
+              <div className="hidden min-w-0 flex-1 lg:grid">
+                <nav
+                  aria-label="Əsas bölmələr"
+                  inert={pill}
+                  className={cn('flex items-center gap-1 [grid-area:1/1] transition-opacity duration-(--dur-base)', pill && 'opacity-0')}
                 >
-                  {l.label}
-                </Link>
-              ))}
-              <Link
-                href="/elanlar?vip=1"
-                className="flex h-11 items-center gap-2 rounded-option px-3.5 text-[15px] leading-[normal] font-medium whitespace-nowrap text-olive-text transition-colors duration-(--dur-fast) hover:text-forest"
-              >
-                <span aria-hidden className="size-[7px] rounded-full bg-olive" />
-                Bağ vitrini
-              </Link>
-            </nav>
-            {favorites}
-            {account}
-            {postAd}
-            {menuButton(cn(iconButton, 'lg:hidden'))}
-          </div>
-
-          {/* Home, < 768 px: logo · favourites · menu (58 px) */}
-          <div className="flex h-[58px] items-center justify-between pr-1 pl-5 md:hidden">
-            <Logo />
-            <div className="flex">
+                  {homeNav.map((l) => (
+                    <Link
+                      key={l.to}
+                      href={l.to}
+                      className="flex h-11 items-center rounded-option px-3.5 text-[15px] leading-[normal] font-medium whitespace-nowrap text-ink transition-colors duration-(--dur-fast) hover:text-forest"
+                    >
+                      {l.label}
+                    </Link>
+                  ))}
+                  <Link
+                    href="/elanlar?vip=1"
+                    className="flex h-11 items-center gap-2 rounded-option px-3.5 text-[15px] leading-[normal] font-medium whitespace-nowrap text-olive-text transition-colors duration-(--dur-fast) hover:text-forest"
+                  >
+                    <span aria-hidden className="size-[7px] rounded-full bg-olive" />
+                    Bağ vitrini
+                  </Link>
+                </nav>
+                <div inert={!pill} className={cn('flex items-center justify-center [grid-area:1/1]', pillState)}>
+                  <button
+                    type="button"
+                    onClick={toHeroSearch}
+                    className="flex h-11 w-full max-w-[400px] items-center gap-2.5 rounded-full border border-line-strong bg-surface px-4 text-[15px] leading-[normal] text-muted transition-colors duration-(--dur-fast) hover:border-forest"
+                  >
+                    <Search aria-hidden size={18} strokeWidth={2} className="shrink-0" />
+                    <span className="truncate">{searchPlaceholder}</span>
+                  </button>
+                </div>
+              </div>
+              {pillIcon('lg:hidden')}
               {favorites}
-              {menuButton(iconButton)}
+              {account}
+              {postAd}
+              {menuButton(cn(iconButton, 'lg:hidden'))}
             </div>
-          </div>
-        </>
-      ) : (
-        <>
-          {/* Desktop / tablet main row */}
-          <div className="page-x mx-auto hidden w-full max-w-[1440px] items-center gap-[18px] py-[18px] md:flex">
-            <Logo />
-            <HeaderSearch variant="bar" />
-            {favorites}
-            {account}
-            {postAd}
-          </div>
 
-          {/* Mobile bar */}
-          <div className="flex items-center gap-3 px-5 py-[18px] md:hidden">
-            <Logo />
-            <div className="flex flex-1 items-center justify-between">
-              <button type="button" aria-label="Axtarış" aria-expanded={mobileSearch} onClick={() => setSearchPath(mobileSearch ? null : pathname)} className="text-forest">
-                <Search aria-hidden size={20} strokeWidth={1.8} absoluteStrokeWidth />
-              </button>
-              {menuButton('text-forest')}
+            {/* Home, < 768 px: logo · (search, once the hero search is gone) · favourites · menu (58 px) */}
+            <div className="flex h-[58px] items-center justify-between pr-1 pl-5 md:hidden">
+              <Logo />
+              <div className="flex">
+                {pillIcon()}
+                {favorites}
+                {menuButton(iconButton)}
+              </div>
             </div>
-          </div>
-          {mobileSearch && <HeaderSearch variant="mobile" onSubmitted={() => setSearchPath(null)} />}
-        </>
-      )}
+          </>
+        ) : (
+          <>
+            {/* Desktop / tablet main row */}
+            <div className="page-x mx-auto hidden w-full max-w-[1440px] items-center gap-[18px] py-[18px] md:flex">
+              <Logo />
+              <HeaderSearch variant="bar" />
+              {favorites}
+              {account}
+              {postAd}
+            </div>
 
-      {/* Mobile drawer menu */}
+            {/* Mobile bar */}
+            <div className="flex items-center gap-3 px-5 py-[18px] md:hidden">
+              <Logo />
+              <div className="flex flex-1 items-center justify-between">
+                <button type="button" aria-label="Axtarış" aria-expanded={mobileSearch} onClick={() => setSearchPath(mobileSearch ? null : pathname)} className="text-forest">
+                  <Search aria-hidden size={20} strokeWidth={1.8} absoluteStrokeWidth />
+                </button>
+                {menuButton('text-forest')}
+              </div>
+            </div>
+            {mobileSearch && <HeaderSearch variant="mobile" onSubmitted={() => setSearchPath(null)} />}
+          </>
+        )}
+      </header>
+
+      {/* Mobile drawer menu — outside <header>, whose backdrop-filter / transform would trap a fixed element */}
       {menuOpen && (
         <div className={cn('fixed inset-0 z-50 bg-ink/40', home ? 'lg:hidden' : 'md:hidden')} onClick={closeMenu}>
           <nav
@@ -303,6 +351,6 @@ export function SiteHeader({ variant = 'default' }: { variant?: 'default' | 'hom
           </nav>
         </div>
       )}
-    </header>
+    </>
   )
 }

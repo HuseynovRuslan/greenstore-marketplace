@@ -168,6 +168,44 @@
 }
 
 /*
+ * Home header on scroll (SiteHeader variant="home", useScrollHeader). Its height never changes; it only turns
+ * translucent with a shadow (data-scrolled) and slides out of view (data-hidden): back in over --dur-slow
+ * decelerating, away over --dur-base accelerating. Reduced motion: no slide, it fades out and in over --dur-fast.
+ */
+@layer components {
+  .gs-header {
+    background-color: var(--color-surface);
+    box-shadow: inset 0 -1px 0 var(--color-line);
+    transition-property: transform, background-color, box-shadow;
+    transition-duration: var(--dur-slow), var(--dur-base), var(--dur-base);
+    transition-timing-function: var(--ease-out);
+  }
+  .gs-header[data-scrolled] {
+    background-color: color-mix(in oklab, var(--color-surface) 95%, transparent);
+    backdrop-filter: blur(12px);
+    box-shadow:
+      inset 0 -1px 0 var(--color-line),
+      var(--shadow-header);
+  }
+  .gs-header[data-hidden] {
+    transform: translateY(-100%);
+    transition-duration: var(--dur-base);
+    transition-timing-function: var(--ease-in);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .gs-header {
+      transition-property: opacity, background-color, box-shadow;
+      transition-duration: var(--dur-fast);
+    }
+    .gs-header[data-hidden] {
+      transform: none;
+      opacity: 0;
+      pointer-events: none;
+    }
+  }
+}
+
+/*
  * Before hydration the header and the private pages' loading frames render both session variants; the
  * pre-hydration script (src/state/bootstrap.ts) marks <html> so only the right one is painted.
  */

@@ -10,11 +10,9 @@ import { cn, formatNumber } from '@/lib/format'
 import { FilterChips } from './FilterChips'
 import { HeroCategories } from './HeroCategories'
 import { HeroFilterSheet, MobileFilterRow } from './HeroFilterSheet'
+import { HERO_QUERY_ID, HERO_SEARCH_ID } from './ids'
 import { emptyHeroFilters, filtersForTab, heroSearchUrl, heroTabs, priceError, type FilterId, type HeroFilters, type HeroTab } from './heroSearch'
 
-/** Ids the header uses to bring the visitor back to the search (compact search pill). */
-export const HERO_SEARCH_ID = 'hero-search'
-export const HERO_QUERY_ID = 'hero-q'
 
 const cityOptions = [
   { value: '', label: 'Bütün şəhərlər', meta: formatNumber(listingTotals.all) },
