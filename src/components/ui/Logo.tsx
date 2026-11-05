@@ -6,7 +6,7 @@ import { cn } from '@/lib/format'
  * The prototype wordmark "YARPAQ" is replaced by the product name "GreenStore". */
 export function Logo({ className, showIcon = true }: { className?: string; showIcon?: boolean }) {
   return (
-    <Link href="/" aria-label="GreenStore — ana səhifə" className={cn('flex shrink-0 items-center gap-3 text-forest md:gap-[18px]', className)}>
+    <Link href="/" aria-label="GreenStore — ana səhifə" className={cn('flex shrink-0 items-center gap-3 text-forest md:gap-[6px]', className)}>
       {showIcon && <Leaf aria-hidden size={26} strokeWidth={1} absoluteStrokeWidth />}
       <span className="text-[22px] leading-[normal] whitespace-nowrap md:text-[25px]">GreenStore</span>
     </Link>
