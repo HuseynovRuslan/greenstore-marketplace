@@ -47,8 +47,9 @@ export function ListingCard({ listing, compact, className }: ListingCardProps) {
         />
       </picture>
       {listing.vip && (
-        <Badge tone="vip" className={cn('absolute top-5', compact ? 'left-4' : 'left-4 md:left-5')}>
-          Vitrin
+        // Below 360 px the badge tightens so it clears the favourite button (the card restyle will revisit this).
+        <Badge tone="vip" className={cn('absolute top-5 max-[359px]:left-3 max-[359px]:px-1.5 max-[359px]:text-[11px]', compact ? 'left-4' : 'left-4 md:left-5')}>
+          Önə çıxan
         </Badge>
       )}
       <FavoriteButton

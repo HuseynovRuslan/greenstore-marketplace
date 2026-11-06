@@ -47,7 +47,7 @@ describe('Variant 2 category data', () => {
     expect(Object.values(cityListingCounts).reduce((a, b) => a + b, 0)).toBe(listingTotals.all)
   })
 
-  it('shows 4 active vitrin listings and 8 other active latest listings on the home page', () => {
+  it('shows 4 active promoted listings and 8 other active latest listings on the home page', () => {
     const vip = listingsByIds(vipListingIds)
     const latest = listingsByIds(latestListingIds)
     expect(vip).toHaveLength(4)

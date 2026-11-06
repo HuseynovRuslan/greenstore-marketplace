@@ -185,7 +185,7 @@ describe('home header search pill', () => {
     renderHome()
     heroSearch(true)
     const links = within(nav()).getAllByRole('link')
-    expect(links.map((l) => l.textContent)).toEqual(['Məhsullar', 'Xidmətlər', 'Satıcılar', 'Bağ vitrini'])
+    expect(links.map((l) => l.textContent)).toEqual(['Məhsullar', 'Xidmətlər', 'Satıcılar', 'Önə çıxanlar'])
     // user-event ignores `inert`, so the attribute itself is what keeps the links reachable in a browser.
     expect(nav().closest('[inert]')).toBeNull()
     expect(nav()).toHaveClass('opacity-0')

@@ -15,7 +15,9 @@ Kept up to date as steps land; remove an item when it is done.
 - **ListingCard vs the Variant 2 mockup** (to be done as its own step):
   - Price: the mockup has 21 px bold forest; today it is 23 px regular ink.
   - Photo: the mockup uses a 4:3 ratio; today the height is fixed (145 / 210 px).
-  - «Vitrin» badge: the mockup has a leaf icon; today it is text only.
+  - «Önə çıxan» badge: add the rocket icon used next to the section heading and in the header (the mockup had a
+    leaf); today it is text only. Below 360 px the badge shrinks (11 px text, less padding) so it clears the
+    favourite button; the restyle should give it proper room.
   - Date: the mockup shows the city only; today it shows «city · date».
   - Favourite button: 34 px today; the mockup keeps a 32 px circle inside a 44 px touch target.
   - Phones: the mockup card is compact (square photo, 17 px price, one-line title, city only).

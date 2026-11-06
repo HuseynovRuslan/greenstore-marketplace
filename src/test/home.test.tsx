@@ -30,27 +30,29 @@ describe('HomePage', () => {
   it('renders the Figma sections and content', async () => {
     await renderHome()
     expect(screen.getByRole('heading', { level: 1, name: 'Azərbaycanda bitki və bağ elanları' })).toBeInTheDocument()
-    for (const title of ['Kateqoriyalar', 'Bağ vitrini', 'Son elanlar', 'Bağınıza peşəkar toxunuş', 'Etibar etdiyiniz satıcılar']) {
+    for (const title of ['Kateqoriyalar', 'Önə çıxan elanlar', 'Son elanlar', 'Bağınıza peşəkar toxunuş', 'Etibar etdiyiniz satıcılar']) {
       expect(screen.getByRole('heading', { level: 2, name: title })).toBeInTheDocument()
     }
     expect(screen.getByText('Zeytun ağacı — Olea europaea')).toBeInTheDocument()
-    expect(screen.getByText('Satıcıların önə çıxardığı elanlar')).toBeInTheDocument()
+    expect(screen.getByText('Satıcıların ödənişlə irəli çəkdiyi elanlar')).toBeInTheDocument()
     expect(screen.getAllByText('Təsdiqlənmiş satıcı')).toHaveLength(3)
-    expect(screen.getAllByText('Vitrin').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('Önə çıxan').length).toBeGreaterThan(0)
+    // The mockup name («Bağ vitrini» / badge «Vitrin») was replaced; it must not come back in text or link names.
+    expect(screen.queryByText(/vitrin/i)).not.toBeInTheDocument()
     expect(screen.queryByText('VIP')).not.toBeInTheDocument()
   })
 
   it('names each section link after where it leads', async () => {
     await renderHome()
-    // «Bağ vitrini»: one link, «Hamısına bax» (≥ 768 px) / «Hamısı» (phones). No aria-label: the name is the visible
-    // text of the width plus a hidden « — Bağ vitrini» (jsdom has no CSS, so it sees both texts).
-    const vitrinAll = screen.getByRole('link', { name: 'Hamısı Hamısına bax — Bağ vitrini' })
-    expect(vitrinAll).toHaveAttribute('href', '/elanlar?vip=1')
-    expect(vitrinAll).not.toHaveAttribute('aria-label')
-    expect(within(vitrinAll).getByText('Hamısı')).toHaveClass('md:hidden')
-    expect(within(vitrinAll).getByText('Hamısına bax')).toHaveClass('max-md:hidden')
-    expect(within(vitrinAll).getByText('— Bağ vitrini')).toHaveClass('sr-only')
-    expect(screen.queryByRole('link', { name: 'Bütün vitrin elanları' })).not.toBeInTheDocument()
+    // «Önə çıxan elanlar»: one link, «Hamısına bax» (≥ 768 px) / «Hamısı» (phones). No aria-label: the name is the visible
+    // text of the width plus a hidden « — Önə çıxan elanlar» (jsdom has no CSS, so it sees both texts).
+    const promotedAll = screen.getByRole('link', { name: 'Hamısı Hamısına bax — Önə çıxan elanlar' })
+    expect(promotedAll).toHaveAttribute('href', '/elanlar?vip=1')
+    expect(promotedAll).not.toHaveAttribute('aria-label')
+    expect(within(promotedAll).getByText('Hamısı')).toHaveClass('md:hidden')
+    expect(within(promotedAll).getByText('Hamısına bax')).toHaveClass('max-md:hidden')
+    expect(within(promotedAll).getByText('— Önə çıxan elanlar')).toHaveClass('sr-only')
+    expect(screen.queryByRole('link', { name: /vitrin/i })).not.toBeInTheDocument()
     for (const [name, href] of [
       ['Bütün elanlara bax', '/elanlar'],
       ['Bütün xidmətlər', '/xidmetler'],

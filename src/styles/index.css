@@ -11,7 +11,7 @@
   --color-forest: #173f32; /* Meşə yaşılı — primary, logo, buttons */
   --color-forest-hover: #285541; /* Düymə · üzərinə gətirilmiş */
   --color-olive: #788149; /* Zeytun — focus ring, hover border, decorative dot (3.7:1 on vip: not for text) */
-  --color-olive-text: #646b3b; /* olive as text: "Bağ vitrini", "Vitrin" badge (5.0:1 on vip, 5.7:1 on white) */
+  --color-olive-text: #646b3b; /* olive as text: "Önə çıxanlar" link, "Önə çıxan" badge (5.0:1 on vip, 5.7:1 on white) */
   --color-cream: #fafaf6; /* İsti ağ — page background */
   --color-surface: #ffffff; /* Səth */
   --color-line: #dee3d9; /* Sərhəd */

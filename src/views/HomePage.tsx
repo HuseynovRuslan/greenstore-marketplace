@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import Link from 'next/link'
-import { ArrowRight, Eye, MessageCircle, ShieldCheck } from 'lucide-react'
+import { ArrowRight, Eye, MessageCircle, Rocket, ShieldCheck } from 'lucide-react'
 import { ListingCard } from '@/components/cards/ListingCard'
 import { ServiceCard } from '@/components/cards/ServiceCard'
 import { SellerCard } from '@/components/cards/SellerCard'
@@ -70,26 +70,28 @@ export default function HomePage({ content }: { content: HomeContent }) {
       <Hero />
 
       <section
-        id="bag-vitrini"
-        aria-labelledby="bag-vitrini-title"
+        id="one-cixan-elanlar"
+        aria-labelledby="one-cixan-elanlar-title"
         className="page-x mx-auto flex w-full max-w-[1440px] scroll-mt-24 flex-col gap-1 pt-3.5 pb-5 md:gap-4 md:pt-8 md:pb-12"
       >
         <div className="flex items-center justify-between gap-3">
           <div className="flex min-w-0 items-baseline gap-3">
-            <h2 id="bag-vitrini-title" className="text-lg leading-[1.3] font-semibold text-forest md:text-[22px]">
-              Bağ vitrini
+            <h2 id="one-cixan-elanlar-title" className="text-lg leading-[1.3] font-semibold text-forest md:text-[22px]">
+              {/* Same mark as the header link: these are listings sellers paid to push forward. */}
+              <Rocket aria-hidden size={20} strokeWidth={2} className="mr-2 inline-block text-olive max-md:size-[18px]" />
+              Önə çıxan elanlar
             </h2>
-            <p className="text-sm leading-[normal] text-muted max-md:hidden">Satıcıların önə çıxardığı elanlar</p>
+            <p className="text-sm leading-[normal] text-muted max-md:hidden">Satıcıların ödənişlə irəli çəkdiyi elanlar</p>
           </div>
           {/* «Hamısı» on phones, «Hamısına bax» from md (Variant 2 mockups). The name starts with the visible text
-              of the width («Hamısı — Bağ vitrini»), then says which list it opens (label in name, WCAG 2.5.3). */}
+              of the width («Hamısı — Önə çıxan elanlar»), then says which list it opens (label in name, WCAG 2.5.3). */}
           <Link
             href="/elanlar?vip=1"
             className="flex h-11 shrink-0 items-center gap-1.5 text-sm leading-[normal] font-semibold text-forest hover:text-olive-text"
           >
             <span className="md:hidden">Hamısı</span>
             <span className="max-md:hidden">Hamısına bax</span>
-            <span className="sr-only"> — Bağ vitrini</span>
+            <span className="sr-only"> — Önə çıxan elanlar</span>
             <ArrowRight aria-hidden size={16} strokeWidth={2} className="max-md:hidden" />
           </Link>
         </div>

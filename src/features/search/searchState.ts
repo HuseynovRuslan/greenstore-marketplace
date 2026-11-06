@@ -227,7 +227,7 @@ export function runSearch(state: SearchState, sort: ListingSort = 'newest'): Lis
 export function searchHeading(state: SearchState): string {
   const category = state.categoryId ? categoryById(state.categoryId) : undefined
   if (category) return `Bağınız üçün ${lowerAz(category.name)}`
-  if (state.vip) return 'Bağ vitrini'
+  if (state.vip) return 'Önə çıxan elanlar'
   if (state.q) return 'Axtarış nəticələri'
   return 'Bütün elanlar'
 }
@@ -272,7 +272,7 @@ export function activeChips(state: SearchState): FilterChip[] {
   push('species', state.species && speciesLabel(state.species), { species: '' })
   push('height', state.height && heightLabel(state.height), { height: '' })
   push('age', state.age && ageLabel(state.age), { age: '' })
-  push('vip', state.vip ? 'Bağ vitrini' : undefined, { vip: false })
+  push('vip', state.vip ? 'Önə çıxanlar' : undefined, { vip: false })
   push('seller', state.sellerType === 'biznes' ? 'Biznes satıcılar' : state.sellerType === 'ferdi' ? 'Fərdi satıcılar' : undefined, {
     sellerType: '',
   })

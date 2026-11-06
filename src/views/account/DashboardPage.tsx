@@ -148,7 +148,7 @@ function Dashboard({ sellerId, name, subtitle }: { sellerId?: string; name: stri
           <InfoNotice title="Biznes üçün daha çox imkan">
             Genişləndirilmiş satıcı profili və ətraflı statistika ilə abunə paketləri tezliklə təqdim ediləcək.
           </InfoNotice>
-          <p className="w-full text-xs leading-[1.5] text-muted">Vitrin təşviqi yalnız seçilən elanlarda göstərilir.</p>
+          <p className="w-full text-xs leading-[1.5] text-muted">«Önə çıxan» nişanı yalnız seçilən elanlarda göstərilir.</p>
         </div>
       </div>
 

@@ -3,7 +3,7 @@
 import { Suspense, useRef, useState, type FocusEvent as ReactFocusEvent, type FormEvent } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import { Heart, LogOut, Menu, Plus, Search, UserRound, X } from 'lucide-react'
+import { Heart, LogOut, Menu, Plus, Rocket, Search, UserRound, X } from 'lucide-react'
 import { Logo } from '@/components/ui/Logo'
 import { ButtonLink } from '@/components/ui/Button'
 import { useSession } from '@/state/store'
@@ -98,7 +98,7 @@ function HeaderSearchForm({ variant, urlQuery, onSubmitted }: SearchFormProps & 
   )
 }
 
-/** Home header nav (Variant 2); "Bağ vitrini" follows with its olive dot. */
+/** Home header nav (Variant 2); "Önə çıxanlar" follows with its olive rocket. */
 const homeNav = [
   { label: 'Məhsullar', to: '/elanlar' },
   { label: 'Xidmətlər', to: '/xidmetler' },
@@ -111,7 +111,7 @@ const iconButton =
 /**
  * Figma "Başlıq naviqasiyası".
  *  - `default`: logo · search · favourites · account · «Elan yerləşdir»; < 768 px a compact bar (logo · search · menu).
- *  - `home` (docs/design/variant-2): one row, logo · nav (Məhsullar, Xidmətlər, Satıcılar, Bağ vitrini) · favourites ·
+ *  - `home` (docs/design/variant-2): one row, logo · nav (Məhsullar, Xidmətlər, Satıcılar, Önə çıxanlar) · favourites ·
  *    account · «Elan yerləşdir». The nav needs 1024 px; 768–1023 px get the menu button, < 768 px logo · ♡ · menu.
  *    The hero search replaces the header search there. On scroll (useScrollHeader) the header turns translucent with a
  *    shadow, hides while you scroll down past 320 px and comes back on any upward scroll; once the hero search has
@@ -266,8 +266,8 @@ export function SiteHeader({ variant = 'default' }: { variant?: 'default' | 'hom
                     href="/elanlar?vip=1"
                     className="flex h-11 items-center gap-2 rounded-option px-3.5 text-[15px] leading-[normal] font-medium whitespace-nowrap text-olive-text transition-colors duration-(--dur-fast) hover:text-forest"
                   >
-                    <span aria-hidden className="size-[7px] rounded-full bg-olive" />
-                    Bağ vitrini
+                    <Rocket aria-hidden size={16} strokeWidth={2} className="shrink-0 text-olive" />
+                    Önə çıxanlar
                   </Link>
                 </nav>
                 <div inert={!pillReachable} {...trackFocus('pill')} className={cn('flex items-center justify-center [grid-area:1/1]', pillState)}>
@@ -339,7 +339,7 @@ export function SiteHeader({ variant = 'default' }: { variant?: 'default' | 'hom
               </button>
             </div>
             <ul className="flex flex-col gap-2 text-[15px] text-forest">
-              {[...sectionLinks, { label: 'Bağ vitrini', to: '/elanlar?vip=1' }, { label: 'Seçilmişlər', to: '/secilmisler' }].map((l) => (
+              {[...sectionLinks, { label: 'Önə çıxanlar', to: '/elanlar?vip=1' }, { label: 'Seçilmişlər', to: '/secilmisler' }].map((l) => (
                 <li key={l.label}>
                   <Link href={l.to} onClick={closeMenu} className="block rounded-lg px-3 py-3 hover:bg-mint">
                     {l.label}

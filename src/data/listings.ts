@@ -363,11 +363,11 @@ export const listings: Listing[] = [
 /** Listings visible to buyers (search, home, seller page). */
 export const publicListings = listings.filter((l) => l.status === 'active')
 
-/** Home "Bağ vitrini" order (Variant 2 mockup: 4 cards, Limon ağacı joined the three from Figma "VIP elanlar"). */
+/** Home "Önə çıxan elanlar" order (Variant 2 mockup: 4 cards, Limon ağacı joined the three from Figma "VIP elanlar"). */
 export const vipListingIds = ['zeytun-agaci', 'mavi-kuknar', 'yapon-agcaqayini', 'limon-agaci']
 
 /**
- * Home "Son elanlar" order: the Figma cards newest first, without Limon ağacı (now in "Bağ vitrini"),
+ * Home "Son elanlar" order: the Figma cards newest first, without Limon ağacı (now in "Önə çıxan elanlar"),
  * plus Tuya — Smaragd and Dəfnə ağacı so the four-column grid ends on a full row (8 cards).
  */
 export const latestListingIds = [
