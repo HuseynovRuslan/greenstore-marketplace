@@ -9,6 +9,7 @@ import { AppStoreProvider } from '@/state/store'
 import { PRE_HYDRATION_SCRIPT } from '@/state/bootstrap'
 import { InlineScript } from '@/components/layout/InlineScript'
 import { SkipLink } from '@/components/layout/SkipLink'
+import { MotionProvider } from '@/components/motion/MotionProvider'
 import { siteUrl } from '@/seo/env'
 import { robotsFor } from '@/seo/metadata'
 import { DEFAULT_OG_IMAGE, SITE_DESCRIPTION, SITE_LOCALE, SITE_NAME, SITE_TITLE } from '@/seo/site'
@@ -40,7 +41,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <body>
         {/* First Tab stop of every page; each frame's <main id="main"> is its target. */}
         <SkipLink />
-        <AppStoreProvider>{children}</AppStoreProvider>
+        <AppStoreProvider>
+          <MotionProvider>{children}</MotionProvider>
+        </AppStoreProvider>
       </body>
     </html>
   )

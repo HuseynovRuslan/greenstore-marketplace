@@ -3,6 +3,7 @@ import { act, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { Reveal } from '@/components/ui/Reveal'
 import { FavoriteButton } from '@/components/cards/FavoriteButton'
+import { MotionProvider } from '@/components/motion/MotionProvider'
 import { AppStoreProvider } from '@/state/store'
 import { mockRepository } from '@/services/mockRepository'
 import HomePage from '@/views/HomePage'
@@ -137,5 +138,18 @@ describe('favourite heart', () => {
     )
     expect(screen.getByRole('button', { name: /seçilmişlərdən çıxar/ })).toBeInTheDocument()
     expect(heart()).not.toHaveClass('animate-heart-pop')
+  })
+})
+
+describe('MotionProvider', () => {
+  it('passes its children through unchanged (the features load later, in their own chunk)', () => {
+    render(
+      <MotionProvider>
+        <main>
+          <h1>Bağ elanları</h1>
+        </main>
+      </MotionProvider>,
+    )
+    expect(screen.getByRole('heading', { level: 1, name: 'Bağ elanları' })).toBeInTheDocument()
   })
 })
