@@ -1,7 +1,7 @@
 # Follow-ups
 
-A running list of known gaps from the Variant 2 home work that were left out of a step on purpose.
-Kept up to date as steps land; remove an item when it is done.
+A running list of known gaps from the Variant 2 work (home, then the catalogue) that were left out of a step on
+purpose. Kept up to date as steps land; remove an item when it is done.
 
 ## Copy that still uses the old category names
 
@@ -12,21 +12,19 @@ Kept up to date as steps land; remove an item when it is done.
 
 ## Design
 
-- **ListingCard vs the Variant 2 mockup** (to be done as its own step):
-  - Price: the mockup has 21 px bold forest; today it is 23 px regular ink.
-  - Photo: the mockup uses a 4:3 ratio; today the height is fixed (145 / 210 px).
-  - «Önə çıxan» badge: add the rocket icon used next to the section heading and in the header (the mockup had a
-    leaf); today it is text only. Below 360 px the badge shrinks (11 px text, less padding) so it clears the
-    favourite button; the restyle should give it proper room.
-  - Date: the mockup shows the city only; today it shows «city · date».
-  - Favourite button: 34 px today; the mockup keeps a 32 px circle inside a 44 px touch target.
-  - Phones: the mockup card is compact (square photo, 17 px price, one-line title, city only).
+- **`/xidmetler`** has the home header only ([elanlar.md](elanlar.md)). Its own step still covers:
+  - the search form and the «Xidmət ərazisi seçin» select;
+  - the category buttons and the sort control;
+  - the service cards and the no-results state.
+- **Seller page sort** (`src/features/seller/SellerListings.tsx`) is its own native select; it could use the catalogue's
+  `SortSelect`.
+- **Page links** do not dim the results while the next page loads; filter changes do.
+- **Filter column gap:** when the sidebar is shorter than the window and the header hides, a 76 px gap shows above it.
 
 ## Accessibility
 
-- **Targets under 44 px** (audit of 5 Nov, item 6; to be done with the ListingCard step). All of them meet the WCAG 2.5.8
-  minimum of 24 px, but not the 44 px the project aims for:
-  - favourite button 34 px;
+- **Targets under 44 px** (audit of 5 Nov, item 6). All of them meet the WCAG 2.5.8 minimum of 24 px, but not the
+  44 px the project aims for. The favourite button is done (44 px since the card step). Still under 44 px:
   - section links («Bütün elanlara bax», «Bütün xidmətlər», «Biznes satıcıların elanları») 20 px tall;
   - footer links 17 px tall;
   - bottom-nav items 40 px.
@@ -39,4 +37,14 @@ Kept up to date as steps land; remove an item when it is done.
   support for one search across products and services) is needed; discuss with Ruslan.
 - Real sub-categories for `kollar` and `otaq-bitkileri` (the current lists are placeholders).
 - Redirects for the removed category URLs `/kateqoriyalar/dekorativ-bitkiler` and `/kateqoriyalar/dibcekler-dekorasiya`.
-- Category and city counts from the API instead of `src/data` (contract change).
+- Category and city counts from the API instead of `src/data` (contract change). The catalogue's counts sit behind
+  `getFacetCounts` (`src/features/search/facets.ts`), and the sheet's count behind `countCatalog`; see
+  [elanlar.md](elanlar.md).
+- Species (`nov`) and sub-category (`alt`) filters need API fields; today they are derived from the sample data.
+
+## Data in the browser
+
+- The listing page, the seller page, «Seçilmişlər», the cabinet and the post-ad wizard still import the sample
+  listings in client code. The catalogue and home no longer do: client components use the data-free
+  `searchUrl.ts`, `taxonomy.ts` and `services/listingSort.ts`. Server-only code uses `searchState.ts` and
+  `species.ts`.

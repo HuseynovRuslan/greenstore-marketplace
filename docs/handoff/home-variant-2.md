@@ -37,7 +37,8 @@ For: management and Ruslan (backend). Branch `nextjs-migration`. Mockups: `docs/
   - an «Əsas məzmuna keç» link on every page, shown when you press Tab;
   - clearer names for links and price fields;
   - the header menu can always be reached with the keyboard.
-- **Not changed yet:** the listing card design (next step) and the header on the other pages.
+- **Since then (6 November):** the listing card follows the Variant 2 card. The catalogue pages and `/xidmetler`
+  also use this header; see [elanlar.md](elanlar.md).
 
 ## Commits
 
@@ -89,8 +90,7 @@ Proposed names, values and the current URL parameters are in [categories.md](cat
 
 The full list is in [follow-ups.md](follow-ups.md).
 
-- **Listing card (next step):** match the Variant 2 card: price style, 4:3 photo, an icon on the «Önə çıxan» badge
-  and a compact phone card. Also bring small touch targets up to 44 px: the favourite button, section links, footer
-  links and the bottom bar.
+- **Listing card:** done on 6 November ([elanlar.md](elanlar.md)). Still to do: bring the section links, footer links
+  and the bottom bar up to 44 px touch targets.
 - **Old category names:** the `/xidmetler` title and the seller page tabs still use them.
 - **Screen reader check:** a manual pass with NVDA or VoiceOver is still to do.

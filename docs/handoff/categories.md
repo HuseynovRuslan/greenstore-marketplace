@@ -66,6 +66,9 @@ If the API sends the category icon as a string, it must accept `shrub` too. The 
 
 `hundurluk` values: `-100` (up to 1 m), `100-200`, `200-300`, `300-`.
 
+The catalogue reads the same names (`PARAM` in `src/features/search/filterDefs.ts`) plus `alt`, `nov`, `yas`, `vip`,
+`saticiNovu`, `siralama`, `gorunus` and `sehife`; see [elanlar.md](elanlar.md).
+
 `/xidmetler`: `q`, `seher` (the page reads `erazi` and falls back to `seher`), `kateqoriya` (service category),
 `min`, `max`.
 
