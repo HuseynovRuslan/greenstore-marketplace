@@ -35,7 +35,7 @@ function renderCatalog(query: string, total = 6) {
         chips={activeChips(state)}
         facets={facets}
         speciesOptions={[{ value: 'zeytun-agaci', label: 'Zeytun ağacı' }]}
-        showPlantFilters
+        plantCategoryIds={['agaclar', 'kollar']}
         breadcrumb={null}
         results={<ul />}
       />
@@ -96,5 +96,34 @@ describe('CatalogResults', () => {
     renderCatalog('kateqoriya=agaclar&max=1', 0)
     expect(screen.queryByRole('combobox', { name: 'Sıralama' })).not.toBeInTheDocument()
     expect(screen.queryByRole('group', { name: 'Görünüş' })).not.toBeInTheDocument()
+  })
+
+  it('edits a draft in the «Filtrlər» sheet with a live count, and applies it on «N elanı göstər»', async () => {
+    const user = userEvent.setup()
+    renderCatalog('', 16)
+    await user.click(screen.getByRole('button', { name: 'Filtrlər' }))
+    const sheet = screen.getByRole('dialog', { name: 'Filtrlər' })
+    expect(within(sheet).getByRole('button', { name: '16 elanı göstər' })).toBeEnabled()
+    // Kollar has no sample listings: the button says so and cannot be pressed.
+    await user.click(within(sheet).getByRole('button', { name: 'Kollar' }))
+    expect(await within(sheet).findByRole('button', { name: 'Uyğun elan yoxdur' })).toBeDisabled()
+    await user.click(within(sheet).getByRole('button', { name: 'Ağaclar' }))
+    await user.click(within(sheet).getByRole('button', { name: 'Çatdırılma' }))
+    const show = await within(sheet).findByRole('button', { name: /^\d+ elanı göstər$/ })
+    expect(push).not.toHaveBeenCalled()
+    await user.click(show)
+    expect(push).toHaveBeenCalledWith('/elanlar?kateqoriya=agaclar&catdirilma=1', { scroll: false })
+    expect(screen.queryByRole('dialog', { name: 'Filtrlər' })).not.toBeInTheDocument()
+  })
+
+  it('drops the draft when the sheet is closed', async () => {
+    const user = userEvent.setup()
+    renderCatalog('', 16)
+    await user.click(screen.getByRole('button', { name: 'Filtrlər' }))
+    await user.click(within(screen.getByRole('dialog', { name: 'Filtrlər' })).getByRole('button', { name: 'Ağaclar' }))
+    await user.keyboard('{Escape}')
+    await user.click(screen.getByRole('button', { name: 'Filtrlər' }))
+    expect(within(screen.getByRole('dialog', { name: 'Filtrlər' })).getByRole('button', { name: 'Ağaclar' })).toHaveAttribute('aria-pressed', 'false')
+    expect(push).not.toHaveBeenCalled()
   })
 })

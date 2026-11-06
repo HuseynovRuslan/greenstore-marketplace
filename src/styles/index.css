@@ -243,6 +243,40 @@
 }
 
 /*
+ * Catalogue bar below 1280 px («Filtrlər (n)», sort, view): sticks under the header (58 px, 76 px from md) and
+ * slides up into its place while the header is hidden, with the header's timing. A transform, so nothing shifts.
+ * Reduced motion: the header only fades and keeps its place, so the bar stays put.
+ */
+@layer components {
+  .gs-catalog-bar {
+    position: sticky;
+    top: 58px;
+    z-index: 30;
+    transition: transform var(--dur-slow) var(--ease-out);
+  }
+  :root:has(.gs-header[data-hidden]) .gs-catalog-bar {
+    transform: translateY(-58px);
+    transition-duration: var(--dur-base);
+    transition-timing-function: var(--ease-in);
+  }
+  @media (width >= 48rem) {
+    .gs-catalog-bar {
+      top: 76px;
+    }
+    :root:has(.gs-header[data-hidden]) .gs-catalog-bar {
+      transform: translateY(-76px);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .gs-catalog-bar,
+    :root:has(.gs-header[data-hidden]) .gs-catalog-bar {
+      transform: none;
+      transition: none;
+    }
+  }
+}
+
+/*
  * Scroll reveal of card grids (useRevealOnce + Reveal): items below the fold start 16 px low and transparent and
  * come in once, 60 ms apart. Reduced motion: shown at once, no fade.
  */

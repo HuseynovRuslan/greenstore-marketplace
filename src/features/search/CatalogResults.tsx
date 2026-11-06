@@ -7,10 +7,9 @@ import { Button } from '@/components/ui/Button'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { formatNumber } from '@/lib/format'
 import type { ListingSort } from '@/services/marketplace'
+import { CatalogFilterSheet } from './CatalogFilterSheet'
 import { CatalogSearchCard, type CityCounts } from './CatalogSearchCard'
 import { FiltersButton } from './FilterControls'
-import { FilterPanel } from './FilterPanel'
-import { FilterSheet } from './FilterSheet'
 import { FilterSidebar, type SidebarFacets } from './FilterSidebar'
 import type { FilterOption } from './filterDefs'
 import { ActiveFilterRow, SortSelect, ViewToggle } from './SearchControls'
@@ -36,7 +35,8 @@ interface CatalogResultsProps {
   chips: FilterChip[]
   facets: SidebarFacets & { cities: CityCounts }
   speciesOptions: FilterOption[]
-  showPlantFilters: boolean
+  /** Categories whose listings are plants (height and age apply). */
+  plantCategoryIds: string[]
   breadcrumb: ReactNode
   /** The server-rendered result list for the current page; ignored when `total` is 0. */
   results: ReactNode
@@ -53,7 +53,7 @@ interface CatalogResultsProps {
  * them); sort and view replace it. Filter changes continue on /elanlar; sort and view stay on the current page.
  */
 export function CatalogResults(props: CatalogResultsProps) {
-  const { state, stateQuery, basePath, urlQuery, sort, view, total, heading, chips, facets, speciesOptions, showPlantFilters } = props
+  const { state, stateQuery, basePath, urlQuery, sort, view, total, heading, chips, facets, speciesOptions, plantCategoryIds } = props
   const router = useRouter()
   const headingId = useId()
   const [isPending, startTransition] = useTransition()
@@ -97,10 +97,10 @@ export function CatalogResults(props: CatalogResultsProps) {
     if (liveRef.current) liveRef.current.textContent = total ? `${formatNumber(total)} elan tapıldı` : 'Bu seçimə uyğun elan yoxdur'
   }, [stateQuery, total])
 
-  // Below 1280 px (until the bar and sheet of the next step): the earlier filter panel in a sheet.
+  // Below 1280 px the filters live in the «Filtrlər» sheet; it closes if the window grows into the sidebar layout.
   const [sheetOpen, setSheetOpen] = useState(false)
   useEffect(() => {
-    if (!sheetOpen) return
+    if (!sheetOpen || typeof window.matchMedia !== 'function') return
     const mq = window.matchMedia('(min-width: 1280px)')
     const onChange = () => mq.matches && setSheetOpen(false)
     mq.addEventListener('change', onChange)
@@ -121,7 +121,7 @@ export function CatalogResults(props: CatalogResultsProps) {
             current={current}
             facets={facets}
             speciesOptions={speciesOptions}
-            showPlantFilters={showPlantFilters}
+            showPlantFilters={!shown.categoryId || plantCategoryIds.includes(shown.categoryId)}
             onChange={apply}
           />
         </aside>
@@ -149,7 +149,8 @@ export function CatalogResults(props: CatalogResultsProps) {
             )}
           </div>
 
-          <div className="flex w-full items-center gap-2 xl:hidden">
+          {/* < 1280 px: «Filtrlər (n)», sort and view stay at hand under the header (and take its place when it hides). */}
+          <div className="gs-catalog-bar -mx-5 flex items-center gap-2 bg-cream/95 px-5 py-2 shadow-[0_1px_0_var(--color-line)] backdrop-blur-sm md:-mx-7 md:px-7 xl:hidden">
             <FiltersButton count={filterCount} expanded={sheetOpen} onClick={() => setSheetOpen(true)} />
             {total > 0 && (
               <>
@@ -183,22 +184,15 @@ export function CatalogResults(props: CatalogResultsProps) {
         </section>
       </div>
 
-      <FilterSheet open={sheetOpen} onClose={() => setSheetOpen(false)} summary={`${heading} · ${formatNumber(total)} elan`}>
-        <FilterPanel
-          key={stateQuery}
-          applied={state}
-          q={state.q}
-          onApply={(next) => {
-            apply(next)
-            setSheetOpen(false)
-          }}
-          onClear={() => {
-            apply(withoutFilters(state))
-            setSheetOpen(false)
-          }}
-          className="w-full"
-        />
-      </FilterSheet>
+      <CatalogFilterSheet
+        open={sheetOpen}
+        onClose={() => setSheetOpen(false)}
+        state={shown}
+        total={total}
+        speciesOptions={speciesOptions}
+        plantCategoryIds={plantCategoryIds}
+        onApply={apply}
+      />
     </div>
   )
 }

@@ -120,7 +120,7 @@ export default async function SearchPage({ state, sort, view, result, stateQuery
       chips={activeChips(state)}
       facets={facets}
       speciesOptions={speciesOptions(state.categoryId)}
-      showPlantFilters={!state.categoryId || PLANT_CATEGORY_IDS.includes(state.categoryId)}
+      plantCategoryIds={PLANT_CATEGORY_IDS}
       breadcrumb={<SearchBreadcrumb crumbs={crumbs} />}
       results={results}
       pagination={pagination}
