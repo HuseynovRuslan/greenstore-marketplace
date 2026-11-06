@@ -5,6 +5,7 @@ import { ButtonLink } from '@/components/ui/Button'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { InfoNotice, Notice } from '@/components/ui/Notice'
 import { Panel } from '@/components/ui/Panel'
+import { PromotedBadge } from '@/components/ui/PromotedBadge'
 import { SectionHeader } from '@/components/ui/SectionHeader'
 import { RevealProvider } from '@/features/contact/RevealContext'
 import { ComplaintButton } from '@/features/seller/ComplaintButton'
@@ -78,7 +79,7 @@ export function ListingDetail({ listing, seller, category, others, similar }: Li
         )}
 
         <div className="flex flex-wrap items-start gap-2">
-          {listing.vip && <Badge tone="vip">Önə çıxan</Badge>}
+          {listing.vip && <PromotedBadge />}
           <Badge tone={status.badge.tone}>{status.badge.label}</Badge>
         </div>
 

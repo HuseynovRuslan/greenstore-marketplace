@@ -1,72 +1,69 @@
 import Link from 'next/link'
-import { Badge } from '@/components/ui/Badge'
-import { FavoriteButton } from './FavoriteButton'
+import { PromotedBadge } from '@/components/ui/PromotedBadge'
+import { RelativeDate } from '@/components/ui/RelativeDate'
 import { cityName } from '@/data/cities'
-import { cn, formatDayMonth, formatPrice } from '@/lib/format'
+import { cn, formatPrice } from '@/lib/format'
 import type { Listing } from '@/types'
+import { FavoriteButton } from './FavoriteButton'
 
-interface ListingCardProps {
-  listing: Listing
-  /** Force the compact 390 px variant regardless of viewport (e.g. narrow side columns). */
-  compact?: boolean
-  /** Image height on ≥ md screens (Figma uses 210 px on every desktop/tablet card). */
-  className?: string
-}
+/** Classes that make a card's title link cover the whole card (the favourite button sits above it). */
+export const stretchedLinkClass = "focus-visible:outline-hidden after:absolute after:inset-0 after:rounded-xl after:content-['']"
+
+/** The card shows the focus ring of its link, since the link covers the card. */
+export const cardFocusClass = 'has-[a:focus-visible]:outline-2 has-[a:focus-visible]:outline-offset-2 has-[a:focus-visible]:outline-olive'
 
 /*
- * Figma "Elan kartı" (components frame + home 1440/768/390):
- *  desktop/tablet: p 14, gap 8, radius 12, photo h 210 radius 8, price 23 px, title 15 px semibold, meta 12 px muted (leading 1.6)
- *  mobile (390):   p 10, photo h 145, price 20 px, title 13 px, meta 11 px
- *  hover: border #788149 + shadow 0 8 24 rgba(23,63,50,.1), the photo zooms to 1.03 inside its frame (not under
- *  reduced motion); overlays sit 7 px inside the photo.
- *  Figma strokes are inside the box, so padding/offsets here are 1 px smaller to make room for the CSS border.
+ * Variant 2 listing card (docs/design/variant-2):
+ *  ≥ 768 px: p 12, gap 12, radius 12; photo 4:3, radius 8; price 21 px bold forest; title 15 px semibold, two lines;
+ *           details 13 px muted; «Bakı · 2 gün əvvəl» 13 px muted.
+ *  phones:  p 8, gap 8; square photo; price 17 px; title 13 px, one line; city 12 px (no details, no date).
+ * The badge and the favourite button sit on the photo. The title link covers the card (one link, one Tab stop);
+ * the favourite button is its own control above it. Cards in a row share one height: the city line sits at the
+ * bottom. Hover: olive border, soft shadow and the photo zooms to 1.03 (not under reduced motion).
+ * Borders are inside the mockup box, so paddings and offsets are 1 px smaller here.
  */
-export function ListingCard({ listing, compact, className }: ListingCardProps) {
-  const meta = listing.attributes.join(' · ')
+export function ListingCard({ listing, className }: { listing: Listing; className?: string }) {
+  const details = listing.attributes.join(' · ')
   return (
-    <Link
-      href={`/elanlar/${listing.slug}`}
+    <article
       className={cn(
-        'group relative flex w-full flex-col items-start gap-2 self-start overflow-hidden rounded-xl border border-line bg-surface transition-[border-color,box-shadow] hover:border-olive hover:shadow-card-hover',
-        compact ? 'p-[9px]' : 'p-[9px] md:p-[13px]',
+        'group relative flex h-full w-full min-w-0 flex-col gap-2 rounded-xl border border-line bg-surface p-[7px] transition-[border-color,box-shadow] duration-(--dur-base) hover:border-olive hover:shadow-card-hover md:gap-3 md:p-[11px]',
+        cardFocusClass,
         className,
       )}
     >
-      {/* Art direction: the 390 / 768 Figma frames show their own photo of the product. */}
-      <picture className="block w-full shrink-0 overflow-hidden rounded-lg">
-        {listing.coverMobile && <source media={compact ? undefined : '(max-width: 767.98px)'} srcSet={listing.coverMobile} />}
-        {!compact && listing.coverTablet && <source media="(max-width: 1279.98px)" srcSet={listing.coverTablet} />}
-        <img
-          src={listing.cover}
-          alt={listing.title}
-          loading="lazy"
-          className={cn(
-            'block w-full rounded-lg object-cover transition-transform duration-(--dur-slow) ease-out motion-safe:group-hover:scale-[1.03]',
-            compact ? 'h-[145px]' : 'h-[145px] md:h-[210px]',
-          )}
-        />
-      </picture>
-      {listing.vip && (
-        // Below 360 px the badge tightens so it clears the favourite button (the card restyle will revisit this).
-        <Badge tone="vip" className={cn('absolute top-5 max-[359px]:left-3 max-[359px]:px-1.5 max-[359px]:text-[11px]', compact ? 'left-4' : 'left-4 md:left-5')}>
-          Önə çıxan
-        </Badge>
-      )}
-      <FavoriteButton
-        kind="listing"
-        id={listing.id}
-        title={listing.title}
-        className={cn('absolute top-5', compact ? 'right-4' : 'right-4 md:right-5')}
-      />
-      {/* Figma's text box is shorter than its 1.6 line boxes; the negative margin keeps card heights at Figma's 259 / 340 px. */}
-      <div className={cn('w-full min-w-0 leading-[1.6] break-words', compact ? '-mb-0.5' : '-mb-0.5 md:-mb-[5px]')}>
-        <p className={cn('text-ink', compact ? 'text-[20px]' : 'text-[20px] md:text-[23px]')}>{formatPrice(listing.price)}</p>
-        <h3 className={cn('font-semibold text-ink', compact ? 'text-[13px]' : 'text-[13px] md:text-[15px]')}>{listing.title}</h3>
-        <p className={cn('text-muted', compact ? 'text-[11px]' : 'text-[11px] md:text-[12px]')}>{meta}</p>
-        <p className={cn('text-muted', compact ? 'text-[11px]' : 'text-[11px] md:text-[12px]')}>
-          {cityName(listing.cityId)} · {formatDayMonth(listing.publishedAt)}
+      <div className="relative">
+        {/* Art direction: the 390 / 768 Figma frames show their own photo of the product. The title says what it is. */}
+        <picture className="block overflow-hidden rounded-lg">
+          {listing.coverMobile && <source media="(max-width: 767.98px)" srcSet={listing.coverMobile} />}
+          {listing.coverTablet && <source media="(max-width: 1279.98px)" srcSet={listing.coverTablet} />}
+          <img
+            src={listing.cover}
+            alt=""
+            loading="lazy"
+            decoding="async"
+            className="block aspect-square w-full object-cover transition-transform duration-(--dur-slow) ease-out motion-safe:group-hover:scale-[1.03] md:aspect-[4/3]"
+          />
+        </picture>
+        {listing.vip && <PromotedBadge size="card" className="absolute top-1.5 left-1.5 md:top-2 md:left-2" />}
+      </div>
+      <div className="flex min-w-0 flex-1 flex-col gap-[3px] px-0.5 pb-0.5 md:px-1 md:pb-1">
+        <p className="text-[17px] leading-[1.25] font-bold text-forest tabular-nums md:text-[21px]">{formatPrice(listing.price)}</p>
+        <h3 className="line-clamp-1 text-[13px] leading-[1.35] font-semibold break-words text-ink md:line-clamp-2 md:text-[15px]">
+          <Link href={`/elanlar/${listing.slug}`} className={stretchedLinkClass}>
+            {listing.title}
+          </Link>
+        </h3>
+        {details && <p className="truncate text-[13px] leading-[1.4] text-muted max-md:hidden">{details}</p>}
+        <p className="mt-auto truncate pt-0.5 text-xs leading-[1.4] text-muted md:text-[13px]">
+          {cityName(listing.cityId)}
+          <span className="max-md:hidden">
+            {' · '}
+            <RelativeDate iso={listing.publishedAt} />
+          </span>
         </p>
       </div>
-    </Link>
+      <FavoriteButton kind="listing" id={listing.id} title={listing.title} className="absolute top-[9px] right-[9px] md:top-[13px] md:right-[13px]" />
+    </article>
   )
 }

@@ -37,6 +37,31 @@ export function formatFullDate(isoDate: string): string {
   return `${formatDayMonth(isoDate)} ${year}`
 }
 
+const DAY_MS = 86_400_000
+/** Azerbaijan time is UTC+4 all year (no daylight saving since 2016). */
+const BAKU_OFFSET_MS = 4 * 3_600_000
+
+/** Day number of a timestamp in Baku time. ISO strings without an offset are Baku local time already. */
+function bakuDay(isoDate: string): number {
+  if (/[zZ]|[+-]\d\d:?\d\d$/.test(isoDate)) return Math.floor((Date.parse(isoDate) + BAKU_OFFSET_MS) / DAY_MS)
+  const [year, month, day] = isoDate.slice(0, 10).split('-').map(Number)
+  return Math.floor(Date.UTC(year, month - 1, day) / DAY_MS)
+}
+
+/**
+ * Short relative date for cards, by calendar day in Baku: "bu gün", "dünən", "3 gün əvvəl", "2 həftə əvvəl",
+ * "4 ay əvvəl", "1 il əvvəl". `now` is a timestamp (ms).
+ */
+export function formatRelativeDate(isoDate: string, now: number): string {
+  const days = Math.floor((now + BAKU_OFFSET_MS) / DAY_MS) - bakuDay(isoDate)
+  if (days <= 0) return 'bu gün'
+  if (days === 1) return 'dünən'
+  if (days < 7) return `${days} gün əvvəl`
+  if (days < 30) return `${Math.floor(days / 7)} həftə əvvəl`
+  if (days < 365) return `${Math.floor(days / 30)} ay əvvəl`
+  return `${Math.floor(days / 365)} il əvvəl`
+}
+
 /*
  * Azerbaijani case mapping and alphabetical order, implemented here instead of `toLocaleLowerCase('az')` /
  * `localeCompare(…, 'az')`: pages now render on the server (Node) and in the browser, and their ICU data differ

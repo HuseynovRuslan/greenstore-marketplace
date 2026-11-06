@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { Badge } from '@/components/ui/Badge'
 import { Button, ButtonLink } from '@/components/ui/Button'
+import { PromotedBadge } from '@/components/ui/PromotedBadge'
 import { formatPrice } from '@/lib/format'
 import { cabinetListingHref } from '@/features/listing/ownerPreview'
 import { rowMeta, statusBadge } from './rowFormat'
@@ -63,7 +64,7 @@ export function MyListingRowCard({ row, onDeactivate, onRenew, onActivate }: Pro
         <div className="flex min-w-0 flex-1 flex-col items-start gap-2">
           <div className="flex flex-wrap items-start gap-2">
             <Badge tone={badge.tone}>{badge.label}</Badge>
-            {listing.vip && <Badge tone="vip">Önə çıxan</Badge>}
+            {listing.vip && <PromotedBadge />}
           </div>
           <h3 className="w-full text-[15px] leading-[1.5] font-semibold break-words text-ink">
             <Link href={detailHref} className="hover:text-olive-text">

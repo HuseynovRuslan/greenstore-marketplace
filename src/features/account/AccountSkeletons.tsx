@@ -122,22 +122,22 @@ export function DashboardSkeleton() {
   )
 }
 
-/** Listing-card placeholder with ListingCard's geometry (145 / 210 px photo, 1.6 text lines, Figma's negative margin). */
+/** Listing-card placeholder with ListingCard's geometry (square / 4:3 photo, price, title, details, city line). */
 function CardSkeleton() {
   return (
-    <div className="flex w-full flex-col items-start gap-2 self-start rounded-xl border border-line bg-surface p-[9px] md:p-[13px]">
-      <SkeletonBlock className="h-[145px] w-full md:h-[210px]" />
-      <div className="-mb-0.5 w-full min-w-0 leading-[1.6] md:-mb-[5px]">
-        <p className="text-[20px] md:text-[23px]">
+    <div className="flex h-full w-full flex-col gap-2 rounded-xl border border-line bg-surface p-[7px] md:gap-3 md:p-[11px]">
+      <SkeletonBlock className="aspect-square w-full md:aspect-[4/3]" />
+      <div className="flex w-full min-w-0 flex-col gap-[3px] px-0.5 pb-0.5 md:px-1 md:pb-1">
+        <p className="text-[17px] leading-[1.25] md:text-[21px]">
           <SkeletonText className="w-[3em]" />
         </p>
-        <p className="text-[13px] md:text-[15px]">
+        <p className="text-[13px] leading-[1.35] md:text-[15px]">
           <SkeletonText className="w-4/5" />
         </p>
-        <p className="text-[11px] md:text-[12px]">
+        <p className="text-[13px] leading-[1.4] max-md:hidden">
           <SkeletonText className="w-3/5" />
         </p>
-        <p className="text-[11px] md:text-[12px]">
+        <p className="pt-0.5 text-xs leading-[1.4] md:text-[13px]">
           <SkeletonText className="w-2/5" />
         </p>
       </div>
