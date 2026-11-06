@@ -1,5 +1,7 @@
 /**
- * URL ⇄ filter state for "/elanlar" (Figma "Məhsul axtarışı" + "Mobil filtr paneli").
+ * URL ⇄ filter state for "/elanlar" and the category pages: parsing, the query, headings and chips.
+ * Server-side (it reads the sample data to validate species and to search); the data-free half that client
+ * components use is searchUrl.ts, re-exported here.
  *
  * Every filter lives in the query string so results are shareable and survive reloads (names in `PARAM`,
  * filterDefs.ts, which also holds the options and labels shared with the home search):
@@ -10,67 +12,30 @@
  */
 import { categoryById, productCategories } from '@/data/categories'
 import { cities, cityName } from '@/data/cities'
-import { formatNumber, lowerAz } from '@/lib/format'
+import { formatNumber, locativeAz, lowerAz } from '@/lib/format'
 import { searchListings, type ListingFilters, type ListingSort } from '@/services/marketplace'
 import type { Listing } from '@/types'
-import {
-  ageLabel,
-  heightLabel,
-  isRange,
-  PARAM,
-  parseRange,
-  priceValueLabel,
-  sellerChipLabel,
-  toggleLabels,
-  type SellerTypeParam,
-} from './filterDefs'
-import { speciesLabel, speciesSlug, subcategoryName, slugify } from './taxonomy'
+import { ageLabel, heightLabel, isRange, PARAM, parseRange, priceValueLabel, sellerChipLabel, toggleLabels } from './filterDefs'
+import type { FilterChip, SearchState } from './searchUrl'
+import { speciesLabel, speciesSlug } from './species'
+import { subcategoryName, slugify } from './taxonomy'
 
 export type { SellerTypeParam } from './filterDefs'
-export type SearchView = 'grid' | 'list'
+export {
+  catalogHref,
+  chipActive,
+  emptySearchState,
+  parseSort,
+  withoutFilters,
+  withSort,
+  withView,
+  writeSearchState,
+  type FilterChip,
+  type SearchState,
+  type SearchView,
+} from './searchUrl'
 
-export interface SearchState {
-  q: string
-  categoryId: string
-  subcategory: string
-  cityIds: string[]
-  /** Raw price inputs ('' = not set) so the form can show exactly what the user typed. */
-  min: string
-  max: string
-  species: string
-  height: string
-  age: string
-  vip: boolean
-  delivery: boolean
-  sellerType: SellerTypeParam
-}
-
-export const emptySearchState: SearchState = {
-  q: '',
-  categoryId: '',
-  subcategory: '',
-  cityIds: [],
-  min: '',
-  max: '',
-  species: '',
-  height: '',
-  age: '',
-  vip: false,
-  delivery: false,
-  sellerType: '',
-}
-
-/* ---------- Sort ---------- */
-
-const sortParam: Record<ListingSort, string> = { newest: '', 'price-asc': 'ucuz', 'price-desc': 'baha' }
-
-export function parseSort(value: string | null): ListingSort {
-  if (value === 'ucuz') return 'price-asc'
-  if (value === 'baha') return 'price-desc'
-  return 'newest'
-}
-
-/* ---------- Parsing / writing ---------- */
+/* ---------- Parsing ---------- */
 
 const isPrice = (v: string) => v !== '' && Number.isFinite(Number(v))
 
@@ -94,7 +59,7 @@ export function parseSearchState(params: URLSearchParams): SearchState {
     q: (params.get(PARAM.q) ?? '').trim(),
     categoryId: category ? category.id : '',
     subcategory: category && subcategoryName(category.id, sub) ? sub : '',
-    // Keep the Figma order of the city list ("Bakı, Abşeron") regardless of the order in the URL.
+    // Keep the order of the city list ("Bakı, Abşeron") regardless of the order in the URL.
     cityIds: cities.map((c) => c.id).filter((id) => cityIds.includes(id)),
     min: isPrice(min) ? min : '',
     max: isPrice(max) ? max : '',
@@ -105,41 +70,6 @@ export function parseSearchState(params: URLSearchParams): SearchState {
     delivery: params.get(PARAM.delivery) === '1',
     sellerType: seller === 'biznes' || seller === 'ferdi' ? seller : '',
   }
-}
-
-/** Builds the query string for `state`, keeping the non-filter params (sort, view) from `current`. */
-export function writeSearchState(state: SearchState, current: URLSearchParams): URLSearchParams {
-  const next = new URLSearchParams()
-  const set = (key: string, value: string | false) => value && next.set(key, value)
-  set(PARAM.q, state.q.trim())
-  set(PARAM.category, state.categoryId)
-  set(PARAM.subcategory, state.categoryId && state.subcategory)
-  set(PARAM.city, state.cityIds.join(','))
-  set(PARAM.min, state.min.trim())
-  set(PARAM.max, state.max.trim())
-  set(PARAM.species, state.species)
-  set(PARAM.height, state.height)
-  set(PARAM.age, state.age)
-  set(PARAM.vip, state.vip && '1')
-  set(PARAM.delivery, state.delivery && '1')
-  set(PARAM.seller, state.sellerType)
-  set(PARAM.sort, current.get(PARAM.sort) ?? '')
-  set(PARAM.view, current.get(PARAM.view) ?? '')
-  return next
-}
-
-export function withSort(current: URLSearchParams, sort: ListingSort): URLSearchParams {
-  const next = new URLSearchParams(current)
-  if (sortParam[sort]) next.set(PARAM.sort, sortParam[sort])
-  else next.delete(PARAM.sort)
-  return next
-}
-
-export function withView(current: URLSearchParams, view: SearchView): URLSearchParams {
-  const next = new URLSearchParams(current)
-  if (view === 'list') next.set(PARAM.view, 'siyahi')
-  else next.delete(PARAM.view)
-  return next
 }
 
 /* ---------- Querying ---------- */
@@ -172,32 +102,30 @@ export function runSearch(state: SearchState, sort: ListingSort = 'newest'): Lis
   return results
 }
 
-/* ---------- Derived copy (heading, breadcrumb, chips) ---------- */
+/* ---------- Derived copy (heading, counts, chips) ---------- */
 
-/** "Bağınız üçün ağaclar" — Figma heading for the "Ağaclar" category; other states keep the same voice. */
+/**
+ * The page heading names what is shown, in the words the visitor clicked: «Məhsullar» (the menu link),
+ * «Ağaclar» / «Meyvə ağacları» (the category or sub-category), «Bakıda ağaclar» (one city), «Önə çıxan elanlar»,
+ * or ««zeytun» üzrə elanlar» for a search word. It is also the page title (with « — GreenStore»).
+ */
 export function searchHeading(state: SearchState): string {
+  if (state.q) return `«${state.q}» üzrə elanlar`
   const category = state.categoryId ? categoryById(state.categoryId) : undefined
-  if (category) return `Bağınız üçün ${lowerAz(category.name)}`
-  if (state.vip) return 'Önə çıxan elanlar'
-  if (state.q) return 'Axtarış nəticələri'
-  return 'Bütün elanlar'
+  const subcategory = category && state.subcategory ? subcategoryName(category.id, state.subcategory) : undefined
+  const subject = subcategory ?? category?.name ?? (state.vip ? 'Önə çıxan elanlar' : 'Məhsullar')
+  if (state.cityIds.length === 1) return `${locativeAz(cityName(state.cityIds[0]))} ${lowerAz(subject)}`
+  return subject
 }
 
-/** "Seçiminizə uyğun 6 elan tapıldı" */
+/** "Seçiminizə uyğun 6 elan tapıldı" (meta description). */
 export function resultSummary(count: number): string {
   return count ? `Seçiminizə uyğun ${formatNumber(count)} elan tapıldı` : 'Seçiminizə uyğun elan tapılmadı'
 }
 
-/** "6 elan" (delivery has its own chip). */
+/** "6 elan", shown once, next to the heading. */
 export function resultCountLabel(count: number): string {
   return `${formatNumber(count)} elan`
-}
-
-export interface FilterChip {
-  key: string
-  label: string
-  /** State after removing this chip. */
-  without: SearchState
 }
 
 /**

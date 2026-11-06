@@ -38,7 +38,7 @@ export async function categoryMetadata(props: CategoryRouteProps): Promise<Metad
   const data = await load(props)
   if (!data || data.outOfRange) return { title: 'Səhifə tapılmadı', robots: { index: false, follow: false } }
   const rule = categoryPageRule(data.category.id, data.city?.id, data.result.total, data.requestedPage)
-  const { title, description } = catalogCopy(data.state, data.result.total, data.requestedPage, { cityPage: Boolean(data.city) })
+  const { title, description } = catalogCopy(data.state, data.result.total, data.requestedPage)
   return pageMetadata({ title, description, canonical: rule.canonical, index: rule.index, follow: rule.follow })
 }
 
@@ -55,6 +55,7 @@ export async function CategoryRoute(props: CategoryRouteProps) {
       <JsonLd data={crumbsJsonLd(crumbs)} />
       <SearchPage
         state={data.state}
+        sort={data.sort}
         view={data.view}
         result={data.result}
         stateQuery={data.stateQuery}

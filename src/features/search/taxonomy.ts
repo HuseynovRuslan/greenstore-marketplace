@@ -1,6 +1,4 @@
-import { publicListings } from '@/data/listings'
-import { compareAz, normalizeSearch } from '@/lib/format'
-import type { Listing } from '@/types'
+import { normalizeSearch } from '@/lib/format'
 
 /** ASCII URL slug for Azerbaijani labels ("İynəyarpaqlılar" → "iyneyarpaqlilar", "Zeytun ağacı" → "zeytun-agaci"). */
 export function slugify(value: string): string {
@@ -13,7 +11,9 @@ export function slugify(value: string): string {
  * Sub-categories per product category, from Figma "İdarəetmə · Kateqoriyalar" (second line of each row).
  * Variant 2: `kollar` and `otaq-bitkileri` replace "Dekorativ bitkilər" (their lists are placeholders until the
  * backend taxonomy exists) and "Dibçəklər və dekor" moved to `bag-avadanliqlari`. The same lists are kept in
- * @/data/postAd and @/data/admin. Used by the "Alt kateqoriya seçin" filter.
+ * @/data/postAd and @/data/admin. Used by the sidebar's sub-category list.
+ *
+ * No listing data here: client components import this module. Species (derived from the listings) are in species.ts.
  */
 export const subcategoriesByCategory: Record<string, string[]> = {
   agaclar: ['Dekorativ ağaclar', 'Meyvə ağacları', 'İynəyarpaqlılar'],
@@ -33,30 +33,4 @@ export function subcategoryOptions(categoryId: string): Array<{ value: string; l
 
 export function subcategoryName(categoryId: string, slug: string): string | undefined {
   return subcategoriesByCategory[categoryId]?.find((name) => slugify(name) === slug)
-}
-
-/** "Zeytun ağacı — Olea europaea" → "Zeytun ağacı" (the part before the latin name / variety). */
-export function speciesName(listing: Listing): string {
-  return listing.title.split(' — ')[0].trim()
-}
-
-export function speciesSlug(listing: Listing): string {
-  return slugify(speciesName(listing))
-}
-
-/** "Ağac növü seçin" options: the species that have public listings in the chosen category (all categories when empty). */
-export function speciesOptions(categoryId: string): Array<{ value: string; label: string }> {
-  const names = new Map<string, string>()
-  for (const l of publicListings) {
-    if (categoryId && l.categoryId !== categoryId) continue
-    names.set(speciesSlug(l), speciesName(l))
-  }
-  return [...names]
-    .map(([value, label]) => ({ value, label }))
-    .sort((a, b) => compareAz(a.label, b.label))
-}
-
-export function speciesLabel(slug: string): string | undefined {
-  const match = publicListings.find((l) => speciesSlug(l) === slug)
-  return match ? speciesName(match) : undefined
 }

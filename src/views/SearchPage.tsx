@@ -1,15 +1,18 @@
 import Link from 'next/link'
 import { ListingCard } from '@/components/cards/ListingCard'
-import { SectionHeader } from '@/components/ui/SectionHeader'
 import { PaginationLinks } from '@/components/ui/PaginationLinks'
 import { categoryById } from '@/data/categories'
 import { cityName } from '@/data/cities'
+import { PLANT_CATEGORY_IDS } from '@/data/postAd'
+import { CatalogResults, RESULTS_ID } from '@/features/search/CatalogResults'
+import { getFacetCounts } from '@/features/search/facets'
 import { ListingRow } from '@/features/search/ListingRow'
-import { SearchShell } from '@/features/search/SearchShell'
+import { speciesOptions } from '@/features/search/species'
 import { subcategoryName } from '@/features/search/taxonomy'
 import { withSearchCover } from '@/features/search/searchCovers'
-import { resultSummary, searchHeading, type SearchState, type SearchView } from '@/features/search/searchState'
+import { activeChips, searchHeading, type SearchState, type SearchView } from '@/features/search/searchState'
 import { categoryPath } from '@/seo/catalog'
+import type { ListingSort } from '@/services/marketplace'
 import type { PageResult } from '@/services/repository'
 import type { Listing } from '@/types'
 
@@ -60,6 +63,7 @@ function SearchBreadcrumb({ crumbs }: { crumbs: Crumb[] }) {
 
 interface SearchPageProps {
   state: SearchState
+  sort: ListingSort
   view: SearchView
   result: PageResult<Listing>
   /** All filters as a query string (category pages include their `kateqoriya` / `seher`). */
@@ -72,18 +76,12 @@ interface SearchPageProps {
 }
 
 /**
- * "/elanlar" and the category pages — Figma "Məhsul axtarışı · 1440" and "Mobil filtr paneli · 390".
- * The heading, breadcrumb and result cards are rendered on the server; `SearchShell` adds the filter controls.
+ * "/elanlar" and the category pages (Variant 2). The breadcrumb, result cards, chips and counts are rendered on
+ * the server; `CatalogResults` adds the search card, the sidebar and the controls.
  */
-export default function SearchPage({ state, view, result, stateQuery, basePath, urlQuery, crumbs }: SearchPageProps) {
+export default async function SearchPage({ state, sort, view, result, stateQuery, basePath, urlQuery, crumbs }: SearchPageProps) {
   const items = result.items.map(withSearchCover)
-
-  const header = (
-    <>
-      <SearchBreadcrumb crumbs={crumbs} />
-      <SectionHeader as="h1" title={searchHeading(state)} subtitle={resultSummary(result.total)} />
-    </>
-  )
+  const facets = await getFacetCounts(state)
 
   const results =
     view === 'grid' ? (
@@ -106,16 +104,24 @@ export default function SearchPage({ state, view, result, stateQuery, basePath, 
 
   const pagination =
     result.pageCount > 1 ? (
-      <PaginationLinks page={result.page} pageCount={result.pageCount} basePath={basePath} query={urlQuery} scrollTargetId="axtaris-neticeleri" />
+      <PaginationLinks page={result.page} pageCount={result.pageCount} basePath={basePath} query={urlQuery} scrollTargetId={RESULTS_ID} />
     ) : undefined
 
   return (
-    <SearchShell
+    <CatalogResults
+      state={state}
       stateQuery={stateQuery}
       basePath={basePath}
       urlQuery={urlQuery}
+      sort={sort}
+      view={view}
       total={result.total}
-      header={header}
+      heading={searchHeading(state)}
+      chips={activeChips(state)}
+      facets={facets}
+      speciesOptions={speciesOptions(state.categoryId)}
+      showPlantFilters={!state.categoryId || PLANT_CATEGORY_IDS.includes(state.categoryId)}
+      breadcrumb={<SearchBreadcrumb crumbs={crumbs} />}
       results={results}
       pagination={pagination}
     />

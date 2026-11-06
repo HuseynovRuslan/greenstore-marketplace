@@ -1,91 +1,140 @@
 'use client'
 
-import { ChevronDown } from 'lucide-react'
-import { buttonClass } from '@/components/ui/Button'
+import { useLayoutEffect, useRef } from 'react'
+import { ArrowDownUp, ChevronDown, LayoutGrid, List, X } from 'lucide-react'
+import { Listbox, listboxChevronClass } from '@/components/ui/Listbox'
 import { cn } from '@/lib/format'
 import { listingSortOptions, type ListingSort } from '@/services/marketplace'
-import type { FilterChip, SearchView } from './searchState'
+import { chipClass } from './FilterControls'
+import type { FilterChip, SearchView } from './searchUrl'
 
-/** Figma "Seçilmiş filtrlər": 12 px semibold "Nişan" chips on #eaf0e9 with "×", then a 12 px «Sıfırla» link. */
-export function ActiveFilterChips({ chips, showClearAll, onRemove, onClearAll }: {
-  chips: FilterChip[]
-  showClearAll: boolean
-  onRemove: (chip: FilterChip) => void
-  onClearAll: () => void
-}) {
-  if (!chips.length && !showClearAll) return null
+/**
+ * Sort control (catalogue, seller page): the site Listbox from md up, a native <select> on phones, both with the
+ * same bordered look. A fixed width keeps the row still when the label changes.
+ */
+export function SortSelect({ value, onChange, className }: { value: ListingSort; onChange: (sort: ListingSort) => void; className?: string }) {
+  const icon = <ArrowDownUp aria-hidden size={16} strokeWidth={2} className="shrink-0 text-muted" />
   return (
-    <div className="flex w-full flex-wrap items-start gap-2" aria-label="Seçilmiş filtrlər" role="group">
-      {chips.map((chip) => (
-        <button
-          key={chip.key}
-          type="button"
-          onClick={() => onRemove(chip)}
-          aria-label={`${chip.label} filtrini sil`}
-          className="inline-flex shrink-0 items-start rounded-[5px] bg-mint px-[9px] py-[5px] text-xs leading-[normal] font-semibold whitespace-nowrap text-forest transition-colors hover:bg-[#dfe8de]"
+    <div className={cn('shrink-0', className)}>
+      <Listbox
+        label="Sıralama"
+        value={value}
+        onChange={(v) => onChange(v as ListingSort)}
+        options={listingSortOptions}
+        icon={icon}
+        align="end"
+        className="hidden h-11 w-[200px] md:block"
+        triggerClassName="border border-line-strong bg-surface transition-colors duration-(--dur-fast) hover:border-forest"
+      />
+      <label className="relative flex h-11 w-full min-w-0 items-center gap-2 rounded-option border border-line-strong bg-surface pl-3 has-[select:focus-visible]:outline-2 has-[select:focus-visible]:outline-offset-2 has-[select:focus-visible]:outline-olive md:hidden">
+        {icon}
+        <span className="sr-only">Sıralama</span>
+        <select
+          value={value}
+          onChange={(e) => onChange(e.target.value as ListingSort)}
+          className="h-full min-w-0 flex-1 cursor-pointer appearance-none bg-transparent pr-9 text-[15px] leading-[normal] font-medium text-ink outline-none"
         >
-          {chip.label} ×
-        </button>
-      ))}
-      {showClearAll && (
-        <button type="button" onClick={onClearAll} className="text-xs leading-[1.5] whitespace-nowrap text-forest hover:text-olive-text hover:underline">
-          Sıfırla
-        </button>
-      )}
+          {listingSortOptions.map((o) => (
+            <option key={o.value} value={o.value}>
+              {o.label}
+            </option>
+          ))}
+        </select>
+        <ChevronDown aria-hidden size={16} strokeWidth={2} className={cn(listboxChevronClass, 'pointer-events-none absolute right-3')} />
+      </label>
     </div>
   )
 }
 
-/** Figma "Bölmə seçimləri": "Şəbəkə" / "Siyahı" (min-h 44, p 12, r 8, 13 px; active #173f32 semibold, idle #eaf0e9). */
-export function ViewToggle({ view, onChange }: { view: SearchView; onChange: (view: SearchView) => void }) {
-  const items: Array<[SearchView, string]> = [
-    ['grid', 'Şəbəkə'],
-    ['list', 'Siyahı'],
+/** «Şəbəkə» / «Siyahı»: two 44 px icon buttons in one bordered group; the names stay for screen readers. */
+export function ViewToggle({ view, onChange, className }: { view: SearchView; onChange: (view: SearchView) => void; className?: string }) {
+  const items = [
+    { value: 'grid' as const, label: 'Şəbəkə', Icon: LayoutGrid },
+    { value: 'list' as const, label: 'Siyahı', Icon: List },
   ]
   return (
-    <div role="group" aria-label="Görünüş" className="flex shrink-0 items-start gap-2">
-      {items.map(([value, label]) => (
+    <div role="group" aria-label="Görünüş" className={cn('flex h-11 shrink-0 rounded-option border border-line-strong bg-surface p-[3px]', className)}>
+      {items.map(({ value, label, Icon }) => (
         <button
           key={value}
           type="button"
           aria-pressed={view === value}
+          title={label}
           onClick={() => onChange(value)}
           className={cn(
-            'min-h-11 rounded-lg p-3 text-[13px] leading-[normal] whitespace-nowrap transition-colors',
-            view === value ? 'bg-forest font-semibold text-white' : 'bg-mint text-forest hover:bg-[#dfe8de]',
+            'flex h-full w-[42px] items-center justify-center rounded-[7px] transition-colors duration-(--dur-fast)',
+            view === value ? 'bg-forest text-white' : 'text-ink hover:bg-mint hover:text-forest',
           )}
         >
-          {label}
+          <Icon aria-hidden size={18} strokeWidth={2} />
+          <span className="sr-only">{label}</span>
         </button>
       ))}
     </div>
   )
 }
 
+interface ActiveFilterRowProps {
+  chips: FilterChip[]
+  /** Filters set (the search word does not count); «Sıfırla» shows from one. */
+  filterCount: number
+  onRemove: (chip: FilterChip) => void
+  onReset: () => void
+  /** Where focus goes when the last chip and «Sıfırla» are gone (the results heading). */
+  fallbackFocusId: string
+}
+
 /**
- * Figma sort "Düymə" (white, 1 px border, 18 px chevron-down + 14 px semibold "Ən yenilər").
- * A transparent native <select> sits on top so the options and keyboard handling stay native.
+ * Active filters above the results: one removable chip per filter, in the home's forest-filled chip style, then
+ * «Sıfırla» (clears the filters, keeps the search word). The row wraps instead of scrolling, so no chip is cut off.
+ * Removing a chip moves focus to the chip that takes its place, then to «Sıfırla», then to the heading.
  */
-export function SortSelect({ value, onChange, className }: { value: ListingSort; onChange: (sort: ListingSort) => void; className?: string }) {
-  const label = listingSortOptions.find((o) => o.value === value)?.label ?? listingSortOptions[0].label
+export function ActiveFilterRow({ chips, filterCount, onRemove, onReset, fallbackFocusId }: ActiveFilterRowProps) {
+  const rowRef = useRef<HTMLDivElement>(null)
+  const focusAt = useRef<number | null>(null)
+
+  useLayoutEffect(() => {
+    const index = focusAt.current
+    if (index == null) return
+    focusAt.current = null
+    const targets = [...(rowRef.current?.querySelectorAll<HTMLElement>('[data-chip], [data-reset]') ?? [])]
+    const target = targets[Math.min(index, targets.length - 1)] ?? document.getElementById(fallbackFocusId)
+    target?.focus()
+  })
+
+  if (!chips.length) return null
   return (
-    <div className={cn('group relative shrink-0 rounded-lg has-[:focus-visible]:ring-[3px] has-[:focus-visible]:ring-olive', className)}>
-      <span aria-hidden className={buttonClass('secondary', 'pointer-events-none w-full group-hover:border-olive')}>
-        <ChevronDown size={18} strokeWidth={1.8} absoluteStrokeWidth />
-        {label}
-      </span>
-      <select
-        aria-label="Sıralama"
-        value={value}
-        onChange={(e) => onChange(e.target.value as ListingSort)}
-        className="absolute inset-0 size-full cursor-pointer appearance-none opacity-0"
-      >
-        {listingSortOptions.map((o) => (
-          <option key={o.value} value={o.value}>
-            {o.label}
-          </option>
-        ))}
-      </select>
+    <div ref={rowRef} role="group" aria-label="Seçilmiş filtrlər" className="flex w-full flex-wrap items-center gap-2">
+      {chips.map((chip, i) => (
+        <button
+          key={chip.key}
+          type="button"
+          data-chip=""
+          onClick={() => {
+            focusAt.current = i
+            onRemove(chip)
+          }}
+          aria-label={chip.key === 'q' ? `${chip.label} axtarış sözünü sil` : `${chip.label} filtrini sil`}
+          className={cn(chipClass({ on: true }), 'max-md:h-11')}
+        >
+          {chip.label}
+          <X aria-hidden size={15} strokeWidth={2.2} className="-mr-1 shrink-0" />
+        </button>
+      ))}
+      {filterCount > 0 && (
+        <button
+          type="button"
+          data-reset=""
+          onClick={() => {
+            // The chips that stay (the search word) keep their place; focus goes to the first of them.
+            focusAt.current = 0
+            onReset()
+          }}
+          className="h-[38px] rounded-lg px-2.5 text-sm leading-[normal] font-semibold text-forest underline underline-offset-[3px] hover:text-olive-text max-md:h-11"
+        >
+          Sıfırla
+        </button>
+      )}
     </div>
   )
 }

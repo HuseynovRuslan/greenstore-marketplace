@@ -8,7 +8,8 @@ import { productCategories } from '@/data/categories'
 import { formatNumber } from '@/lib/format'
 import { CityMultiSelect } from './CityMultiSelect'
 import { ageLabel, ageOptions, heightLabel, heightOptions, priceError, sellerOptions, type FilterOption } from './filterDefs'
-import { speciesOptions, subcategoryOptions } from './taxonomy'
+import { speciesOptions } from './species'
+import { subcategoryOptions } from './taxonomy'
 import { emptySearchState, runSearch, type SearchState, type SellerTypeParam } from './searchState'
 
 /** "All" first, then the shared presets, plus a custom range from the URL (e.g. an older "hundurluk=80-200"). */

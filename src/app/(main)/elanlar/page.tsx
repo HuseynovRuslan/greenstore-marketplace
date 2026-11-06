@@ -29,13 +29,13 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
 
 /** /elanlar — product catalogue. Filters live in the query string; results and pagination are server-rendered. */
 export default async function Page({ searchParams }: Props) {
-  const { state, view, result, outOfRange, query, urlQuery } = await load(searchParams)
+  const { state, sort, view, result, outOfRange, query, urlQuery } = await load(searchParams)
   if (outOfRange) notFound()
   const crumbs = searchCrumbs(state)
   return (
     <>
       <JsonLd data={crumbsJsonLd(crumbs)} />
-      <SearchPage state={state} view={view} result={result} stateQuery={query} basePath="/elanlar" urlQuery={urlQuery} crumbs={crumbs} />
+      <SearchPage state={state} sort={sort} view={view} result={result} stateQuery={query} basePath="/elanlar" urlQuery={urlQuery} crumbs={crumbs} />
     </>
   )
 }

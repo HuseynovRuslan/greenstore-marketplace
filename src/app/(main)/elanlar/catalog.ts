@@ -1,6 +1,5 @@
 import { cache } from 'react'
 import { categoryById } from '@/data/categories'
-import { cityName } from '@/data/cities'
 import { parseSearchState, parseSort, resultSummary, searchHeading, type SearchState, type SearchView } from '@/features/search/searchState'
 import { getRepository } from '@/services/repository'
 import { CATALOG_PAGE_SIZE, parsePage } from '@/seo/catalog'
@@ -21,11 +20,13 @@ export const loadCatalog = cache(async (stateQuery: string, pageParam: string | 
   return { state, sort, view, result, requestedPage, outOfRange: requestedPage > result.pageCount }
 })
 
-/** Title and description of a catalogue page ("Bağınız üçün ağaclar", "Ağaclar · Bakı", page suffix). */
-export function catalogCopy(state: SearchState, total: number, page: number, opts: { cityPage?: boolean } = {}) {
+/**
+ * Title and description of a catalogue page: the page heading («Ağaclar», «Bakıda ağaclar», «Məhsullar») plus
+ * a page suffix; the root layout adds « — GreenStore».
+ */
+export function catalogCopy(state: SearchState, total: number, page: number) {
   const category = state.categoryId ? categoryById(state.categoryId) : undefined
-  const city = opts.cityPage && state.cityIds[0] ? cityName(state.cityIds[0]) : undefined
-  const base = city && category ? `${category.name} · ${city}` : searchHeading(state)
+  const base = searchHeading(state)
   const title = page > 1 ? `${base} — səhifə ${page}` : base
   const lead = [category?.description, resultSummary(total)].filter(Boolean).join('. ')
   return { title, description: describe(`${lead}. ${SITE_DESCRIPTION}`) }

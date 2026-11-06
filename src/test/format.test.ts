@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { compareAz, formatDayMonth, formatFullDate, formatNumber, formatPrice, formatRelativeDate, lowerAz, normalizeSearch, upperAz } from '@/lib/format'
+import { compareAz, formatDayMonth, formatFullDate, formatNumber, formatPrice, formatRelativeDate, locativeAz, lowerAz, normalizeSearch, upperAz } from '@/lib/format'
 
 describe('format helpers', () => {
   it('groups thousands with a space like the Figma copy', () => {
@@ -38,5 +38,17 @@ describe('format helpers', () => {
     expect(formatRelativeDate('2026-11-05T21:30:00Z', now)).toBe('bu gün')
     // A date in the future (clock skew) still reads "bu gün"
     expect(formatRelativeDate('2026-11-07T09:00:00', now)).toBe('bu gün')
+  })
+
+  it('puts place names in the locative by their last vowel', () => {
+    expect(['Bakı', 'Abşeron', 'Sumqayıt', 'Gəncə', 'Şəki', 'Quba', 'Lənkəran'].map(locativeAz)).toEqual([
+      'Bakıda',
+      'Abşeronda',
+      'Sumqayıtda',
+      'Gəncədə',
+      'Şəkidə',
+      'Qubada',
+      'Lənkəranda',
+    ])
   })
 })

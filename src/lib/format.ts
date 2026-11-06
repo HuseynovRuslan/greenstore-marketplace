@@ -71,6 +71,16 @@ export function lowerAz(value: string): string {
   return value.replace(/I/g, 'ı').replace(/İ/g, 'i').toLowerCase()
 }
 
+/**
+ * Locative of a place name, by its last vowel (back a ı o u → -da, front e ə i ö ü → -də):
+ * "Bakı" → "Bakıda", "Abşeron" → "Abşeronda", "Gəncə" → "Gəncədə", "Şəki" → "Şəkidə".
+ */
+export function locativeAz(name: string): string {
+  const vowels = lowerAz(name).match(/[aıoueəiöü]/g)
+  const last = vowels?.[vowels.length - 1]
+  return `${name}${last && 'aıou'.includes(last) ? 'da' : 'də'}`
+}
+
 export function upperAz(value: string): string {
   return value.replace(/i/g, 'İ').replace(/ı/g, 'I').toUpperCase()
 }
