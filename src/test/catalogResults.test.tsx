@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { render, screen, within } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { CatalogResults } from '@/features/search/CatalogResults'
 import { activeChips, parseSearchState } from '@/features/search/searchState'
@@ -115,6 +115,20 @@ describe('CatalogResults', () => {
     await user.click(show)
     expect(push).toHaveBeenCalledWith('/elanlar?kateqoriya=agaclar&catdirilma=1', { scroll: false })
     expect(screen.queryByRole('dialog', { name: 'Filtrlər' })).not.toBeInTheDocument()
+  })
+
+  it('dims the sheet count while it is redone, then lets the new number blur in', async () => {
+    const user = userEvent.setup()
+    renderCatalog('', 16)
+    await user.click(screen.getByRole('button', { name: 'Filtrlər' }))
+    const sheet = screen.getByRole('dialog', { name: 'Filtrlər' })
+    const count = () => within(within(sheet).getByRole('button', { name: /elanı göstər$/ })).getByText(/^[\d ]+$/)
+    expect(count()).toHaveClass('opacity-100')
+    expect(count()).not.toHaveClass('motion-safe:animate-count-in')
+    await user.click(within(sheet).getByRole('button', { name: 'Çatdırılma' }))
+    expect(count()).toHaveClass('opacity-50', 'delay-150')
+    await waitFor(() => expect(count()).toHaveClass('opacity-100'))
+    expect(count()).toHaveClass('motion-safe:animate-count-in')
   })
 
   it('drops the draft when the sheet is closed', async () => {

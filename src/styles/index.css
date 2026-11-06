@@ -68,6 +68,15 @@
    * touched, dragged or interrupted); their values live in src/components/motion/springs.ts, next to these tokens.
    */
 
+  /* A number that just changed (the filter sheet's «N elanı göstər»): a quick blur-in. Off under reduced motion. */
+  --animate-count-in: gs-count-in var(--dur-base) var(--ease-out);
+  @keyframes gs-count-in {
+    from {
+      opacity: 0;
+      filter: blur(2px);
+    }
+  }
+
   /*
    * Home hero entrance (first paint). The heading only rises (it is the LCP element and stays fully opaque); the
    * search card and the categories fade up. `backwards` holds the start frame during a stagger delay and drops the

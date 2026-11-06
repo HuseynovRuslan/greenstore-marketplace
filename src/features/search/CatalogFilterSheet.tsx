@@ -77,6 +77,8 @@ export function CatalogFilterSheet({ open, onClose, state, total, speciesOptions
   const error = priceError(draft)
   const current = counted.query === draftQuery
   const none = current && counted.total === 0
+  // The count belongs to an edited draft (not the filters the sheet opened with): a new number fades in.
+  const recounted = counted.query !== queryOf(state)
   const plant = !draft.categoryId || plantCategoryIds.includes(draft.categoryId)
   const subcategories = draft.categoryId ? subcategoryOptions(draft.categoryId) : []
   const species = draft.categoryId === state.categoryId ? speciesOptions : []
@@ -88,7 +90,27 @@ export function CatalogFilterSheet({ open, onClose, state, total, speciesOptions
       onClose={onClose}
       onReset={() => setDraft((d) => withoutFilters(d))}
       resetDisabled={unchanged}
-      submitLabel={none ? 'Uyğun elan yoxdur' : `${formatNumber(counted.total)} elanı göstər`}
+      submitLabel={
+        none ? (
+          'Uyğun elan yoxdur'
+        ) : (
+          <>
+            {/* While the count is being redone the old number dims (after 150 ms, so quick answers don't flicker);
+                a new number blurs in (keyed, so it remounts). The button's name stays «N elanı göstər». */}
+            <span
+              key={counted.total}
+              className={cn(
+                'inline-block tabular-nums transition-opacity duration-(--dur-base) ease-out',
+                recounted && 'motion-safe:animate-count-in',
+                current ? 'opacity-100' : 'opacity-50 delay-150',
+              )}
+            >
+              {formatNumber(counted.total)}
+            </span>{' '}
+            elanı göstər
+          </>
+        )
+      }
       submitDisabled={Boolean(error) || none}
       onSubmit={() => {
         onApply(draft)
