@@ -24,10 +24,10 @@ export function HeroCategories({ selected, className, items = categories }: { se
         {items.map((c, i) => {
           const on = c.id === selected
           return (
-            // Fades up after the search card, 40 ms apart.
+            // Fades up after the search card, 30 ms apart.
             <li
               key={c.id}
-              style={{ animationDelay: `${120 + i * 40}ms` }}
+              style={{ animationDelay: `${120 + i * 30}ms` }}
               className="flex w-[78px] shrink-0 animate-fade-up motion-reduce:animate-none lg:w-auto lg:min-w-0"
             >
               <Link href={categoryHref(c)} className="group flex w-full min-w-0 flex-col items-center gap-1.5 rounded-option p-0.5 lg:gap-2 lg:p-1">

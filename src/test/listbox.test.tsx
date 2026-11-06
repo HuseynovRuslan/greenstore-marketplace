@@ -175,3 +175,22 @@ describe('Listbox (select-only combobox)', () => {
     expect(combobox()).toHaveTextContent('Quba')
   })
 })
+
+describe('Listbox motion', () => {
+  it('opens and closes without animation from the keyboard, animated from a click', async () => {
+    const user = userEvent.setup()
+    render(<CityField />)
+    const list = () => document.getElementById(combobox().getAttribute('aria-controls')!)!
+    combobox().focus()
+    await user.keyboard('{ArrowDown}')
+    expect(list()).toHaveAttribute('data-state', 'open')
+    expect(list()).toHaveAttribute('data-instant')
+    await user.keyboard('{Escape}')
+    expect(list()).toHaveAttribute('data-state', 'closed')
+    expect(list()).toHaveAttribute('data-instant')
+
+    await user.click(combobox())
+    expect(list()).toHaveAttribute('data-state', 'open')
+    expect(list()).not.toHaveAttribute('data-instant')
+  })
+})

@@ -64,10 +64,15 @@ export function Listbox({ label, value, onChange, options, icon, name, align, cl
 
   const [open, setOpen] = useState(false)
   const [active, setActive] = useState(-1)
+  // Opened or closed from the keyboard: no animation (data-instant) — keyboard actions repeat and must feel immediate.
+  const [instant, setInstant] = useState(false)
   const { present, state, onTransitionEnd } = usePresence(open)
   usePanelAlign(present, listRef, align)
   useOpenPanelCount(open)
-  useOutsidePress(open, rootRef, () => setOpen(false))
+  useOutsidePress(open, rootRef, () => {
+    setInstant(false)
+    setOpen(false)
+  })
 
   const selectedIndex = Math.max(
     0,
@@ -115,6 +120,7 @@ export function Listbox({ label, value, onChange, options, icon, name, align, cl
   const typing = () => Date.now() - typed.current.at < TYPEAHEAD_MS
 
   const onKeyDown = (e: ReactKeyboardEvent<HTMLButtonElement>) => {
+    setInstant(true)
     const printable = e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey
     if (!open) {
       if (['Enter', ' ', 'ArrowDown', 'ArrowUp'].includes(e.key) && !(e.key === ' ' && typing())) {
@@ -186,7 +192,11 @@ export function Listbox({ label, value, onChange, options, icon, name, align, cl
         aria-expanded={open}
         aria-controls={listboxId}
         aria-activedescendant={open && active >= 0 ? optionId(active) : undefined}
-        onClick={() => (open ? setOpen(false) : openAt(selectedIndex))}
+        onClick={() => {
+          setInstant(false)
+          if (open) setOpen(false)
+          else openAt(selectedIndex)
+        }}
         onKeyDown={onKeyDown}
         // Space is handled on keydown; cancel the button's own click on keyup so it doesn't toggle again.
         onKeyUp={(e) => e.key === ' ' && e.preventDefault()}
@@ -216,6 +226,7 @@ export function Listbox({ label, value, onChange, options, icon, name, align, cl
         hidden={!present}
         inert={!open}
         data-state={state}
+        data-instant={instant || undefined}
         onTransitionEnd={onTransitionEnd}
         // Keep focus on the trigger when an option is pressed.
         onMouseDown={(e) => e.preventDefault()}
@@ -231,7 +242,10 @@ export function Listbox({ label, value, onChange, options, icon, name, align, cl
               aria-selected={isSelected}
               data-active={i === active || undefined}
               onPointerMove={() => i !== active && setActive(i)}
-              onClick={() => choose(i)}
+              onClick={() => {
+                setInstant(false)
+                choose(i)
+              }}
               className={cn(
                 'flex h-11 cursor-pointer items-center gap-3 rounded-option px-3 text-[15px] leading-[normal] whitespace-nowrap',
                 'transition-colors duration-(--dur-fast) data-active:bg-mint',

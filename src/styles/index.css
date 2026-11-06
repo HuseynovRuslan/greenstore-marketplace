@@ -42,24 +42,24 @@
   --radius-search: 18px; /* hero search card */
 
   /*
-   * Motion. Exit is faster than enter; only transform and opacity move (colour and shadow may fade).
+   * Motion. Exit is faster than enter; only transform and opacity move (colour and shadow may fade). Entering and
+   * leaving both decelerate (ease-out): an accelerating exit holds still at the start, when it is being watched.
    * Everything is switched off or reduced to a fade under prefers-reduced-motion (see the end of this file).
    */
-  --ease-out: cubic-bezier(0.22, 1, 0.36, 1); /* arriving: decelerate */
-  --ease-in: cubic-bezier(0.4, 0, 1, 1); /* leaving: accelerate */
-  --dur-fast: 120ms; /* chips, press feedback */
-  --dur-base: 180ms; /* header state, tab indicator, hiding the header */
-  --dur-slow: 280ms; /* showing the header, card image zoom */
-  --dur-reveal: 420ms; /* hero entrance, card reveal */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1); /* enter and exit: decelerate */
+  --dur-fast: 120ms; /* chips, press feedback, the leaving side of a cross-fade */
+  --dur-base: 180ms; /* header state, tab indicator, hiding the header, card hover */
+  --dur-slow: 280ms; /* showing the header */
+  --dur-reveal: 320ms; /* hero entrance, card reveal */
   --dur-panel-in: 160ms; /* listbox / popover open */
   --dur-panel-out: 110ms; /* listbox / popover close */
 
-  /* Check mark of an active toggle chip (animate-pop-in; off under reduced motion) */
+  /* Check mark of an active toggle chip (animate-pop-in; off under reduced motion): from .85, never from nothing */
   --animate-pop-in: gs-pop-in var(--dur-fast) var(--ease-out);
   @keyframes gs-pop-in {
     from {
       opacity: 0;
-      transform: scale(0.6);
+      transform: scale(0.85);
     }
   }
 
@@ -87,7 +87,8 @@
   /*
    * Home hero entrance (first paint). The heading only rises (it is the LCP element and stays fully opaque); the
    * search card and the categories fade up. `backwards` holds the start frame during a stagger delay and drops the
-   * transform afterwards, so no stacking context or containing block is left behind. Off under reduced motion.
+   * transform afterwards, so no stacking context or containing block is left behind. It plays once per page load
+   * (html[data-hero-seen], set by HeroSearchCard). Off under reduced motion.
    */
   --animate-rise: gs-rise var(--dur-reveal) var(--ease-out) backwards;
   --animate-fade-up: gs-fade-up var(--dur-reveal) var(--ease-out) backwards;
@@ -186,21 +187,28 @@
 
 /*
  * Floating panels (Listbox, filter popovers — src/components/ui/Popover.tsx). A panel enters with
- * data-state="open" from @starting-style and leaves with data-state="closed" (faster, accelerating);
- * the component unmounts or hides it once the exit is over. Reduced motion: opacity only.
+ * data-state="open" from @starting-style and leaves with data-state="closed" (faster); the component unmounts or
+ * hides it once the exit is over. It grows from its trigger's corner: top left, or top right when it is aligned to
+ * the trigger's end. Opened or closed from the keyboard (data-instant) it appears and goes at once.
+ * Reduced motion: opacity only.
  */
 @layer components {
   .gs-panel {
-    transform-origin: top;
+    transform-origin: top left;
     transition-property: opacity, transform;
     transition-duration: var(--dur-panel-in);
     transition-timing-function: var(--ease-out);
+  }
+  .gs-panel[data-align='end'] {
+    transform-origin: top right;
   }
   .gs-panel[data-state='closed'] {
     opacity: 0;
     transform: translateY(-4px) scale(0.98);
     transition-duration: var(--dur-panel-out);
-    transition-timing-function: var(--ease-in);
+  }
+  .gs-panel[data-instant] {
+    transition-duration: 0s;
   }
   @starting-style {
     .gs-panel[data-state='open'] {
@@ -225,8 +233,8 @@
 
 /*
  * Home header on scroll (SiteHeader variant="home", useScrollHeader). Its height never changes; it only turns
- * translucent with a shadow (data-scrolled) and slides out of view (data-hidden): back in over --dur-slow
- * decelerating, away over --dur-base accelerating. Reduced motion: no slide, it fades out and in over --dur-fast.
+ * translucent with a shadow (data-scrolled) and slides out of view (data-hidden): back in over --dur-slow, away
+ * over --dur-base, both decelerating. Reduced motion: no slide, it fades out and in over --dur-fast.
  */
 @layer components {
   .gs-header {
@@ -246,7 +254,6 @@
   .gs-header[data-hidden] {
     transform: translateY(-100%);
     transition-duration: var(--dur-base);
-    transition-timing-function: var(--ease-in);
   }
   @media (prefers-reduced-motion: reduce) {
     .gs-header {
@@ -276,7 +283,6 @@
   :root:has(.gs-header[data-hidden]) .gs-catalog-bar {
     transform: translateY(-58px);
     transition-duration: var(--dur-base);
-    transition-timing-function: var(--ease-in);
   }
   @media (width >= 48rem) {
     .gs-catalog-bar {
@@ -316,6 +322,17 @@
       transform: none;
       transition: none;
     }
+  }
+}
+
+/*
+ * The hero entrance plays once per page load: HeroSearchCard sets html[data-hero-seen] once it has finished, so a
+ * later visit to the home page (client navigation, back/forward cache) shows the hero at rest. In the utilities
+ * layer, so its higher specificity outranks the animate-* utilities.
+ */
+@layer utilities {
+  html[data-hero-seen] :is(.animate-rise, .animate-fade-up) {
+    animation: none;
   }
 }
 

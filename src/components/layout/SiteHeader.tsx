@@ -172,10 +172,15 @@ export function SiteHeader({ variant = 'default' }: { variant?: 'default' | 'hom
     document.getElementById(HERO_SEARCH_ID)?.scrollIntoView({ block: 'center' })
     document.getElementById(HERO_QUERY_ID)?.focus({ preventScroll: true })
   }
-  const pillState = cn(
-    'transition-[opacity,translate] duration-(--dur-base) ease-out motion-reduce:transition-opacity',
-    pill ? 'opacity-100' : 'pointer-events-none translate-y-1 opacity-0 motion-reduce:translate-y-0',
-  )
+  // Nav ↔ pill cross-fade: the side that leaves fades and blurs out fast (--dur-fast); the side that arrives waits
+  // 60 ms and comes in over --dur-base, so the two are hardly on screen together, and the 2 px blur makes what overlap
+  // there is read as one change. Same curve both ways. Reduced motion: opacity only.
+  const swap = (shown: boolean) =>
+    cn(
+      'transition-[opacity,translate,filter] ease-out motion-reduce:transition-opacity',
+      shown ? 'opacity-100 delay-60 duration-(--dur-base)' : 'pointer-events-none opacity-0 blur-[2px] duration-(--dur-fast) motion-reduce:blur-none',
+    )
+  const pillState = cn(swap(pill), !pill && 'translate-y-1 motion-reduce:translate-y-0')
   const pillIcon = (className?: string) => (
     <button
       type="button"
@@ -264,7 +269,7 @@ export function SiteHeader({ variant = 'default' }: { variant?: 'default' | 'hom
                 <nav
                   aria-label="Əsas bölmələr"
                   {...trackFocus('nav')}
-                  className={cn('flex items-center gap-1 [grid-area:1/1] transition-opacity duration-(--dur-base)', pill && 'pointer-events-none opacity-0')}
+                  className={cn('flex items-center gap-1 [grid-area:1/1]', swap(!pill))}
                 >
                   {homeNav.map((l) => (
                     <Link

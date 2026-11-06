@@ -1,6 +1,6 @@
 'use client'
 
-import { useId, useLayoutEffect, useRef, useState, type FormEvent } from 'react'
+import { useEffect, useId, useLayoutEffect, useRef, useState, type FormEvent } from 'react'
 import { useRouter } from 'next/navigation'
 import { Search } from 'lucide-react'
 import { listingTotals } from '@/data/categories'
@@ -18,6 +18,9 @@ const cityOptions = [
   { value: '', label: 'Bütün şəhərlər', meta: formatNumber(listingTotals.all) },
   ...cities.map((c) => ({ value: c.id, label: c.name, meta: formatNumber(cityListingCounts[c.id] ?? 0) })),
 ]
+
+/** The hero entrance is over by then (card 320 ms; last category 390 ms delay + 320 ms). */
+const HERO_ENTRANCE_MS = 1000
 
 /**
  * Home hero search (docs/design/variant-2): the card with Hamısı / Məhsullar / Xidmətlər, the search row
@@ -41,6 +44,12 @@ export function HeroSearchCard() {
     setTab(next)
     setFilters((current) => filtersForTab(next, current))
   }
+
+  // The entrance plays once per page load: once it is over, mark it seen (index.css stills it for later visits).
+  useEffect(() => {
+    const timer = window.setTimeout(() => document.documentElement.setAttribute('data-hero-seen', ''), HERO_ENTRANCE_MS)
+    return () => window.clearTimeout(timer)
+  }, [])
 
   /** Opens the catalogue; false (and the error shown) when the price range is invalid. */
   const search = () => {

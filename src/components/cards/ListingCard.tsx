@@ -34,7 +34,7 @@ export function ListingCard({ listing, className }: { listing: Listing; classNam
   return (
     <article
       className={cn(
-        'group relative flex h-full w-full min-w-0 flex-col gap-2 rounded-xl border border-line bg-surface p-[7px] transition-[border-color,box-shadow] duration-(--dur-base) hover:border-olive hover:shadow-card-hover md:gap-3 md:p-[11px]',
+        'group relative flex h-full w-full min-w-0 flex-col gap-2 rounded-xl border border-line bg-surface p-[7px] transition-[border-color,box-shadow] duration-(--dur-base) ease-out hover:border-olive hover:shadow-card-hover md:gap-3 md:p-[11px]',
         cardFocusClass,
         className,
       )}
@@ -45,7 +45,7 @@ export function ListingCard({ listing, className }: { listing: Listing; classNam
           src={listing.cover}
           sources={sources}
           className="aspect-square rounded-lg md:aspect-[4/3]"
-          imgClassName="transition-transform duration-(--dur-slow) ease-out motion-safe:group-hover:scale-[1.03]"
+          imgClassName="transition-transform duration-(--dur-base) ease-out motion-safe:group-hover:scale-[1.03]"
         />
         {listing.vip && <PromotedBadge size="card" className="absolute top-1.5 left-1.5 md:top-2 md:left-2" />}
       </div>

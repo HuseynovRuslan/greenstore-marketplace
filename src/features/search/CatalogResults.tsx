@@ -162,8 +162,10 @@ export function CatalogResults(props: CatalogResultsProps) {
 
           <ActiveFilterRow chips={shownChips} filterCount={filterCount} onRemove={(chip) => apply(chip.without)} onReset={reset} fallbackFocusId={headingId} />
 
-          {/* The old results stay while new ones load; they dim after 150 ms, and brighten at once when done. */}
-          <div className="flex flex-col gap-8 transition-opacity duration-(--dur-base) ease-out group-data-pending:opacity-55 group-data-pending:delay-150 motion-reduce:transition-none">
+          {/* The old results stay while new ones load; they dim after 150 ms, and brighten at once when done. The
+              fade stays under reduced motion (it is not movement): without the transition the delay went too, and
+              every load, however short, flashed the results. */}
+          <div className="flex flex-col gap-8 transition-opacity duration-(--dur-base) ease-out group-data-pending:opacity-55 group-data-pending:delay-150">
             {total === 0 ? (
               <CatalogEmptyState
                 chips={shownChips}

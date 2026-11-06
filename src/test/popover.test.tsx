@@ -81,3 +81,18 @@ describe('Popover', () => {
     expect(screen.getByRole('button', { name: 'Hündürlük' })).toHaveFocus()
   })
 })
+
+describe('Popover motion', () => {
+  it('opens without animation from the keyboard and animated from a click', async () => {
+    const user = userEvent.setup()
+    render(<PriceChip />)
+    chip().focus()
+    await user.keyboard('{Enter}')
+    expect(screen.getByRole('dialog', { name: 'Qiymət, ₼' })).toHaveAttribute('data-instant')
+    await user.keyboard('{Escape}')
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+
+    await user.click(chip())
+    expect(screen.getByRole('dialog', { name: 'Qiymət, ₼' })).not.toHaveAttribute('data-instant')
+  })
+})

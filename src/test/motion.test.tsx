@@ -90,7 +90,24 @@ describe('hero entrance', () => {
     expect(heading.className).not.toMatch(/fade/)
     expect(document.getElementById('hero-search')).toHaveClass('animate-fade-up', 'motion-reduce:animate-none')
     const items = [...document.querySelectorAll<HTMLElement>('#kateqoriyalar li')]
-    expect(items.map((li) => li.style.animationDelay)).toEqual(['120ms', '160ms', '200ms', '240ms', '280ms', '320ms', '360ms', '400ms', '440ms', '480ms'])
+    expect(items.map((li) => li.style.animationDelay)).toEqual(['120ms', '150ms', '180ms', '210ms', '240ms', '270ms', '300ms', '330ms', '360ms', '390ms'])
+  })
+
+  it('plays once per page load: marks the hero seen once the entrance is over', async () => {
+    vi.useFakeTimers()
+    document.documentElement.removeAttribute('data-hero-seen')
+    const content = await mockRepository.getHomeContent()
+    render(
+      <AppStoreProvider>
+        <HomePage content={content} />
+      </AppStoreProvider>,
+    )
+    act(() => vi.advanceTimersByTime(900))
+    expect(document.documentElement).not.toHaveAttribute('data-hero-seen')
+    act(() => vi.advanceTimersByTime(100))
+    expect(document.documentElement).toHaveAttribute('data-hero-seen')
+    vi.useRealTimers()
+    document.documentElement.removeAttribute('data-hero-seen')
   })
 })
 

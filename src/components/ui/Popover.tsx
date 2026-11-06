@@ -8,6 +8,7 @@ import {
   useState,
   type FocusEvent as ReactFocusEvent,
   type KeyboardEvent as ReactKeyboardEvent,
+  type MouseEvent as ReactMouseEvent,
   type ReactNode,
   type RefObject,
   type TransitionEvent as ReactTransitionEvent,
@@ -17,8 +18,9 @@ import { cn } from '@/lib/format'
 /*
  * Floating panel shared by Listbox and the filter-chip popovers (Variant 2 mockup):
  * white surface, 1 px line border, radius 14, --shadow-popover, 6 px under the trigger, above the hero content.
- * Motion lives in index.css (.gs-panel): open 160 ms ease-out from opacity 0 / translateY(-4px) / scale(.98),
- * close 110 ms ease-in; opacity only under prefers-reduced-motion.
+ * Motion lives in index.css (.gs-panel): open 160 ms ease-out from opacity 0 / translateY(-4px) / scale(.98) out of
+ * the trigger's corner, close 110 ms ease-out; none when opened or closed from the keyboard (data-instant); opacity
+ * only under prefers-reduced-motion.
  */
 export const panelClass = 'gs-panel absolute top-[calc(100%+6px)] z-30 rounded-panel border border-line bg-surface shadow-popover'
 
@@ -118,7 +120,7 @@ export interface PopoverTriggerProps {
   'aria-expanded': boolean
   /** Set while the panel is in the DOM. */
   'aria-controls': string | undefined
-  onClick: () => void
+  onClick: (e: ReactMouseEvent<HTMLButtonElement>) => void
 }
 
 interface PopoverProps {
@@ -145,10 +147,15 @@ export function Popover({ open, onOpenChange, label, trigger, children, align: p
   const panelRef = useRef<HTMLDivElement>(null)
   const panelId = useId()
   const triggerId = `${panelId}-trigger`
+  // Opened from the keyboard (a click with detail 0) or closed with Esc: no animation (data-instant).
+  const [instant, setInstant] = useState(false)
   const { present, state, onTransitionEnd } = usePresence(open)
   usePanelAlign(present, panelRef, preferredAlign)
   useOpenPanelCount(open)
-  useOutsidePress(open, rootRef, () => onOpenChange(false))
+  useOutsidePress(open, rootRef, () => {
+    setInstant(false)
+    onOpenChange(false)
+  })
 
   // Looks the trigger up by id (not a ref) because `close` is handed to the render function below.
   const close = () => {
@@ -166,6 +173,7 @@ export function Popover({ open, onOpenChange, label, trigger, children, align: p
   const onKeyDown = (e: ReactKeyboardEvent) => {
     if (e.key !== 'Escape' || !open) return
     e.stopPropagation()
+    setInstant(true)
     close()
   }
 
@@ -183,7 +191,10 @@ export function Popover({ open, onOpenChange, label, trigger, children, align: p
         'aria-haspopup': 'dialog',
         'aria-expanded': open,
         'aria-controls': present ? panelId : undefined,
-        onClick: () => onOpenChange(!open),
+        onClick: (e) => {
+          setInstant(e.detail === 0)
+          onOpenChange(!open)
+        },
       })}
       {present && (
         <div
@@ -193,6 +204,7 @@ export function Popover({ open, onOpenChange, label, trigger, children, align: p
           aria-label={label}
           tabIndex={-1}
           data-state={state}
+          data-instant={instant || undefined}
           inert={!open}
           onTransitionEnd={onTransitionEnd}
           className={cn(panelClass, panelAlignClass, 'p-4 outline-none', panelClassName)}
