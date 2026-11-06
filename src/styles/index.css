@@ -63,26 +63,10 @@
     }
   }
 
-  /* Dialog: backdrop fade, bottom sheet slide-up (< 640 px), centred panel settle; reduced motion = fade only */
-  --animate-fade-in: gs-fade-in var(--dur-base) var(--ease-out);
-  --animate-sheet-up: gs-sheet-up var(--dur-slow) var(--ease-out);
-  --animate-dialog-in: gs-dialog-in var(--dur-base) var(--ease-out);
-  @keyframes gs-fade-in {
-    from {
-      opacity: 0;
-    }
-  }
-  @keyframes gs-sheet-up {
-    from {
-      transform: translateY(100%);
-    }
-  }
-  @keyframes gs-dialog-in {
-    from {
-      opacity: 0;
-      transform: translateY(8px) scale(0.98);
-    }
-  }
+  /*
+   * The Dialog / bottom sheet, the favourite heart and the catalogue's chips move with Motion springs (they are
+   * touched, dragged or interrupted); their values live in src/components/motion/springs.ts, next to these tokens.
+   */
 
   /*
    * Home hero entrance (first paint). The heading only rises (it is the LCP element and stays fully opaque); the

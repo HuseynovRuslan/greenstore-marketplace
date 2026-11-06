@@ -61,3 +61,42 @@ describe('Dialog', () => {
     expect(screen.getByRole('button', { name: 'Bağla' })).toHaveClass('size-11')
   })
 })
+
+describe('Dialog layout', () => {
+  afterEach(() => vi.unstubAllGlobals())
+
+  function WithFooter() {
+    return (
+      <Dialog open title="Filtrlər" onClose={() => {}} footer={<button type="button">Axtar</button>}>
+        <p>Qruplar</p>
+      </Dialog>
+    )
+  }
+
+  it('keeps the header and the footer outside the scrolling content', () => {
+    render(<WithFooter />)
+    const dialog = screen.getByRole('dialog', { name: 'Filtrlər' })
+    const body = screen.getByText('Qruplar').parentElement!
+    expect(body).toHaveClass('overflow-y-auto', 'overscroll-contain')
+    expect(body).not.toContainElement(screen.getByRole('button', { name: 'Axtar' }))
+    expect(body).not.toContainElement(screen.getByRole('heading', { name: 'Filtrlər' }))
+    expect(dialog).toContainElement(screen.getByRole('button', { name: 'Axtar' }))
+  })
+
+  it('is a bottom sheet with a grab handle below 640 px, a centred dialog above', () => {
+    const { unmount } = render(<WithFooter />)
+    const handle = () => screen.getByRole('dialog').querySelector('span[aria-hidden].rounded-full')
+    expect(handle()).toBeNull()
+    unmount()
+    vi.stubGlobal('matchMedia', (query: string) => ({
+      matches: query === '(max-width: 639.98px)',
+      media: query,
+      addEventListener() {},
+      removeEventListener() {},
+    }))
+    render(<WithFooter />)
+    expect(handle()).not.toBeNull()
+    // The handle and the title bar take the drag (no browser panning there); the content keeps native scrolling.
+    expect(handle()!.parentElement).toHaveClass('touch-none')
+  })
+})

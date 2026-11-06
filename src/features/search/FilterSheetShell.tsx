@@ -22,8 +22,9 @@ interface FilterSheetShellProps {
 }
 
 /**
- * «Filtrlər» sheet shared by the home search and the catalogue: the site Dialog (a bottom sheet below 640 px),
- * one titled group per filter and a sticky footer with «Sıfırla» and the primary action.
+ * «Filtrlər» sheet shared by the home search and the catalogue: the site Dialog (a bottom sheet below 640 px that
+ * can be dragged down to close), one titled group per filter and a pinned footer with «Sıfırla» and the primary
+ * action.
  */
 export function FilterSheetShell({ open, onClose, focus, onReset, resetDisabled, submitLabel, onSubmit, submitDisabled, children }: FilterSheetShellProps) {
   const base = useId()
@@ -36,28 +37,31 @@ export function FilterSheetShell({ open, onClose, focus, onReset, resetDisabled,
     group?.querySelector<HTMLElement>('[data-autofocus], button, input')?.focus({ preventScroll: true })
   }, [open, focus, base])
 
+  // Pinned under the scrolling groups by the Dialog.
+  const footer = (
+    <>
+      <button
+        type="button"
+        onClick={onReset}
+        disabled={resetDisabled}
+        className="h-11 rounded-lg px-2 text-sm leading-[normal] font-semibold text-forest underline underline-offset-[3px] transition-[color,scale] duration-(--dur-fast) ease-out active:scale-[0.97] disabled:text-muted disabled:no-underline disabled:active:scale-100 motion-reduce:active:scale-100"
+      >
+        Sıfırla
+      </button>
+      <button
+        type="button"
+        onClick={onSubmit}
+        disabled={submitDisabled}
+        className="h-12 rounded-option bg-forest px-8 text-base leading-[normal] font-semibold text-white transition-[background-color,color,scale] duration-(--dur-fast) ease-out hover:bg-forest-hover active:scale-[0.97] disabled:bg-line-strong disabled:text-muted disabled:active:scale-100 motion-reduce:active:scale-100"
+      >
+        {submitLabel}
+      </button>
+    </>
+  )
+
   return (
-    <Dialog open={open} title="Filtrlər" onClose={onClose}>
+    <Dialog open={open} title="Filtrlər" onClose={onClose} footer={footer}>
       <SheetBase.Provider value={base}>{children}</SheetBase.Provider>
-      {/* The bottom padding grows by the home-indicator inset on notched phones (viewport-fit=cover). */}
-      <div className="sticky -bottom-6 -mx-6 -mb-6 flex items-center justify-between gap-3 border-t border-line bg-surface px-6 pt-4 pb-[calc(24px+env(safe-area-inset-bottom,0px))]">
-        <button
-          type="button"
-          onClick={onReset}
-          disabled={resetDisabled}
-          className="h-11 rounded-lg px-2 text-sm leading-[normal] font-semibold text-forest underline underline-offset-[3px] transition-[color,scale] duration-(--dur-fast) ease-out active:scale-[0.97] disabled:text-muted disabled:no-underline disabled:active:scale-100 motion-reduce:active:scale-100"
-        >
-          Sıfırla
-        </button>
-        <button
-          type="button"
-          onClick={onSubmit}
-          disabled={submitDisabled}
-          className="h-12 rounded-option bg-forest px-8 text-base leading-[normal] font-semibold text-white transition-[background-color,color,scale] duration-(--dur-fast) ease-out hover:bg-forest-hover active:scale-[0.97] disabled:bg-line-strong disabled:text-muted disabled:active:scale-100 motion-reduce:active:scale-100"
-        >
-          {submitLabel}
-        </button>
-      </div>
     </Dialog>
   )
 }
