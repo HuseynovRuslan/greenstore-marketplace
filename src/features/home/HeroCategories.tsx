@@ -2,24 +2,26 @@ import Link from 'next/link'
 import { CategoryIcon } from '@/components/ui/CategoryIcon'
 import { categories } from '@/data/categories'
 import { cn, formatNumber } from '@/lib/format'
+import type { Category } from '@/types'
 
 /** Product categories open their own page; the services umbrella opens the services catalogue. */
-const categoryHref = (c: (typeof categories)[number]) => (c.kind === 'service' ? '/xidmetler' : `/kateqoriyalar/${c.slug}`)
+const categoryHref = (c: Category) => (c.kind === 'service' ? '/xidmetler' : `/kateqoriyalar/${c.slug}`)
 
 /**
  * Variant 2 categories row: a 48 px white circle with the category icon, the name (two lines reserved so the counts
  * line up) and the listing count. Ten equal columns from lg; phones and tablets scroll it sideways (78 px items).
  * `selected` mirrors the Kateqoriya filter of the search card (forest circle, white icon).
- * `#kateqoriyalar` is the target of the menu link "Kateqoriyalar".
+ * `#kateqoriyalar` is the target of the menu link "Kateqoriyalar". `items` is the data (the dev worst-case page
+ * passes its own).
  */
-export function HeroCategories({ selected, className }: { selected?: string; className?: string }) {
+export function HeroCategories({ selected, className, items = categories }: { selected?: string; className?: string; items?: Category[] }) {
   return (
     <div id="kateqoriyalar" className={cn('scroll-mt-24', className)}>
       <h2 className="sr-only">Kateqoriyalar</h2>
       {/* relative: the visually hidden " elan" labels are absolutely positioned and must be clipped by this scroller. */}
       {/* overscroll-x-contain: a swipe past the row's start must not become the browser's back gesture. */}
       <ul className="scrollbar-none relative flex gap-1 overflow-x-auto overscroll-x-contain px-2.5 md:px-5 lg:grid lg:grid-cols-10 lg:gap-2 lg:overflow-visible lg:px-0">
-        {categories.map((c, i) => {
+        {items.map((c, i) => {
           const on = c.id === selected
           return (
             // Fades up after the search card, 40 ms apart.
