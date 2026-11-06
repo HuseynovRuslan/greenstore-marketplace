@@ -20,7 +20,7 @@ function rangeOptions(all: string, presets: FilterOption[], value: string, label
 interface FilterPanelProps {
   /** Filters currently applied (from the URL). The panel edits a draft copy of them. */
   applied: SearchState
-  /** Live value of the "Elanlarda axtarış" field, so the "N elanı göstər" count matches what will be applied. */
+  /** The applied search word (from the search card), so the "N elanı göstər" count matches what will be applied. */
   q: string
   onApply: (next: SearchState) => void
   onClear: () => void

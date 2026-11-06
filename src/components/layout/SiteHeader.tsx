@@ -98,12 +98,20 @@ function HeaderSearchForm({ variant, urlQuery, onSubmitted }: SearchFormProps & 
   )
 }
 
-/** Home header nav (Variant 2); "Önə çıxanlar" follows with its olive rocket. */
+/** Home header nav (Variant 2); "Önə çıxanlar" follows with its olive rocket. `section` marks the current page. */
 const homeNav = [
-  { label: 'Məhsullar', to: '/elanlar' },
-  { label: 'Xidmətlər', to: '/xidmetler' },
-  { label: 'Satıcılar', to: '/#saticilar' },
+  { label: 'Məhsullar', to: '/elanlar', section: (path: string) => path === '/elanlar' || path.startsWith('/kateqoriyalar/') },
+  { label: 'Xidmətlər', to: '/xidmetler', section: (path: string) => path === '/xidmetler' },
+  { label: 'Satıcılar', to: '/#saticilar', section: () => false },
 ]
+
+/**
+ * Catalogue pages also get the home header: their own search card plays the hero search's part, so the header has
+ * no search field of its own there (one search per page).
+ */
+export function usesHomeHeader(pathname: string) {
+  return pathname === '/elanlar' || pathname.startsWith('/kateqoriyalar/')
+}
 
 const iconButton =
   'flex size-11 shrink-0 items-center justify-center rounded-option text-ink transition-colors duration-(--dur-fast) hover:bg-mint hover:text-forest'
@@ -111,7 +119,8 @@ const iconButton =
 /**
  * Figma "Başlıq naviqasiyası".
  *  - `default`: logo · search · favourites · account · «Elan yerləşdir»; < 768 px a compact bar (logo · search · menu).
- *  - `home` (docs/design/variant-2): one row, logo · nav (Məhsullar, Xidmətlər, Satıcılar, Önə çıxanlar) · favourites ·
+ *  - `home` (docs/design/variant-2; also the catalogue pages, see usesHomeHeader): one row, logo · nav (Məhsullar,
+ *    Xidmətlər, Satıcılar, Önə çıxanlar; the current section is marked) · favourites ·
  *    account · «Elan yerləşdir». The nav needs 1024 px; 768–1023 px get the menu button, < 768 px logo · ♡ · menu.
  *    The hero search replaces the header search there. On scroll (useScrollHeader) the header turns translucent with a
  *    shadow, hides while you scroll down past 320 px and comes back on any upward scroll; once the hero search has
@@ -119,10 +128,10 @@ const iconButton =
  *    Keyboard users can still Tab to the nav links then: focusing one brings the nav back, Tab goes on to the pill.
  */
 export function SiteHeader({ variant = 'default' }: { variant?: 'default' | 'home' }) {
-  const home = variant === 'home'
   const { user, signOut } = useSession()
   const router = useRouter()
   const pathname = usePathname()
+  const home = variant === 'home' || usesHomeHeader(pathname)
   // The drawer and the mobile search remember the page they were opened on, so navigating closes them.
   const [menuPath, setMenuPath] = useState<string | null>(null)
   const [searchPath, setSearchPath] = useState<string | null>(null)
@@ -142,7 +151,8 @@ export function SiteHeader({ variant = 'default' }: { variant?: 'default' | 'hom
 
   const headerRef = useRef<HTMLElement>(null)
   const { scrolled, hidden } = useScrollHeader(headerRef, { enabled: home, paused: menuOpen })
-  const heroSearchGone = useScrolledPast(HERO_SEARCH_ID, headerRef, home)
+  // Re-watch on every route: each catalogue page renders its own search card.
+  const heroSearchGone = useScrolledPast(HERO_SEARCH_ID, headerRef, home, pathname)
   // Whichever of nav / pill holds keyboard focus is the one shown. The nav links are always in the Tab order (a link
   // that gets focus cross-fades the nav back); the pill is reachable once the hero search is gone, or while focused.
   const [focusIn, setFocusIn] = useState<'nav' | 'pill' | null>(null)
@@ -257,7 +267,8 @@ export function SiteHeader({ variant = 'default' }: { variant?: 'default' | 'hom
                     <Link
                       key={l.to}
                       href={l.to}
-                      className="flex h-11 items-center rounded-option px-3.5 text-[15px] leading-[normal] font-medium whitespace-nowrap text-ink transition-colors duration-(--dur-fast) hover:text-forest"
+                      aria-current={l.section(pathname) ? 'page' : undefined}
+                      className="relative flex h-11 items-center rounded-option px-3.5 text-[15px] leading-[normal] font-medium whitespace-nowrap text-ink transition-colors duration-(--dur-fast) hover:text-forest aria-[current=page]:font-semibold aria-[current=page]:text-forest aria-[current=page]:after:absolute aria-[current=page]:after:inset-x-3.5 aria-[current=page]:after:bottom-1 aria-[current=page]:after:h-0.5 aria-[current=page]:after:rounded-full aria-[current=page]:after:bg-forest aria-[current=page]:after:content-['']"
                     >
                       {l.label}
                     </Link>

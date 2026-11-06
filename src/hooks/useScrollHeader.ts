@@ -82,9 +82,10 @@ export function useScrollHeader(header: RefObject<HTMLElement | null>, { enabled
 
 /**
  * True once the element with `id` has scrolled up past the bottom of `header` (IntersectionObserver), e.g. to show
- * the header's compact search pill when the hero search is gone.
+ * the header's compact search pill when the hero search is gone. A new `watchKey` (e.g. the pathname) looks the
+ * element up again, for pages that render their own copy of it.
  */
-export function useScrolledPast(id: string, header: RefObject<HTMLElement | null>, enabled = true) {
+export function useScrolledPast(id: string, header: RefObject<HTMLElement | null>, enabled = true, watchKey?: string) {
   const [past, setPast] = useState(false)
   useEffect(() => {
     const el = document.getElementById(id)
@@ -95,6 +96,6 @@ export function useScrolledPast(id: string, header: RefObject<HTMLElement | null
     })
     observer.observe(el)
     return () => observer.disconnect()
-  }, [id, header, enabled])
+  }, [id, header, enabled, watchKey])
   return past
 }

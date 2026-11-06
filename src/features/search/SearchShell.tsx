@@ -1,14 +1,14 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useState, type FormEvent, type ReactNode } from 'react'
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
 import { Search, SlidersHorizontal } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { EmptyState } from '@/components/ui/EmptyState'
-import { TextField } from '@/components/ui/Field'
 import { categoryById } from '@/data/categories'
 import { formatNumber } from '@/lib/format'
 import type { ListingSort } from '@/services/marketplace'
+import { CatalogSearchCard } from './CatalogSearchCard'
 import { FilterPanel } from './FilterPanel'
 import { FilterSheet } from './FilterSheet'
 import { ActiveFilterChips, SortSelect, ViewToggle } from './SearchControls'
@@ -57,15 +57,6 @@ export function SearchShell({ stateQuery, basePath, urlQuery, total, header, res
   const sort = parseSort(params.get('siralama'))
   const view: SearchView = params.get('gorunus') === 'siyahi' ? 'list' : 'grid'
 
-  // "Elanlarda axtarış" is edited locally and applied on Enter (or together with the filter panel);
-  // it re-syncs whenever the URL query changes from elsewhere (header search, chips, «Sıfırla»).
-  const [qInput, setQInput] = useState(state.q)
-  const [syncedQ, setSyncedQ] = useState(state.q)
-  if (state.q !== syncedQ) {
-    setSyncedQ(state.q)
-    setQInput(state.q)
-  }
-
   const [sheetOpen, setSheetOpen] = useState(false)
   const closeSheet = useCallback(() => setSheetOpen(false), [])
 
@@ -88,18 +79,13 @@ export function SearchShell({ stateQuery, basePath, urlQuery, total, header, res
   }
   const setView = (next: SearchView) => go(basePath, withView(new URLSearchParams(urlQuery), next))
 
-  const submitQuery = (e: FormEvent) => {
-    e.preventDefault()
-    commit({ ...state, q: qInput.trim() })
-  }
-
   const category = state.categoryId ? categoryById(state.categoryId) : undefined
   const chips = activeChips(state)
   const filterCount = activeFilterCount(state)
 
   const panelProps = {
     applied: state,
-    q: qInput,
+    q: state.q,
     onApply: (next: SearchState) => {
       commit(next)
       setSheetOpen(false)
@@ -114,16 +100,7 @@ export function SearchShell({ stateQuery, basePath, urlQuery, total, header, res
     <div className="page-x mx-auto flex w-full max-w-[1440px] flex-col items-start gap-6 pt-5 pb-9 md:gap-7 md:pt-7 xl:pt-[51px]">
       {header}
 
-      <form role="search" onSubmit={submitQuery} className="w-full">
-        <TextField
-          label="Elanlarda axtarış"
-          type="search"
-          enterKeyHint="search"
-          value={qInput}
-          onChange={(e) => setQInput(e.target.value)}
-          placeholder={category ? category.name : 'Məsələn, zeytun ağacı'}
-        />
-      </form>
+      <CatalogSearchCard q={state.q} cityIds={state.cityIds} query={stateQuery} onSearch={(q, cityIds) => commit({ ...state, q, cityIds })} />
 
       <div className="flex w-full items-start gap-7">
         {/* Desktop sidebar ("Filtr yan paneli", 276 px) */}

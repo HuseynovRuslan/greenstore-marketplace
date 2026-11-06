@@ -2,11 +2,11 @@
 
 import { useId, useLayoutEffect, useRef, useState, type FormEvent } from 'react'
 import { useRouter } from 'next/navigation'
-import { ChevronDown, MapPin, Search } from 'lucide-react'
-import { Listbox, listboxChevronClass } from '@/components/ui/Listbox'
+import { Search } from 'lucide-react'
 import { listingTotals } from '@/data/categories'
 import { cities, cityListingCounts } from '@/data/cities'
 import { cn, formatNumber } from '@/lib/format'
+import { CityField } from '@/features/search/CityField'
 import { priceError } from '@/features/search/filterDefs'
 import { FilterChips } from './FilterChips'
 import { HeroCategories } from './HeroCategories'
@@ -89,7 +89,7 @@ export function HeroSearchCard() {
               />
             </label>
             <div className="flex gap-2 md:contents">
-              <CityField value={city} onChange={setCity} />
+              <CityField value={city} onChange={setCity} options={cityOptions} />
               <button
                 type="submit"
                 aria-describedby={error ? errorId : undefined}
@@ -196,42 +196,5 @@ function TypeTabs({ value, onChange }: { value: HeroTab; onChange: (tab: HeroTab
         className="pointer-events-none absolute -bottom-px left-0 h-0.5 w-px origin-left bg-forest opacity-0 [transform:translateX(var(--tab-x,0))_scaleX(var(--tab-w,0))] group-data-ready:opacity-100 motion-safe:group-data-ready:transition-transform motion-safe:group-data-ready:duration-(--dur-base) motion-safe:group-data-ready:ease-out"
       />
     </fieldset>
-  )
-}
-
-/**
- * City field: the custom Listbox from md up, a native <select> on phones (their own pickers are better there).
- * Both show the same value; only the native one has a `name`, for the no-JavaScript form submit.
- */
-function CityField({ value, onChange }: { value: string; onChange: (city: string) => void }) {
-  const pin = <MapPin aria-hidden size={18} strokeWidth={2} className="shrink-0 text-muted" />
-  return (
-    <>
-      <Listbox
-        label="Şəhər"
-        value={value}
-        onChange={onChange}
-        options={cityOptions}
-        icon={pin}
-        className="hidden h-[52px] w-[196px] shrink-0 border-l border-line pl-1.5 md:block"
-      />
-      <label className="relative flex h-12 min-w-0 flex-1 items-center gap-2 rounded-option border border-line bg-cream pl-3 has-[select:focus-visible]:outline-2 has-[select:focus-visible]:outline-offset-2 has-[select:focus-visible]:outline-olive md:hidden">
-        {pin}
-        <span className="sr-only">Şəhər</span>
-        <select
-          name="seher"
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          className="h-full min-w-0 flex-1 cursor-pointer appearance-none bg-transparent pr-9 text-[15px] leading-[normal] font-medium text-ink outline-none"
-        >
-          {cityOptions.map((o) => (
-            <option key={o.value} value={o.value}>
-              {o.label}
-            </option>
-          ))}
-        </select>
-        <ChevronDown aria-hidden size={16} strokeWidth={2} className={cn(listboxChevronClass, 'pointer-events-none absolute right-3')} />
-      </label>
-    </>
   )
 }
