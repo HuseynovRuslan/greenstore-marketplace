@@ -17,7 +17,8 @@ export function HeroCategories({ selected, className }: { selected?: string; cla
     <div id="kateqoriyalar" className={cn('scroll-mt-24', className)}>
       <h2 className="sr-only">Kateqoriyalar</h2>
       {/* relative: the visually hidden " elan" labels are absolutely positioned and must be clipped by this scroller. */}
-      <ul className="scrollbar-none relative flex gap-1 overflow-x-auto px-2.5 md:px-5 lg:grid lg:grid-cols-10 lg:gap-2 lg:overflow-visible lg:px-0">
+      {/* overscroll-x-contain: a swipe past the row's start must not become the browser's back gesture. */}
+      <ul className="scrollbar-none relative flex gap-1 overflow-x-auto overscroll-x-contain px-2.5 md:px-5 lg:grid lg:grid-cols-10 lg:gap-2 lg:overflow-visible lg:px-0">
         {categories.map((c, i) => {
           const on = c.id === selected
           return (

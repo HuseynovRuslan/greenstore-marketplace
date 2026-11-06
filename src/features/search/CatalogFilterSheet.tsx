@@ -124,7 +124,7 @@ export function CatalogFilterSheet({ open, onClose, state, total, speciesOptions
             <select
               value={draft.species}
               onChange={(e) => set({ species: e.target.value })}
-              className="h-full w-full cursor-pointer appearance-none bg-transparent pr-9 pl-3 text-[15px] leading-[normal] font-medium text-ink outline-none"
+              className="h-full w-full cursor-pointer appearance-none bg-transparent pr-9 pl-3 text-[15px] leading-[normal] font-medium text-ink outline-none pointer-coarse:text-base"
             >
               <option value="">Bütün növlər</option>
               {species.map((o) => (

@@ -10,7 +10,8 @@ import { cn } from '@/lib/format'
  * Focus → 2 px #788149 border, error → 1 px #b6443f border + 12 px error text, disabled → #e8ebe5.
  */
 export const controlClass =
-  'w-full min-h-12 rounded-lg border border-line bg-surface px-[13px] py-3 text-sm leading-[1.5] text-ink placeholder:text-ink ' +
+  // 16 px on touch screens: iOS zooms into any field under 16 px and stays zoomed.
+  'w-full min-h-12 rounded-lg border border-line bg-surface px-[13px] py-3 text-sm leading-[1.5] text-ink placeholder:text-ink pointer-coarse:text-base ' +
   'outline-none transition-[border-color] focus:border-2 focus:border-olive focus:px-3 focus:py-[11px] ' +
   'disabled:bg-disabled disabled:text-muted aria-[invalid=true]:border-danger'
 

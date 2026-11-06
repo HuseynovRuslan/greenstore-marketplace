@@ -23,7 +23,7 @@ export function SortSelect({ value, onChange }: { value: ServiceSort; onChange: 
         id={id}
         value={value}
         onChange={(e) => onChange(e.target.value as ServiceSort)}
-        className="absolute inset-0 cursor-pointer appearance-none opacity-0"
+        className="absolute inset-0 cursor-pointer appearance-none opacity-0 pointer-coarse:text-base"
       >
         {serviceSortOptions.map((o) => (
           <option key={o.value} value={o.value}>

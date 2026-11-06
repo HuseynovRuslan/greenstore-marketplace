@@ -32,7 +32,7 @@ export function SortSelect({ value, onChange, className }: { value: ListingSort;
         <select
           value={value}
           onChange={(e) => onChange(e.target.value as ListingSort)}
-          className="h-full min-w-0 flex-1 cursor-pointer appearance-none bg-transparent pr-9 text-[15px] leading-[normal] font-medium text-ink outline-none"
+          className="h-full min-w-0 flex-1 cursor-pointer appearance-none bg-transparent pr-9 text-[15px] leading-[normal] font-medium text-ink outline-none pointer-coarse:text-base"
         >
           {listingSortOptions.map((o) => (
             <option key={o.value} value={o.value}>

@@ -75,7 +75,8 @@ function HeaderSearchForm({ variant, urlQuery, onSubmitted }: SearchFormProps & 
       placeholder={searchPlaceholder}
       aria-label={searchPlaceholder}
       className={cn(
-        'h-full min-w-0 flex-1 bg-transparent text-sm text-ink outline-none placeholder:text-muted',
+        // 16 px on touch screens: iOS zooms into any field under 16 px and stays zoomed.
+        'h-full min-w-0 flex-1 bg-transparent text-sm text-ink outline-none placeholder:text-muted pointer-coarse:text-base',
         variant === 'bar' && 'leading-[normal]',
       )}
     />

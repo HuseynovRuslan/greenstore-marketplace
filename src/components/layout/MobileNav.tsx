@@ -14,7 +14,8 @@ function isWithin(pathname: string, base: string) {
 }
 
 /* Figma "Mobil naviqasiya" (390): h 86, white, top border, pt 10 / pb 16 / px 6, 22 px icons, 11 px labels.
- * Active item: #173f32 icon + bold label; others #727c72. */
+ * Active item: #173f32 icon + bold label; others #727c72. It grows by the home-indicator inset (viewport-fit=cover).
+ * The items are controls: no text selection or link callout on a long press. */
 export function MobileNav() {
   const { user } = useSession()
   const pathname = usePathname()
@@ -37,7 +38,7 @@ export function MobileNav() {
   return (
     <nav
       aria-label="Mobil naviqasiya"
-      className="fixed inset-x-0 bottom-0 z-40 flex h-[86px] items-start border-t border-line bg-surface px-1.5 pt-2.5 pb-4 md:hidden"
+      className="fixed inset-x-0 bottom-0 z-40 flex h-[calc(86px+env(safe-area-inset-bottom,0px))] items-start border-t border-line bg-surface px-1.5 pt-2.5 pb-[calc(16px+env(safe-area-inset-bottom,0px))] md:hidden"
     >
       {items.map(({ label, to, icon: Icon, end, also = [], preHydration }) => {
         const isActive = end ? pathname === to : [to, ...also].some((p) => isWithin(pathname, p))
@@ -47,7 +48,7 @@ export function MobileNav() {
             href={to}
             aria-current={isActive ? 'page' : undefined}
             className={cn(
-              'flex min-w-0 flex-1 flex-col items-center gap-1 text-center text-[11px] leading-[normal]',
+              'flex min-w-0 flex-1 flex-col items-center gap-1 text-center text-[11px] leading-[normal] select-none [-webkit-touch-callout:none]',
               isActive ? 'font-bold text-forest' : 'text-muted',
               preHydration && preHydrationClass(preHydration),
             )}

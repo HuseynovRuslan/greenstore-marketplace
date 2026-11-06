@@ -39,7 +39,8 @@ export function FilterSheetShell({ open, onClose, focus, onReset, resetDisabled,
   return (
     <Dialog open={open} title="Filtrlər" onClose={onClose}>
       <SheetBase.Provider value={base}>{children}</SheetBase.Provider>
-      <div className="sticky -bottom-6 -mx-6 -mb-6 flex items-center justify-between gap-3 border-t border-line bg-surface px-6 pt-4 pb-6">
+      {/* The bottom padding grows by the home-indicator inset on notched phones (viewport-fit=cover). */}
+      <div className="sticky -bottom-6 -mx-6 -mb-6 flex items-center justify-between gap-3 border-t border-line bg-surface px-6 pt-4 pb-[calc(24px+env(safe-area-inset-bottom,0px))]">
         <button
           type="button"
           onClick={onReset}

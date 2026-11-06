@@ -101,7 +101,7 @@ export function PriceFields({ value, onChange, onSubmit, error, errorId, touch }
         value={value[key]}
         onChange={(e) => onChange({ ...value, [key]: digitsOnly(e.target.value) })}
         onKeyDown={onKeyDown}
-        className="w-full min-w-0 flex-1 bg-transparent text-[15px] text-ink tabular-nums outline-none"
+        className="w-full min-w-0 flex-1 bg-transparent text-[15px] text-ink tabular-nums outline-none pointer-coarse:text-base"
       />
     </label>
   )

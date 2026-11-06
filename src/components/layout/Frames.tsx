@@ -23,7 +23,7 @@ function Main({ children }: { children: ReactNode }) {
 /** Home page: the one-row home header (Variant 2) + full footer (Figma "Ana səhifə"). */
 export function HomeFrame({ children }: { children: ReactNode }) {
   return (
-    <div className="flex min-h-dvh flex-col pb-[86px] md:pb-0">
+    <div className="flex min-h-dvh flex-col pb-[calc(86px+env(safe-area-inset-bottom,0px))] md:pb-0">
       <DemoBanner />
       <SiteHeader variant="home" />
       <Main>{children}</Main>
@@ -36,7 +36,7 @@ export function HomeFrame({ children }: { children: ReactNode }) {
 /** Inner public pages: 82 px header + "Yığcam sonluq" (search, detail, services, seller, cabinet…). */
 export function MainFrame({ children }: { children: ReactNode }) {
   return (
-    <div className="flex min-h-dvh flex-col pb-[86px] md:pb-0">
+    <div className="flex min-h-dvh flex-col pb-[calc(86px+env(safe-area-inset-bottom,0px))] md:pb-0">
       <DemoBanner />
       <SiteHeader />
       <Main>{children}</Main>
@@ -49,7 +49,7 @@ export function MainFrame({ children }: { children: ReactNode }) {
 /** Login / registration: header only (Figma "Daxil ol", "Qeydiyyat"). */
 export function AuthFrame({ children }: { children: ReactNode }) {
   return (
-    <div className="flex min-h-dvh flex-col pb-[86px] md:pb-0">
+    <div className="flex min-h-dvh flex-col pb-[calc(86px+env(safe-area-inset-bottom,0px))] md:pb-0">
       <DemoBanner />
       <SiteHeader />
       <Main>{children}</Main>

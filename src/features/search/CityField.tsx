@@ -29,7 +29,7 @@ export function CityField({ value, onChange, options }: { value: string; onChang
           name={PARAM.city}
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className="h-full min-w-0 flex-1 cursor-pointer appearance-none bg-transparent pr-9 text-[15px] leading-[normal] font-medium text-ink outline-none"
+          className="h-full min-w-0 flex-1 cursor-pointer appearance-none bg-transparent pr-9 text-[15px] leading-[normal] font-medium text-ink outline-none pointer-coarse:text-base"
         >
           {options.map((o) => (
             <option key={o.value} value={o.value}>

@@ -39,7 +39,7 @@ interface MobileFilterRowProps {
 export function MobileFilterRow({ tab, filters, onChange, onOpenSheet, sheetOpen, className }: MobileFilterRowProps) {
   const visible = visibleFilters(tab).filter((f) => ROW_FILTERS.includes(f.id))
   return (
-    <div role="group" aria-label="Filtrlər" className={cn('scrollbar-none flex gap-2 overflow-x-auto', className)}>
+    <div role="group" aria-label="Filtrlər" className={cn('scrollbar-none flex gap-2 overflow-x-auto overscroll-x-contain', className)}>
       <FiltersButton count={activeFilterCount(tab, filters)} expanded={sheetOpen} onClick={() => onOpenSheet()} />
       {visible.map((def) => {
         const on = isFilterSet(def.id, filters)

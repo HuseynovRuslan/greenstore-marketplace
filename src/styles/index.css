@@ -131,6 +131,14 @@
   button:disabled {
     cursor: not-allowed;
   }
+  /* Controls are not content: a long press on a phone must not select their labels (chips, tabs, options). */
+  button,
+  [role='button'],
+  [role='option'],
+  label:has(> input[type='radio']) {
+    -webkit-user-select: none;
+    user-select: none;
+  }
   :focus-visible {
     outline: 2px solid var(--color-olive);
     outline-offset: 2px;
@@ -153,9 +161,20 @@
 }
 
 @layer utilities {
-  /* Page gutter used by every Figma frame: 20 px @390, 28 px @768, 64 px @1440 */
+  /*
+   * Page gutter used by every Figma frame: 20 px @390, 28 px @768, 64 px @1440. With viewport-fit=cover (layout.tsx)
+   * a phone in landscape draws under the notch, so the gutter grows to the safe-area inset when that is larger.
+   */
   .page-x {
-    @apply px-5 md:px-7 xl:px-16;
+    --page-x: 1.25rem;
+    padding-left: max(var(--page-x), env(safe-area-inset-left, 0px));
+    padding-right: max(var(--page-x), env(safe-area-inset-right, 0px));
+    @media (width >= 48rem) {
+      --page-x: 1.75rem;
+    }
+    @media (width >= 80rem) {
+      --page-x: 4rem;
+    }
   }
   .scrollbar-none {
     scrollbar-width: none;

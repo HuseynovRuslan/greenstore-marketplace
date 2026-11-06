@@ -179,7 +179,7 @@ function SortSelect({ value, onChange }: { value: ListingSort; onChange: (value:
         id={id}
         value={value}
         onChange={(e) => onChange(e.target.value as ListingSort)}
-        className="absolute inset-0 cursor-pointer appearance-none opacity-0"
+        className="absolute inset-0 cursor-pointer appearance-none opacity-0 pointer-coarse:text-base"
       >
         {listingSortOptions.map((o) => (
           <option key={o.value} value={o.value}>

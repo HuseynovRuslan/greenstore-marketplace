@@ -32,13 +32,19 @@ export function Dialog({ open, title, onClose, children, className }: DialogProp
     if (!open) return
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onCloseRef.current()
     document.addEventListener('keydown', onKey)
-    const previous = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
+    const body = document.body
+    const previous = { overflow: body.style.overflow, paddingRight: body.style.paddingRight }
+    // Locking the page hides a classic scrollbar, which would widen the page under the backdrop: pad by its width.
+    const viewportWidth = document.documentElement.clientWidth
+    const scrollbar = viewportWidth > 0 ? window.innerWidth - viewportWidth : 0
+    body.style.overflow = 'hidden'
+    if (scrollbar > 0) body.style.paddingRight = `${scrollbar}px`
     const opener = document.activeElement as HTMLElement | null
     ref.current?.focus()
     return () => {
       document.removeEventListener('keydown', onKey)
-      document.body.style.overflow = previous
+      body.style.overflow = previous.overflow
+      body.style.paddingRight = previous.paddingRight
       opener?.focus?.()
     }
   }, [open])
@@ -74,13 +80,21 @@ export function Dialog({ open, title, onClose, children, className }: DialogProp
         onMouseDown={(e) => e.stopPropagation()}
         onKeyDown={trapTab}
         className={cn(
-          'flex max-h-[90vh] w-full animate-sheet-up flex-col items-stretch gap-5 overflow-y-auto rounded-t-xl border border-line bg-surface p-6 outline-none sm:max-w-[432px] sm:animate-dialog-in sm:rounded-xl motion-reduce:animate-fade-in',
+          // 90dvh, not vh: vh is the height with the browser bars hidden. overscroll-contain: scrolling stops at the
+          // sheet's edge instead of moving (or refreshing) the page behind it.
+          'flex max-h-[90dvh] w-full animate-sheet-up flex-col items-stretch gap-5 overflow-y-auto overscroll-contain rounded-t-xl border border-line bg-surface p-6 outline-none sm:max-w-[432px] sm:animate-dialog-in sm:rounded-xl motion-reduce:animate-fade-in',
           className,
         )}
       >
         <div className="flex items-start justify-between gap-4">
           <h2 className="text-[23px] leading-[1.35] font-normal text-ink">{title}</h2>
-          <button type="button" aria-label="Bağla" onClick={onClose} className="-m-1 rounded p-1 text-forest hover:bg-mint">
+          {/* 44 px target; the negative margin keeps the icon where the 28 px button had it. */}
+          <button
+            type="button"
+            aria-label="Bağla"
+            onClick={onClose}
+            className="-m-3 flex size-11 shrink-0 items-center justify-center rounded-option text-forest hover:bg-mint"
+          >
             <X size={20} strokeWidth={1.8} absoluteStrokeWidth />
           </button>
         </div>

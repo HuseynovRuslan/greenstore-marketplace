@@ -24,7 +24,9 @@ export const metadata: Metadata = {
   twitter: { card: 'summary_large_image' },
 }
 
-export const viewport: Viewport = { width: 'device-width', initialScale: 1 }
+// viewport-fit=cover: the page paints edge to edge on notched phones; the bottom nav, the sheet footer and the page
+// gutters pad themselves with env(safe-area-inset-*). Zoom stays enabled (fields are 16 px on touch screens instead).
+export const viewport: Viewport = { width: 'device-width', initialScale: 1, viewportFit: 'cover' }
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
