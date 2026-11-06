@@ -1,6 +1,6 @@
 'use client'
 
-import type { ReactNode } from 'react'
+import { createContext, useContext, useState, type ReactNode } from 'react'
 import { LazyMotion, type LazyFeatureBundle } from 'motion/react'
 
 /** Below 640 px the Dialog is a bottom sheet (and the only place that drags). */
@@ -21,10 +21,34 @@ export const loadDomMax: LazyFeatureBundle = () => idle().then(() => import('./f
 /** A Dialog drags only as a phone bottom sheet; wider screens just animate a centred dialog. */
 export const loadForDialog: LazyFeatureBundle = () => (window.matchMedia?.(SHEET_QUERY).matches ? loadDomMax() : loadDomAnimation())
 
+const FeaturesReady = createContext(true)
+
+/**
+ * False until the nearest MotionFeatures has its bundle. Until then `m` components inside it cannot animate, so a
+ * hidden `initial` (a sheet below the screen, a chip at opacity 0) would stay hidden: render the final state instead.
+ * Content never waits for — or depends on — a chunk that may be slow or fail to load.
+ */
+export function useFeaturesReady() {
+  return useContext(FeaturesReady)
+}
+
 /**
  * A nested LazyMotion for the leaves that need more than the app-wide domAnimation (MotionProvider): features load
  * once, globally, so later instances reuse them. Its `m` components render statically until the bundle arrives.
  */
 export function MotionFeatures({ load, children }: { load: LazyFeatureBundle; children: ReactNode }) {
-  return <LazyMotion features={load}>{children}</LazyMotion>
+  const [ready, setReady] = useState(false)
+  // LazyMotion calls the loader once, on mount. `ready` turns on in the task after it has installed the bundle.
+  const [loader] = useState<LazyFeatureBundle>(
+    () => () =>
+      load().then((bundle) => {
+        window.setTimeout(() => setReady(true), 0)
+        return bundle
+      }),
+  )
+  return (
+    <FeaturesReady.Provider value={ready}>
+      <LazyMotion features={loader}>{children}</LazyMotion>
+    </FeaturesReady.Provider>
+  )
 }

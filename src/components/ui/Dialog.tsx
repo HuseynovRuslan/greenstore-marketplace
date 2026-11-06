@@ -3,6 +3,7 @@
 import {
   useEffect,
   useRef,
+  useState,
   useSyncExternalStore,
   type KeyboardEvent as ReactKeyboardEvent,
   type PointerEvent as ReactPointerEvent,
@@ -12,7 +13,7 @@ import {
 import { X } from 'lucide-react'
 import { AnimatePresence, useDragControls, useIsPresent, useMotionValue, useMotionValueEvent, useReducedMotion } from 'motion/react'
 import * as m from 'motion/react-m'
-import { loadForDialog, MotionFeatures, SHEET_QUERY } from '@/components/motion/MotionFeatures'
+import { loadForDialog, MotionFeatures, SHEET_QUERY, useFeaturesReady } from '@/components/motion/MotionFeatures'
 import { dialogEnter, dialogExit, fade, PROJECTION_SECONDS, sheetElastic, sheetEnter, sheetExit, sheetSnapBack } from '@/components/motion/springs'
 import { cn } from '@/lib/format'
 
@@ -107,7 +108,11 @@ function DialogLayer({ title, onClose, children, footer, className, panelRef }: 
   const isPresent = useIsPresent()
   const sheet = useIsSheet()
   const reduce = useReducedMotion() ?? false
-  const slides = sheet && !reduce
+  // Opened before the motion bundle arrived (the first moments after load, or a chunk that failed): show and hide it
+  // without animation rather than leave it below the screen. Decided once, when it opens.
+  const ready = useFeaturesReady()
+  const [animated] = useState(ready)
+  const slides = animated && sheet && !reduce
   const dragControls = useDragControls()
   const y = useMotionValue<number | string>(0)
   const height = () => panelRef.current?.offsetHeight || 1
@@ -153,7 +158,11 @@ function DialogLayer({ title, onClose, children, footer, className, panelRef }: 
         aria-hidden
         onMouseDown={onClose}
         className="absolute inset-0 bg-ink/40"
-        {...(slides ? { style: { opacity: 0 } } : { initial: { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0 }, transition: fade })}
+        {...(slides
+          ? { style: { opacity: 0 } }
+          : animated
+            ? { initial: { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0 }, transition: fade }
+            : {})}
       />
       <m.div
         ref={panelRef}
@@ -163,10 +172,10 @@ function DialogLayer({ title, onClose, children, footer, className, panelRef }: 
         tabIndex={-1}
         onKeyDown={trapTab}
         style={sheet ? { y } : undefined}
-        initial={slides ? { y: '100%' } : sheet ? { opacity: 0 } : { opacity: 0, scale: 0.97 }}
+        initial={!animated ? false : slides ? { y: '100%' } : sheet ? { opacity: 0 } : { opacity: 0, scale: 0.97 }}
         animate={slides ? { y: 0, transition: sheetEnter } : sheet ? { opacity: 1, transition: fade } : { opacity: 1, scale: 1, transition: dialogEnter }}
-        exit={slides ? { y: '100%', transition: sheetExit } : sheet ? { opacity: 0, transition: fade } : { opacity: 0, scale: 0.98, transition: dialogExit }}
-        drag={sheet ? 'y' : false}
+        exit={!animated ? undefined : slides ? { y: '100%', transition: sheetExit } : sheet ? { opacity: 0, transition: fade } : { opacity: 0, scale: 0.98, transition: dialogExit }}
+        drag={animated && sheet ? 'y' : false}
         dragListener={false}
         dragControls={dragControls}
         dragConstraints={{ top: 0, bottom: 0 }}
