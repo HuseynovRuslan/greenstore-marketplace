@@ -4,7 +4,6 @@ import { ArrowRight, Eye, MessageCircle, Rocket, ShieldCheck } from 'lucide-reac
 import { ListingCard } from '@/components/cards/ListingCard'
 import { ServiceCard } from '@/components/cards/ServiceCard'
 import { SellerCard } from '@/components/cards/SellerCard'
-import { SectionHeader } from '@/components/ui/SectionHeader'
 import { ButtonLink } from '@/components/ui/Button'
 import { Reveal } from '@/components/ui/Reveal'
 import { HeroSearchCard } from '@/features/home/HeroSearchCard'
@@ -21,9 +20,10 @@ function Hero() {
       <div className="page-x mx-auto flex w-full max-w-[1440px] flex-col items-center gap-3.5 pt-[18px] pb-3.5 md:gap-[26px] md:pt-11 lg:pb-[30px]">
         {/* Rises 8 px on first paint but never fades: the heading is the LCP element. */}
         <div className="flex w-full animate-rise flex-col gap-1.5 motion-reduce:animate-none md:items-center md:gap-2.5 md:text-center">
+          {/* Tracking follows Inter's size table: ≈ −0.020em at 25 px, −0.022em at 44 px. */}
           <h1
             id="hero-title"
-            className="text-[25px] leading-[1.15] font-semibold tracking-[-0.015em] text-balance text-forest md:text-[44px] md:leading-[1.12] md:tracking-[-0.02em]"
+            className="text-[25px] leading-[1.15] font-semibold tracking-[-0.02em] text-balance text-forest md:text-[44px] md:leading-[1.12]"
           >
             Azərbaycanda bitki və bağ elanları
           </h1>
@@ -39,11 +39,70 @@ function Hero() {
   )
 }
 
-function Section({ id, children, className }: { id?: string; children: ReactNode; className?: string }) {
+/**
+ * One rhythm for the home sections: 32 px above and below (64 px between two sections), 16 px (24 px from md) from
+ * the heading row to the content. The first section sits closer to the hero on phones.
+ */
+function Section({ id, labelledBy, children, className }: { id?: string; labelledBy?: string; children: ReactNode; className?: string }) {
   return (
-    <section id={id} className={cn('page-x mx-auto flex w-full max-w-[1440px] scroll-mt-24 flex-col items-start gap-6 py-8', className)}>
+    <section
+      id={id}
+      aria-labelledby={labelledBy}
+      className={cn('page-x mx-auto flex w-full max-w-[1440px] scroll-mt-24 flex-col items-start gap-4 py-8 md:gap-6', className)}
+    >
       {children}
     </section>
+  )
+}
+
+interface HomeHeadingProps {
+  id?: string
+  title: string
+  /** Decorative mark before the title (the olive rocket of «Önə çıxan elanlar»). */
+  icon?: ReactNode
+  subtitle?: string
+  /** Section link. With `short`, phones get the short text in the row; otherwise phones get MobileMore below. */
+  action?: { label: string; to: string; short?: string; context?: string }
+}
+
+/**
+ * The heading row of every home section (Variant 2, «Önə çıxan elanlar»): 18 / 22 px semibold forest title, the
+ * muted subtitle beside it from md (under it on phones), and the section link with an arrow at the end. Tracking
+ * follows Inter's size table (≈ −0.014em at 18 px, −0.018em at 22 px).
+ */
+function HomeHeading({ id, title, icon, subtitle, action }: HomeHeadingProps) {
+  return (
+    <div className="flex min-h-11 w-full items-center justify-between gap-3">
+      <div className="flex min-w-0 flex-col gap-0.5 md:flex-row md:items-baseline md:gap-3">
+        <h2 id={id} className="text-lg leading-[1.3] font-semibold tracking-[-0.01em] text-forest md:text-[22px] md:tracking-[-0.015em]">
+          {icon}
+          {title}
+        </h2>
+        {subtitle && <p className="text-[13px] leading-[1.4] text-muted md:text-sm md:leading-[normal]">{subtitle}</p>}
+      </div>
+      {action && (
+        // With `short`: «Hamısı» on phones, the full label from md; the name starts with the visible text of the
+        // width, then says which list it opens (label in name, WCAG 2.5.3).
+        <Link
+          href={action.to}
+          className={cn(
+            'flex h-11 shrink-0 items-center gap-1.5 text-sm leading-[normal] font-semibold whitespace-nowrap text-forest transition-colors duration-(--dur-fast) hover:text-olive-text',
+            !action.short && 'max-md:hidden',
+          )}
+        >
+          {action.short ? (
+            <>
+              <span className="md:hidden">{action.short}</span>
+              <span className="max-md:hidden">{action.label}</span>
+              {action.context && <span className="sr-only"> — {action.context}</span>}
+            </>
+          ) : (
+            action.label
+          )}
+          <ArrowRight aria-hidden size={16} strokeWidth={2} className="max-md:hidden" />
+        </Link>
+      )}
+    </div>
   )
 }
 
@@ -69,41 +128,24 @@ export default function HomePage({ content }: { content: HomeContent }) {
     <>
       <Hero />
 
-      <section
-        id="one-cixan-elanlar"
-        aria-labelledby="one-cixan-elanlar-title"
-        className="page-x mx-auto flex w-full max-w-[1440px] scroll-mt-24 flex-col gap-1 pt-3.5 pb-5 md:gap-4 md:pt-8 md:pb-12"
-      >
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex min-w-0 items-baseline gap-3">
-            <h2 id="one-cixan-elanlar-title" className="text-lg leading-[1.3] font-semibold text-forest md:text-[22px]">
-              {/* Same mark as the header link: these are listings sellers paid to push forward. */}
-              <Rocket aria-hidden size={20} strokeWidth={2} className="mr-2 inline-block text-olive max-md:size-[18px]" />
-              Önə çıxan elanlar
-            </h2>
-            <p className="text-sm leading-[normal] text-muted max-md:hidden">Satıcıların ödənişlə irəli çəkdiyi elanlar</p>
-          </div>
-          {/* «Hamısı» on phones, «Hamısına bax» from md (Variant 2 mockups). The name starts with the visible text
-              of the width («Hamısı — Önə çıxan elanlar»), then says which list it opens (label in name, WCAG 2.5.3). */}
-          <Link
-            href="/elanlar?vip=1"
-            className="flex h-11 shrink-0 items-center gap-1.5 text-sm leading-[normal] font-semibold text-forest hover:text-olive-text"
-          >
-            <span className="md:hidden">Hamısı</span>
-            <span className="max-md:hidden">Hamısına bax</span>
-            <span className="sr-only"> — Önə çıxan elanlar</span>
-            <ArrowRight aria-hidden size={16} strokeWidth={2} className="max-md:hidden" />
-          </Link>
-        </div>
+      <Section id="one-cixan-elanlar" labelledBy="one-cixan-elanlar-title" className="max-md:pt-3.5">
+        <HomeHeading
+          id="one-cixan-elanlar-title"
+          // Same mark as the header link: these are listings sellers paid to push forward.
+          icon={<Rocket aria-hidden size={20} strokeWidth={2} className="mr-2 inline-block text-olive max-md:size-[18px]" />}
+          title="Önə çıxan elanlar"
+          subtitle="Satıcıların ödənişlə irəli çəkdiyi elanlar"
+          action={{ label: 'Hamısına bax', short: 'Hamısı', context: 'Önə çıxan elanlar', to: '/elanlar?vip=1' }}
+        />
         <Reveal className="grid w-full grid-cols-2 gap-2.5 lg:grid-cols-4 lg:gap-5">
           {vip.map((l) => (
             <ListingCard key={l.id} listing={l} />
           ))}
         </Reveal>
-      </section>
+      </Section>
 
       <Section id="son-elanlar">
-        <SectionHeader title="Son elanlar" subtitle="Azərbaycanda yeni yerləşdirilən elanlar" action={{ label: 'Bütün elanlara bax', to: '/elanlar' }} />
+        <HomeHeading title="Son elanlar" subtitle="Azərbaycanda yeni yerləşdirilən elanlar" action={{ label: 'Bütün elanlara bax', to: '/elanlar' }} />
         <Reveal className="grid w-full grid-cols-2 gap-3 md:grid-cols-3 md:gap-5 xl:grid-cols-4">
           {latest.map((l) => (
             <ListingCard key={l.id} listing={l} />
@@ -113,7 +155,7 @@ export default function HomePage({ content }: { content: HomeContent }) {
       </Section>
 
       <Section id="xidmetler">
-        <SectionHeader title="Bağınıza peşəkar toxunuş" subtitle="Landşaft və bağçılıq xidmətləri" action={{ label: 'Bütün xidmətlər', to: '/xidmetler' }} />
+        <HomeHeading title="Bağınıza peşəkar toxunuş" subtitle="Landşaft və bağçılıq xidmətləri" action={{ label: 'Bütün xidmətlər', to: '/xidmetler' }} />
         <div className="grid w-full grid-cols-1 gap-5 md:grid-cols-3">
           {content.services.map(({ service, image }) => (
             <ServiceCard key={service.id} service={service} image={image} />
@@ -123,7 +165,7 @@ export default function HomePage({ content }: { content: HomeContent }) {
       </Section>
 
       <Section id="saticilar">
-        <SectionHeader
+        <HomeHeading
           title="Etibar etdiyiniz satıcılar"
           subtitle="Tingçilik təsərrüfatları və peşəkar bağ mərkəzləri"
           action={{ label: 'Biznes satıcıların elanları', to: '/elanlar?saticiNovu=biznes' }}
@@ -137,8 +179,8 @@ export default function HomePage({ content }: { content: HomeContent }) {
       </Section>
 
       <section className="w-full bg-sand">
-        <div className="page-x mx-auto flex w-full max-w-[1440px] flex-col items-start gap-6 py-10">
-          <h2 className="w-full text-[23px] leading-[1.35] font-normal text-ink md:text-[30px]">Daha rahat və təhlükəsiz seçim</h2>
+        <div className="page-x mx-auto flex w-full max-w-[1440px] flex-col items-start gap-4 py-10 md:gap-6">
+          <HomeHeading title="Daha rahat və təhlükəsiz seçim" />
           <div className="flex w-full flex-col gap-7 md:flex-row">
             {trustTips.map(({ icon: Icon, title, text }) => (
               <div key={title} className="flex min-w-0 flex-1 flex-col items-start gap-2.5">
