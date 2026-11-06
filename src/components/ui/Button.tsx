@@ -18,8 +18,10 @@ const variants: Record<ButtonVariant, string> = {
   danger: 'bg-danger text-white hover:bg-[#a13a35]',
 }
 
+// Press feedback: scale .97 on press (Tailwind's scale-* sets the `scale` property, so the transition lists it).
 const base =
-  'inline-flex min-h-[46px] shrink-0 items-center justify-center gap-2 rounded-lg px-4 py-[11px] text-sm leading-[normal] font-semibold whitespace-nowrap transition-colors ' +
+  'inline-flex min-h-[46px] shrink-0 items-center justify-center gap-2 rounded-lg px-4 py-[11px] text-sm leading-[normal] font-semibold whitespace-nowrap ' +
+  'transition-[color,background-color,border-color,scale] duration-(--dur-fast) ease-out active:scale-[0.97] motion-reduce:active:scale-100 ' +
   'focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-olive focus-visible:ring-inset ' +
   'disabled:bg-disabled disabled:text-muted disabled:border-transparent'
 

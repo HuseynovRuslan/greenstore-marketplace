@@ -62,7 +62,7 @@ export function ViewToggle({ view, onChange, className }: { view: SearchView; on
           title={label}
           onClick={() => onChange(value)}
           className={cn(
-            'flex h-full w-[42px] items-center justify-center rounded-[7px] transition-colors duration-(--dur-fast)',
+            'flex h-full w-[42px] items-center justify-center rounded-[7px] transition-[color,background-color,scale] duration-(--dur-fast) ease-out active:scale-[0.95] motion-reduce:active:scale-100',
             view === value ? 'bg-forest text-white' : 'text-ink hover:bg-mint hover:text-forest',
           )}
         >
@@ -132,7 +132,7 @@ export function ActiveFilterRow({ chips, filterCount, onRemove, onReset, fallbac
             focusAt.current = 0
             onReset()
           }}
-          className="h-[38px] rounded-lg px-2.5 text-sm leading-[normal] font-semibold text-forest underline underline-offset-[3px] hover:text-olive-text max-md:h-11"
+          className="h-[38px] rounded-lg px-2.5 text-sm leading-[normal] font-semibold text-forest underline underline-offset-[3px] transition-[color,scale] duration-(--dur-fast) ease-out hover:text-olive-text active:scale-[0.97] motion-reduce:active:scale-100 max-md:h-11"
         >
           Sıfırla
         </button>

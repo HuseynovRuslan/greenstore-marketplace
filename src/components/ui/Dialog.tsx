@@ -93,7 +93,7 @@ export function Dialog({ open, title, onClose, children, className }: DialogProp
             type="button"
             aria-label="Bağla"
             onClick={onClose}
-            className="-m-3 flex size-11 shrink-0 items-center justify-center rounded-option text-forest hover:bg-mint"
+            className="-m-3 flex size-11 shrink-0 items-center justify-center rounded-option text-forest transition-[background-color,scale] duration-(--dur-fast) ease-out hover:bg-mint active:scale-[0.95] motion-reduce:active:scale-100"
           >
             <X size={20} strokeWidth={1.8} absoluteStrokeWidth />
           </button>

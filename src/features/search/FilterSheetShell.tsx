@@ -45,7 +45,7 @@ export function FilterSheetShell({ open, onClose, focus, onReset, resetDisabled,
           type="button"
           onClick={onReset}
           disabled={resetDisabled}
-          className="h-11 rounded-lg px-2 text-sm leading-[normal] font-semibold text-forest underline underline-offset-[3px] disabled:text-muted disabled:no-underline"
+          className="h-11 rounded-lg px-2 text-sm leading-[normal] font-semibold text-forest underline underline-offset-[3px] transition-[color,scale] duration-(--dur-fast) ease-out active:scale-[0.97] disabled:text-muted disabled:no-underline disabled:active:scale-100 motion-reduce:active:scale-100"
         >
           Sıfırla
         </button>
@@ -53,7 +53,7 @@ export function FilterSheetShell({ open, onClose, focus, onReset, resetDisabled,
           type="button"
           onClick={onSubmit}
           disabled={submitDisabled}
-          className="h-12 rounded-option bg-forest px-8 text-base leading-[normal] font-semibold text-white transition-colors duration-(--dur-fast) hover:bg-forest-hover disabled:bg-line-strong disabled:text-muted"
+          className="h-12 rounded-option bg-forest px-8 text-base leading-[normal] font-semibold text-white transition-[background-color,color,scale] duration-(--dur-fast) ease-out hover:bg-forest-hover active:scale-[0.97] disabled:bg-line-strong disabled:text-muted disabled:active:scale-100 motion-reduce:active:scale-100"
         >
           {submitLabel}
         </button>

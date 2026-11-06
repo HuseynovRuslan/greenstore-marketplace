@@ -90,7 +90,7 @@ export function CatalogSearchCard({ q, cityIds, query, cityCounts, onSearch, cla
             <CityField value={city} onChange={setCity} options={options} />
             <button
               type="submit"
-              className="h-12 shrink-0 rounded-option bg-forest px-6 text-base leading-[normal] font-semibold text-white transition-colors duration-(--dur-fast) hover:bg-forest-hover md:h-[52px] md:rounded-xl md:px-[30px]"
+              className="h-12 shrink-0 rounded-option bg-forest px-6 text-base leading-[normal] font-semibold text-white transition-[background-color,scale] duration-(--dur-fast) ease-out hover:bg-forest-hover active:scale-[0.97] motion-reduce:active:scale-100 md:h-[52px] md:rounded-xl md:px-[30px]"
             >
               Axtar
             </button>

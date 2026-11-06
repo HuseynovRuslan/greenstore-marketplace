@@ -258,7 +258,7 @@ function PriceGroup({ state, onApply }: { state: SearchState; onApply: (range: P
           type="button"
           disabled={Boolean(error)}
           onClick={() => apply(draft)}
-          className="h-10 self-start rounded-option border border-forest px-4 text-sm leading-[normal] font-semibold text-forest transition-colors duration-(--dur-fast) hover:bg-mint disabled:border-line-strong disabled:text-muted"
+          className="h-10 self-start rounded-option border border-forest px-4 text-sm leading-[normal] font-semibold text-forest transition-[color,background-color,border-color,scale] duration-(--dur-fast) ease-out hover:bg-mint active:scale-[0.97] disabled:border-line-strong disabled:text-muted disabled:active:scale-100 motion-reduce:active:scale-100"
         >
           Tətbiq et
         </button>

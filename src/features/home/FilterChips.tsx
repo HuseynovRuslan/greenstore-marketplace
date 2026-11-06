@@ -129,7 +129,7 @@ export function FilterChips({ tab, filters, onChange, className }: FilterChipsPr
         <button
           type="button"
           onClick={reset}
-          className="h-[38px] rounded-lg px-2.5 text-sm leading-[normal] font-semibold text-forest underline underline-offset-[3px] hover:text-olive-text"
+          className="h-[38px] rounded-lg px-2.5 text-sm leading-[normal] font-semibold text-forest underline underline-offset-[3px] transition-[color,scale] duration-(--dur-fast) ease-out hover:text-olive-text active:scale-[0.97] motion-reduce:active:scale-100"
         >
           Sıfırla
         </button>

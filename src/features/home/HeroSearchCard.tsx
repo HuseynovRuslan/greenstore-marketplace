@@ -103,7 +103,7 @@ export function HeroSearchCard() {
               <button
                 type="submit"
                 aria-describedby={error ? errorId : undefined}
-                className="h-12 shrink-0 rounded-option bg-forest px-6 text-base leading-[normal] font-semibold text-white transition-colors duration-(--dur-fast) hover:bg-forest-hover md:h-[52px] md:rounded-xl md:px-[30px]"
+                className="h-12 shrink-0 rounded-option bg-forest px-6 text-base leading-[normal] font-semibold text-white transition-[background-color,scale] duration-(--dur-fast) ease-out hover:bg-forest-hover active:scale-[0.97] motion-reduce:active:scale-100 md:h-[52px] md:rounded-xl md:px-[30px]"
               >
                 Axtar
               </button>
@@ -186,7 +186,8 @@ function TypeTabs({ value, onChange }: { value: HeroTab; onChange: (tab: HeroTab
             key={t.value}
             data-checked={checked || undefined}
             className={cn(
-              'relative flex h-11 min-w-0 flex-1 cursor-pointer items-center justify-center gap-[7px] rounded-t-option px-3 text-sm leading-[normal] font-semibold transition-colors duration-(--dur-fast) md:h-[46px] md:flex-none md:text-[15px]',
+              // Press: the label dims (a tab doesn't shrink; the underline moving is the rest of the feedback).
+              'relative flex h-11 min-w-0 flex-1 cursor-pointer items-center justify-center gap-[7px] rounded-t-option px-3 text-sm leading-[normal] font-semibold transition-[color,opacity] duration-(--dur-fast) ease-out active:opacity-70 md:h-[46px] md:flex-none md:text-[15px]',
               'has-[:focus-visible]:outline-2 has-[:focus-visible]:-outline-offset-2 has-[:focus-visible]:outline-olive',
               checked ? 'text-forest' : 'text-ink-soft hover:text-forest',
             )}

@@ -48,12 +48,19 @@ export function MobileNav() {
             href={to}
             aria-current={isActive ? 'page' : undefined}
             className={cn(
-              'flex min-w-0 flex-1 flex-col items-center gap-1 text-center text-[11px] leading-[normal] select-none [-webkit-touch-callout:none]',
+              'group flex min-w-0 flex-1 flex-col items-center gap-1 text-center text-[11px] leading-[normal] select-none [-webkit-touch-callout:none]',
               isActive ? 'font-bold text-forest' : 'text-muted',
               preHydration && preHydrationClass(preHydration),
             )}
           >
-            <Icon aria-hidden size={22} strokeWidth={1.8} absoluteStrokeWidth />
+            {/* Press feedback on touch-down: the icon dips to .92. */}
+            <Icon
+              aria-hidden
+              size={22}
+              strokeWidth={1.8}
+              absoluteStrokeWidth
+              className="transition-[scale] duration-(--dur-fast) ease-out group-active:scale-[0.92] motion-reduce:group-active:scale-100"
+            />
             <span className="w-full truncate">{label}</span>
           </Link>
         )

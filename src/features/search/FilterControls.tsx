@@ -15,7 +15,8 @@ export function chipClass(state: { on: boolean; open?: boolean; touch?: boolean 
   return cn(
     'flex shrink-0 items-center gap-[7px] rounded-full border px-3.5 text-sm leading-[normal] font-medium whitespace-nowrap',
     state.touch ? 'h-11' : 'h-[38px]',
-    'transition-[background-color,border-color,color,transform] duration-(--dur-fast) active:scale-[0.97] motion-reduce:active:scale-100',
+    // `scale`, not `transform`: Tailwind's scale-* sets the scale property, so the press was not animated before.
+    'transition-[background-color,border-color,color,scale] duration-(--dur-fast) ease-out active:scale-[0.97] motion-reduce:active:scale-100',
     state.on
       ? 'border-forest bg-forest text-white hover:border-forest-hover hover:bg-forest-hover'
       : state.open
@@ -27,7 +28,7 @@ export function chipClass(state: { on: boolean; open?: boolean; touch?: boolean 
 /** An option pill inside a popover, the sheet or the sidebar. */
 export function optionClass(on: boolean, touch?: boolean) {
   return cn(
-    'rounded-full border px-3.5 text-sm leading-[normal] font-medium whitespace-nowrap transition-colors duration-(--dur-fast)',
+    'rounded-full border px-3.5 text-sm leading-[normal] font-medium whitespace-nowrap transition-[color,background-color,border-color,scale] duration-(--dur-fast) ease-out active:scale-[0.97] motion-reduce:active:scale-100',
     touch ? 'h-11' : 'h-[38px]',
     on ? 'border-forest bg-forest text-white' : 'border-line-strong bg-surface text-ink hover:border-forest',
   )

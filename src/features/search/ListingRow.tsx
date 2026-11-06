@@ -18,7 +18,8 @@ export function ListingRow({ listing }: { listing: Listing }) {
   return (
     <article
       className={cn(
-        'group relative flex w-full items-start gap-3 rounded-xl border border-line bg-surface p-[7px] transition-[border-color,box-shadow] duration-(--dur-base) ease-out hover:border-olive hover:shadow-card-hover md:gap-5 md:p-[11px]',
+        // Press: the row dips to .99 (it is wide; .98 would move its edges by 20 px at 1440).
+        'group relative flex w-full items-start gap-3 rounded-xl border border-line bg-surface p-[7px] transition-[border-color,box-shadow,scale] duration-(--dur-base) ease-out hover:border-olive hover:shadow-card-hover has-[a:active]:scale-[0.99] has-[a:active]:duration-(--dur-fast) motion-reduce:has-[a:active]:scale-100 md:gap-5 md:p-[11px]',
         cardFocusClass,
       )}
     >

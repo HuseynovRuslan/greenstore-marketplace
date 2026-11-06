@@ -117,7 +117,7 @@ export function usesHomeHeader(pathname: string) {
 }
 
 const iconButton =
-  'flex size-11 shrink-0 items-center justify-center rounded-option text-ink transition-colors duration-(--dur-fast) hover:bg-mint hover:text-forest'
+  'flex size-11 shrink-0 items-center justify-center rounded-option text-ink transition-[color,background-color,scale] duration-(--dur-fast) ease-out hover:bg-mint hover:text-forest active:scale-[0.95] motion-reduce:active:scale-100'
 
 /**
  * Figma "Başlıq naviqasiyası".
@@ -181,17 +181,13 @@ export function SiteHeader({ variant = 'default' }: { variant?: 'default' | 'hom
       shown ? 'opacity-100 delay-60 duration-(--dur-base)' : 'pointer-events-none opacity-0 blur-[2px] duration-(--dur-fast) motion-reduce:blur-none',
     )
   const pillState = cn(swap(pill), !pill && 'translate-y-1 motion-reduce:translate-y-0')
+  // The cross-fade sits on a wrapper so its transition doesn't replace the button's own (colour, press).
   const pillIcon = (className?: string) => (
-    <button
-      type="button"
-      aria-label={searchPlaceholder}
-      inert={!pillReachable}
-      onClick={toHeroSearch}
-      {...trackFocus('pill')}
-      className={cn(iconButton, pillState, className)}
-    >
-      <Search aria-hidden size={21} strokeWidth={1.8} absoluteStrokeWidth />
-    </button>
+    <span className={cn('flex shrink-0', pillState, className)}>
+      <button type="button" aria-label={searchPlaceholder} inert={!pillReachable} onClick={toHeroSearch} {...trackFocus('pill')} className={iconButton}>
+        <Search aria-hidden size={21} strokeWidth={1.8} absoluteStrokeWidth />
+      </button>
+    </span>
   )
 
   // 768–1279 px: the Figma 768 header has no "Daxil ol" text, so account access is a compact icon.
@@ -293,7 +289,7 @@ export function SiteHeader({ variant = 'default' }: { variant?: 'default' | 'hom
                   <button
                     type="button"
                     onClick={toHeroSearch}
-                    className="flex h-11 w-full max-w-[400px] items-center gap-2.5 rounded-full border border-line-strong bg-surface px-4 text-[15px] leading-[normal] text-muted transition-colors duration-(--dur-fast) hover:border-forest"
+                    className="flex h-11 w-full max-w-[400px] items-center gap-2.5 rounded-full border border-line-strong bg-surface px-4 text-[15px] leading-[normal] text-muted transition-[border-color,scale] duration-(--dur-fast) ease-out hover:border-forest active:scale-[0.98] motion-reduce:active:scale-100"
                   >
                     <Search aria-hidden size={18} strokeWidth={2} className="shrink-0" />
                     <span className="truncate">{searchPlaceholder}</span>

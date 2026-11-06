@@ -34,7 +34,8 @@ export function ListingCard({ listing, className }: { listing: Listing; classNam
   return (
     <article
       className={cn(
-        'group relative flex h-full w-full min-w-0 flex-col gap-2 rounded-xl border border-line bg-surface p-[7px] transition-[border-color,box-shadow] duration-(--dur-base) ease-out hover:border-olive hover:shadow-card-hover md:gap-3 md:p-[11px]',
+        // Press (the title link covers the card): the card dips to .98; not when the favourite button is pressed.
+        'group relative flex h-full w-full min-w-0 flex-col gap-2 rounded-xl border border-line bg-surface p-[7px] transition-[border-color,box-shadow,scale] duration-(--dur-base) ease-out hover:border-olive hover:shadow-card-hover has-[a:active]:scale-[0.98] has-[a:active]:duration-(--dur-fast) motion-reduce:has-[a:active]:scale-100 md:gap-3 md:p-[11px]',
         cardFocusClass,
         className,
       )}
