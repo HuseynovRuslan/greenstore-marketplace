@@ -31,6 +31,14 @@ describe('header on catalogue pages', () => {
     expect(screen.queryByRole('search')).not.toBeInTheDocument()
   })
 
+  it('gives /xidmetler the home header with «Xidmətlər» marked and no header search', () => {
+    renderHeader('/xidmetler')
+    const nav = screen.getByRole('navigation', { name: 'Əsas bölmələr' })
+    expect(within(nav).getByRole('link', { name: 'Xidmətlər' })).toHaveAttribute('aria-current', 'page')
+    expect(within(nav).getByRole('link', { name: 'Məhsullar' })).not.toHaveAttribute('aria-current')
+    expect(screen.queryByRole('search')).not.toBeInTheDocument()
+  })
+
   it('keeps the default header with its search on a listing page', () => {
     renderHeader('/elanlar/zeytun-agaci-olea-europaea')
     expect(screen.queryByRole('navigation', { name: 'Əsas bölmələr' })).not.toBeInTheDocument()

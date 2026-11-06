@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/Button'
 import { SelectField, TextField } from '@/components/ui/Field'
 import { cities } from '@/data/cities'
 import { serviceCategories } from '@/data/services'
+import { HERO_QUERY_ID, HERO_SEARCH_ID } from '@/features/home/ids'
 import { cn, formatNumber } from '@/lib/format'
 import { SortSelect } from './SortSelect'
 import { parseServiceQuery, providerTabs, type ServiceSort } from './query'
@@ -34,7 +35,10 @@ function useServicesUpdate(query: string) {
   }
 }
 
-/** "Xidmət axtarışı": typed values are applied on "Axtar"; they re-sync when the URL changes elsewhere. */
+/**
+ * "Xidmət axtarışı": typed values are applied on "Axtar"; they re-sync when the URL changes elsewhere. It is the
+ * page's only search (the home header has none) and carries the hero ids, so the header's search pill leads here.
+ */
 export function ServicesSearchForm({ query }: { query: string }) {
   const parsed = parseServiceQuery(new URLSearchParams(query))
   const update = useServicesUpdate(query)
@@ -54,8 +58,9 @@ export function ServicesSearchForm({ query }: { query: string }) {
   }
 
   return (
-    <form role="search" onSubmit={submit} className="flex w-full flex-col items-stretch gap-3 md:flex-row md:items-start">
+    <form id={HERO_SEARCH_ID} role="search" onSubmit={submit} className="flex w-full scroll-mt-28 flex-col items-stretch gap-3 md:flex-row md:items-start">
       <TextField
+        id={HERO_QUERY_ID}
         containerClassName="md:flex-1"
         label="Xidmət axtarışı"
         name="q"

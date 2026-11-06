@@ -110,7 +110,7 @@ const homeNav = [
  * no search field of its own there (one search per page).
  */
 export function usesHomeHeader(pathname: string) {
-  return pathname === '/elanlar' || pathname.startsWith('/kateqoriyalar/')
+  return pathname === '/elanlar' || pathname === '/xidmetler' || pathname.startsWith('/kateqoriyalar/')
 }
 
 const iconButton =
