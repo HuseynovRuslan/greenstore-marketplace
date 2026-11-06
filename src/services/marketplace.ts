@@ -10,13 +10,9 @@ import { sellerById } from '@/data/sellers'
 import { normalizeSearch } from '@/lib/format'
 import type { Listing, SellerType } from '@/types'
 
-export type ListingSort = 'newest' | 'price-asc' | 'price-desc'
+import type { ListingSort } from './listingSort'
 
-export const listingSortOptions: Array<{ value: ListingSort; label: string }> = [
-  { value: 'newest', label: 'Ən yenilər' },
-  { value: 'price-asc', label: 'Əvvəlcə ucuz' },
-  { value: 'price-desc', label: 'Əvvəlcə bahalı' },
-]
+export { listingSortOptions, type ListingSort } from './listingSort'
 
 export interface ListingFilters {
   q?: string

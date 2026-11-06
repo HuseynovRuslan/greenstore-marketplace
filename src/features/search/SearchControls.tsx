@@ -4,7 +4,7 @@ import { useLayoutEffect, useRef } from 'react'
 import { ArrowDownUp, ChevronDown, LayoutGrid, List, X } from 'lucide-react'
 import { Listbox, listboxChevronClass } from '@/components/ui/Listbox'
 import { cn } from '@/lib/format'
-import { listingSortOptions, type ListingSort } from '@/services/marketplace'
+import { listingSortOptions, type ListingSort } from '@/services/listingSort'
 import { chipClass } from './FilterControls'
 import type { FilterChip, SearchView } from './searchUrl'
 

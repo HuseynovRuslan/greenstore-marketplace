@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { ChevronRight } from 'lucide-react'
-import { buttonClass } from './Button'
+import { cn } from '@/lib/format'
 import { pageHref, pageWindow } from '@/lib/pagination'
 
 interface PaginationLinksProps {
@@ -15,16 +15,29 @@ interface PaginationLinksProps {
   scrollTargetId?: string
 }
 
+const pageClass =
+  'flex h-11 min-w-11 items-center justify-center gap-1.5 rounded-option border px-3.5 text-[15px] leading-[normal] font-semibold tabular-nums transition-colors duration-(--dur-fast)'
+const idle = 'border-line-strong bg-surface text-ink hover:border-forest hover:text-forest'
+
 /**
- * Figma "Səhifələmə": centred row, gap 8; 46 px buttons — current page primary, others secondary; "› Növbəti".
- * Real links (`?sehife=N`), so search engines can crawl every page; the page is rendered on the server.
+ * Page links (Variant 2 look: 44 px, the current page forest-filled, «Növbəti ›»). Real links (`?sehife=N`), so
+ * search engines can crawl every page; the page is rendered on the server. Switching pages brings the list's top
+ * into view (instantly under reduced motion).
  */
 export function PaginationLinks({ page, pageCount, basePath, query, scrollTargetId }: PaginationLinksProps) {
   const scroll = () => {
-    if (scrollTargetId) document.getElementById(scrollTargetId)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    if (!scrollTargetId) return
+    const reduce = typeof window.matchMedia === 'function' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    document.getElementById(scrollTargetId)?.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' })
   }
+  const next = (
+    <>
+      Növbəti
+      <ChevronRight aria-hidden size={18} strokeWidth={2} className="-mr-1" />
+    </>
+  )
   return (
-    <nav aria-label="Səhifələmə" className="flex w-full flex-wrap items-start justify-center gap-2">
+    <nav aria-label="Səhifələmə" className="flex w-full flex-wrap items-center justify-center gap-2">
       {pageWindow(page, pageCount).map((p) => (
         <Link
           key={p}
@@ -33,20 +46,18 @@ export function PaginationLinks({ page, pageCount, basePath, query, scrollTarget
           onClick={p === page ? (e) => e.preventDefault() : scroll}
           aria-current={p === page ? 'page' : undefined}
           aria-label={`Səhifə ${p}`}
-          className={buttonClass(p === page ? 'primary' : 'secondary', 'min-w-[39px]')}
+          className={cn(pageClass, p === page ? 'border-forest bg-forest text-white' : idle)}
         >
           {p}
         </Link>
       ))}
       {page >= pageCount ? (
-        <button type="button" disabled className={buttonClass('secondary')}>
-          <ChevronRight aria-hidden size={18} strokeWidth={1.8} absoluteStrokeWidth />
-          Növbəti
+        <button type="button" disabled className={cn(pageClass, 'border-line bg-surface text-muted')}>
+          {next}
         </button>
       ) : (
-        <Link href={pageHref(basePath, query, page + 1)} scroll={false} onClick={scroll} rel="next" className={buttonClass('secondary')}>
-          <ChevronRight aria-hidden size={18} strokeWidth={1.8} absoluteStrokeWidth />
-          Növbəti
+        <Link href={pageHref(basePath, query, page + 1)} scroll={false} onClick={scroll} rel="next" className={cn(pageClass, idle)}>
+          {next}
         </Link>
       )}
     </nav>

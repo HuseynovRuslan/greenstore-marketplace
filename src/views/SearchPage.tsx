@@ -5,7 +5,7 @@ import { categoryById } from '@/data/categories'
 import { cityName } from '@/data/cities'
 import { PLANT_CATEGORY_IDS } from '@/data/postAd'
 import { CatalogResults, RESULTS_ID } from '@/features/search/CatalogResults'
-import { getFacetCounts } from '@/features/search/facets'
+import { getFacetCounts, getRemovalCounts } from '@/features/search/facets'
 import { ListingRow } from '@/features/search/ListingRow'
 import { speciesOptions } from '@/features/search/species'
 import { subcategoryName } from '@/features/search/taxonomy'
@@ -81,7 +81,8 @@ interface SearchPageProps {
  */
 export default async function SearchPage({ state, sort, view, result, stateQuery, basePath, urlQuery, crumbs }: SearchPageProps) {
   const items = result.items.map(withSearchCover)
-  const facets = await getFacetCounts(state)
+  const chips = activeChips(state)
+  const [facets, removalCounts] = await Promise.all([getFacetCounts(state), result.total === 0 ? getRemovalCounts(chips) : undefined])
 
   const results =
     view === 'grid' ? (
@@ -117,7 +118,8 @@ export default async function SearchPage({ state, sort, view, result, stateQuery
       view={view}
       total={result.total}
       heading={searchHeading(state)}
-      chips={activeChips(state)}
+      chips={chips}
+      removalCounts={removalCounts}
       facets={facets}
       speciesOptions={speciesOptions(state.categoryId)}
       plantCategoryIds={PLANT_CATEGORY_IDS}

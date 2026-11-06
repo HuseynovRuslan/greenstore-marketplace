@@ -6,7 +6,7 @@ import { JsonLd } from '@/seo/StructuredData'
 import { crumbsJsonLd } from '@/seo/jsonld'
 import { pageMetadata } from '@/seo/metadata'
 import { toSearchParams, type RawSearchParams } from '@/lib/searchParams'
-import { catalogCopy, loadCatalog } from './catalog'
+import { catalogCopy, loadCatalog } from '../catalog'
 
 type Props = { searchParams: Promise<RawSearchParams> }
 

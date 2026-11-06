@@ -19,7 +19,7 @@ const facets = {
   cities: { all: 16, byCity: { baki: 5 } },
 }
 
-function renderCatalog(query: string, total = 6) {
+function renderCatalog(query: string, total = 6, removalCounts?: Record<string, number>) {
   const state = parseSearchState(new URLSearchParams(query))
   render(
     <AppStoreProvider>
@@ -33,6 +33,7 @@ function renderCatalog(query: string, total = 6) {
         total={total}
         heading="Ağaclar"
         chips={activeChips(state)}
+        removalCounts={removalCounts}
         facets={facets}
         speciesOptions={[{ value: 'zeytun-agaci', label: 'Zeytun ağacı' }]}
         plantCategoryIds={['agaclar', 'kollar']}
@@ -125,5 +126,24 @@ describe('CatalogResults', () => {
     await user.click(screen.getByRole('button', { name: 'Filtrlər' }))
     expect(within(screen.getByRole('dialog', { name: 'Filtrlər' })).getByRole('button', { name: 'Ağaclar' })).toHaveAttribute('aria-pressed', 'false')
     expect(push).not.toHaveBeenCalled()
+  })
+
+  it('offers the filters whose removal brings listings back when nothing matches', async () => {
+    const user = userEvent.setup()
+    renderCatalog('q=zeytun&kateqoriya=kollar&max=100', 0, { q: 2, category: 4, price: 0 })
+    expect(screen.getByRole('heading', { name: 'Bu seçimə uyğun elan yoxdur' })).toBeInTheDocument()
+    const suggestions = screen.getAllByRole('button', { name: /olmadan/ }).map((b) => b.textContent)
+    expect(suggestions).toEqual(['«Kollar» olmadan: 4 elan', '«zeytun» olmadan: 2 elan'])
+    await user.click(screen.getByRole('button', { name: '«Kollar» olmadan: 4 elan' }))
+    expect(push).toHaveBeenLastCalledWith('/elanlar?q=zeytun&max=100', { scroll: false })
+    await user.click(screen.getByRole('button', { name: 'Filtrləri sıfırla' }))
+    expect(push).toHaveBeenLastCalledWith('/elanlar?q=zeytun', { scroll: false })
+  })
+
+  it('leads to every listing when only the search word finds nothing', async () => {
+    const user = userEvent.setup()
+    renderCatalog('q=palma', 0, { q: 16 })
+    await user.click(screen.getByRole('button', { name: 'Bütün elanlara bax' }))
+    expect(push).toHaveBeenLastCalledWith('/elanlar', { scroll: false })
   })
 })

@@ -3,7 +3,7 @@
  * the sample listings never reach the browser bundle. Parsing (which validates against the data), the query and
  * the chips live in searchState.ts, which re-exports everything here.
  */
-import type { ListingSort } from '@/services/marketplace'
+import type { ListingSort } from '@/services/listingSort'
 import { PARAM, type SellerTypeParam } from './filterDefs'
 
 export type SearchView = 'grid' | 'list'

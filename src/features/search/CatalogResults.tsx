@@ -2,18 +2,16 @@
 
 import { useEffect, useId, useMemo, useOptimistic, useRef, useState, useTransition, type ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
-import { Search } from 'lucide-react'
-import { Button } from '@/components/ui/Button'
-import { EmptyState } from '@/components/ui/EmptyState'
 import { formatNumber } from '@/lib/format'
-import type { ListingSort } from '@/services/marketplace'
+import type { ListingSort } from '@/services/listingSort'
+import { CatalogEmptyState } from './CatalogEmptyState'
 import { CatalogFilterSheet } from './CatalogFilterSheet'
 import { CatalogSearchCard, type CityCounts } from './CatalogSearchCard'
 import { FiltersButton } from './FilterControls'
 import { FilterSidebar, type SidebarFacets } from './FilterSidebar'
 import type { FilterOption } from './filterDefs'
 import { ActiveFilterRow, SortSelect, ViewToggle } from './SearchControls'
-import { catalogHref, chipActive, withoutFilters, withSort, withView, type FilterChip, type SearchState, type SearchView } from './searchUrl'
+import { catalogHref, chipActive, emptySearchState, withoutFilters, withSort, withView, type FilterChip, type SearchState, type SearchView } from './searchUrl'
 import { useStickySide } from './useStickySide'
 
 export const RESULTS_ID = 'axtaris-neticeleri'
@@ -33,6 +31,8 @@ interface CatalogResultsProps {
   heading: string
   /** Built on the server (their labels need the data). */
   chips: FilterChip[]
+  /** With 0 results: listings left after removing each chip (the empty state's suggestions). */
+  removalCounts?: Record<string, number>
   facets: SidebarFacets & { cities: CityCounts }
   speciesOptions: FilterOption[]
   /** Categories whose listings are plants (height and age apply). */
@@ -165,15 +165,13 @@ export function CatalogResults(props: CatalogResultsProps) {
           {/* The old results stay while new ones load; they dim after 150 ms, and brighten at once when done. */}
           <div className="flex flex-col gap-8 transition-opacity duration-(--dur-base) ease-out group-data-pending:opacity-55 group-data-pending:delay-150 motion-reduce:transition-none">
             {total === 0 ? (
-              <EmptyState
-                icon={<Search aria-hidden size={30} strokeWidth={1.8} absoluteStrokeWidth />}
-                title="Bu seçimə uyğun elan yoxdur"
-                description="Filtrləri dəyişin və ya başqa açar söz sınayın."
-                action={
-                  <Button fullWidth onClick={reset}>
-                    Filtrləri sıfırla
-                  </Button>
-                }
+              <CatalogEmptyState
+                chips={shownChips}
+                removalCounts={props.removalCounts ?? {}}
+                filterCount={filterCount}
+                onRemove={(chip) => apply(chip.without)}
+                onReset={reset}
+                onShowAll={() => apply(emptySearchState)}
               />
             ) : (
               props.results
