@@ -10,7 +10,7 @@ import {
   type RefObject,
 } from 'react'
 import { X } from 'lucide-react'
-import { AnimatePresence, useDragControls, useIsPresent, useMotionValue, useReducedMotion, useTransform } from 'motion/react'
+import { AnimatePresence, useDragControls, useIsPresent, useMotionValue, useMotionValueEvent, useReducedMotion } from 'motion/react'
 import * as m from 'motion/react-m'
 import { loadForDialog, MotionFeatures, SHEET_QUERY } from '@/components/motion/MotionFeatures'
 import { dialogEnter, dialogExit, fade, PROJECTION_SECONDS, sheetElastic, sheetEnter, sheetExit, sheetSnapBack } from '@/components/motion/springs'
@@ -111,8 +111,12 @@ function DialogLayer({ title, onClose, children, footer, className, panelRef }: 
   const dragControls = useDragControls()
   const y = useMotionValue<number | string>(0)
   const height = () => panelRef.current?.offsetHeight || 1
-  // Fully dimmed at rest, clear once the sheet is off screen; it follows the finger while dragging.
-  const dim = useTransform(y, (value) => 1 - Math.min(1, Math.max(0, toPx(value, height()) / height())))
+  // Fully dimmed at rest, clear once the sheet is off screen; it follows the finger while dragging. Written straight
+  // to the backdrop's style (one element, no re-render; useTransform would pull Motion's mixers into the first load).
+  const backdropRef = useRef<HTMLDivElement>(null)
+  useMotionValueEvent(y, 'change', (value) => {
+    if (slides && backdropRef.current) backdropRef.current.style.opacity = String(1 - Math.min(1, Math.max(0, toPx(value, height()) / height())))
+  })
 
   const trapTab = (e: ReactKeyboardEvent) => {
     const panel = panelRef.current
@@ -145,10 +149,11 @@ function DialogLayer({ title, onClose, children, footer, className, panelRef }: 
   return (
     <div inert={!isPresent || undefined} className="fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:p-5">
       <m.div
+        ref={backdropRef}
         aria-hidden
         onMouseDown={onClose}
         className="absolute inset-0 bg-ink/40"
-        {...(slides ? { style: { opacity: dim } } : { initial: { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0 }, transition: fade })}
+        {...(slides ? { style: { opacity: 0 } } : { initial: { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0 }, transition: fade })}
       />
       <m.div
         ref={panelRef}
