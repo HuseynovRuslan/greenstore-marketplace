@@ -73,9 +73,11 @@ If the API sends the category icon as a string, it must accept `shrub` too. The 
 
 ## Filters waiting for backend
 
-The hero shows these filters, but the frontend does **not send them** yet. They are behind one constant,
-`SHOW_PENDING_FILTERS` (default `true`), in `src/features/home/heroSearch.ts` (added in the next frontend step).
-Setting it to `false` hides them.
+The frontend does **not send** these filters yet, and since 6 November 2026 it does not show them either: the
+results page could not apply them, so a choice made on the home page was silently lost. They are behind one
+constant, `SHOW_PENDING_FILTERS` in `src/features/home/heroSearch.ts`, now `false`. The code stays; setting it to
+`true` shows them again on the home page. Once the params below are confirmed, they will be added to the catalogue
+filters too.
 
 | Filter (UI) | Proposed param | Values | Applies to | Needs on the DTO |
 |---|---|---|---|---|

@@ -58,7 +58,7 @@ export function SearchShell({ stateQuery, basePath, urlQuery, total, header, res
   const view: SearchView = params.get('gorunus') === 'siyahi' ? 'list' : 'grid'
 
   // "Elanlarda axtarış" is edited locally and applied on Enter (or together with the filter panel);
-  // it re-syncs whenever the URL query changes from elsewhere (header search, chips, "Hamısını təmizlə").
+  // it re-syncs whenever the URL query changes from elsewhere (header search, chips, «Sıfırla»).
   const [qInput, setQInput] = useState(state.q)
   const [syncedQ, setSyncedQ] = useState(state.q)
   if (state.q !== syncedQ) {
@@ -151,7 +151,7 @@ export function SearchShell({ stateQuery, basePath, urlQuery, total, header, res
 
           <div className="flex w-full items-start gap-4">
             <p className="shrink-0 text-sm leading-[1.5] text-ink" aria-live="polite">
-              {resultCountLabel(total, state)}
+              {resultCountLabel(total)}
             </p>
             <ViewToggle view={view} onChange={setView} />
             <SortSelect value={sort} onChange={setSort} className="ml-auto hidden xl:block" />
@@ -164,7 +164,7 @@ export function SearchShell({ stateQuery, basePath, urlQuery, total, header, res
               description="Filtrləri dəyişin və ya başqa açar söz sınayın."
               action={
                 <Button fullWidth onClick={clearAll}>
-                  Filtrləri təmizlə
+                  Filtrləri sıfırla
                 </Button>
               }
             />

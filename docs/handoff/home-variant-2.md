@@ -19,7 +19,8 @@ For: management and Ruslan (backend). Branch `nextjs-migration`. Mockups: `docs/
 - **Hero:** the heading on mint, then a white search card.
   - Tabs «Hamısı / Məhsullar / Xidmətlər» with listing counts.
   - Search word, city and «Axtar».
-  - Filter chips: Kateqoriya, Qiymət, Hündürlük, Kök sistemi, Mövcudluq, Çatdırılma, Əkin daxil.
+  - Filter chips: Kateqoriya, Qiymət, Hündürlük, Çatdırılma. «Kök sistemi», «Mövcudluq» and «Əkin daxil» are
+    hidden until the backend has params for them (see below).
   - On phones: a scrolling chip row and a «Filtrlər» sheet.
 - **Categories:** the ten categories (icon, name, count) sit in one row under the search, instead of a separate grid
   further down.
@@ -70,9 +71,10 @@ For: management and Ruslan (backend). Branch `nextjs-migration`. Mockups: `docs/
 
 Proposed names, values and the current URL parameters are in [categories.md](categories.md).
 
-1. **New filters.** «Kök sistemi», «Mövcudluq», «Əkin daxil» and «Çatdırılma» for services are shown but not sent.
-   The proposed parameters are `kok`, `movcudluq`, `ekin` and `catdirilma` for services. Please confirm the names
-   and one set of values for both the filters and the post-ad form. After that, the frontend starts sending them.
+1. **New filters.** «Kök sistemi», «Mövcudluq», «Əkin daxil» and «Çatdırılma» for services are hidden for now
+   (`SHOW_PENDING_FILTERS = false`, 6 November): the results page cannot apply them yet. The proposed parameters are
+   `kok`, `movcudluq`, `ekin` and `catdirilma` for services. Please confirm the names and one set of values for both
+   the filters and the post-ad form. After that, the frontend shows and sends them on home and in the catalogue.
 2. **«Hamısı» search.** It opens `/elanlar`, so services are left out of the results. This needs a combined results
    page, or one API search across products and services.
 3. **Counts.** The tab, category and city counts come from frontend sample data. Serving them from the API is a

@@ -7,20 +7,15 @@ import { SelectField, TextField } from '@/components/ui/Field'
 import { productCategories } from '@/data/categories'
 import { formatNumber } from '@/lib/format'
 import { CityMultiSelect } from './CityMultiSelect'
+import { ageLabel, ageOptions, heightLabel, heightOptions, priceError, sellerOptions, type FilterOption } from './filterDefs'
 import { speciesOptions, subcategoryOptions } from './taxonomy'
-import {
-  agePresets,
-  ageLabel,
-  emptySearchState,
-  heightLabel,
-  heightPresets,
-  priceError,
-  runSearch,
-  sellerTypeOptions,
-  withCustomRange,
-  type SearchState,
-  type SellerTypeParam,
-} from './searchState'
+import { emptySearchState, runSearch, type SearchState, type SellerTypeParam } from './searchState'
+
+/** "All" first, then the shared presets, plus a custom range from the URL (e.g. an older "hundurluk=80-200"). */
+function rangeOptions(all: string, presets: FilterOption[], value: string, label: (v: string) => string): FilterOption[] {
+  const options = [{ value: '', label: all }, ...presets]
+  return !value || presets.some((p) => p.value === value) ? options : [...options, { value, label: label(value) }]
+}
 
 interface FilterPanelProps {
   /** Filters currently applied (from the URL). The panel edits a draft copy of them. */
@@ -34,7 +29,7 @@ interface FilterPanelProps {
 
 /**
  * Figma "Filtr yan paneli" / "Məlumat paneli" (desktop sidebar, also the body of the mobile bottom sheet).
- * Fields edit a draft; "N elanı göstər" applies it (live count), "Filtrləri təmizlə" resets every filter.
+ * Fields edit a draft; "N elanı göstər" applies it (live count), "Filtrləri sıfırla" resets every filter.
  * Parents remount the panel (key = query string) so the draft always starts from the applied URL state.
  */
 export function FilterPanel({ applied, q, onApply, onClear, className }: FilterPanelProps) {
@@ -119,14 +114,14 @@ export function FilterPanel({ applied, q, onApply, onClear, className }: FilterP
           label="Hündürlük seçin"
           value={draft.height}
           onChange={(e) => update({ height: e.target.value })}
-          options={withCustomRange(heightPresets, draft.height, heightLabel)}
+          options={rangeOptions('Bütün hündürlüklər', heightOptions, draft.height, heightLabel)}
         />
         <SelectField
           containerClassName="w-full"
           label="Yaş seçin"
           value={draft.age}
           onChange={(e) => update({ age: e.target.value })}
-          options={withCustomRange(agePresets, draft.age, ageLabel)}
+          options={rangeOptions('Bütün yaşlar', ageOptions, draft.age, ageLabel)}
         />
         {/* Every public listing is on sale, so "Satışda olanlar" is the only availability state buyers can see. */}
         <SelectField containerClassName="w-full" label="Mövcudluq seçin" value="satisda" onChange={() => {}} options={[{ value: 'satisda', label: 'Satışda olanlar' }]} />
@@ -137,14 +132,14 @@ export function FilterPanel({ applied, q, onApply, onClear, className }: FilterP
             onChange={(e) => update({ delivery: e.target.checked })}
             className="size-[13px] shrink-0 cursor-pointer accent-forest"
           />
-          Çatdırılma mümkündür
+          Çatdırılma
         </label>
         <SelectField
           containerClassName="w-full"
           label="Satıcı növü seçin"
           value={draft.sellerType}
           onChange={(e) => update({ sellerType: e.target.value as SellerTypeParam })}
-          options={sellerTypeOptions}
+          options={sellerOptions}
         />
         <Button type="submit" fullWidth disabled={Boolean(error)}>
           {formatNumber(count)} elanı göstər
@@ -157,7 +152,7 @@ export function FilterPanel({ applied, q, onApply, onClear, className }: FilterP
             onClear()
           }}
         >
-          Filtrləri təmizlə
+          Filtrləri sıfırla
         </Button>
       </form>
     </Panel>

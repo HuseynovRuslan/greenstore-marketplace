@@ -1,19 +1,32 @@
 /**
  * URL ⇄ filter state for "/elanlar" (Figma "Məhsul axtarışı" + "Mobil filtr paneli").
  *
- * Every filter lives in the query string so results are shareable and survive reloads:
- *   q · kateqoriya · alt (sub-category slug) · seher (comma list) · min · max · nov (species slug)
- *   hundurluk ("80-200", "-80", "200-") · yas ("2-5") · vip=1 · catdirilma=1 · saticiNovu=biznes|ferdi
- *   siralama=ucuz|baha (default "Ən yenilər") · gorunus=siyahi (default grid)
+ * Every filter lives in the query string so results are shareable and survive reloads (names in `PARAM`,
+ * filterDefs.ts, which also holds the options and labels shared with the home search):
+ *   q · kateqoriya · alt (sub-category slug) · seher (city id; old comma lists still parse) · min · max
+ *   nov (species slug) · hundurluk ("100-200", "-100", "300-"; older ranges still work) · yas ("2-5")
+ *   vip=1 · catdirilma=1 · saticiNovu=biznes|ferdi · siralama=ucuz|baha (default "Ən yenilər")
+ *   gorunus=siyahi (default grid)
  */
 import { categoryById, productCategories } from '@/data/categories'
 import { cities, cityName } from '@/data/cities'
 import { formatNumber, lowerAz } from '@/lib/format'
 import { searchListings, type ListingFilters, type ListingSort } from '@/services/marketplace'
 import type { Listing } from '@/types'
+import {
+  ageLabel,
+  heightLabel,
+  isRange,
+  PARAM,
+  parseRange,
+  priceValueLabel,
+  sellerChipLabel,
+  toggleLabels,
+  type SellerTypeParam,
+} from './filterDefs'
 import { speciesLabel, speciesSlug, subcategoryName, slugify } from './taxonomy'
 
-export type SellerTypeParam = '' | 'biznes' | 'ferdi'
+export type { SellerTypeParam } from './filterDefs'
 export type SearchView = 'grid' | 'list'
 
 export interface SearchState {
@@ -47,61 +60,7 @@ export const emptySearchState: SearchState = {
   sellerType: '',
 }
 
-/* ---------- Range presets ("Hündürlük seçin" / "Yaş seçin") ---------- */
-
-export interface RangeOption {
-  value: string
-  label: string
-}
-
-/** "80–200 sm" is the Figma value; the other presets follow the same "A–B unit" pattern. */
-export const heightPresets: RangeOption[] = [
-  { value: '', label: 'Bütün hündürlüklər' },
-  { value: '-80', label: '80 sm-dək' },
-  { value: '80-200', label: '80–200 sm' },
-  { value: '200-', label: '200 sm-dən' },
-]
-
-/** "2–5 yaş" is the Figma value. */
-export const agePresets: RangeOption[] = [
-  { value: '', label: 'Bütün yaşlar' },
-  { value: '1-2', label: '1–2 yaş' },
-  { value: '2-5', label: '2–5 yaş' },
-  { value: '5-', label: '5 yaşdan' },
-]
-
-const RANGE_RE = /^(\d*)-(\d*)$/
-
-export function parseRange(value: string): [number | undefined, number | undefined] {
-  const m = RANGE_RE.exec(value)
-  if (!m) return [undefined, undefined]
-  return [m[1] ? Number(m[1]) : undefined, m[2] ? Number(m[2]) : undefined]
-}
-
-function rangeLabel(value: string, unit: 'sm' | 'yaş', presets: RangeOption[]): string {
-  const preset = presets.find((p) => p.value === value)
-  if (preset) return preset.label
-  const [from, to] = parseRange(value)
-  if (from != null && to != null) return `${from}–${to} ${unit}`
-  if (from != null) return unit === 'sm' ? `${from} sm-dən` : `${from} yaşdan`
-  return unit === 'sm' ? `${to} sm-dək` : `${to} yaşadək`
-}
-
-export const heightLabel = (value: string) => rangeLabel(value, 'sm', heightPresets)
-export const ageLabel = (value: string) => rangeLabel(value, 'yaş', agePresets)
-
-/** Adds a custom range coming from the URL (e.g. "hundurluk=100-150") to the preset list so the select can show it. */
-export function withCustomRange(presets: RangeOption[], value: string, label: (v: string) => string): RangeOption[] {
-  return !value || presets.some((p) => p.value === value) ? presets : [...presets, { value, label: label(value) }]
-}
-
-/* ---------- Seller type / sort ---------- */
-
-export const sellerTypeOptions: Array<{ value: SellerTypeParam; label: string }> = [
-  { value: '', label: 'Fərdi və biznes' },
-  { value: 'biznes', label: 'Biznes' },
-  { value: 'ferdi', label: 'Fərdi' },
-]
+/* ---------- Sort ---------- */
 
 const sortParam: Record<ListingSort, string> = { newest: '', 'price-asc': 'ucuz', 'price-desc': 'baha' }
 
@@ -116,33 +75,34 @@ export function parseSort(value: string | null): ListingSort {
 const isPrice = (v: string) => v !== '' && Number.isFinite(Number(v))
 
 export function parseSearchState(params: URLSearchParams): SearchState {
-  const categoryId = params.get('kateqoriya') ?? ''
+  const categoryId = params.get(PARAM.category) ?? ''
   const category = productCategories.find((c) => c.id === categoryId)
-  const sub = params.get('alt') ?? ''
-  const cityIds = (params.get('seher') ?? '')
+  const sub = params.get(PARAM.subcategory) ?? ''
+  const cityIds = (params.get(PARAM.city) ?? '')
     .split(',')
     .map((s) => s.trim())
     .filter((id) => cities.some((c) => c.id === id))
-  const min = (params.get('min') ?? '').trim()
-  const max = (params.get('max') ?? '').trim()
+  const min = (params.get(PARAM.min) ?? '').trim()
+  const max = (params.get(PARAM.max) ?? '').trim()
   const range = (key: string) => {
     const v = (params.get(key) ?? '').trim()
-    return RANGE_RE.test(v) && v !== '-' ? v : ''
+    return isRange(v) ? v : ''
   }
-  const seller = params.get('saticiNovu')
+  const seller = params.get(PARAM.seller)
+  const species = params.get(PARAM.species) ?? ''
   return {
-    q: (params.get('q') ?? '').trim(),
+    q: (params.get(PARAM.q) ?? '').trim(),
     categoryId: category ? category.id : '',
     subcategory: category && subcategoryName(category.id, sub) ? sub : '',
     // Keep the Figma order of the city list ("Bakı, Abşeron") regardless of the order in the URL.
     cityIds: cities.map((c) => c.id).filter((id) => cityIds.includes(id)),
     min: isPrice(min) ? min : '',
     max: isPrice(max) ? max : '',
-    species: speciesLabel(params.get('nov') ?? '') ? (params.get('nov') ?? '') : '',
-    height: range('hundurluk'),
-    age: range('yas'),
-    vip: params.get('vip') === '1',
-    delivery: params.get('catdirilma') === '1',
+    species: speciesLabel(species) ? species : '',
+    height: range(PARAM.height),
+    age: range(PARAM.age),
+    vip: params.get(PARAM.vip) === '1',
+    delivery: params.get(PARAM.delivery) === '1',
     sellerType: seller === 'biznes' || seller === 'ferdi' ? seller : '',
   }
 }
@@ -151,47 +111,38 @@ export function parseSearchState(params: URLSearchParams): SearchState {
 export function writeSearchState(state: SearchState, current: URLSearchParams): URLSearchParams {
   const next = new URLSearchParams()
   const set = (key: string, value: string | false) => value && next.set(key, value)
-  set('q', state.q.trim())
-  set('kateqoriya', state.categoryId)
-  set('alt', state.categoryId && state.subcategory)
-  set('seher', state.cityIds.join(','))
-  set('min', state.min.trim())
-  set('max', state.max.trim())
-  set('nov', state.species)
-  set('hundurluk', state.height)
-  set('yas', state.age)
-  set('vip', state.vip && '1')
-  set('catdirilma', state.delivery && '1')
-  set('saticiNovu', state.sellerType)
-  set('siralama', current.get('siralama') ?? '')
-  set('gorunus', current.get('gorunus') ?? '')
+  set(PARAM.q, state.q.trim())
+  set(PARAM.category, state.categoryId)
+  set(PARAM.subcategory, state.categoryId && state.subcategory)
+  set(PARAM.city, state.cityIds.join(','))
+  set(PARAM.min, state.min.trim())
+  set(PARAM.max, state.max.trim())
+  set(PARAM.species, state.species)
+  set(PARAM.height, state.height)
+  set(PARAM.age, state.age)
+  set(PARAM.vip, state.vip && '1')
+  set(PARAM.delivery, state.delivery && '1')
+  set(PARAM.seller, state.sellerType)
+  set(PARAM.sort, current.get(PARAM.sort) ?? '')
+  set(PARAM.view, current.get(PARAM.view) ?? '')
   return next
 }
 
 export function withSort(current: URLSearchParams, sort: ListingSort): URLSearchParams {
   const next = new URLSearchParams(current)
-  if (sortParam[sort]) next.set('siralama', sortParam[sort])
-  else next.delete('siralama')
+  if (sortParam[sort]) next.set(PARAM.sort, sortParam[sort])
+  else next.delete(PARAM.sort)
   return next
 }
 
 export function withView(current: URLSearchParams, view: SearchView): URLSearchParams {
   const next = new URLSearchParams(current)
-  if (view === 'list') next.set('gorunus', 'siyahi')
-  else next.delete('gorunus')
+  if (view === 'list') next.set(PARAM.view, 'siyahi')
+  else next.delete(PARAM.view)
   return next
 }
 
-/* ---------- Validation / querying ---------- */
-
-/** Same messages as the home hero search ("Qiymət sıfırdan az ola bilməz." is the Figma error copy). */
-export function priceError(state: Pick<SearchState, 'min' | 'max'>): string | undefined {
-  const min = state.min.trim() === '' ? undefined : Number(state.min)
-  const max = state.max.trim() === '' ? undefined : Number(state.max)
-  if ((min != null && min < 0) || (max != null && max < 0)) return 'Qiymət sıfırdan az ola bilməz.'
-  if (min != null && max != null && min > max) return 'Minimum qiymət maksimumdan böyük ola bilməz.'
-  return undefined
-}
+/* ---------- Querying ---------- */
 
 export function toListingFilters(state: SearchState): ListingFilters {
   const [heightMin, heightMax] = parseRange(state.height)
@@ -237,18 +188,9 @@ export function resultSummary(count: number): string {
   return count ? `Seçiminizə uyğun ${formatNumber(count)} elan tapıldı` : 'Seçiminizə uyğun elan tapılmadı'
 }
 
-/** "6 elan · çatdırılma ilə" */
-export function resultCountLabel(count: number, state: SearchState): string {
-  return `${formatNumber(count)} elan${state.delivery ? ' · çatdırılma ilə' : ''}`
-}
-
-export function priceLabel(min: string, max: string): string | undefined {
-  const a = min.trim()
-  const b = max.trim()
-  if (a && b) return `${formatNumber(Number(a))}–${formatNumber(Number(b))} ₼`
-  if (a) return `${formatNumber(Number(a))} ₼-dən`
-  if (b) return `${formatNumber(Number(b))} ₼-dək`
-  return undefined
+/** "6 elan" (delivery has its own chip). */
+export function resultCountLabel(count: number): string {
+  return `${formatNumber(count)} elan`
 }
 
 export interface FilterChip {
@@ -258,27 +200,30 @@ export interface FilterChip {
   without: SearchState
 }
 
-/** Chips shown above the results ("Ağaclar ×", "Bakı, Abşeron ×", "30–180 ₼ ×"). Delivery is reported in the count line instead, as in Figma. */
+/**
+ * Chips shown above the results, in page order: the search card (search word, city), then the filter groups
+ * («zeytun» ×, Bakı ×, Ağaclar ×, 50–150 ₼ ×, 1–2 m ×, Çatdırılma ×).
+ */
 export function activeChips(state: SearchState): FilterChip[] {
   const chips: FilterChip[] = []
   const push = (key: string, label: string | undefined, without: Partial<SearchState>) =>
     label && chips.push({ key, label, without: { ...state, ...without } })
 
-  push('q', state.q && `“${state.q}”`, { q: '' })
+  push('q', state.q && `«${state.q}»`, { q: '' })
+  push('city', state.cityIds.map(cityName).join(', '), { cityIds: [] })
   push('category', categoryById(state.categoryId)?.name, { categoryId: '', subcategory: '', species: '' })
   push('subcategory', state.subcategory && subcategoryName(state.categoryId, state.subcategory), { subcategory: '' })
-  push('city', state.cityIds.map(cityName).join(', '), { cityIds: [] })
-  push('price', priceLabel(state.min, state.max), { min: '', max: '' })
-  push('species', state.species && speciesLabel(state.species), { species: '' })
+  push('price', priceValueLabel(state.min, state.max), { min: '', max: '' })
   push('height', state.height && heightLabel(state.height), { height: '' })
   push('age', state.age && ageLabel(state.age), { age: '' })
-  push('vip', state.vip ? 'Önə çıxanlar' : undefined, { vip: false })
-  push('seller', state.sellerType === 'biznes' ? 'Biznes satıcılar' : state.sellerType === 'ferdi' ? 'Fərdi satıcılar' : undefined, {
-    sellerType: '',
-  })
+  push('species', state.species && speciesLabel(state.species), { species: '' })
+  push('seller', sellerChipLabel(state.sellerType), { sellerType: '' })
+  push('delivery', state.delivery ? toggleLabels.delivery : undefined, { delivery: false })
+  push('vip', state.vip ? toggleLabels.vip : undefined, { vip: false })
   return chips
 }
 
+/** Filters set, for «Filtrlər (n)» and «Sıfırla». The search word has its own chip but is not a filter. */
 export function activeFilterCount(state: SearchState): number {
-  return activeChips(state).length + (state.delivery ? 1 : 0)
+  return activeChips(state).filter((chip) => chip.key !== 'q').length
 }

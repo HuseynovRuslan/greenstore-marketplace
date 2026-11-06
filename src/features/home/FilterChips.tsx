@@ -1,17 +1,17 @@
 'use client'
 
-import { useId, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from 'react'
-import { Check, ChevronDown, X } from 'lucide-react'
+import { useId, useRef, useState } from 'react'
+import { ChevronDown, X } from 'lucide-react'
 import { Popover } from '@/components/ui/Popover'
 import { cn } from '@/lib/format'
+import { ChoiceOptions, chipClass, PriceFields, ToggleCheck } from '@/features/search/FilterControls'
+import { priceError } from '@/features/search/filterDefs'
 import {
   activeFilterCount,
   choiceOptions,
   emptyHeroFilters,
   filterValueLabel,
   isFilterSet,
-  priceError,
-  pricePresets,
   visibleFilters,
   type ChoiceFilterId,
   type FilterId,
@@ -20,21 +20,9 @@ import {
 } from './heroSearch'
 
 /*
- * Variant 2 "filter chips": 38 px pills (44 px on phones, the touch-target minimum); a chip with a value is
- * forest-filled and shows it ("Qiymət: 50–150 ₼").
+ * Variant 2 "filter chips" (≥ md): one chip per filter; the shared controls (chips, pills, price fields) live in
+ * features/search/FilterControls.tsx so the catalogue uses the same ones.
  */
-export function chipClass(state: { on: boolean; open?: boolean; touch?: boolean }) {
-  return cn(
-    'flex shrink-0 items-center gap-[7px] rounded-full border px-3.5 text-sm leading-[normal] font-medium whitespace-nowrap',
-    state.touch ? 'h-11' : 'h-[38px]',
-    'transition-[background-color,border-color,color,transform] duration-(--dur-fast) active:scale-[0.97] motion-reduce:active:scale-100',
-    state.on
-      ? 'border-forest bg-forest text-white hover:border-forest-hover hover:bg-forest-hover'
-      : state.open
-        ? 'border-forest bg-mint text-ink'
-        : 'border-line-strong bg-surface text-ink hover:border-forest',
-  )
-}
 
 /** Mockup popover widths per filter. */
 const panelWidth: Record<Exclude<FilterId, 'delivery' | 'planting'>, string> = {
@@ -43,13 +31,6 @@ const panelWidth: Record<Exclude<FilterId, 'delivery' | 'planting'>, string> = {
   height: 'w-[320px]',
   root: 'w-[320px]',
   availability: 'w-[260px]',
-}
-
-const digitsOnly = (value: string) => value.replace(/\D/g, '').slice(0, 7)
-
-/** Check mark of an active toggle chip; it pops in from .6 (no motion under reduced motion). */
-export function ToggleCheck() {
-  return <Check aria-hidden size={14} strokeWidth={2.6} className="shrink-0 animate-pop-in motion-reduce:animate-none" />
 }
 
 interface FilterChipsProps {
@@ -122,7 +103,13 @@ export function FilterChips({ tab, filters, onChange, className }: FilterChipsPr
                   </button>
                 </div>
                 {id === 'price' ? (
-                  <PriceFields filters={filters} onChange={onChange} close={close} error={error} errorId={errorId} />
+                  <PriceFields
+                    value={{ min: filters.min, max: filters.max }}
+                    onChange={(range) => onChange({ ...filters, ...range })}
+                    onSubmit={close}
+                    error={error}
+                    errorId={errorId}
+                  />
                 ) : (
                   <ChoiceOptions
                     options={choiceOptions(id, tab)}
@@ -148,114 +135,5 @@ export function FilterChips({ tab, filters, onChange, className }: FilterChipsPr
         </button>
       )}
     </div>
-  )
-}
-
-export function optionClass(on: boolean, touch?: boolean) {
-  return cn(
-    'rounded-full border px-3.5 text-sm leading-[normal] font-medium whitespace-nowrap transition-colors duration-(--dur-fast)',
-    touch ? 'h-11' : 'h-[38px]',
-    on ? 'border-forest bg-forest text-white' : 'border-line-strong bg-surface text-ink hover:border-forest',
-  )
-}
-
-interface ChoiceOptionsProps {
-  options: Array<{ value: string; label: string }>
-  value: string
-  onPick: (value: string) => void
-  touch?: boolean
-}
-
-/** Single-choice pills; picking the chosen one again clears the filter. */
-export function ChoiceOptions({ options, value, onPick, touch }: ChoiceOptionsProps) {
-  const autofocus = options.some((o) => o.value === value) ? value : options[0]?.value
-  return (
-    <div className="flex flex-wrap gap-2">
-      {options.map((o) => (
-        <button
-          key={o.value}
-          type="button"
-          aria-pressed={o.value === value}
-          data-autofocus={o.value === autofocus || undefined}
-          onClick={() => onPick(o.value === value ? '' : o.value)}
-          className={optionClass(o.value === value, touch)}
-        >
-          {o.label}
-        </button>
-      ))}
-    </div>
-  )
-}
-
-interface PriceFieldsProps {
-  filters: HeroFilters
-  onChange: (filters: HeroFilters) => void
-  /** Popover only: Enter and a preset close it and return focus to the chip. */
-  close?: () => void
-  error?: string
-  errorId: string
-  touch?: boolean
-}
-
-export function PriceFields({ filters, onChange, close, error, errorId, touch }: PriceFieldsProps) {
-  // Enter applies the typed range and returns to the chip instead of submitting the search.
-  const onKeyDown = (e: ReactKeyboardEvent<HTMLInputElement>) => {
-    if (e.key !== 'Enter' || !close) return
-    e.preventDefault()
-    close()
-  }
-  const field = (key: 'min' | 'max', prefix: string, label: string) => (
-    <label className="flex h-11 min-w-0 flex-1 items-center gap-1.5 rounded-option border border-line-strong px-3 text-[13px] leading-[normal] text-muted md:h-[42px] has-[input:focus-visible]:border-olive has-[input:focus-visible]:outline-1 has-[input:focus-visible]:outline-olive has-aria-invalid:border-danger">
-      {prefix}
-      <input
-        type="text"
-        inputMode="numeric"
-        autoComplete="off"
-        aria-label={label}
-        aria-invalid={error ? true : undefined}
-        aria-describedby={error ? errorId : undefined}
-        data-autofocus={key === 'min' || undefined}
-        value={filters[key]}
-        onChange={(e) => onChange({ ...filters, [key]: digitsOnly(e.target.value) })}
-        onKeyDown={onKeyDown}
-        className="w-full min-w-0 flex-1 bg-transparent text-[15px] text-ink tabular-nums outline-none"
-      />
-    </label>
-  )
-  return (
-    <>
-      <div className="flex items-center gap-2">
-        {/* Each name starts with the field's visible prefix (label in name, WCAG 2.5.3). */}
-        {field('min', 'min.', 'min. qiymət, ₼')}
-        <span aria-hidden className="text-muted">
-          –
-        </span>
-        {field('max', 'maks.', 'maks. qiymət, ₼')}
-      </div>
-      {error && (
-        <p id={errorId} role="alert" className="text-xs leading-[1.5] text-danger">
-          {error}
-        </p>
-      )}
-      <div className="flex flex-wrap gap-2">
-        {pricePresets.map((p) => {
-          const on = filters.min === p.min && filters.max === p.max
-          return (
-            <button
-              key={p.label}
-              type="button"
-              aria-pressed={on}
-              onClick={() => {
-                onChange({ ...filters, min: on ? '' : p.min, max: on ? '' : p.max })
-                close?.()
-              }}
-              className={optionClass(on, touch)}
-            >
-              {p.label}
-            </button>
-          )
-        })}
-      </div>
-    </>
   )
 }

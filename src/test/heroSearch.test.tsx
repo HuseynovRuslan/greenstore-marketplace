@@ -7,7 +7,6 @@ import {
   emptyHeroFilters,
   filtersForTab,
   heroSearchUrl,
-  priceValueLabel,
   SHOW_PENDING_FILTERS,
   visibleFilters,
   type HeroFilters,
@@ -52,30 +51,26 @@ describe('hero search URL', () => {
 describe('hero filter rules', () => {
   const ids = (list: Array<{ id: string }>) => list.map((f) => f.id)
 
-  it('shows the pending filters by default and hides them behind SHOW_PENDING_FILTERS', () => {
-    expect(SHOW_PENDING_FILTERS).toBe(true)
-    expect(ids(visibleFilters('products'))).toEqual(['category', 'price', 'height', 'root', 'availability', 'delivery', 'planting'])
-    expect(ids(visibleFilters('products', false))).toEqual(['category', 'price', 'height', 'delivery'])
-    expect(ids(visibleFilters('services', false))).toEqual(['category', 'price'])
+  it('hides the pending filters until the backend has params for them; the flag brings them back', () => {
+    expect(SHOW_PENDING_FILTERS).toBe(false)
+    expect(ids(visibleFilters('products'))).toEqual(['category', 'price', 'height', 'delivery'])
+    expect(ids(visibleFilters('services'))).toEqual(['category', 'price'])
+    expect(ids(visibleFilters('products', true))).toEqual(['category', 'price', 'height', 'root', 'availability', 'delivery', 'planting'])
   })
 
   it('hides Hündürlük and Kök sistemi on Xidmətlər and drops what that tab cannot show', () => {
-    expect(ids(visibleFilters('services'))).toEqual(['category', 'price', 'availability', 'delivery', 'planting'])
-    expect(filtersForTab('services', allSet)).toEqual({ ...allSet, category: '', height: '', root: '' })
-    expect(filtersForTab('all', allSet)).toEqual(allSet)
-  })
-
-  it('labels price presets and typed ranges the same way', () => {
-    expect(priceValueLabel('50', '150')).toBe('50–150 ₼')
-    expect(priceValueLabel('', '50')).toBe('50 ₼-a qədər')
-    expect(priceValueLabel('300', '')).toBe('300 ₼-dan çox')
-    expect(priceValueLabel('80', '1200')).toBe('80–1 200 ₼')
-    expect(priceValueLabel('', '')).toBeUndefined()
+    expect(ids(visibleFilters('services', true))).toEqual(['category', 'price', 'availability', 'delivery', 'planting'])
+    expect(filtersForTab('services', allSet, true)).toEqual({ ...allSet, category: '', height: '', root: '' })
+    expect(filtersForTab('all', allSet, true)).toEqual(allSet)
+    // With the pending filters hidden, their values are dropped too.
+    expect(filtersForTab('all', allSet)).toEqual({ ...allSet, root: '', availability: '', planting: false })
   })
 
   it('counts only the filters visible on the tab', () => {
-    expect(activeFilterCount('products', allSet)).toBe(7)
-    expect(activeFilterCount('services', allSet)).toBe(5)
+    expect(activeFilterCount('products', allSet)).toBe(4)
+    expect(activeFilterCount('services', allSet)).toBe(2)
+    expect(activeFilterCount('products', allSet, true)).toBe(7)
+    expect(activeFilterCount('services', allSet, true)).toBe(5)
     expect(activeFilterCount('all', emptyHeroFilters)).toBe(0)
   })
 })
@@ -155,8 +150,7 @@ describe('HeroSearchCard', () => {
     await user.click(within(screen.getByRole('listbox', { name: 'Şəhər' })).getByRole('option', { name: /Bakı/ }))
     await user.click(chip('Kateqoriya'))
     await user.click(within(form()).getByRole('button', { name: 'Ağaclar' }))
-    await user.click(chip('Kök sistemi'))
-    await user.click(within(form()).getByRole('button', { name: 'Dibçəkdə' }))
+    expect(within(form()).queryByRole('button', { name: /Kök sistemi|Mövcudluq|Əkin daxil/ })).not.toBeInTheDocument()
     await user.click(chip('Çatdırılma'))
     await user.click(chip('Axtar'))
     expect(push).toHaveBeenCalledWith('/elanlar?q=zeytun&kateqoriya=agaclar&seher=baki&catdirilma=1')
@@ -198,7 +192,7 @@ describe('HeroSearchCard on phones', () => {
     await user.click(within(row()).getByRole('button', { name: /^Filtrlər/ }))
     expect(within(row()).getByRole('button', { name: /^Filtrlər/ })).toHaveAttribute('aria-expanded', 'true')
     const headings = within(sheet()).getAllByRole('heading', { level: 3 }).map((h) => h.textContent)
-    expect(headings).toEqual(['Kateqoriya', 'Qiymət, ₼', 'Bitkinin hündürlüyü', 'Kök sistemi', 'Mövcudluq', 'Əlavə'])
+    expect(headings).toEqual(['Kateqoriya', 'Qiymət, ₼', 'Bitkinin hündürlüyü', 'Əlavə'])
     await user.click(within(sheet()).getByRole('button', { name: 'Ağaclar' }))
     expect(within(row()).getByRole('button', { name: 'Kateqoriya: Ağaclar' })).toBeInTheDocument()
 

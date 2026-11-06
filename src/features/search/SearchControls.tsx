@@ -6,7 +6,7 @@ import { cn } from '@/lib/format'
 import { listingSortOptions, type ListingSort } from '@/services/marketplace'
 import type { FilterChip, SearchView } from './searchState'
 
-/** Figma "Seçilmiş filtrlər": 12 px semibold "Nişan" chips on #eaf0e9 with "×", then a 12 px "Hamısını təmizlə" link. */
+/** Figma "Seçilmiş filtrlər": 12 px semibold "Nişan" chips on #eaf0e9 with "×", then a 12 px «Sıfırla» link. */
 export function ActiveFilterChips({ chips, showClearAll, onRemove, onClearAll }: {
   chips: FilterChip[]
   showClearAll: boolean
@@ -29,7 +29,7 @@ export function ActiveFilterChips({ chips, showClearAll, onRemove, onClearAll }:
       ))}
       {showClearAll && (
         <button type="button" onClick={onClearAll} className="text-xs leading-[1.5] whitespace-nowrap text-forest hover:text-olive-text hover:underline">
-          Hamısını təmizlə
+          Sıfırla
         </button>
       )}
     </div>

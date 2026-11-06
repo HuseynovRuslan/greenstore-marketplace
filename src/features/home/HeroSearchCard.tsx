@@ -7,12 +7,12 @@ import { Listbox, listboxChevronClass } from '@/components/ui/Listbox'
 import { listingTotals } from '@/data/categories'
 import { cities, cityListingCounts } from '@/data/cities'
 import { cn, formatNumber } from '@/lib/format'
+import { priceError } from '@/features/search/filterDefs'
 import { FilterChips } from './FilterChips'
 import { HeroCategories } from './HeroCategories'
 import { HeroFilterSheet, MobileFilterRow } from './HeroFilterSheet'
 import { HERO_QUERY_ID, HERO_SEARCH_ID } from './ids'
-import { emptyHeroFilters, filtersForTab, heroSearchUrl, heroTabs, priceError, type FilterId, type HeroFilters, type HeroTab } from './heroSearch'
-
+import { emptyHeroFilters, filtersForTab, heroSearchUrl, heroTabs, type FilterId, type HeroFilters, type HeroTab } from './heroSearch'
 
 const cityOptions = [
   { value: '', label: 'Bütün şəhərlər', meta: formatNumber(listingTotals.all) },

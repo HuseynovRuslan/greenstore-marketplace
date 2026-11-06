@@ -1,17 +1,20 @@
 /**
  * Home hero search (docs/design/variant-2): tabs, filter definitions, chip labels and the URL the form opens.
  *
- * URL params are the ones the catalogues already read (see search/searchState.ts and services/query.ts):
+ * Options, labels and URL param names come from the filter model shared with the catalogue (search/filterDefs.ts):
  *   /elanlar   q · kateqoriya · seher · min · max · hundurluk (cm) · catdirilma=1
  *   /xidmetler q · kateqoriya (service category) · seher · min · max
- * Filters without a backend param are shown but never sent (docs/handoff/categories.md, "Filters waiting for backend").
+ * Filters without a backend param are never sent (docs/handoff/categories.md, "Filters waiting for backend").
  */
 import { listingTotals, productCategories } from '@/data/categories'
 import { serviceCategories } from '@/data/services'
-import { formatNumber } from '@/lib/format'
+import { filterTitles, heightOptions, PARAM, priceValueLabel, toggleLabels, type FilterOption } from '@/features/search/filterDefs'
 
-/** Kök sistemi, Mövcudluq, Əkin daxil and Çatdırılma on services have no param yet. `false` hides them. */
-export const SHOW_PENDING_FILTERS = true
+/**
+ * Kök sistemi, Mövcudluq, Əkin daxil and Çatdırılma on services have no param yet, and the catalogue cannot show
+ * them, so they are hidden until the backend confirms the params (the code stays). `true` shows them again.
+ */
+export const SHOW_PENDING_FILTERS = false
 
 /* ---------- Tabs ---------- */
 
@@ -53,11 +56,6 @@ export const emptyHeroFilters: HeroFilters = {
 export type ChoiceFilterId = 'category' | 'height' | 'root' | 'availability'
 export type FilterId = ChoiceFilterId | 'price' | 'delivery' | 'planting'
 
-export interface FilterOption {
-  value: string
-  label: string
-}
-
 interface FilterDef {
   id: FilterId
   label: string
@@ -72,28 +70,20 @@ interface FilterDef {
 
 const ALL_TABS: HeroTab[] = ['all', 'products', 'services']
 
-export const filterDefs: FilterDef[] = [
-  { id: 'category', label: 'Kateqoriya', title: 'Kateqoriya', kind: 'choice' },
-  { id: 'price', label: 'Qiymət', title: 'Qiymət, ₼', kind: 'price' },
-  { id: 'height', label: 'Hündürlük', title: 'Bitkinin hündürlüyü', kind: 'choice', productsOnly: true },
+export const heroFilterDefs: FilterDef[] = [
+  { id: 'category', label: 'Kateqoriya', title: filterTitles.category, kind: 'choice' },
+  { id: 'price', label: 'Qiymət', title: filterTitles.price, kind: 'price' },
+  { id: 'height', label: 'Hündürlük', title: filterTitles.height, kind: 'choice', productsOnly: true },
   { id: 'root', label: 'Kök sistemi', title: 'Kök sistemi', kind: 'choice', productsOnly: true, pendingOn: ALL_TABS },
   { id: 'availability', label: 'Mövcudluq', title: 'Mövcudluq', kind: 'choice', pendingOn: ALL_TABS },
-  { id: 'delivery', label: 'Çatdırılma', title: 'Çatdırılma', kind: 'toggle', pendingOn: ['services'] },
+  { id: 'delivery', label: toggleLabels.delivery, title: toggleLabels.delivery, kind: 'toggle', pendingOn: ['services'] },
   { id: 'planting', label: 'Əkin daxil', title: 'Əkin daxil', kind: 'toggle', pendingOn: ALL_TABS },
 ]
 
 /** Chips shown on a tab, in mockup order. */
 export function visibleFilters(tab: HeroTab, showPending = SHOW_PENDING_FILTERS): FilterDef[] {
-  return filterDefs.filter((f) => !(f.productsOnly && tab === 'services') && (showPending || !f.pendingOn?.includes(tab)))
+  return heroFilterDefs.filter((f) => !(f.productsOnly && tab === 'services') && (showPending || !f.pendingOn?.includes(tab)))
 }
-
-/** "1 m-ə qədər" … "3 m-dən uca" → `hundurluk` ranges in cm (the catalogue's unit). */
-export const heightOptions: FilterOption[] = [
-  { value: '-100', label: '1 m-ə qədər' },
-  { value: '100-200', label: '1–2 m' },
-  { value: '200-300', label: '2–3 m' },
-  { value: '300-', label: '3 m-dən uca' },
-]
 
 /** Pending: values proposed for the `kok` param. */
 export const rootOptions: FilterOption[] = [
@@ -108,13 +98,6 @@ export const availabilityOptions: FilterOption[] = [
   { value: 'sifarisle', label: 'Sifarişlə' },
 ]
 
-export const pricePresets: Array<{ label: string; min: string; max: string }> = [
-  { label: '50 ₼-a qədər', min: '', max: '50' },
-  { label: '50–150 ₼', min: '50', max: '150' },
-  { label: '150–300 ₼', min: '150', max: '300' },
-  { label: '300 ₼-dan çox', min: '300', max: '' },
-]
-
 export function choiceOptions(id: ChoiceFilterId, tab: HeroTab): FilterOption[] {
   switch (id) {
     case 'category':
@@ -126,16 +109,6 @@ export function choiceOptions(id: ChoiceFilterId, tab: HeroTab): FilterOption[] 
     case 'availability':
       return availabilityOptions
   }
-}
-
-/** "50–150 ₼", "300 ₼-dan çox", "50 ₼-a qədər" (presets and typed values read the same way). */
-export function priceValueLabel(min: string, max: string): string | undefined {
-  const preset = pricePresets.find((p) => p.min === min && p.max === max)
-  if (preset) return preset.label
-  if (min && max) return `${formatNumber(Number(min))}–${formatNumber(Number(max))} ₼`
-  if (min) return `${formatNumber(Number(min))} ₼-dan çox`
-  if (max) return `${formatNumber(Number(max))} ₼-a qədər`
-  return undefined
 }
 
 /** The value part of a chip label ("Qiymət: 50–150 ₼"), or undefined when the filter is not set. */
@@ -169,12 +142,6 @@ export function filtersForTab(tab: HeroTab, filters: HeroFilters, showPending = 
   return next
 }
 
-/** "Minimum qiymət maksimumdan böyük ola bilməz." — same copy as the catalogue filters. */
-export function priceError(filters: Pick<HeroFilters, 'min' | 'max'>): string | undefined {
-  if (filters.min && filters.max && Number(filters.min) > Number(filters.max)) return 'Minimum qiymət maksimumdan böyük ola bilməz.'
-  return undefined
-}
-
 /* ---------- URL ---------- */
 
 export interface HeroSearchInput {
@@ -192,14 +159,14 @@ export function heroSearchUrl({ tab, q, city, filters }: HeroSearchInput): strin
   const services = tab === 'services'
   const params = new URLSearchParams()
   const set = (key: string, value: string | false) => value && params.set(key, value)
-  set('q', q.trim())
-  set('kateqoriya', filters.category)
-  set('seher', city)
-  set('min', filters.min)
-  set('max', filters.max)
+  set(PARAM.q, q.trim())
+  set(PARAM.category, filters.category)
+  set(PARAM.city, city)
+  set(PARAM.min, filters.min)
+  set(PARAM.max, filters.max)
   if (!services) {
-    set('hundurluk', filters.height)
-    set('catdirilma', filters.delivery && '1')
+    set(PARAM.height, filters.height)
+    set(PARAM.delivery, filters.delivery && '1')
   }
   const base = services ? '/xidmetler' : '/elanlar'
   return params.size ? `${base}?${params}` : base
