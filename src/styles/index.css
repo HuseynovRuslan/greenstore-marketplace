@@ -88,14 +88,6 @@
     }
   }
 
-  /* Favourite heart when switched on */
-  --animate-heart-pop: gs-heart-pop 240ms var(--ease-out);
-  @keyframes gs-heart-pop {
-    50% {
-      transform: scale(1.25);
-    }
-  }
-
   --breakpoint-xs: 26rem;
 }
 

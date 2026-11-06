@@ -14,6 +14,13 @@ vi.mock('next/navigation', () => ({
   useSearchParams: () => new URLSearchParams(),
 }))
 
+// The heart's spring is started through animation controls; record the calls.
+const heartStart = vi.hoisted(() => vi.fn())
+vi.mock('motion/react', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('motion/react')>()),
+  useAnimationControls: () => ({ start: heartStart, stop: vi.fn(), set: vi.fn(), mount: () => () => {} }),
+}))
+
 describe('Reveal (scroll reveal once)', () => {
   let callback: IntersectionObserverCallback | undefined
   const disconnect = vi.fn()
@@ -113,31 +120,37 @@ describe('hero entrance', () => {
 })
 
 describe('favourite heart', () => {
-  beforeEach(() => window.localStorage.clear())
+  beforeEach(() => {
+    window.localStorage.clear()
+    heartStart.mockClear()
+  })
 
-  it('pops when switched on, not when it is already on', async () => {
+  it('pops with a spring when switched on, not when switched off or already on', async () => {
     const user = userEvent.setup()
     const { rerender } = render(
       <AppStoreProvider>
         <FavoriteButton key="a" kind="listing" id="zeytun-agaci" title="Zeytun ağacı" />
       </AppStoreProvider>,
     )
-    const heart = () => screen.getByRole('button').querySelector('svg')!
-    expect(heart()).not.toHaveClass('animate-heart-pop')
+    expect(heartStart).not.toHaveBeenCalled()
     await user.click(screen.getByRole('button', { name: /seçilmişlərə əlavə et/ }))
-    expect(heart()).toHaveClass('animate-heart-pop')
+    expect(heartStart).toHaveBeenCalledTimes(1)
+    // A velocity kick from rest: the spring itself makes the pop, and can be retargeted mid-way.
+    expect(heartStart).toHaveBeenCalledWith({ scale: 1, transition: { type: 'spring', stiffness: 520, damping: 18, velocity: 9 } })
     await user.click(screen.getByRole('button', { name: /seçilmişlərdən çıxar/ }))
-    expect(heart()).not.toHaveClass('animate-heart-pop')
+    expect(heartStart).toHaveBeenCalledTimes(1)
 
     await user.click(screen.getByRole('button', { name: /seçilmişlərə əlavə et/ }))
+    expect(heartStart).toHaveBeenCalledTimes(2)
     // A fresh button for a listing that is already a favourite stays still.
+    heartStart.mockClear()
     rerender(
       <AppStoreProvider>
         <FavoriteButton key="b" kind="listing" id="zeytun-agaci" title="Zeytun ağacı" />
       </AppStoreProvider>,
     )
-    expect(screen.getByRole('button', { name: /seçilmişlərdən çıxar/ })).toBeInTheDocument()
-    expect(heart()).not.toHaveClass('animate-heart-pop')
+    expect(screen.getByRole('button', { name: /seçilmişlərdən çıxar/ })).toHaveAttribute('aria-pressed', 'true')
+    expect(heartStart).not.toHaveBeenCalled()
   })
 })
 
