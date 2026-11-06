@@ -115,9 +115,11 @@ export function ActiveFilterRow({ chips, filterCount, onRemove, onReset, fallbac
             onRemove(chip)
           }}
           aria-label={chip.key === 'q' ? `${chip.label} axtarış sözünü sil` : `${chip.label} filtrini sil`}
-          className={cn(chipClass({ on: true }), 'max-md:h-11')}
+          // A chip never gets wider than the row (a pasted search word made the page scroll sideways): the label
+          // truncates, the × stays; the full text is in the name and the page heading.
+          className={cn(chipClass({ on: true }), 'max-w-full max-md:h-11')}
         >
-          {chip.label}
+          <span className="min-w-0 truncate">{chip.label}</span>
           <X aria-hidden size={15} strokeWidth={2.2} className="-mr-1 shrink-0" />
         </button>
       ))}

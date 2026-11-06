@@ -41,7 +41,12 @@ export function HeroCategories({ selected, className, items = categories }: { se
                 >
                   <CategoryIcon name={c.icon} size={20} className="shrink-0" />
                 </span>{' '}
-                <span className="line-clamp-2 min-h-[34px] text-center text-xs leading-[1.4] font-semibold text-forest lg:min-h-[38px] lg:max-w-[110px] lg:text-sm lg:leading-[1.35]">
+                {/* A long single word breaks inside the 78 px item instead of running into its neighbours;
+                    `title` shows a clamped name in full on hover. */}
+                <span
+                  title={c.name}
+                  className="line-clamp-2 min-h-[34px] w-full text-center text-xs leading-[1.4] font-semibold wrap-anywhere hyphens-auto text-forest lg:min-h-[38px] lg:max-w-[110px] lg:text-sm lg:leading-[1.35]"
+                >
                   {c.name}
                 </span>{' '}
                 <span className="text-xs leading-[normal] text-muted tabular-nums lg:text-[13px]">

@@ -252,7 +252,7 @@ function PriceGroup({ state, onApply }: { state: SearchState; onApply: (range: P
   }
   return (
     <div className="flex flex-col gap-3">
-      <PriceFields value={draft} onChange={setDraft} onSubmit={apply} error={error} errorId={errorId} />
+      <PriceFields value={draft} onChange={setDraft} onSubmit={apply} error={error} errorId={errorId} stacked />
       {changed && (
         <button
           type="button"

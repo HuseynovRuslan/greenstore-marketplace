@@ -77,10 +77,12 @@ interface PriceFieldsProps {
   error?: string
   errorId: string
   touch?: boolean
+  /** One field per row (the 256 px sidebar): side by side, a 6–7 digit price did not fit after «maks.». */
+  stacked?: boolean
 }
 
 /** «min.» – «maks.» fields (digits only) and the four presets; picking the chosen preset again clears the price. */
-export function PriceFields({ value, onChange, onSubmit, error, errorId, touch }: PriceFieldsProps) {
+export function PriceFields({ value, onChange, onSubmit, error, errorId, touch, stacked }: PriceFieldsProps) {
   // Enter finishes the typed range instead of submitting the surrounding form.
   const onKeyDown = (e: ReactKeyboardEvent<HTMLInputElement>) => {
     if (e.key !== 'Enter' || !onSubmit) return
@@ -88,7 +90,12 @@ export function PriceFields({ value, onChange, onSubmit, error, errorId, touch }
     onSubmit(value)
   }
   const field = (key: 'min' | 'max', prefix: string, label: string) => (
-    <label className="flex h-11 min-w-0 flex-1 items-center gap-1.5 rounded-option border border-line-strong px-3 text-[13px] leading-[normal] text-muted md:h-[42px] has-[input:focus-visible]:border-olive has-[input:focus-visible]:outline-1 has-[input:focus-visible]:outline-olive has-aria-invalid:border-danger">
+    <label
+      className={cn(
+        'flex h-11 min-w-0 items-center gap-1.5 rounded-option border border-line-strong px-3 text-[13px] leading-[normal] text-muted md:h-[42px] has-[input:focus-visible]:border-olive has-[input:focus-visible]:outline-1 has-[input:focus-visible]:outline-olive has-aria-invalid:border-danger',
+        stacked ? 'w-full' : 'flex-1',
+      )}
+    >
       {prefix}
       <input
         type="text"
@@ -107,12 +114,14 @@ export function PriceFields({ value, onChange, onSubmit, error, errorId, touch }
   )
   return (
     <>
-      <div className="flex items-center gap-2">
+      <div className={stacked ? 'flex flex-col gap-2' : 'flex items-center gap-2'}>
         {/* Each name starts with the field's visible prefix (label in name, WCAG 2.5.3). */}
         {field('min', 'min.', 'min. qiymət, ₼')}
-        <span aria-hidden className="text-muted">
-          –
-        </span>
+        {!stacked && (
+          <span aria-hidden className="text-muted">
+            –
+          </span>
+        )}
         {field('max', 'maks.', 'maks. qiymət, ₼')}
       </div>
       {error && (

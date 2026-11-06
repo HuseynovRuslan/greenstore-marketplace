@@ -41,6 +41,13 @@ purpose. Kept up to date as steps land; remove an item when it is done.
   `getFacetCounts` (`src/features/search/facets.ts`), and the sheet's count behind `countCatalog`; see
   [elanlar.md](elanlar.md).
 - Species (`nov`) and sub-category (`alt`) filters need API fields; today they are derived from the sample data.
+- **Price 0 — «Razılaşma ilə»?** `Listing.price` is a plain number, so a listing without a fixed price would show
+  «0 ₼» on cards and rows (`formatPrice`, `src/lib/format.ts`). Does the API send 0 for "price on request"? If so,
+  the UI should show «Razılaşma ilə» instead, and the contract needs a way to say it (a nullable `price` or a
+  `priceType` field). No UI change until this is decided. (Found with `/dev/worst-case`, Nov 2026 polish pass.)
+- **Search word length.** The search fields now stop at 100 characters (`QUERY_MAX`,
+  `src/features/search/filterDefs.ts`); before, a pasted phrase made the search chip wider than a phone screen.
+  What is the longest `q` the API accepts? Links can still carry a longer `q`; the chip truncates it.
 
 ## Data in the browser
 

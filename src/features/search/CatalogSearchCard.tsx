@@ -7,7 +7,7 @@ import { cities, cityName } from '@/data/cities'
 import { HERO_QUERY_ID, HERO_SEARCH_ID } from '@/features/home/ids'
 import { cn, formatNumber } from '@/lib/format'
 import { CityField } from './CityField'
-import { PARAM } from './filterDefs'
+import { PARAM, QUERY_MAX } from './filterDefs'
 
 export interface CityCounts {
   all: number
@@ -79,6 +79,7 @@ export function CatalogSearchCard({ q, cityIds, query, cityCounts, onSearch, cla
               name={PARAM.q}
               autoComplete="off"
               enterKeyHint="search"
+              maxLength={QUERY_MAX}
               value={text}
               onChange={(e) => setText(e.target.value)}
               placeholder="Məsələn, zeytun ağacı"

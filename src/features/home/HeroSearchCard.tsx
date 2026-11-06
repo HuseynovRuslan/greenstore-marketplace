@@ -7,7 +7,7 @@ import { listingTotals } from '@/data/categories'
 import { cities, cityListingCounts } from '@/data/cities'
 import { cn, formatNumber } from '@/lib/format'
 import { CityField } from '@/features/search/CityField'
-import { priceError } from '@/features/search/filterDefs'
+import { priceError, QUERY_MAX } from '@/features/search/filterDefs'
 import { FilterChips } from './FilterChips'
 import { HeroCategories } from './HeroCategories'
 import { HeroFilterSheet, MobileFilterRow } from './HeroFilterSheet'
@@ -82,6 +82,7 @@ export function HeroSearchCard() {
                 type="search"
                 name="q"
                 autoComplete="off"
+                maxLength={QUERY_MAX}
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
                 placeholder={placeholder}
@@ -159,8 +160,10 @@ function TypeTabs({ value, onChange }: { value: HeroTab; onChange: (tab: HeroTab
     }
     place()
     if (typeof ResizeObserver === 'undefined') return
+    // The labels too: a late web font or a new count changes a tab's width without resizing the row.
     const observer = new ResizeObserver(place)
     observer.observe(list)
+    list.querySelectorAll('label').forEach((label) => observer.observe(label))
     return () => observer.disconnect()
   }, [value])
 

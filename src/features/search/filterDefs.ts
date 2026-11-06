@@ -10,6 +10,12 @@ import { formatNumber } from '@/lib/format'
 
 /* ---------- URL params ---------- */
 
+/**
+ * Longest search word the search fields accept. No API limit is known yet (question for the backend in
+ * docs/handoff/follow-ups.md); without one, a pasted phrase made the search chip wider than a phone screen.
+ */
+export const QUERY_MAX = 100
+
 /** Query-string names the catalogue reads (docs/handoff/categories.md). */
 export const PARAM = {
   q: 'q',

@@ -12,6 +12,7 @@ import { useHydrated } from './ClientGate'
 import { cn } from '@/lib/format'
 import { useScrolledPast, useScrollHeader } from '@/hooks/useScrollHeader'
 import { HERO_QUERY_ID, HERO_SEARCH_ID } from '@/features/home/ids'
+import { QUERY_MAX } from '@/features/search/filterDefs'
 
 const sectionLinks = [
   { label: 'Kateqoriyalar', to: '/#kateqoriyalar' },
@@ -70,6 +71,7 @@ function HeaderSearchForm({ variant, urlQuery, onSubmitted }: SearchFormProps & 
       autoFocus={variant === 'mobile'}
       type="search"
       name="q"
+      maxLength={QUERY_MAX}
       value={query}
       onChange={(e) => setQuery(e.target.value)}
       placeholder={searchPlaceholder}

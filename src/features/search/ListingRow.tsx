@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { CardImage } from '@/components/cards/CardImage'
 import { cardFocusClass, stretchedLinkClass } from '@/components/cards/ListingCard'
 import { FavoriteButton } from '@/components/cards/FavoriteButton'
 import { PromotedBadge } from '@/components/ui/PromotedBadge'
@@ -22,15 +23,11 @@ export function ListingRow({ listing }: { listing: Listing }) {
       )}
     >
       <div className="relative w-[128px] shrink-0 md:w-[220px]">
-        <div className="overflow-hidden rounded-lg">
-          <img
-            src={listing.cover}
-            alt=""
-            loading="lazy"
-            decoding="async"
-            className="block aspect-[4/3] w-full object-cover transition-transform duration-(--dur-slow) ease-out motion-safe:group-hover:scale-[1.03]"
-          />
-        </div>
+        <CardImage
+          src={listing.cover}
+          className="aspect-[4/3] rounded-lg"
+          imgClassName="transition-transform duration-(--dur-slow) ease-out motion-safe:group-hover:scale-[1.03]"
+        />
         {listing.vip && <PromotedBadge size="card" className="absolute top-2 left-2 max-md:hidden" />}
         <FavoriteButton kind="listing" id={listing.id} title={listing.title} className="absolute top-0.5 right-0.5" />
       </div>
