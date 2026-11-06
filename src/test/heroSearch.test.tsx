@@ -187,7 +187,7 @@ describe('HeroSearchCard on phones', () => {
     // Toggles switch in place
     await user.click(within(row()).getByRole('button', { name: 'Çatdırılma' }))
     expect(within(row()).getByRole('button', { name: 'Çatdırılma' })).toHaveAttribute('aria-pressed', 'true')
-    expect(within(row()).getByRole('button', { name: 'Filtrlər, 1 filtr seçilib' })).toBeInTheDocument()
+    expect(within(row()).getByRole('button', { name: 'Filtrlər (1 filtr seçilib)' })).toBeInTheDocument()
 
     await user.click(within(row()).getByRole('button', { name: /^Filtrlər/ }))
     expect(within(row()).getByRole('button', { name: /^Filtrlər/ })).toHaveAttribute('aria-expanded', 'true')

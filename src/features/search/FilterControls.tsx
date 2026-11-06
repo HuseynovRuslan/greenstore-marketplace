@@ -145,7 +145,7 @@ export function PriceFields({ value, onChange, onSubmit, error, errorId, touch }
 }
 
 interface FiltersButtonProps {
-  /** Active filters; shown as a badge and spoken in the name ("Filtrlər, 2 filtr seçilib"). */
+  /** Active filters; shown as a badge and spoken in the name ("Filtrlər (2 filtr seçilib)", no aria-label). */
   count: number
   expanded: boolean
   onClick: () => void
@@ -159,8 +159,6 @@ export function FiltersButton({ count, expanded, onClick, className }: FiltersBu
       type="button"
       aria-haspopup="dialog"
       aria-expanded={expanded}
-      // The badge is visual; the name carries the count.
-      aria-label={count > 0 ? `Filtrlər, ${count} filtr seçilib` : undefined}
       onClick={onClick}
       className={cn(
         'flex h-11 shrink-0 items-center gap-[7px] rounded-full border border-forest bg-surface px-3.5 text-sm leading-[normal] font-semibold text-forest transition-transform duration-(--dur-fast) active:scale-[0.97] motion-reduce:active:scale-100',
@@ -170,9 +168,13 @@ export function FiltersButton({ count, expanded, onClick, className }: FiltersBu
       <SlidersHorizontal aria-hidden size={16} strokeWidth={2} />
       Filtrlər
       {count > 0 && (
-        <span aria-hidden className="flex h-5 min-w-5 items-center justify-center rounded-full bg-forest px-1.5 text-xs leading-none text-white tabular-nums">
-          {count}
-        </span>
+        <>
+          {/* The badge is visual; the name says it in words and still starts with the visible «Filtrlər» (WCAG 2.5.3). */}
+          <span aria-hidden className="flex h-5 min-w-5 items-center justify-center rounded-full bg-forest px-1.5 text-xs leading-none text-white tabular-nums">
+            {count}
+          </span>
+          <span className="sr-only">{` (${count} filtr seçilib)`}</span>
+        </>
       )}
     </button>
   )
