@@ -1,178 +1,160 @@
 'use client'
 
-import { DEMO_LOGIN_PASSWORD } from '@/config/demo'
 import { useState, type FormEvent } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useSession } from '@/state/store'
-import { currentUser } from '@/data/user'
 import { Button } from '@/components/ui/Button'
 import { TextField } from '@/components/ui/Field'
-import { Notice } from '@/components/ui/Notice'
-import { SectionHeader } from '@/components/ui/SectionHeader'
-import { AuthIntro } from '@/features/auth/AuthIntro'
-import { Card, Checkbox } from '@/features/account/ui'
-import { pillClass } from '@/features/account/pill'
-import { emailError, formatPhone, hasErrors, passwordError, phoneError, safeNext } from '@/features/auth/validation'
+import { CheckboxField, PasswordField, PhoneField } from '@/components/ui/FormControls'
+import { useToast } from '@/components/ui/Toast'
+import { DEMO_LOGIN_PASSWORD } from '@/config/demo'
+import { requestCode } from '@/features/auth/actions'
+import { OtpVerify } from '@/features/auth/OtpVerify'
+import { AuthShell, DemoNote, FormCard, Segmented } from '@/features/auth/ui'
+import { emailError, safeNext } from '@/features/auth/validation'
+import { phoneFieldError, phoneValue } from '@/lib/phone'
+import { useSession } from '@/state/store'
+import type { OtpChallenge } from '@/types'
 
-type Method = 'phone' | 'email'
+type Method = 'password' | 'sms'
+
+/** "+994 50 …" / "050 …" / digits → phone; anything with "@" → e-mail. */
+const looksLikeEmail = (value: string) => value.includes('@')
+
+function identifierError(value: string) {
+  const v = value.trim()
+  if (!v) return 'Telefon nömrəsini və ya e-poçtu yazın.'
+  if (looksLikeEmail(v)) return emailError(v)
+  return phoneFieldError(v)
+}
 
 /**
- * Figma "Daxil ol · 1440" (/daxil-ol).
- * There is no backend: any well-formed phone/e-mail + 8-character password signs in the demo account.
- * The form starts with the demo account's remembered credentials ("Məni xatırla" is on), as in the frame.
+ * /daxil-ol — sign in with a password (phone or e-mail in one field, so the browser's saved login fills it) or with
+ * an SMS code. «Şifrəni unutmusunuz?» leads to the reset flow. DEMO: any well-formed login and an 8-character
+ * password sign in the demo account; the SMS code is shown on screen.
  */
 export default function LoginPage({ next }: { next?: string }) {
-  const { signIn, updateProfile } = useSession()
+  const { signIn } = useSession()
   const router = useRouter()
+  const { toast } = useToast()
+  const [method, setMethod] = useState<Method>('password')
+  const target = safeNext(next)
+  const query = next ? `?next=${encodeURIComponent(next)}` : ''
 
-  const [method, setMethod] = useState<Method>('phone')
-  const [phone, setPhone] = useState(currentUser.phone)
-  const [email, setEmail] = useState(currentUser.email)
-  const [password, setPassword] = useState(DEMO_LOGIN_PASSWORD)
+  const done = (patch: Parameters<typeof signIn>[0]) => {
+    signIn(patch)
+    toast('Xoş gəldiniz!')
+    router.replace(target)
+  }
+
+  return (
+    <AuthShell title="Daxil olun" lead="Elanlarınız, seçilmişləriniz və yadda saxladığınız axtarışlar sizi gözləyir.">
+      <FormCard>
+        <Segmented
+          legend="Daxil olma üsulu"
+          name="method"
+          value={method}
+          onChange={setMethod}
+          options={[
+            { value: 'password', label: 'Şifrə ilə' },
+            { value: 'sms', label: 'SMS kodu ilə' },
+          ]}
+        />
+        {method === 'password' ? <PasswordLogin onDone={done} /> : <SmsLogin onDone={done} />}
+      </FormCard>
+      <p className="text-center text-[15px] leading-[1.5] text-ink">
+        Hesabınız yoxdur?{' '}
+        <Link href={`/qeydiyyat${query}`} className="font-semibold text-forest underline-offset-2 hover:underline">
+          Qeydiyyatdan keçin
+        </Link>
+      </p>
+    </AuthShell>
+  )
+}
+
+function PasswordLogin({ onDone }: { onDone: (patch: { email?: string; phone?: string }) => void }) {
+  const [login, setLogin] = useState('')
+  const [password, setPassword] = useState('')
   const [remember, setRemember] = useState(true)
-  const [errors, setErrors] = useState<{ id?: string; password?: string }>({})
-  const [forgotOpen, setForgotOpen] = useState(false)
-
-  const failed = hasErrors(errors)
+  const [errors, setErrors] = useState<{ login?: string; password?: string }>({})
+  const [busy, setBusy] = useState(false)
 
   const submit = (e: FormEvent) => {
     e.preventDefault()
-    const nextErrors = {
-      id: method === 'phone' ? phoneError(phone) : emailError(email),
-      password: passwordError(password),
+    const next = { login: identifierError(login), password: password.length >= 8 ? undefined : password ? 'Şifrə ən azı 8 simvol olur.' : 'Şifrəni yazın.' }
+    setErrors(next)
+    if (next.login || next.password) {
+      document.getElementById(next.login ? 'giris' : 'sifre')?.focus()
+      return
     }
-    setErrors(nextErrors)
-    if (hasErrors(nextErrors)) return
-    if (method === 'email') {
-      signIn(email.trim())
-    } else {
-      signIn()
-      updateProfile({ phone: formatPhone(phone) })
-    }
-    router.replace(safeNext(next))
+    setBusy(true)
+    // DEMO: no server checks the password.
+    window.setTimeout(() => onDone(looksLikeEmail(login) ? { email: login.trim() } : { phone: phoneValue(login) }), 350)
   }
-
-  const switchMethod = (m: Method) => {
-    setMethod(m)
-    setErrors({})
-  }
-
-  const registerHref = next ? `/qeydiyyat?next=${encodeURIComponent(next)}` : '/qeydiyyat'
 
   return (
-    <div className="page-x mx-auto w-full max-w-[1440px] pt-[39px] pb-6 md:pt-[51px] md:pb-9">
-      <div className="grid grid-cols-1 items-start gap-7 md:grid-cols-[580fr_668fr] md:py-12 xl:gap-16">
-        <AuthIntro
-          image="/images/auth/login.webp"
-          imageClassName="aspect-[580/510]"
-          title="Bağınız üçün yeni imkanlar"
-          lead="Elan yerləşdirin, seçdiyiniz məhsulları saxlayın və satıcılarla birbaşa əlaqə qurun."
-        />
+    <form onSubmit={submit} noValidate className="flex flex-col gap-5">
+      <TextField
+        id="giris"
+        label="Telefon və ya e-poçt"
+        name="username"
+        autoComplete="username"
+        autoCapitalize="none"
+        spellCheck={false}
+        placeholder="050 555 12 34 və ya ad@poct.az"
+        value={login}
+        error={errors.login}
+        onChange={(e) => setLogin(e.target.value)}
+        onBlur={() => login && setErrors((x) => ({ ...x, login: identifierError(login) }))}
+      />
+      <PasswordField
+        id="sifre"
+        autoComplete="current-password"
+        value={password}
+        error={errors.password}
+        onValueChange={setPassword}
+        aside={
+          <Link href="/sifreni-berpa-et" className="-my-2 inline-flex min-h-11 items-center text-[13px] font-semibold text-forest hover:underline">
+            Şifrəni unutmusunuz?
+          </Link>
+        }
+      />
+      <CheckboxField label="Bu cihazda məni xatırla" checked={remember} onChange={(e) => setRemember(e.target.checked)} />
+      <DemoNote>istənilən düzgün nömrə və ya e-poçt, şifrə üçün 8 simvol (məsələn, «{DEMO_LOGIN_PASSWORD}»).</DemoNote>
+      <Button type="submit" fullWidth disabled={busy} aria-busy={busy}>
+        {busy ? 'Daxil olunur…' : 'Daxil ol'}
+      </Button>
+    </form>
+  )
+}
 
-        <div className="flex min-w-0 flex-col items-start gap-6">
-          <SectionHeader as="h1" title="Yenidən xoş gəldiniz" subtitle="GreenStore hesabınıza daxil olun." />
+function SmsLogin({ onDone }: { onDone: (patch: { phone: string }) => void }) {
+  const [phone, setPhone] = useState('')
+  const [error, setError] = useState<string>()
+  const [busy, setBusy] = useState(false)
+  const [challenge, setChallenge] = useState<OtpChallenge>()
 
-          <Card className="w-full">
-            <form noValidate onSubmit={submit} className="flex w-full flex-col items-start gap-5">
-              <div role="group" aria-label="Daxil olma üsulu" className="flex flex-wrap items-start gap-2">
-                {(
-                  [
-                    ['phone', 'Telefonla'],
-                    ['email', 'E-poçtla'],
-                  ] as const
-                ).map(([value, label]) => (
-                  <button
-                    key={value}
-                    type="button"
-                    aria-pressed={method === value}
-                    onClick={() => switchMethod(value)}
-                    className={pillClass(method === value)}
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
+  const send = async (e: FormEvent) => {
+    e.preventDefault()
+    const message = phoneFieldError(phone)
+    setError(message)
+    if (message) return
+    setBusy(true)
+    const result = await requestCode(phone, 'login')
+    setBusy(false)
+    if (!result.ok) return setError(result.error)
+    setChallenge(result)
+  }
 
-              {method === 'phone' ? (
-                <TextField
-                  key="phone"
-                  label="Telefon nömrəsi"
-                  name="phone"
-                  type="tel"
-                  inputMode="tel"
-                  autoComplete="tel"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  hint="Azərbaycan nömrənizi daxil edin."
-                  error={errors.id}
-                  containerClassName="w-full"
-                />
-              ) : (
-                <TextField
-                  key="email"
-                  label="E-poçt ünvanı"
-                  name="email"
-                  type="email"
-                  inputMode="email"
-                  autoComplete="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  error={errors.id}
-                  containerClassName="w-full"
-                />
-              )}
-
-              <TextField
-                label="Şifrə"
-                name="password"
-                type="password"
-                autoComplete="current-password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                error={errors.password}
-                containerClassName="w-full"
-              />
-
-              <div className="flex w-full flex-wrap items-start gap-x-4 gap-y-2 text-[13px] leading-[1.5]">
-                <Checkbox label="Məni xatırla" checked={remember} onChange={(e) => setRemember(e.target.checked)} />
-                <button
-                  type="button"
-                  aria-expanded={forgotOpen}
-                  onClick={() => setForgotOpen((v) => !v)}
-                  className="font-semibold text-forest hover:text-olive-text"
-                >
-                  Şifrəni unutmusunuz?
-                </button>
-              </div>
-              {forgotOpen && <Notice tone="warning" title="Şifrə bərpası tezliklə əlavə olunacaq." />}
-
-              <Button type="submit" fullWidth>
-                Daxil ol
-              </Button>
-
-              {failed && (
-                <Notice tone="danger" title="Məlumatları yoxlayın">
-                  {method === 'phone'
-                    ? 'Telefon nömrəsi və ya şifrə düzgün deyil. Yenidən cəhd edin.'
-                    : 'E-poçt ünvanı və ya şifrə düzgün deyil. Yenidən cəhd edin.'}
-                </Notice>
-              )}
-
-              <p className="w-full text-sm leading-[1.5] text-ink">
-                Hesabınız yoxdur?{' '}
-                <Link href={registerHref} className="hover:text-olive-text hover:underline">
-                  Qeydiyyatdan keçin →
-                </Link>
-              </p>
-            </form>
-          </Card>
-
-          <p className="w-full text-xs leading-[1.5] text-muted">
-            Daxil olmaqla İstifadə şərtləri və Məxfilik siyasəti ilə razılaşırsınız. Məlumatlarınız təhlükəsiz saxlanılır.
-          </p>
-        </div>
-      </div>
-    </div>
+  if (challenge) {
+    return <OtpVerify challenge={challenge} phone={phone} purpose="login" submitLabel="Daxil ol" onVerified={() => onDone({ phone })} onChangePhone={() => setChallenge(undefined)} />
+  }
+  return (
+    <form onSubmit={send} noValidate className="flex flex-col gap-5">
+      <PhoneField id="sms-telefon" value={phone} onValueChange={setPhone} error={error} hint="Hesabınıza bağlı nömrə. Kodu SMS ilə göndərəcəyik." />
+      <Button type="submit" fullWidth disabled={busy} aria-busy={busy}>
+        {busy ? 'Göndərilir…' : 'Kod göndər'}
+      </Button>
+    </form>
   )
 }

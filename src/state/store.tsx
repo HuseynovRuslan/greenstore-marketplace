@@ -3,7 +3,7 @@
 import { createContext, useCallback, useContext, useMemo, type ReactNode } from 'react'
 import { useLocalStorage } from '@/hooks/useLocalStorage'
 import { ACCOUNT_FAVORITES_KEY, GUEST_FAVORITES_KEY, SESSION_KEY } from './bootstrap'
-import { currentUser } from '@/data/user'
+import { currentUser, type AccountProfile } from '@/data/user'
 import type { Listing, UserProfile } from '@/types'
 
 /* ------------------------------------------------------------------ */
@@ -36,7 +36,11 @@ const FavoritesContext = createContext<FavoritesValue | null>(null)
 
 interface SessionValue {
   user: UserProfile | null
-  signIn: (email?: string) => void
+  /**
+   * Signs in the demo account, with `patch` laid over it (the e-mail typed at sign-in, or a whole new profile after
+   * registration — pass `sellerId: undefined` for an account without a seller page).
+   */
+  signIn: (patch?: Partial<AccountProfile>) => void
   signOut: () => void
   updateProfile: (patch: Partial<UserProfile>) => void
 }
@@ -84,7 +88,7 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
   const sessionValue = useMemo<SessionValue>(
     () => ({
       user,
-      signIn: (email) => setUser({ ...currentUser, ...(email ? { email } : {}) }),
+      signIn: (patch) => setUser({ ...currentUser, ...patch }),
       signOut: () => setUser(null),
       updateProfile: (patch) => setUser((prev) => (prev ? { ...prev, ...patch } : prev)),
     }),

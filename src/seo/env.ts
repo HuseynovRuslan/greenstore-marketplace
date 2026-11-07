@@ -26,4 +26,4 @@ export function siteUrl(env: Record<string, string | undefined> = process.env): 
 }
 
 /** Paths that are private, per-user or demo tooling — never indexed, even in production. */
-export const PRIVATE_PATHS = ['/kabinet', '/secilmisler', '/elan-yerlesdir', '/idareetme', '/daxil-ol', '/qeydiyyat'] as const
+export const PRIVATE_PATHS = ['/kabinet', '/secilmisler', '/elan-yerlesdir', '/idareetme', '/daxil-ol', '/qeydiyyat', '/sifreni-berpa-et'] as const

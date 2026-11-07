@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, type InputHTMLAttributes, type ReactNode } from 'react'
+import { useState, type InputHTMLAttributes, type ReactNode, type Ref } from 'react'
 import { Check, Eye, EyeOff } from 'lucide-react'
 import { cn } from '@/lib/format'
 import { formatLocal, localDigits, phoneValue } from '@/lib/phone'
@@ -75,7 +75,7 @@ interface PasswordFieldProps extends InputProps {
 }
 
 /** Password with a show / hide button (44 px, its state announced with aria-pressed). Paste always works. */
-export function PasswordField({ label = 'Şifrə', hint, error, value, onValueChange, autoComplete, containerClassName, aside, id, ...rest }: PasswordFieldProps) {
+export function PasswordField({ label = 'Şifrə', hint, error, value, onValueChange, autoComplete, containerClassName, aside, id, 'aria-describedby': extra, ...rest }: PasswordFieldProps) {
   const ids = useFieldIds(id)
   const [shown, setShown] = useState(false)
   return (
@@ -88,7 +88,7 @@ export function PasswordField({ label = 'Şifrə', hint, error, value, onValueCh
           autoCapitalize="none"
           spellCheck={false}
           aria-invalid={error ? true : undefined}
-          aria-describedby={describedBy(ids, hint, error)}
+          aria-describedby={describedBy(ids, hint, error, extra)}
           value={value}
           onChange={(e) => onValueChange(e.target.value)}
           className={cn(controlClass, 'pr-12 focus:pr-12')}
@@ -110,6 +110,7 @@ export function PasswordField({ label = 'Şifrə', hint, error, value, onValueCh
 }
 
 interface OtpFieldProps extends InputProps {
+  ref?: Ref<HTMLInputElement>
   label?: ReactNode
   hint?: ReactNode
   error?: string

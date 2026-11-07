@@ -1,331 +1,221 @@
 'use client'
 
-import { InfoNotice } from '@/components/ui/Notice'
 import { useState, type FormEvent } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useSession } from '@/state/store'
-import { businessTypes, type AccountProfile } from '@/data/user'
+import { ArrowLeft, Building2, Fence, Store, Trees, UserRound } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
-import { SelectField, TextField } from '@/components/ui/Field'
-import { SectionHeader } from '@/components/ui/SectionHeader'
-import { AuthIntro } from '@/features/auth/AuthIntro'
-import { Card, Checkbox } from '@/features/account/ui'
-import { pillClass } from '@/features/account/pill'
-import {
-  emailError,
-  formatPhone,
-  hasErrors,
-  messages,
-  newPasswordError,
-  phoneError,
-  requiredError,
-  safeNext,
-  type Errors,
-} from '@/features/auth/validation'
-import type { SellerType } from '@/types'
+import { TextField } from '@/components/ui/Field'
+import { CheckboxField, ChoiceCard, FieldGroup, PasswordField, PhoneField } from '@/components/ui/FormControls'
+import { Notice } from '@/components/ui/Notice'
+import { useToast } from '@/components/ui/Toast'
+import { registerAccount, requestCode } from '@/features/auth/actions'
+import { OtpVerify } from '@/features/auth/OtpVerify'
+import { AuthShell, FormCard, PasswordRules } from '@/features/auth/ui'
+import { emailError, newPasswordError, safeNext } from '@/features/auth/validation'
+import { cn } from '@/lib/format'
+import { phoneFieldError } from '@/lib/phone'
+import { useSession } from '@/state/store'
+import type { BusinessKind, OtpChallenge, SellerType } from '@/types'
 
-type Method = 'phone' | 'email'
-type Field = 'company' | 'name' | 'phone' | 'email' | 'password' | 'repeat' | 'consent'
+const kinds: Array<{ value: BusinessKind; title: string; description: string; icon: typeof Trees; label: string }> = [
+  { value: 'nursery', title: 'Tingçilik təsərrüfatı', label: 'Tingçilik təsərrüfatı', description: 'Ağac, fidan və ting yetişdirirsiniz', icon: Trees },
+  { value: 'garden-centre', title: 'Bağ mərkəzi', label: 'Bağ mərkəzi', description: 'Bitki, dibçək, torpaq və alət satırsınız', icon: Store },
+  { value: 'landscaping', title: 'Landşaft şirkəti', label: 'Landşaft şirkəti', description: 'Layihə, əkin və bağ baxımı xidməti göstərirsiniz', icon: Fence },
+]
 
-/* Example values from the Figma frame, shown as (muted) placeholders on an empty form. */
-const examples = {
-  company: 'Abşeron Tingçilik',
-  name: 'Elvin Əliyev',
-  phone: '+994 50 555 12 34',
-  email: 'info@absheronting.az',
-}
-const exampleClass = 'placeholder:text-muted'
+const STEPS = ['Hesab növü', 'Məlumatlar', 'Telefonun təsdiqi'] as const
 
 /**
- * Figma "Qeydiyyat · 1440" (/qeydiyyat).
- * Registration is mocked: a valid form signs in and stores the entered details on the session profile.
+ * /qeydiyyat — three steps: account type (individual, or a business and its kind: nursery, garden centre,
+ * landscaping company), details (name, phone, optional e-mail, password with live rules, terms), then the SMS code.
+ * Back keeps everything. On success the account is signed in and the visitor goes on to `next` (default: cabinet).
+ * DEMO: the SMS is not sent (the code is on screen) and nothing is stored on a server.
  */
 export default function RegisterPage({ next }: { next?: string }) {
-  const { signIn, updateProfile } = useSession()
   const router = useRouter()
-
-  const [accountType, setAccountType] = useState<SellerType>('business')
-  const [businessType, setBusinessType] = useState(businessTypes[0])
+  const { signIn } = useSession()
+  const { toast } = useToast()
+  const [step, setStep] = useState(0)
+  const [type, setType] = useState<SellerType | ''>('')
+  const [kind, setKind] = useState<BusinessKind | ''>('')
   const [company, setCompany] = useState('')
   const [name, setName] = useState('')
-  const [method, setMethod] = useState<Method>('phone')
   const [phone, setPhone] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [repeat, setRepeat] = useState('')
-  const [consent, setConsent] = useState(false)
-  const [errors, setErrors] = useState<Errors<Field>>({})
+  const [terms, setTerms] = useState(false)
+  const [errors, setErrors] = useState<Record<string, string | undefined>>({})
+  const [busy, setBusy] = useState(false)
+  const [formError, setFormError] = useState<string>()
+  const [challenge, setChallenge] = useState<OtpChallenge>()
+  const query = next ? `?next=${encodeURIComponent(next)}` : ''
 
-  const isBusiness = accountType === 'business'
+  const focusFirst = (found: Record<string, string | undefined>) => {
+    const first = Object.keys(found).find((k) => found[k])
+    if (first) document.getElementById(`q-${first}`)?.focus()
+  }
 
-  const validate = (): Errors<Field> => ({
-    company: isBusiness ? requiredError(company, messages.companyRequired) : undefined,
-    name: requiredError(name, messages.nameRequired),
-    phone: phoneError(phone, method === 'phone'),
-    email: emailError(email, method === 'email'),
-    password: newPasswordError(password),
-    repeat: !repeat ? messages.passwordRepeat : repeat !== password ? messages.passwordMismatch : undefined,
-    consent: consent ? undefined : messages.consent,
-  })
-
-  const submit = (e: FormEvent) => {
+  const submitType = (e: FormEvent) => {
     e.preventDefault()
-    const nextErrors = validate()
-    setErrors(nextErrors)
-    if (hasErrors(nextErrors)) {
-      const first = Object.keys(nextErrors).find((k) => nextErrors[k as Field])
-      document.querySelector<HTMLElement>(`[name="${first}"]`)?.focus()
+    const found = {
+      type: type ? undefined : 'Fərdi və ya biznes hesabı seçin.',
+      kind: type === 'business' && !kind ? 'Biznesinizin növünü seçin.' : undefined,
+      company: type === 'business' && !company.trim() ? 'Biznesin adını yazın.' : undefined,
+    }
+    setErrors(found)
+    if (Object.values(found).some(Boolean)) return focusFirst(found)
+    setStep(1)
+  }
+
+  const submitDetails = async (e: FormEvent) => {
+    e.preventDefault()
+    const found = {
+      name: name.trim().length >= 2 ? undefined : 'Adınızı və soyadınızı yazın.',
+      phone: phoneFieldError(phone),
+      email: emailError(email, false),
+      password: newPasswordError(password) ? 'Şifrə ən azı 8 simvol olmalı, hərf və rəqəm olmalıdır.' : undefined,
+      terms: terms ? undefined : 'Davam etmək üçün şərtlərlə razılaşın.',
+    }
+    setErrors(found)
+    if (Object.values(found).some(Boolean)) return focusFirst(found)
+    setBusy(true)
+    const result = await requestCode(phone, 'register')
+    setBusy(false)
+    if (!result.ok) return setFormError(result.error)
+    setFormError(undefined)
+    setChallenge(result)
+    setStep(2)
+  }
+
+  const finish = async (challengeId: string) => {
+    if (type !== 'business' && type !== 'individual') return
+    const result = await registerAccount({
+      accountType: type,
+      businessKind: type === 'business' ? (kind as BusinessKind) : undefined,
+      companyName: type === 'business' ? company.trim() : undefined,
+      fullName: name.trim(),
+      phone,
+      email: email.trim() || undefined,
+      password,
+      otpChallengeId: challengeId,
+    })
+    if (!result.ok) {
+      setFormError(result.error)
+      setStep(1)
       return
     }
-    const profile: Partial<AccountProfile> = {
+    const business = type === 'business'
+    signIn({
+      id: result.userId,
       fullName: name.trim(),
-      accountType,
-      phone: phone.trim() ? formatPhone(phone) : '',
+      phone,
       email: email.trim(),
-      companyName: isBusiness ? company.trim() : '',
-      businessType: isBusiness ? businessType : '',
+      accountType: type,
+      // A new account has no seller page or listings yet (the cabinet shows its empty state).
+      sellerId: undefined,
+      companyName: business ? company.trim() : undefined,
+      businessType: business ? kinds.find((k) => k.value === kind)?.label : undefined,
+      cityId: undefined,
+      address: undefined,
+      about: undefined,
       verified: false,
-      phoneVerified: false,
-    }
-    signIn(email.trim() || undefined)
-    updateProfile(profile)
+      phoneVerified: true,
+    })
+    toast('Hesab yaradıldı. Xoş gəldiniz!')
     router.replace(safeNext(next))
   }
 
-  /** Re-validate a field as the user corrects it (only once it has been flagged). */
-  const clear = (field: Field) => {
-    if (errors[field]) setErrors((prev) => ({ ...prev, [field]: undefined }))
-  }
-
-  const loginHref = next ? `/daxil-ol?next=${encodeURIComponent(next)}` : '/daxil-ol'
-
-  const phoneField = (
-    <TextField
-      key="phone"
-      label={method === 'phone' ? 'Telefon nömrəsi' : 'Telefon nömrəsi (istəyə bağlı)'}
-      name="phone"
-      type="tel"
-      inputMode="tel"
-      autoComplete="tel"
-      placeholder={examples.phone}
-      className={exampleClass}
-      value={phone}
-      onChange={(e) => {
-        setPhone(e.target.value)
-        clear('phone')
-      }}
-      hint={method === 'phone' ? 'Təsdiq kodu bu nömrəyə göndəriləcək.' : undefined}
-      error={errors.phone}
-      containerClassName="w-full"
-    />
-  )
-  const emailField = (
-    <TextField
-      key="email"
-      label={method === 'email' ? 'E-poçt ünvanı' : 'E-poçt ünvanı (istəyə bağlı)'}
-      name="email"
-      type="email"
-      inputMode="email"
-      autoComplete="email"
-      placeholder={examples.email}
-      className={exampleClass}
-      value={email}
-      onChange={(e) => {
-        setEmail(e.target.value)
-        clear('email')
-      }}
-      error={errors.email}
-      containerClassName="w-full"
-    />
-  )
-
   return (
-    <div className="page-x mx-auto w-full max-w-[1440px] pt-[39px] pb-6 md:pt-[51px] md:pb-9">
-      <div className="grid grid-cols-1 items-start gap-7 md:grid-cols-[480fr_768fr] xl:gap-16">
-        <AuthIntro
-          image="/images/auth/register.webp"
-          imageClassName="aspect-square"
-          title="Yaşıl bazarın bir hissəsi olun"
-          lead="Fərdi satıcılar, tingçilik təsərrüfatları, bağ mərkəzləri və landşaft şirkətləri üçün bir platforma."
-        >
-          <InfoNotice title="Alıcı ilə birbaşa əlaqə">
-            Elanınızı dərc edin. Alıcılar sizinlə telefon və ya WhatsApp vasitəsilə əlaqə saxlasın.
-          </InfoNotice>
-        </AuthIntro>
+    <AuthShell title="Hesab yaradın" lead="Bir dəqiqəlik iş: elan yerləşdirin, satıcılarla əlaqə saxlayın, axtarışlarınızı yadda saxlayın." image="/images/auth/register.webp">
+      <ol aria-label="Qeydiyyat addımları" className="flex gap-1.5">
+        {STEPS.map((s, i) => (
+          <li key={s} className="flex min-w-0 flex-1 flex-col gap-1.5" aria-current={i === step ? 'step' : undefined}>
+            <span aria-hidden className={cn('h-1.5 rounded-full', i <= step ? 'bg-forest' : 'bg-line')} />
+            <span className={cn('truncate text-xs leading-[normal]', i === step ? 'font-semibold text-forest' : 'text-muted')}>
+              {i + 1}. {s}
+            </span>
+          </li>
+        ))}
+      </ol>
 
-        <div className="flex min-w-0 flex-col items-start gap-6">
-          <SectionHeader
-            as="h1"
-            title="Hesab yaradın"
-            subtitle="Elan yerləşdirmək və seçilmişləri saxlamaq üçün qeydiyyatdan keçin."
-          />
+      <FormCard>
+        {formError && (
+          <Notice tone="danger" title="Alınmadı">
+            {formError}
+          </Notice>
+        )}
 
-          <Card className="w-full">
-            <form noValidate onSubmit={submit} className="flex w-full flex-col items-start gap-5">
-              <p id="account-type" className="text-[13px] leading-[1.5] font-semibold text-ink">
-                Hesab növü
-              </p>
-              <div role="group" aria-labelledby="account-type" className="flex flex-wrap items-start gap-2">
-                {(
-                  [
-                    ['individual', 'Fərdi şəxs'],
-                    ['business', 'Biznes'],
-                  ] as const
-                ).map(([value, label]) => (
-                  <button
-                    key={value}
-                    type="button"
-                    aria-pressed={accountType === value}
-                    onClick={() => {
-                      setAccountType(value)
-                      setErrors((prev) => ({ ...prev, company: undefined }))
-                    }}
-                    className={pillClass(accountType === value)}
-                  >
-                    {label}
-                  </button>
-                ))}
+        {step === 0 && (
+          <form onSubmit={submitType} noValidate className="flex flex-col gap-6">
+            <FieldGroup legend="Kim kimi qeydiyyatdan keçirsiniz?" error={errors.type}>
+              <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+                <ChoiceCard id="q-type" name="type" value="individual" checked={type === 'individual'} onChange={() => setType('individual')} icon={<UserRound size={20} strokeWidth={1.8} />} title="Fərdi şəxs" description="Öz bağınızdan bitki satırsınız və ya alırsınız" />
+                <ChoiceCard name="type" value="business" checked={type === 'business'} onChange={() => setType('business')} icon={<Building2 size={20} strokeWidth={1.8} />} title="Biznes" description="Tingçilik, bağ mərkəzi və ya landşaft şirkəti" />
               </div>
+            </FieldGroup>
+            {type === 'business' && (
+              <>
+                <FieldGroup legend="Biznesin növü" error={errors.kind} hint="Profil səhifəniz və axtarışdakı filtr buna görə qurulur.">
+                  <div className="flex flex-col gap-2.5">
+                    {kinds.map((k, i) => {
+                      const Icon = k.icon
+                      return <ChoiceCard key={k.value} id={i === 0 ? 'q-kind' : undefined} name="kind" value={k.value} checked={kind === k.value} onChange={() => setKind(k.value)} icon={<Icon size={20} strokeWidth={1.8} />} title={k.title} description={k.description} className="p-3.5" />
+                    })}
+                  </div>
+                </FieldGroup>
+                <TextField id="q-company" label="Biznesin adı" autoComplete="organization" placeholder="Məsələn: Abşeron Tingçilik" value={company} error={errors.company} maxLength={60} onChange={(e) => setCompany(e.target.value)} />
+              </>
+            )}
+            <Button type="submit" fullWidth>
+              Davam et
+            </Button>
+          </form>
+        )}
 
-              {isBusiness && (
+        {step === 1 && (
+          <form onSubmit={submitDetails} noValidate className="flex flex-col gap-5">
+            <TextField id="q-name" label={type === 'business' ? 'Əlaqələndirici şəxs' : 'Ad və soyad'} autoComplete="name" placeholder="Məsələn: Elvin Əliyev" value={name} error={errors.name} maxLength={60} onChange={(e) => setName(e.target.value)} />
+            <PhoneField id="q-phone" value={phone} onValueChange={setPhone} error={errors.phone} hint="Bu nömrəni SMS kodu ilə təsdiqləyəcəyik. Alıcılar sizə ona zəng edəcək." />
+            <TextField id="q-email" label="E-poçt" optional type="email" inputMode="email" autoComplete="email" autoCapitalize="none" spellCheck={false} placeholder="ad@poct.az" value={email} error={errors.email} hint="Ödəniş qəbzləri və bildirişlər üçün." onChange={(e) => setEmail(e.target.value)} />
+            <div className="flex flex-col gap-2">
+              <PasswordField id="q-password" autoComplete="new-password" value={password} onValueChange={setPassword} error={errors.password} aria-describedby="sifre-qaydalari" />
+              <PasswordRules id="sifre-qaydalari" value={password} />
+            </div>
+            <CheckboxField
+              id="q-terms"
+              checked={terms}
+              onChange={(e) => setTerms(e.target.checked)}
+              error={errors.terms}
+              label={
                 <>
-                  <SelectField
-                    label="Biznes növü seçin"
-                    name="businessType"
-                    value={businessType}
-                    onChange={(e) => setBusinessType(e.target.value)}
-                    options={businessTypes.map((t) => ({ value: t, label: t }))}
-                    hint="Bağ mərkəzi və ya landşaft şirkəti də seçə bilərsiniz."
-                    containerClassName="w-full"
-                  />
-                  <TextField
-                    label="Şirkətin adı"
-                    name="company"
-                    autoComplete="organization"
-                    placeholder={examples.company}
-                    className={exampleClass}
-                    value={company}
-                    onChange={(e) => {
-                      setCompany(e.target.value)
-                      clear('company')
-                    }}
-                    error={errors.company}
-                    containerClassName="w-full"
-                  />
+                  <Link href="/istifade-sertleri" className="font-semibold text-forest underline underline-offset-2">İstifadə şərtləri</Link> və{' '}
+                  <Link href="/mexfilik" className="font-semibold text-forest underline underline-offset-2">Məxfilik siyasəti</Link> ilə razıyam.
                 </>
-              )}
-
-              <TextField
-                label={isBusiness ? 'Əlaqələndirici şəxsin adı' : 'Ad və soyad'}
-                name="name"
-                autoComplete="name"
-                placeholder={examples.name}
-                className={exampleClass}
-                value={name}
-                onChange={(e) => {
-                  setName(e.target.value)
-                  clear('name')
-                }}
-                error={errors.name}
-                containerClassName="w-full"
-              />
-
-              <div role="group" aria-label="Əlaqə üsulu" className="flex flex-wrap items-start gap-2">
-                {(
-                  [
-                    ['phone', 'Telefonla'],
-                    ['email', 'E-poçtla'],
-                  ] as const
-                ).map(([value, label]) => (
-                  <button
-                    key={value}
-                    type="button"
-                    aria-pressed={method === value}
-                    onClick={() => {
-                      setMethod(value)
-                      setErrors((prev) => ({ ...prev, phone: undefined, email: undefined }))
-                    }}
-                    className={pillClass(method === value)}
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
-
-              {method === 'phone' ? (
-                <>
-                  {phoneField}
-                  {emailField}
-                </>
-              ) : (
-                <>
-                  {emailField}
-                  {phoneField}
-                </>
-              )}
-
-              <TextField
-                label="Şifrə"
-                name="password"
-                type="password"
-                autoComplete="new-password"
-                value={password}
-                onChange={(e) => {
-                  setPassword(e.target.value)
-                  clear('password')
-                }}
-                hint={messages.passwordRule}
-                error={errors.password}
-                containerClassName="w-full"
-              />
-              <TextField
-                label="Şifrənin təkrarı"
-                name="repeat"
-                type="password"
-                autoComplete="new-password"
-                value={repeat}
-                onChange={(e) => {
-                  setRepeat(e.target.value)
-                  clear('repeat')
-                }}
-                error={errors.repeat}
-                containerClassName="w-full"
-              />
-
-              <div className="flex w-full flex-col gap-[7px]">
-                <Checkbox
-                  name="consent"
-                  className="text-[13px] leading-[1.5]"
-                  label="İstifadə şərtlərini və Məxfilik siyasətini oxudum, şəxsi məlumatlarımın emalına razıyam."
-                  checked={consent}
-                  aria-invalid={errors.consent ? true : undefined}
-                  onChange={(e) => {
-                    setConsent(e.target.checked)
-                    clear('consent')
-                  }}
-                />
-                {errors.consent && (
-                  <p role="alert" className="text-xs leading-[1.5] text-danger">
-                    {errors.consent}
-                  </p>
-                )}
-              </div>
-
-              <Button type="submit" fullWidth>
-                Qeydiyyatdan keç
+              }
+            />
+            <div className="flex gap-2.5">
+              <Button variant="secondary" onClick={() => setStep(0)} icon={<ArrowLeft aria-hidden size={18} strokeWidth={1.8} />}>
+                Geri
               </Button>
+              <Button type="submit" disabled={busy} aria-busy={busy} className="flex-1">
+                {busy ? 'Kod göndərilir…' : 'Kod göndər'}
+              </Button>
+            </div>
+          </form>
+        )}
 
-              <p className="w-full text-sm leading-[1.5] text-ink">
-                Artıq hesabınız var?{' '}
-                <Link href={loginHref} className="hover:text-olive-text hover:underline">
-                  Daxil olun →
-                </Link>
-              </p>
-            </form>
-          </Card>
-        </div>
-      </div>
-    </div>
+        {step === 2 && challenge && (
+          <OtpVerify challenge={challenge} phone={phone} purpose="register" submitLabel="Təsdiqlə və hesab yarat" onVerified={finish} onChangePhone={() => setStep(1)} />
+        )}
+      </FormCard>
+
+      <p className="text-center text-[15px] leading-[1.5] text-ink">
+        Artıq hesabınız var?{' '}
+        <Link href={`/daxil-ol${query}`} className="font-semibold text-forest underline-offset-2 hover:underline">
+          Daxil olun
+        </Link>
+      </p>
+    </AuthShell>
   )
 }
