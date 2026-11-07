@@ -63,12 +63,38 @@ describe('CatalogResults', () => {
     renderCatalog('kateqoriya=agaclar&siralama=ucuz')
     await user.click(within(sidebar()).getByRole('button', { name: '1–2 m' }))
     expect(push).toHaveBeenCalledWith('/elanlar?kateqoriya=agaclar&hundurluk=100-200&siralama=ucuz', { scroll: false })
-    // Categories are links with counts; the chosen one is marked.
-    const trees = within(sidebar()).getByRole('link', { name: /Ağaclar/ })
-    expect(trees).toHaveAttribute('aria-current', 'true')
+    // Categories are links with counts; the chosen one opens its list, where «Bütün ağaclar» is the current row.
+    const trees = within(sidebar()).getByRole('link', { name: /^Ağaclar/ })
     expect(trees).toHaveTextContent('9')
+    expect(trees).not.toHaveAttribute('aria-current')
+    const all = within(sidebar()).getByRole('link', { name: /^Bütün ağaclar/ })
+    expect(all).toHaveAttribute('aria-current', 'true')
+    expect(all).toHaveTextContent('9')
     await user.click(within(sidebar()).getByRole('link', { name: /Kollar/ }))
     expect(push).toHaveBeenLastCalledWith('/elanlar?kateqoriya=kollar&siralama=ucuz', { scroll: false })
+  })
+
+  it('lists the chosen category’s sub-categories after «Bütün …», and folds them with the chevron', async () => {
+    const user = userEvent.setup()
+    renderCatalog('kateqoriya=agaclar&alt=meyve-agaclari')
+    const sub = within(sidebar()).getByRole('link', { name: /^Meyvə ağacları/ })
+    expect(sub).toHaveAttribute('aria-current', 'true')
+    expect(sub).toHaveTextContent('3')
+    // «Bütün ağaclar» is the category itself: it drops the sub-category.
+    const all = within(sidebar()).getByRole('link', { name: /^Bütün ağaclar/ })
+    expect(all).not.toHaveAttribute('aria-current')
+    await user.click(all)
+    expect(push).toHaveBeenLastCalledWith('/elanlar?kateqoriya=agaclar', { scroll: false })
+
+    const fold = within(sidebar()).getByRole('button', { name: 'Alt kateqoriyalar — Ağaclar' })
+    expect(fold).toHaveAttribute('aria-expanded', 'true')
+    await user.click(fold)
+    expect(fold).toHaveAttribute('aria-expanded', 'false')
+    expect(within(sidebar()).queryByRole('link', { name: /^Meyvə ağacları/ })).not.toBeInTheDocument()
+    // Folded, the category row itself is the current one.
+    expect(within(sidebar()).getByRole('link', { name: /^Ağaclar/ })).toHaveAttribute('aria-current', 'true')
+    await user.click(fold)
+    expect(within(sidebar()).getByRole('link', { name: /^Meyvə ağacları/ })).toHaveAttribute('aria-current', 'true')
   })
 
   it('removes a chip, and «Sıfırla» keeps the search word', async () => {

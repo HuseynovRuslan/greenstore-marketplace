@@ -48,7 +48,7 @@ const withCustom = (options: FilterOption[], value: string, label: (v: string) =
 
 /**
  * Catalogue filters, ≥ 1280 px (Variant 2 controls): every change applies at once. Kateqoriya is a list of links
- * with counts (sub-categories open under the chosen one); Qiymət has the home presets and min/max fields applied
+ * with counts (the chosen one opens its sub-categories, «Bütün …» first); Qiymət has the home presets and min/max fields applied
  * with Enter or «Tətbiq et»; Hündürlük and Yaş use the home pills (plants only); Növ is a Listbox; Satıcı and
  * Əlavə are pills. Yaş, Növ and Satıcı fold away while they are not set, so the column stays short.
  */
@@ -164,66 +164,76 @@ const inPlace = (e: MouseEvent, go: () => void) => {
   go()
 }
 
-const rowClass =
-  'flex min-h-10 items-center gap-2.5 rounded-option px-2.5 text-sm leading-[1.3] text-ink transition-colors duration-(--dur-fast) hover:bg-mint hover:text-forest aria-[current=true]:bg-mint aria-[current=true]:font-semibold aria-[current=true]:text-forest'
+/** A category link: where it goes, and the in-place click. */
+interface Go {
+  href: string
+  onClick: (e: MouseEvent) => void
+}
 
+/** «Bütün ağaclar»: the chosen category itself, first in its sub-category list. */
+const allInCategory = (name: string) => `Bütün ${name.toLocaleLowerCase('az')}`
+
+/**
+ * «Hamısı», then the categories. The chosen one turns mint (white icon disc and count) and opens its list: «Bütün
+ * …» first, then the sub-categories on a guide line, the current one marked by a bar on the line. Its chevron folds
+ * the list away; choosing another category opens that one. Rows with no listings are grey, and stay links.
+ */
 function CategoryList({ state, current, facets, onChange }: Pick<FilterSidebarProps, 'state' | 'current' | 'facets' | 'onChange'>) {
-  const link = (next: SearchState, selected: boolean, body: ReactNode, className?: string) => (
-    <Link
-      href={catalogHref(next, current)}
-      prefetch={false}
-      aria-current={selected ? 'true' : undefined}
-      onClick={(e) => inPlace(e, () => onChange(next))}
-      className={cn(rowClass, className)}
-    >
-      {body}
-    </Link>
-  )
-  const count = (n: number | undefined) => (
-    <span className="ml-auto shrink-0 text-[13px] font-normal text-muted tabular-nums">{formatNumber(n ?? 0)}</span>
-  )
+  const subListId = useId()
+  const [folded, setFolded] = useState(false)
+  const [foldedFor, setFoldedFor] = useState(state.categoryId)
+  if (foldedFor !== state.categoryId) {
+    setFoldedFor(state.categoryId)
+    setFolded(false)
+  }
+  const go = (next: SearchState): Go => ({ href: catalogHref(next, current), onClick: (e) => inPlace(e, () => onChange(next)) })
   const noCategory = { ...state, categoryId: '', subcategory: '', species: '' }
   return (
-    <ul className="-mx-2.5 flex flex-col">
+    <ul className="-mx-2.5 flex flex-col gap-0.5">
       <li>
-        {link(
-          noCategory,
-          !state.categoryId,
-          <>
-            <Layers aria-hidden size={18} strokeWidth={1.8} className="shrink-0 text-forest" />
-            <span className="min-w-0 truncate">Hamısı</span>
-            {count(facets.categories.all)}
-          </>,
-        )}
+        <CategoryRow
+          go={go(noCategory)}
+          on={!state.categoryId}
+          current={!state.categoryId}
+          icon={<Layers aria-hidden size={16} strokeWidth={1.8} absoluteStrokeWidth className="shrink-0" />}
+          name="Hamısı"
+          count={facets.categories.all}
+        />
       </li>
       {productCategories.map((c) => {
         const selected = state.categoryId === c.id
-        const subs = selected ? subcategoryOptions(c.id) : []
+        const open = selected && !folded
+        const toCategory = { ...noCategory, categoryId: c.id }
+        const count = facets.categories.byId[c.id] ?? 0
         return (
           <li key={c.id}>
-            {link(
-              { ...noCategory, categoryId: c.id },
-              selected && !state.subcategory,
-              <>
-                <CategoryIcon name={c.icon} size={18} />
-                <span className="min-w-0 truncate">{c.name}</span>
-                {count(facets.categories.byId[c.id])}
-              </>,
-              selected && state.subcategory ? 'font-semibold text-forest' : undefined,
-            )}
-            {subs.length > 0 && (
-              <ul className="ml-[38px] flex flex-col border-l border-line pl-1">
-                {subs.map((s) => (
+            <CategoryRow
+              go={go(toCategory)}
+              on={selected}
+              current={selected && folded}
+              icon={<CategoryIcon name={c.icon} size={16} className="shrink-0" />}
+              name={c.name}
+              count={count}
+              fold={selected ? { open, controls: subListId, toggle: () => setFolded(open) } : 'closed'}
+            />
+            {selected && (
+              // The guide line runs under the icon disc (its centre is 24 px in); the rows start at the name.
+              <ul
+                id={subListId}
+                hidden={!open}
+                className="relative my-1 flex flex-col pl-9 before:absolute before:inset-y-1 before:left-[23.5px] before:w-px before:bg-line-strong"
+              >
+                <li>
+                  <SubcategoryRow go={go(toCategory)} current={!state.subcategory} name={allInCategory(c.name)} count={count} />
+                </li>
+                {subcategoryOptions(c.id).map((s) => (
                   <li key={s.value}>
-                    {link(
-                      { ...state, subcategory: state.subcategory === s.value ? '' : s.value },
-                      state.subcategory === s.value,
-                      <>
-                        <span className="min-w-0 truncate">{s.label}</span>
-                        {count(facets.subcategories[s.value])}
-                      </>,
-                      'min-h-9 text-[13px]',
-                    )}
+                    <SubcategoryRow
+                      go={go({ ...state, subcategory: state.subcategory === s.value ? '' : s.value })}
+                      current={state.subcategory === s.value}
+                      name={s.label}
+                      count={facets.subcategories[s.value] ?? 0}
+                    />
                   </li>
                 ))}
               </ul>
@@ -232,6 +242,99 @@ function CategoryList({ state, current, facets, onChange }: Pick<FilterSidebarPr
         )
       })}
     </ul>
+  )
+}
+
+interface CategoryRowProps {
+  go: Go
+  /** The chosen row: mint, with a white icon disc and a white count pill. */
+  on: boolean
+  /** aria-current: «Hamısı» when no category is chosen, a category while its list is folded. */
+  current: boolean
+  icon: ReactNode
+  name: string
+  count: number
+  /** 'closed': a chevron that points at the list the link opens. The chosen category gets a button that folds it. */
+  fold?: 'closed' | { open: boolean; controls: string; toggle: () => void }
+}
+
+function CategoryRow({ go, on, current, icon, name, count, fold }: CategoryRowProps) {
+  const empty = count === 0 && !on
+  const toggle = typeof fold === 'object' ? fold : undefined
+  return (
+    <div className={cn('flex items-center rounded-option', on && 'bg-mint')}>
+      <Link
+        href={go.href}
+        prefetch={false}
+        aria-current={current ? 'true' : undefined}
+        onClick={go.onClick}
+        className={cn(
+          'group/cat flex min-h-[42px] min-w-0 flex-1 items-center gap-2.5 rounded-option py-1.5 pl-2.5 text-[15px] leading-[1.3] tracking-[-0.01em] transition-colors duration-(--dur-fast)',
+          toggle ? 'pr-1' : 'pr-2.5',
+          on ? 'font-semibold text-forest' : cn('font-medium hover:bg-mint/60 hover:text-forest active:bg-mint', empty ? 'text-muted' : 'text-ink'),
+        )}
+      >
+        <span
+          className={cn(
+            'flex size-7 shrink-0 items-center justify-center rounded-full transition-colors duration-(--dur-fast)',
+            on ? 'bg-surface' : 'bg-mint group-hover/cat:bg-surface',
+            empty ? 'text-muted group-hover/cat:text-forest' : 'text-forest',
+          )}
+        >
+          {icon}
+        </span>
+        <span className="min-w-0 truncate">{name}</span>
+        <span
+          className={cn(
+            'ml-auto flex h-5 min-w-6 shrink-0 items-center justify-center rounded-full px-1.5 text-[13px] leading-none tracking-normal tabular-nums',
+            on ? 'bg-surface font-semibold text-forest' : 'font-normal text-muted',
+          )}
+        >
+          {formatNumber(count)}
+        </span>
+        {fold === 'closed' && <ChevronDown aria-hidden size={16} strokeWidth={2} className="shrink-0 -rotate-90 text-muted" />}
+        {/* «Hamısı» has no list: a gap keeps its count in line with the others. */}
+        {!fold && <span aria-hidden className="size-4 shrink-0" />}
+      </Link>
+      {toggle && (
+        <button
+          type="button"
+          aria-expanded={toggle.open}
+          aria-controls={toggle.controls}
+          aria-label={`Alt kateqoriyalar — ${name}`}
+          onClick={toggle.toggle}
+          className="mr-1 flex size-7 shrink-0 items-center justify-center rounded-full text-forest transition-colors duration-(--dur-fast) hover:bg-surface"
+        >
+          <ChevronDown
+            aria-hidden
+            size={16}
+            strokeWidth={2}
+            className={cn('transition-transform duration-(--dur-fast) ease-out motion-reduce:transition-none', !toggle.open && '-rotate-90')}
+          />
+        </button>
+      )}
+    </div>
+  )
+}
+
+function SubcategoryRow({ go, current, name, count }: { go: Go; current: boolean; name: string; count: number }) {
+  return (
+    <Link
+      href={go.href}
+      prefetch={false}
+      aria-current={current ? 'true' : undefined}
+      onClick={go.onClick}
+      className={cn(
+        'relative flex min-h-[38px] items-center gap-2 rounded-option px-3 text-sm leading-[1.3] tracking-[-0.01em] transition-colors duration-(--dur-fast)',
+        current
+          ? // The bar sits on the guide line: its centre is 24 px into the list, 36 px left of this row.
+            'bg-mint/60 font-semibold text-forest before:absolute before:top-1/2 before:-left-[13.5px] before:h-5 before:w-[3px] before:-translate-y-1/2 before:rounded-full before:bg-forest'
+          : cn('hover:bg-mint/40 hover:text-forest active:bg-mint/70', count === 0 ? 'text-muted' : 'text-ink'),
+      )}
+    >
+      <span className="min-w-0 truncate">{name}</span>
+      <span className={cn('ml-auto shrink-0 text-[13px] tracking-normal text-muted tabular-nums', current && 'font-semibold')}>{formatNumber(count)}</span>
+    </Link>
   )
 }
 
