@@ -24,7 +24,7 @@ typecheck, tests (251), build.
 
 ## Before / after
 
-`docs/design/skills-pass/` — the ten most visible changes, before (`81fa83f`) on the left, after on the right, both
+[`.screenshots/skills-pass/`](../../.screenshots/skills-pass/) (local, not in git) — the ten most visible changes, before (`81fa83f`) on the left, after on the right, both
 from production builds with the same script:
 
 | File | Change |

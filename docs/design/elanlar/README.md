@@ -2,7 +2,8 @@
 
 **Before:** the catalogue as it was when the audit started. **After:** the Variant 2 catalogue. "After" shots come
 from the production build. Widths are 1440 and 390 px. `-1440` filter and no-results shots are full pages; the rest
-show the first screen.
+show the first screen. The images are kept locally in
+[`.screenshots/elanlar/`](../../../.screenshots/elanlar/) (not in git).
 
 | State | URL | Before | After |
 |---|---|---|---|

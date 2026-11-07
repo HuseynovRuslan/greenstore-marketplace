@@ -9,3 +9,4 @@
 - Hər commit-dən əvvəl: `npm run lint`, `npm run typecheck`, `npm test`, `npm run build`.
 - Commit yalnız mənim OK-dan sonra. Push etmə.
 - Brauzerdə yoxlama: `playwright-cli`. Video və CLS ölçmək: `webapp-testing`.
+- Ekran şəkilləri və videolar `.screenshots/` qovluğuna yazılır, git-ə əlavə olunmur.

@@ -86,7 +86,7 @@ phones) with success state; «Usta çağır» also from the catalogue.
 the home page); admin header and headings aligned (internal tool, light touch).
 
 ### 10. Wrap-up
-Screenshots of every page and key state at 1440 / 390 in `docs/design/pages-v2/`; `docs/handoff/pages-v2.md`
+Screenshots of every page and key state at 1440 / 390 in `.screenshots/pages-v2/` (local, not in git); `docs/handoff/pages-v2.md`
 (commits, what each page does, mock vs real, contract additions, open questions); summary with localhost URLs.
 
 ## Progress
@@ -107,7 +107,7 @@ Update after every commit (newest last).
 | 8 · Services catalogue and service page + «Usta çağır» | done | f855d5f |
 | 9 · 404, support pages (Kömək, Elan qaydaları, Təhlükəsiz alış, Əlaqə + form, şərtlər, məxfilik), footer links, admin headings | done | 8fb1803 |
 | Fix · phone contact bar with worst-case prices (break-ui pass) | done | 2a10775 |
-| 10 · Wrap-up: screenshots (docs/design/pages-v2), handoff (docs/handoff/pages-v2.md), viewer a11y fix | done | (this commit) |
+| 10 · Wrap-up: screenshots (.screenshots/pages-v2), handoff (docs/handoff/pages-v2.md), viewer a11y fix | done | (this commit) |
 
 All steps done. Next (not in this pass): messaging, price history, balance/payments, admin layouts, the site-wide
 motion pass, real-device checks — see [pages-v2.md](../handoff/pages-v2.md) → open questions.

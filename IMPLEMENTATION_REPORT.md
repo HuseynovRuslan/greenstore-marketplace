@@ -13,8 +13,8 @@ the prototype wordmark "YARPAQ" replaced by **GreenStore**. The design audit is 
 * There are 18 route paths, 95 extracted images and typed mock data copied from Figma.
 * Typecheck, lint, unit tests, production build, a route smoke test (26 routes × 3 widths × guest/signed in) and a
   cross‑page end‑to‑end flow all pass.
-* Every frame was screenshotted and compared with its Figma render. The comparison images are in
-  [`docs/verification/`](docs/verification).
+* Every frame was screenshotted and compared with its Figma render. The comparison images are kept locally in
+  [`.screenshots/verification/`](.screenshots/verification/) (not in git).
 
 No backend was built (as requested). All behaviour runs on local mock state.
 

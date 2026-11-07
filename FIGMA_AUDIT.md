@@ -7,8 +7,9 @@ The prototype is branded **YARPAQ**. Every occurrence of the wordmark and of "YA
 "YARPAQ alıcı və satıcını birləşdirir", "© 2026 YARPAQ", …) is rendered as **GreenStore** in the implementation. Nothing
 else in the copy was changed.
 
-Downscaled reference renders of every frame are committed in [`docs/figma/reference/`](docs/figma/reference) (50 % width,
-JPEG) so future work can be compared without Figma access.
+Downscaled reference renders of every frame (50 % width, JPEG) are kept locally in
+[`.screenshots/figma-reference/`](.screenshots/figma-reference/) (not in git) so future work can be compared without
+Figma access.
 
 ---
 

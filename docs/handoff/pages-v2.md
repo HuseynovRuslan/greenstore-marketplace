@@ -8,7 +8,7 @@ The "everything else" pass after the home page and `/elanlar`: GreenStore as the
 A second pass with the design, writing, mobile, worst-case data and accessibility skills followed: see
 [skills-pass.md](skills-pass.md) (changes, findings, before / after).
 
-Screenshots of every page and key state at 1440 and 390: [`docs/design/pages-v2/`](../design/pages-v2/)
+Screenshots of every page and key state at 1440 and 390, kept locally (not in git): [`.screenshots/pages-v2/`](../../.screenshots/pages-v2/)
 (`<nn>-<page>-<width>.jpg`; `10-posting-*` and `15-auth-*` are full walk-throughs).
 
 ## Commits
