@@ -84,7 +84,7 @@ export default function ResetPasswordPage() {
     <AuthShell title="Şifrəni bərpa edin" lead={leads[stage]}>
       <FormCard>
         {formError && (
-          <Notice tone="danger" title="Alınmadı">
+          <Notice tone="danger" title="Şifrə bərpa olunmadı">
             {formError}
           </Notice>
         )}

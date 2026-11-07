@@ -111,8 +111,8 @@ describe('listing page', () => {
   it('sends a report with a reason and confirms it', async () => {
     const user = userEvent.setup()
     renderPage('zeytun-agaci')
-    await user.click(screen.getByRole('button', { name: 'Elanı şikayət et' }))
-    const dialog = screen.getByRole('dialog', { name: 'Elanı şikayət et' })
+    await user.click(screen.getByRole('button', { name: 'Elandan şikayət et' }))
+    const dialog = screen.getByRole('dialog', { name: 'Elandan şikayət et' })
     await user.click(within(dialog).getByRole('button', { name: 'Şikayəti göndər' }))
     expect(within(dialog).getByText('Səbəbi seçin.')).toBeInTheDocument()
     await user.click(within(dialog).getByRole('radio', { name: 'Digər səbəb' }))

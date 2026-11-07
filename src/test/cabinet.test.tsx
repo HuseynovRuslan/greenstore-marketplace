@@ -100,7 +100,7 @@ describe('saved searches', () => {
 
     const second = screen.getByRole('link', { name: 'Tuya, 50 ₼-a qədər' }).closest('li')!
     await user.click(within(second).getByRole('button', { name: 'Sil' }))
-    await user.click(within(screen.getByRole('dialog', { name: 'Axtarışı silək?' })).getByRole('button', { name: 'Sil' }))
+    await user.click(within(screen.getByRole('dialog', { name: 'Axtarışı silək?' })).getByRole('button', { name: 'Axtarışı sil' }))
     expect(screen.queryByRole('link', { name: 'Tuya, 50 ₼-a qədər' })).not.toBeInTheDocument()
   })
 })

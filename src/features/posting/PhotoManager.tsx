@@ -7,6 +7,7 @@ import { loadDomMax, MotionFeatures, useFeaturesReady } from '@/components/motio
 import { chipEnter, chipExit, chipLayout } from '@/components/motion/springs'
 import { buttonClass } from '@/components/ui/Button'
 import { useToast } from '@/components/ui/Toast'
+import { ordinal } from '@/features/listing/detail'
 import { cn } from '@/lib/format'
 import { MAX_PHOTO_MB, MAX_PHOTOS, type DraftPhoto } from './draft'
 import { ACCEPTED_TYPES, fileError, fitCount, makeCover, movePhoto, newPhotoId, photoStore, processFile } from './photos'
@@ -109,7 +110,7 @@ export function PhotoManager({ draft, update, error, urls }: StepProps & { urls:
             <span className="hidden pointer-coarse:inline">Şəkil çəkin və ya qalereyadan seçin</span>
           </p>
           <p className="text-[13px] leading-[1.5] text-muted">
-            JPG, PNG və ya WebP · hər biri {MAX_PHOTO_MB} MB-a qədər · {photos.length} / {MAX_PHOTOS}
+            JPG, PNG və ya WebP, hər biri {MAX_PHOTO_MB} MB-a qədər · {photos.length} / {MAX_PHOTOS} şəkil
           </p>
         </div>
         <button
@@ -255,23 +256,24 @@ function PhotoGrid({ photos, urls, busy, onMove, onCover, onRemove }: PhotoGridP
                 Örtük
               </span>
             )}
-            <button type="button" onClick={() => onRemove(i)} aria-label={`Şəkil ${i + 1}-i sil`} className={cn(iconButton, 'absolute top-1.5 right-1.5 text-danger')}>
+            <button type="button" onClick={() => onRemove(i)} aria-label={`${ordinal(i + 1)} şəkli sil`} className={cn(iconButton, 'absolute top-1.5 right-1.5 text-danger')}>
               <Trash2 aria-hidden size={16} strokeWidth={1.8} />
             </button>
             <div className="absolute inset-x-1.5 bottom-1.5 flex items-center justify-between gap-1">
-              <button type="button" disabled={i === 0} onClick={() => onMove(i, i - 1)} aria-label={`Şəkil ${i + 1}: sola`} className={iconButton}>
+              <button type="button" disabled={i === 0} onClick={() => onMove(i, i - 1)} aria-label={`${ordinal(i + 1)} şəkli sola çək`} className={iconButton}>
                 <ChevronLeft aria-hidden size={18} strokeWidth={2} />
               </button>
               {i > 0 && (
                 <button
                   type="button"
                   onClick={() => onCover(i)}
+                  aria-label={`${ordinal(i + 1)} şəkli örtük et`}
                   className="relative h-9 rounded-full bg-surface/95 px-2.5 text-xs font-semibold whitespace-nowrap text-forest shadow-sm transition-[scale] duration-(--dur-fast) ease-out active:scale-[0.96] motion-reduce:active:scale-100 after:absolute after:-inset-1 after:content-['']"
                 >
                   Örtük et
                 </button>
               )}
-              <button type="button" disabled={i === photos.length - 1} onClick={() => onMove(i, i + 1)} aria-label={`Şəkil ${i + 1}: sağa`} className={iconButton}>
+              <button type="button" disabled={i === photos.length - 1} onClick={() => onMove(i, i + 1)} aria-label={`${ordinal(i + 1)} şəkli sağa çək`} className={iconButton}>
                 <ChevronRight aria-hidden size={18} strokeWidth={2} />
               </button>
             </div>

@@ -97,7 +97,7 @@ export default function SavedSearchesPage() {
                 <div className="mt-auto flex flex-wrap gap-2 border-t border-line pt-3">
                   <Link href={href} onClick={() => update(s.id, { newCount: 0 })} className={quiet}>
                     <ExternalLink aria-hidden size={15} strokeWidth={2} />
-                    Aç
+                    Elanlara bax
                   </Link>
                   <button type="button" className={quiet} onClick={() => setRenaming(s)} aria-haspopup="dialog">
                     <Pencil aria-hidden size={15} strokeWidth={2} />
@@ -121,7 +121,7 @@ export default function SavedSearchesPage() {
             onSave={(name) => {
               update(renaming.id, { name })
               setRenaming(null)
-              toast('Ad dəyişdi')
+              toast('Axtarışın adı dəyişdi')
             }}
           />
         )}
@@ -130,7 +130,7 @@ export default function SavedSearchesPage() {
         <p className="text-[15px] leading-[1.5] text-ink">«{deleting?.name}» və onun bildirişləri silinəcək.</p>
         <div className="flex flex-col-reverse gap-2.5 sm:flex-row sm:justify-end">
           <Button variant="secondary" onClick={() => setDeleting(null)}>
-            Saxla
+            Axtarış qalsın
           </Button>
           <Button
             variant="danger"
@@ -140,7 +140,7 @@ export default function SavedSearchesPage() {
               toast('Axtarış silindi')
             }}
           >
-            Sil
+            Axtarışı sil
           </Button>
         </div>
       </Dialog>

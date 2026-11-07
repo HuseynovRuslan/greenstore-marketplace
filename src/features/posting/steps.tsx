@@ -165,7 +165,7 @@ function AttributeField({ a, draft, update, error, touch }: StepProps & { a: Att
           />
           <UnitInput
             id={id(`${key}Max`)}
-            label={<>Ən çox</>}
+            label={<>Ən hündürü</>}
             optional
             unit={a.unit}
             error={error(`${key}Max`)}
@@ -263,7 +263,7 @@ export function DetailsStep(props: StepProps) {
 /* ---------- 4 · Qiymət və ünvan ---------- */
 
 const priceTypes = [
-  { value: 'fixed', title: 'Qiymət', description: 'Dəqiq qiymət' },
+  { value: 'fixed', title: 'Sabit qiymət', description: 'Yazdığınız qiymətə satırsınız' },
   { value: 'negotiable', title: 'Razılaşmaq olar', description: 'Qiymət var, endirim mümkündür' },
   { value: 'agreement', title: 'Razılaşma ilə', description: 'Qiyməti alıcı ilə danışacaqsınız' },
 ] as const
@@ -308,7 +308,7 @@ export function PriceStep({ draft, update, error, touch }: StepProps) {
                 onValueChange={(v) => update({ price: v })}
                 onBlur={() => touch('price')}
               />
-              <FieldGroup legend="Nəyə görə" error={error('priceUnit')}>
+              <FieldGroup legend="Vahid" error={error('priceUnit')}>
                 <RadioPills name="priceUnit" firstId={id('priceUnit')} options={units.map((u) => ({ value: u.value, label: `1 ${u.label}` }))} value={draft.priceUnit} onChange={(v) => update({ priceUnit: v as PostingDraft['priceUnit'] })} />
               </FieldGroup>
             </div>
@@ -367,7 +367,7 @@ export function PriceStep({ draft, update, error, touch }: StepProps) {
 
       <section aria-labelledby="unvan-basliq" className="flex flex-col gap-5">
         <h2 id="unvan-basliq" className="text-[15px] leading-[1.35] font-semibold text-forest">
-          {service ? 'Haradasınız' : 'Bitki harada'}
+          {service ? 'Haradasınız' : 'Ünvan'}
         </h2>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="flex min-w-0 flex-col gap-[7px]">

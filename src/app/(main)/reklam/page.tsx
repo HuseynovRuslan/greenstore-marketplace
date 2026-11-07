@@ -4,7 +4,7 @@ import { pageMetadata } from '@/seo/metadata'
 import PromotionPage from '@/views/PromotionPage'
 
 export const metadata: Metadata = pageMetadata({
-  title: 'Elanı irəli çək və önə çıxar',
+  title: 'Reklam paketləri: irəli çək və önə çıxar',
   description: '«İrəli çək», «Önə çıxar» və paket: elanınızı ana səhifədə və axtarışın başında göstərin. Qiymətlər və şərtlər.',
   canonical: '/reklam',
 })

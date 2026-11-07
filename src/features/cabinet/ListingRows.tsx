@@ -232,7 +232,7 @@ export function ListingRowCard({ listing, stats, now, handlers }: { listing: Lis
         </p>
         <div className="flex flex-col-reverse gap-2.5 sm:flex-row sm:justify-end">
           <Button variant="secondary" onClick={() => setDialog(null)}>
-            Saxla
+            Elan qalsın
           </Button>
           <Button
             variant="danger"
@@ -242,7 +242,7 @@ export function ListingRowCard({ listing, stats, now, handlers }: { listing: Lis
               toast('Elan silindi')
             }}
           >
-            Sil
+            Elanı sil
           </Button>
         </div>
       </Dialog>
@@ -335,7 +335,7 @@ export function DraftRowCard({ draft, onDiscard }: { draft: PostingDraft; onDisc
         <p className="text-[15px] leading-[1.5] text-ink">Yazdıqlarınız və şəkillər silinəcək.</p>
         <div className="flex flex-col-reverse gap-2.5 sm:flex-row sm:justify-end">
           <Button variant="secondary" onClick={() => setConfirm(false)}>
-            Saxla
+            Qaralama qalsın
           </Button>
           <Button
             variant="danger"
@@ -344,7 +344,7 @@ export function DraftRowCard({ draft, onDiscard }: { draft: PostingDraft; onDisc
               setConfirm(false)
             }}
           >
-            Sil
+            Qaralamanı sil
           </Button>
         </div>
       </Dialog>

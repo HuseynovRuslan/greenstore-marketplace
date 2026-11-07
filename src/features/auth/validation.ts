@@ -1,22 +1,23 @@
 /**
  * Client-side validation for the auth and profile forms.
  * Copy that exists in Figma is used verbatim ("Şifrələr eyni olmalıdır.", "Ən azı 8 simvol.",
- * "Ən azı 8 simvol, bir hərf və bir rəqəm istifadə edin."); the rest is minimal Azerbaijani wording.
+ * "Ən azı 8 simvol, bir hərf və bir rəqəm istifadə edin."); the rest says what to write («… yazın»), the verb the
+ * posting, contact and request forms use too.
  */
 
 export const messages = {
-  phoneRequired: 'Telefon nömrəsini daxil edin.',
-  phoneFormat: 'Nömrəni +994 50 555 12 34 formatında daxil edin.',
-  emailRequired: 'E-poçt ünvanını daxil edin.',
-  emailFormat: 'E-poçt ünvanı düzgün deyil.',
-  passwordRequired: 'Şifrəni daxil edin.',
+  phoneRequired: 'Telefon nömrəsini yazın.',
+  phoneFormat: 'Nömrəni +994 50 555 12 34 kimi yazın.',
+  emailRequired: 'E-poçt ünvanını yazın.',
+  emailFormat: 'E-poçt ünvanını ad@poct.az kimi yazın.',
+  passwordRequired: 'Şifrəni yazın.',
   passwordShort: 'Ən azı 8 simvol.',
   passwordRule: 'Ən azı 8 simvol, bir hərf və bir rəqəm istifadə edin.',
-  passwordRepeat: 'Şifrəni təkrar daxil edin.',
+  passwordRepeat: 'Şifrəni bir daha yazın.',
   passwordMismatch: 'Şifrələr eyni olmalıdır.',
-  currentPassword: 'Cari şifrəni daxil edin.',
-  companyRequired: 'Şirkətin adını daxil edin.',
-  nameRequired: 'Adı daxil edin.',
+  currentPassword: 'Cari şifrəni yazın.',
+  companyRequired: 'Şirkətin adını yazın.',
+  nameRequired: 'Adınızı yazın.',
   consent: 'Davam etmək üçün şərtlərlə razılaşın.',
 }
 

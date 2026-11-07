@@ -103,7 +103,7 @@ export function ContactForm() {
         </Notice>
       )}
       <Button type="submit" disabled={busy} aria-busy={busy} className="self-start max-sm:w-full">
-        {busy ? 'Göndərilir…' : 'Göndər'}
+        {busy ? 'Göndərilir…' : 'Mesajı göndər'}
       </Button>
     </form>
   )

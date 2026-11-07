@@ -74,7 +74,7 @@ export const rulesPage: HelpPage = {
     {
       id: 'pozuntu',
       title: 'Qayda pozulanda',
-      paragraphs: ['İlk dəfə xəbərdarlıq edirik və elanı dayandırırıq. Təkrar və ya dələduzluq halında hesab bağlanır. Şübhəli elanı «Elanı şikayət et» ilə bizə bildirin.'],
+      paragraphs: ['İlk dəfə xəbərdarlıq edirik və elanı dayandırırıq. Təkrar və ya dələduzluq halında hesab bağlanır. Şübhəli elanı «Elandan şikayət et» ilə bizə bildirin.'],
     },
   ],
 }
@@ -127,7 +127,7 @@ export const safeBuyingPage: HelpPage = {
         'Satıcı görüşməkdən qaçır, yalnız kartla əvvəlcədən ödəniş istəyir',
         'Kart məlumatlarınızı, SMS kodunu istəyirlər — GreenStore heç vaxt kod istəmir',
       ],
-      paragraphs: ['Belə elanı «Elanı şikayət et» ilə bildirin: moderatorlar 24 saat ərzində yoxlayır.'],
+      paragraphs: ['Belə elanı «Elandan şikayət et» ilə bildirin: moderatorlar 24 saat ərzində yoxlayır.'],
     },
   ],
 }

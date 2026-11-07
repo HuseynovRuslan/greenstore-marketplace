@@ -55,7 +55,7 @@ const plantAttrs = (opts: { foliage: boolean }): AttrDef[] => [
     hint: 'Latınca adı bilirsinizsə yazın: alıcılar dəqiq növü axtarır.',
     maxLength: 60,
   },
-  { id: 'height', label: filterTitles.height, kind: 'range', unit: 'sm', required: true, min: 1, max: 3000, hint: 'Dibçək daxil. Bir ölçüdürsə, yalnız birinci xananı yazın.' },
+  { id: 'height', label: filterTitles.height, kind: 'range', unit: 'sm', required: true, min: 1, max: 3000, hint: 'Dibçəklə birlikdə. Tinglər müxtəlif boydadırsa, ən hündürünü yanındakı xanaya yazın.' },
   { id: 'age', label: filterTitles.age, kind: 'number', unit: 'yaş', min: 0, max: 200 },
   { id: 'rootSystem', label: 'Kök sistemi', kind: 'choice', required: true, options: rootSystemOptions },
   { id: 'potLitres', label: 'Dibçəyin həcmi', kind: 'number', unit: 'litr', min: 0.5, max: 2000, when: { id: 'rootSystem', value: 'container' } },

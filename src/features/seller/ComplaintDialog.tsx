@@ -17,7 +17,7 @@ const MIN_OTHER = 10
 interface ComplaintDialogProps {
   open: boolean
   onClose: () => void
-  /** «Elanı şikayət et» / «Satıcını şikayət et» */
+  /** «Elandan şikayət et» / «Satıcıdan şikayət et» */
   title: string
   reasons: string[]
   target: ReportTarget

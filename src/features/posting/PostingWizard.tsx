@@ -23,7 +23,7 @@ import { firstInvalidStep, validateStep } from './validation'
 
 /** Field names for the error summary («Başlıq: Başlıq yazın…»). */
 const LABELS: Record<string, string> = {
-  kind: 'Növ',
+  kind: 'Elanın növü',
   categoryId: 'Kateqoriya',
   subcategory: 'Alt kateqoriya',
   title: 'Başlıq',
@@ -33,14 +33,14 @@ const LABELS: Record<string, string> = {
   priceUnit: 'Vahid',
   wholesalePrice: 'Topdan qiymət',
   wholesaleMin: 'Ən az sifariş',
-  quantity: 'Stok',
-  cityId: 'Şəhər',
+  quantity: 'Stokda neçə var',
+  cityId: 'Şəhər və ya rayon',
   area: 'Ərazi',
-  deliveryAreas: 'Çatdırılma',
-  contactName: 'Ad',
-  phone: 'Telefon',
+  deliveryAreas: 'Hara çatdırırsınız',
+  contactName: 'Adınız',
+  phone: 'Telefon nömrəsi',
   whatsapp: 'WhatsApp',
-  rulesAccepted: 'Qaydalar',
+  rulesAccepted: 'Elan qaydaları',
 }
 
 const TIPS: Record<StepNumber, string[]> = {
@@ -249,7 +249,7 @@ export function PostingWizard({ step }: { step: StepNumber }) {
 
           {/* ≥ 768 px: the buttons under the form. Phones: the same buttons in a bar fixed to the bottom. */}
           <div className="fixed inset-x-0 bottom-0 z-30 flex gap-3 border-t border-line bg-surface/95 px-5 pt-3 pb-[calc(12px+env(safe-area-inset-bottom,0px))] backdrop-blur-md md:static md:z-auto md:border-0 md:bg-transparent md:p-0 md:backdrop-blur-none">
-            {back ? (
+            {back && (
               <ButtonLink
                 href={back}
                 onClick={() => markStepChange(step, step - 1)}
@@ -258,10 +258,6 @@ export function PostingWizard({ step }: { step: StepNumber }) {
                 className="max-md:px-3.5"
               >
                 Geri
-              </ButtonLink>
-            ) : (
-              <ButtonLink href="/" variant="secondary" className="max-md:px-3.5">
-                Ləğv et
               </ButtonLink>
             )}
             <Button type="submit" disabled={sending || navigating || guestAtEnd} aria-busy={sending || navigating} className="flex-1 md:ml-auto md:flex-none md:min-w-[180px]">

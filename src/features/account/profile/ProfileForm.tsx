@@ -87,7 +87,7 @@ export function ProfileForm({ account, onSave }: { account: AccountProfile; onSa
               containerClassName="w-full"
             />
             <SelectField
-              label="Biznes növü seçin"
+              label="Biznesin növü"
               name="businessType"
               value={values.businessType}
               onChange={set('businessType')}
@@ -97,7 +97,7 @@ export function ProfileForm({ account, onSave }: { account: AccountProfile; onSa
           </>
         )}
         <TextField
-          label={isBusiness ? 'Əlaqələndirici şəxs' : 'Ad və soyad'}
+          label={isBusiness ? 'Əlaqə şəxsi' : 'Ad və soyad'}
           name="contact"
           autoComplete="name"
           value={values.contact}
@@ -130,7 +130,7 @@ export function ProfileForm({ account, onSave }: { account: AccountProfile; onSa
           containerClassName="w-full"
         />
         <SelectField
-          label="Şəhər seçin"
+          label="Şəhər"
           name="city"
           value={values.cityId}
           onChange={set('cityId')}

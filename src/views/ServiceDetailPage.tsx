@@ -49,7 +49,7 @@ interface ServiceDetailProps {
 /**
  * Service page (Nov 2026), on the listing page's layout: gallery, a sticky summary (title, provider, starting price,
  * «Usta çağır», number and WhatsApp, favourite and share, provider card, a payment note), the work and what it
- * includes, areas and the process, completed projects, the listing facts with «Xidməti şikayət et», the provider's
+ * includes, areas and the process, completed projects, the listing facts with «Xidmətdən şikayət et», the provider's
  * other services and similar ones. Phones get «Usta çağır» and «Zəng et» in a bar above the bottom navigation.
  */
 export default function ServiceDetailPage({ service, provider, others, similar }: ServiceDetailProps) {

@@ -8,9 +8,9 @@ import { ComplaintDialog } from './ComplaintDialog'
 import { listingComplaintReasons, sellerComplaintReasons, serviceComplaintReasons } from './complaintReasons'
 
 const variants = {
-  listing: { label: 'Elanı şikayət et', reasons: listingComplaintReasons },
-  seller: { label: 'Satıcını şikayət et', reasons: sellerComplaintReasons },
-  service: { label: 'Xidməti şikayət et', reasons: serviceComplaintReasons },
+  listing: { label: 'Elandan şikayət et', reasons: listingComplaintReasons },
+  seller: { label: 'Satıcıdan şikayət et', reasons: sellerComplaintReasons },
+  service: { label: 'Xidmətdən şikayət et', reasons: serviceComplaintReasons },
 } as const
 
 interface ComplaintButtonProps {
@@ -23,7 +23,7 @@ interface ComplaintButtonProps {
 }
 
 /**
- * «Elanı / Satıcını / Xidməti şikayət et» with its dialog. The dialog renders nothing while closed and is a fixed
+ * «Elandan / Satıcıdan / Xidmətdən şikayət et» with its dialog. The dialog renders nothing while closed and is a fixed
  * overlay while open, so it can live next to the button inside server-rendered markup.
  */
 export function ComplaintButton({ kind, targetId, fullWidth, appearance = 'button', className }: ComplaintButtonProps) {

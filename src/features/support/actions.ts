@@ -15,6 +15,6 @@ export async function sendSupportMessage(input: SupportMessageInput): Promise<{ 
     const { ticket } = await getRepository().submitSupportMessage(input)
     return { ok: true, ticket }
   } catch {
-    return { ok: false, error: 'Göndərmək alınmadı. Bir az sonra yenidən cəhd edin və ya zəng edin.' }
+    return { ok: false, error: 'Mesajı göndərmək alınmadı. Bir az sonra yenidən cəhd edin və ya zəng edin.' }
   }
 }

@@ -10,7 +10,7 @@ const support = [
   { label: 'Kömək', to: '/komek' },
   { label: 'Elan qaydaları', to: '/qaydalar' },
   { label: 'Təhlükəsiz alış', to: '/tehlukesiz-alis' },
-  { label: 'Elanı irəli çək', to: '/reklam' },
+  { label: 'Reklam paketləri', to: '/reklam' },
   { label: 'Bizimlə əlaqə', to: '/elaqe' },
 ]
 const legal = [

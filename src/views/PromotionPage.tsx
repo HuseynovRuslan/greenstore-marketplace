@@ -57,7 +57,7 @@ export default function PromotionPage({ packages }: { packages: PromotionPackage
       <Breadcrumb
         items={[
           { label: 'Ana səhifə', to: '/' },
-          { label: 'Elanı irəli çək' },
+          { label: 'Reklam paketləri' },
         ]}
       />
       <div className="grid grid-cols-1 items-center gap-6 md:grid-cols-[minmax(0,1fr)_320px] lg:gap-12">

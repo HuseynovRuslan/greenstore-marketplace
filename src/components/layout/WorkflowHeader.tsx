@@ -18,7 +18,7 @@ export function WorkflowHeader({ right }: { right?: ReactNode }) {
             className="-mr-2 inline-flex h-11 items-center gap-1.5 rounded-option px-3 text-sm leading-[normal] font-medium text-ink transition-colors duration-(--dur-fast) hover:bg-mint hover:text-forest"
           >
             <X aria-hidden size={18} strokeWidth={1.8} />
-            Çıx<span className="sr-only">: qaralama saxlanılır</span>
+            Bağla<span className="sr-only">: qaralama saxlanılır</span>
           </Link>
         )}
       </div>

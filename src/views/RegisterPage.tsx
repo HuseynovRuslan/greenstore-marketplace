@@ -141,14 +141,14 @@ export default function RegisterPage({ next }: { next?: string }) {
 
       <FormCard>
         {formError && (
-          <Notice tone="danger" title="Alınmadı">
+          <Notice tone="danger" title="Hesab yaradılmadı">
             {formError}
           </Notice>
         )}
 
         {step === 0 && (
           <form onSubmit={submitType} noValidate className="flex flex-col gap-6">
-            <FieldGroup legend="Kim kimi qeydiyyatdan keçirsiniz?" error={errors.type}>
+            <FieldGroup legend="Hesabın növü" error={errors.type}>
               <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
                 <ChoiceCard id="q-type" name="type" value="individual" checked={type === 'individual'} onChange={() => setType('individual')} icon={<UserRound size={20} strokeWidth={1.8} />} title="Fərdi şəxs" description="Öz bağınızdan bitki satırsınız və ya alırsınız" />
                 <ChoiceCard name="type" value="business" checked={type === 'business'} onChange={() => setType('business')} icon={<Building2 size={20} strokeWidth={1.8} />} title="Biznes" description="Tingçilik, bağ mərkəzi və ya landşaft şirkəti" />
