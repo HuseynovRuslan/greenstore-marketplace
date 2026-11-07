@@ -1,0 +1,439 @@
+@import 'tailwindcss';
+
+/*
+ * GreenStore design tokens — values taken 1:1 from the Figma frame
+ * "Vizual komponentlər və vəziyyətlər" (Rəng və tipoqrafiya) and the page frames.
+ */
+@theme {
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+
+  /* Palette (Figma name in comment) */
+  --color-forest: #173f32; /* Meşə yaşılı — primary, logo, buttons */
+  --color-forest-hover: #285541; /* Düymə · üzərinə gətirilmiş */
+  --color-olive: #788149; /* Zeytun — focus ring, hover border, decorative dot (3.7:1 on vip: not for text) */
+  --color-olive-text: #646b3b; /* olive as text: "Önə çıxanlar" link, "Önə çıxan" badge (5.0:1 on vip, 5.7:1 on white) */
+  --color-cream: #fafaf6; /* İsti ağ — page background */
+  --color-surface: #ffffff; /* Səth */
+  --color-line: #dee3d9; /* Sərhəd */
+  --color-line-strong: #cfd8cc; /* chip, price input and search card outlines (Variant 2) */
+  --color-ink: #20352b; /* Mətn */
+  --color-ink-soft: #4f5a51; /* secondary text on mint: hero subtitle, inactive tabs (6.2:1 on mint) */
+  --color-muted: #646d64; /* Köməkçi mətn — Figma #727c72 darkened to reach 4.5:1 on mint (4.6:1) */
+  --color-mint: #eaf0e9; /* search band, chips, secondary button */
+  --color-sand: #f0eee4; /* "Daha rahat və təhlükəsiz seçim" band */
+  --color-disabled: #e8ebe5; /* disabled button / field, skeleton */
+  --color-vip: #f1f2e6; /* VIP badge background */
+  --color-success: #287247;
+  --color-success-soft: #eaf5ec;
+  --color-warning: #8a5f17; /* darkened from #96691e (Nov 2026): 12 px badge text reaches 5.0:1 on warning-soft */
+  --color-warning-soft: #fbf2dc;
+  --color-danger: #b6443f;
+  --color-danger-soft: #faece9;
+  --color-footer-text: #d6dfd2;
+
+  --shadow-card-hover: 0px 8px 24px 0px rgba(23, 63, 50, 0.1);
+  --shadow-search: 0px 10px 30px 0px rgba(23, 63, 50, 0.08); /* hero search card */
+  --shadow-popover: 0px 16px 40px 0px rgba(23, 63, 50, 0.18); /* listbox and filter popovers */
+  --shadow-header: 0px 6px 20px 0px rgba(23, 63, 50, 0.06); /* header once the page is scrolled */
+
+  /* Radii added for Variant 2 (rounded-option / rounded-panel / rounded-search) */
+  --radius-option: 10px; /* listbox options, header icon buttons */
+  --radius-panel: 14px; /* listbox and popover panels */
+  --radius-search: 18px; /* hero search card */
+
+  /*
+   * Motion. Exit is faster than enter; only transform and opacity move (colour and shadow may fade). Entering and
+   * leaving both decelerate (ease-out): an accelerating exit holds still at the start, when it is being watched.
+   * Everything is switched off or reduced to a fade under prefers-reduced-motion (see the end of this file).
+   */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1); /* enter and exit: decelerate */
+  --dur-fast: 120ms; /* chips, press feedback, the leaving side of a cross-fade */
+  --dur-base: 180ms; /* header state, tab indicator, hiding the header, card hover */
+  --dur-slow: 280ms; /* showing the header */
+  --dur-reveal: 320ms; /* hero entrance, card reveal */
+  --dur-panel-in: 160ms; /* listbox / popover open */
+  --dur-panel-out: 110ms; /* listbox / popover close */
+
+  /* Check mark of an active toggle chip (animate-pop-in; off under reduced motion): from .85, never from nothing */
+  --animate-pop-in: gs-pop-in var(--dur-fast) var(--ease-out);
+  @keyframes gs-pop-in {
+    from {
+      opacity: 0;
+      transform: scale(0.85);
+    }
+  }
+
+  /*
+   * The Dialog / bottom sheet, the favourite heart and the catalogue's chips move with Motion springs (they are
+   * touched, dragged or interrupted); their values live in src/components/motion/springs.ts, next to these tokens.
+   */
+
+  /* A number that just changed (the filter sheet's «N elanı göstər»): a quick blur-in. Off under reduced motion. */
+  --animate-count-in: gs-count-in var(--dur-base) var(--ease-out);
+  @keyframes gs-count-in {
+    from {
+      opacity: 0;
+      filter: blur(2px);
+    }
+  }
+
+  /*
+   * Home hero entrance (first paint). The heading only rises (it is the LCP element and stays fully opaque); the
+   * search card and the categories fade up. `backwards` holds the start frame during a stagger delay and drops the
+   * transform afterwards, so no stacking context or containing block is left behind. It plays once per page load
+   * (html[data-hero-seen], set by HeroSearchCard). Off under reduced motion.
+   */
+  --animate-rise: gs-rise var(--dur-reveal) var(--ease-out) backwards;
+  --animate-fade-up: gs-fade-up var(--dur-reveal) var(--ease-out) backwards;
+  @keyframes gs-rise {
+    from {
+      transform: translateY(8px);
+    }
+  }
+  @keyframes gs-fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+  }
+
+  --breakpoint-xs: 26rem;
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+    /* No grey flash over tapped controls: every control has its own press state (:active scale or fade). */
+    -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    @apply bg-cream font-sans text-ink antialiased;
+    font-feature-settings: 'cv11';
+    line-height: normal;
+  }
+  button,
+  [role='button'] {
+    cursor: pointer;
+  }
+  button:disabled {
+    cursor: not-allowed;
+  }
+  /* Controls are not content: a long press on a phone must not select their labels (chips, tabs, options). */
+  button,
+  [role='button'],
+  [role='option'],
+  label:has(> input[type='radio']) {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  /* Controls never wait for a double-tap zoom: the tap fires at once (pinch zoom still works). */
+  :is(a, button, label, summary, [role='button'], [role='option'], [role='switch']) {
+    touch-action: manipulation;
+  }
+  /*
+   * Text links have no press state of their own: they dim while pressed, in place of the tap highlight. Links styled
+   * as buttons or chips (an `active:` class) and links stretched over a card (the card scales) keep theirs.
+   */
+  :where(a:not([class*='active:'], [class*='after:inset-0'])):active {
+    opacity: 0.7;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-olive);
+    outline-offset: 2px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+  }
+}
+
+/*
+ * Phones: while the software keyboard is up (a text field has focus), the bars fixed to the bottom of the screen —
+ * the bottom nav, the posting buttons, the listing's contact bar, the promotion checkout bar — step aside like a
+ * native tab bar, so none of them sits on the keyboard or over the field being typed in. The form's own return key
+ * («Davam et», «Axtar») still submits. Touch screens under 768 px only: that is where these bars are fixed.
+ */
+@media (pointer: coarse) and (width < 48rem) {
+  html:has(:is(input:not([type='checkbox'], [type='radio'], [type='range'], [type='file'], [type='button'], [type='submit']), textarea):focus)
+    .gs-keyboard-aside {
+    visibility: hidden;
+  }
+}
+
+/*
+ * Focus is never hidden under the sticky header or the bars fixed to the bottom (WCAG 2.4.11): the browser scrolls a
+ * control that takes focus into the part of the window they leave free. Bottom: the bottom nav or the posting bar
+ * (≈ 90 px), the listing / service contact bar above the nav (≈ 155 px), the promotion checkout bar above the nav.
+ */
+@layer base {
+  html {
+    scroll-padding-top: 72px;
+  }
+  @media (width >= 48rem) {
+    html {
+      scroll-padding-top: 92px;
+    }
+  }
+  @media (width < 48rem) {
+    html:has(.gs-keyboard-aside) {
+      scroll-padding-bottom: calc(var(--gs-bottom-ui, 104px) + env(safe-area-inset-bottom, 0px));
+    }
+    html:has([data-bottom-bar='contact']) {
+      --gs-bottom-ui: 172px;
+    }
+    html:has([data-bottom-bar='checkout']) {
+      --gs-bottom-ui: 236px;
+    }
+  }
+}
+
+/*
+ * Catalogue sidebar (useStickySide sets --side-h): one that fits the window sticks 16 px under the 76 px header;
+ * a taller one scrolls with the page, then sticks by its bottom edge. No inner scroll area, so its Listbox panels
+ * are never clipped.
+ */
+@utility sticky-side {
+  position: sticky;
+  top: min(92px, calc(100dvh - var(--side-h, 0px) - 16px));
+}
+
+@layer utilities {
+  /*
+   * Page gutter used by every Figma frame: 20 px @390, 28 px @768, 64 px @1440. With viewport-fit=cover (layout.tsx)
+   * a phone in landscape draws under the notch, so the gutter grows to the safe-area inset when that is larger.
+   */
+  .page-x {
+    --page-x: 1.25rem;
+    padding-left: max(var(--page-x), env(safe-area-inset-left, 0px));
+    padding-right: max(var(--page-x), env(safe-area-inset-right, 0px));
+    @media (width >= 48rem) {
+      --page-x: 1.75rem;
+    }
+    @media (width >= 80rem) {
+      --page-x: 4rem;
+    }
+  }
+  .scrollbar-none {
+    scrollbar-width: none;
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/*
+ * Floating panels (Listbox, filter popovers — src/components/ui/Popover.tsx). A panel enters with
+ * data-state="open" from @starting-style and leaves with data-state="closed" (faster); the component unmounts or
+ * hides it once the exit is over. It grows from its trigger's corner: top left, or top right when it is aligned to
+ * the trigger's end. Opened or closed from the keyboard (data-instant) it appears and goes at once.
+ * Reduced motion: opacity only.
+ */
+@layer components {
+  .gs-panel {
+    transform-origin: top left;
+    transition-property: opacity, transform;
+    transition-duration: var(--dur-panel-in);
+    transition-timing-function: var(--ease-out);
+  }
+  .gs-panel[data-align='end'] {
+    transform-origin: top right;
+  }
+  .gs-panel[data-state='closed'] {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+    transition-duration: var(--dur-panel-out);
+  }
+  .gs-panel[data-instant] {
+    transition-duration: 0s;
+  }
+  @starting-style {
+    .gs-panel[data-state='open'] {
+      opacity: 0;
+      transform: translateY(-4px) scale(0.98);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .gs-panel {
+      transition-property: opacity;
+    }
+    .gs-panel[data-state='closed'] {
+      transform: none;
+    }
+    @starting-style {
+      .gs-panel[data-state='open'] {
+        transform: none;
+      }
+    }
+  }
+}
+
+/*
+ * Home header on scroll (SiteHeader variant="home", useScrollHeader). Its height never changes; it only turns
+ * translucent with a shadow (data-scrolled) and slides out of view (data-hidden): back in over --dur-slow, away
+ * over --dur-base, both decelerating. Reduced motion: no slide, it fades out and in over --dur-fast.
+ */
+@layer components {
+  .gs-header {
+    background-color: var(--color-surface);
+    box-shadow: inset 0 -1px 0 var(--color-line);
+    transition-property: transform, background-color, box-shadow;
+    transition-duration: var(--dur-slow), var(--dur-base), var(--dur-base);
+    transition-timing-function: var(--ease-out);
+  }
+  .gs-header[data-scrolled] {
+    background-color: color-mix(in oklab, var(--color-surface) 95%, transparent);
+    backdrop-filter: blur(12px);
+    box-shadow:
+      inset 0 -1px 0 var(--color-line),
+      var(--shadow-header);
+  }
+  .gs-header[data-hidden] {
+    transform: translateY(-100%);
+    transition-duration: var(--dur-base);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .gs-header {
+      transition-property: opacity, background-color, box-shadow;
+      transition-duration: var(--dur-fast);
+    }
+    .gs-header[data-hidden] {
+      transform: none;
+      opacity: 0;
+      pointer-events: none;
+    }
+  }
+}
+
+/*
+ * Catalogue bar below 1280 px («Filtrlər (n)», sort, view): sticks under the header (58 px, 76 px from md) and
+ * slides up into its place while the header is hidden, with the header's timing. A transform, so nothing shifts.
+ * Reduced motion: the header only fades and keeps its place, so the bar stays put.
+ */
+@layer components {
+  .gs-catalog-bar {
+    position: sticky;
+    top: 58px;
+    z-index: 30;
+    transition: transform var(--dur-slow) var(--ease-out);
+  }
+  :root:has(.gs-header[data-hidden]) .gs-catalog-bar {
+    transform: translateY(-58px);
+    transition-duration: var(--dur-base);
+  }
+  @media (width >= 48rem) {
+    .gs-catalog-bar {
+      top: 76px;
+    }
+    :root:has(.gs-header[data-hidden]) .gs-catalog-bar {
+      transform: translateY(-76px);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .gs-catalog-bar,
+    :root:has(.gs-header[data-hidden]) .gs-catalog-bar {
+      transform: none;
+      transition: none;
+    }
+  }
+}
+
+/*
+ * Scroll reveal of card grids (useRevealOnce + Reveal): items below the fold start 16 px low and transparent and
+ * come in once, 60 ms apart. Reduced motion: shown at once, no fade.
+ */
+@layer components {
+  [data-reveal] > .gs-reveal-item {
+    transition:
+      opacity var(--dur-reveal) var(--ease-out),
+      transform var(--dur-reveal) var(--ease-out);
+    transition-delay: calc(var(--i, 0) * 60ms);
+  }
+  [data-reveal='pending'] > .gs-reveal-item {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    [data-reveal] > .gs-reveal-item {
+      opacity: 1;
+      transform: none;
+      transition: none;
+    }
+  }
+}
+
+/*
+ * «Elan yerləşdir» step change (PostingWizard, stepMotion.ts): the new step's heading and form come 12 px in from the
+ * side the user is heading to (forward: from the right, back: from the left) and fade in; moving forward, the step's
+ * progress segment fills from the left. Only on a step change, never on a first load or a reload. `backwards` drops
+ * the transform once done, so the fixed phone button bar is never held by it. Reduced motion: a short fade, no fill.
+ */
+@layer components {
+  .gs-step[data-dir='forward'] {
+    animation: gs-step-forward var(--dur-base) var(--ease-out) backwards;
+  }
+  .gs-step[data-dir='back'] {
+    animation: gs-step-back var(--dur-base) var(--ease-out) backwards;
+  }
+  .gs-fill {
+    transform-origin: left;
+    animation: gs-fill var(--dur-slow) var(--ease-out) backwards;
+  }
+  @keyframes gs-step-forward {
+    from {
+      opacity: 0;
+      transform: translateX(12px);
+    }
+  }
+  @keyframes gs-step-back {
+    from {
+      opacity: 0;
+      transform: translateX(-12px);
+    }
+  }
+  @keyframes gs-fill {
+    from {
+      transform: scaleX(0);
+    }
+  }
+  @keyframes gs-fade-in {
+    from {
+      opacity: 0;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .gs-step[data-dir] {
+      animation: gs-fade-in var(--dur-fast) var(--ease-out) backwards;
+    }
+    .gs-fill {
+      animation: none;
+    }
+  }
+}
+
+/*
+ * The hero entrance plays once per page load: HeroSearchCard sets html[data-hero-seen] once it has finished, so a
+ * later visit to the home page (client navigation, back/forward cache) shows the hero at rest. In the utilities
+ * layer, so its higher specificity outranks the animate-* utilities.
+ */
+@layer utilities {
+  html[data-hero-seen] :is(.animate-rise, .animate-fade-up) {
+    animation: none;
+  }
+}
+
+/*
+ * Before hydration the header and the private pages' loading frames render both session variants; the
+ * pre-hydration script (src/state/bootstrap.ts) marks <html> so only the right one is painted.
+ */
+html[data-auth='user'] .auth-guest,
+html:not([data-auth='user']) .auth-user,
+html[data-banner='dismissed'] .demo-banner,
+html[data-favorites='none'] .favorites-some,
+html:not([data-favorites='none']) .favorites-none {
+  display: none !important;
+}
+.auth-user-name::before {
+  content: var(--gs-user-name, '');
+}

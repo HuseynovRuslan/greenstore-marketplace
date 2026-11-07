@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="az">
+<head>
+<meta charset="utf-8">
+<title>Ana səhifə, telefon</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+.m2,.m2 *{box-sizing:border-box}
+.m2 button,.m2 input,.m2 select{font-family:inherit}
+.m2 :focus-visible{outline:2px solid #173f32;outline-offset:2px}
+.m2 .hs{scrollbar-width:none}
+.m2 .hs::-webkit-scrollbar{display:none}
+.m2 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+</style>
+</helmet>
+<div class="m2" style="width:390px; height:844px; position:relative; overflow:hidden; background:#fafaf6; font-family:'Inter', 'Segoe UI', Arial, sans-serif; font-size:15px; line-height:1.45; color:#20352b">
+
+<div style="position:absolute; inset:0 0 78px 0; overflow-y:auto" class="hs">
+
+<header style="height:58px; display:flex; align-items:center; justify-content:space-between; padding:0 4px 0 16px; background:#ffffff; border-bottom:1px solid #dee3d9">
+<a href="#ana" aria-label="GreenStore, ana səhifə" style="display:flex; align-items:center; gap:10px; color:#173f32; text-decoration:none">
+<svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"></path><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"></path></svg>
+<span style="font-size:22px; line-height:1">GreenStore</span>
+</a>
+<div style="display:flex">
+<a href="#secilmisler" aria-label="Seçilmişlər" style="width:44px; height:44px; display:flex; align-items:center; justify-content:center; color:#20352b"><svg aria-hidden="true" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path></svg></a>
+<button type="button" aria-label="Menyunu aç" style="width:44px; height:44px; display:flex; align-items:center; justify-content:center; padding:0; border:0; background:transparent; color:#20352b; cursor:pointer"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"></path></svg></button>
+</div>
+</header>
+
+<section aria-labelledby="mh1" style="display:flex; flex-direction:column; gap:14px; padding:18px 16px 16px; background:#eaf0e9">
+<div style="display:flex; flex-direction:column; gap:6px">
+<h1 id="mh1" style="margin:0; font-size:25px; line-height:1.15; font-weight:600; letter-spacing:-0.015em; color:#173f32; text-wrap:balance">Azərbaycanda bitki və bağ elanları</h1>
+<p style="margin:0; font-size:15px; line-height:1.45; color:#4f5a51">Satıcı ilə birbaşa əlaqə saxlayın.</p>
+</div>
+
+<div style="background:#ffffff; border:1px solid #d3dccf; border-radius:16px; box-shadow:0 8px 24px rgba(23,63,50,.07)">
+<div role="group" aria-label="Elan növü" style="display:flex; padding:2px 8px 0; border-bottom:1px solid #e6ebe2">
+<sc-for list="{{ tabs }}" as="t" hint-placeholder-count="3">
+<button type="button" aria-pressed="{{ t.pressed }}" onClick="{{ t.pick }}" style="flex:1 1 0; min-width:0; height:44px; border:0; border-bottom:2px solid {{ t.line }}; margin-bottom:-1px; background:transparent; cursor:pointer; font-size:14px; font-weight:600; color:{{ t.fg }}">{{ t.label }}</button>
+</sc-for>
+</div>
+<form role="search" aria-label="Elan axtarışı" onSubmit="{{ noop }}" style="display:flex; flex-direction:column; gap:8px; padding:10px">
+<label for="mq" style="height:48px; display:flex; align-items:center; gap:10px; padding:0 12px; background:#fafaf6; border:1px solid #dee3d9; border-radius:10px; cursor:text">
+<svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#646d64" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg>
+<span class="sr">Axtarış sözü</span>
+<input id="mq" type="search" placeholder="{{ placeholder }}" style="flex:1 1 auto; width:100%; min-width:0; border:0; outline:none; background:transparent; font-size:16px; color:#20352b">
+</label>
+<div style="display:flex; gap:8px">
+<label for="mcity" style="flex:1 1 auto; min-width:0; height:48px; display:flex; align-items:center; gap:8px; padding-left:12px; background:#fafaf6; border:1px solid #dee3d9; border-radius:10px">
+<svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#646d64" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 4.99-5.54 10.19-7.4 11.8a1 1 0 0 1-1.2 0C9.54 20.19 4 14.99 4 10a8 8 0 0 1 16 0"></path><circle cx="12" cy="10" r="3"></circle></svg>
+<span class="sr">Şəhər</span>
+<select id="mcity" style="flex:1 1 auto; min-width:0; height:44px; border:0; background:transparent; font-size:15px; font-weight:500; color:#20352b">
+<option>Bütün şəhərlər</option><option>Bakı</option><option>Abşeron</option><option>Sumqayıt</option><option>Gəncə</option><option>Şəki</option><option>Quba</option><option>Lənkəran</option>
+</select>
+</label>
+<button type="submit" style="flex:0 0 auto; height:48px; padding:0 24px; border:0; border-radius:10px; background:#173f32; color:#ffffff; font-size:16px; font-weight:600; cursor:pointer">Axtar</button>
+</div>
+</form>
+</div>
+
+<div class="hs" role="group" aria-label="Filtrlər" style="display:flex; gap:8px; overflow-x:auto; margin:0 -16px; padding:0 16px">
+<button type="button" style="flex:0 0 auto; height:40px; display:flex; align-items:center; gap:7px; padding:0 14px; border:1px solid #173f32; border-radius:20px; background:#ffffff; color:#173f32; font-size:14px; font-weight:600; cursor:pointer"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12"></path><circle cx="16" cy="6" r="2"></circle><circle cx="10" cy="12" r="2"></circle><circle cx="18" cy="18" r="2"></circle></svg>Filtrlər<span style="display:{{ countShow }}; min-width:20px; height:20px; align-items:center; justify-content:center; padding:0 6px; border-radius:10px; background:#173f32; color:#ffffff; font-size:12px">{{ activeCount }}</span></button>
+<sc-for list="{{ chips }}" as="ch" hint-placeholder-count="5">
+<button type="button" aria-pressed="{{ ch.pressed }}" onClick="{{ ch.click }}" style="flex:0 0 auto; height:40px; display:flex; align-items:center; gap:6px; padding:0 14px; border:1px solid {{ ch.bd }}; border-radius:20px; background:{{ ch.bg }}; color:{{ ch.fg }}; font-size:14px; font-weight:500; white-space:nowrap; cursor:pointer"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="display:{{ ch.checkShow }}"><path d="M20 6 9 17l-5-5"></path></svg>{{ ch.text }}<svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="display:{{ ch.caretShow }}"><path d="m6 9 6 6 6-6"></path></svg></button>
+</sc-for>
+</div>
+</section>
+
+<h2 class="sr">Kateqoriyalar</h2>
+<div class="hs" style="display:flex; gap:4px; overflow-x:auto; padding:16px 10px 14px; background:#eaf0e9; border-top:1px solid #d8e1d3">
+<sc-for list="{{ cats }}" as="c" hint-placeholder-count="5">
+<button type="button" aria-pressed="{{ c.pressed }}" onClick="{{ c.pick }}" style="flex:0 0 78px; display:flex; flex-direction:column; align-items:center; gap:6px; padding:2px; border:0; background:transparent; cursor:pointer">
+<span aria-hidden="true" style="width:48px; height:48px; display:flex; align-items:center; justify-content:center; border-radius:50%; border:1px solid {{ c.ring }}; background:{{ c.bg }}; color:{{ c.fg }}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="{{ c.d }}"></path></svg></span>
+<span style="min-height:34px; text-align:center; font-size:12px; font-weight:600; line-height:1.4; color:#173f32">{{ c.name }}</span>
+<span style="font-size:12px; color:#646d64">{{ c.count }}</span>
+</button>
+</sc-for>
+</div>
+
+<div style="display:flex; align-items:center; justify-content:space-between; padding:14px 16px 4px">
+<h2 style="margin:0; font-size:18px; font-weight:600; color:#173f32">Bağ vitrini</h2>
+<a href="#vitrin-hamisi" style="height:44px; display:flex; align-items:center; font-size:14px; font-weight:600; color:#173f32; text-decoration:none">Hamısı</a>
+</div>
+<div style="display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:10px; padding:0 16px 20px">
+<sc-for list="{{ cards }}" as="it" hint-placeholder-count="4">
+<article style="display:flex; flex-direction:column; gap:8px; padding:8px; background:#ffffff; border:1px solid #dee3d9; border-radius:12px; min-width:0">
+<div style="position:relative">
+<img src="{{ it.img }}" alt="{{ it.title }}" style="display:block; width:100%; max-width:100%; aspect-ratio:1 / 1; object-fit:cover; border-radius:8px">
+<span style="position:absolute; top:6px; left:6px; padding:3px 7px; border-radius:5px; background:#f1f2e6; color:#646b3b; font-size:12px; font-weight:600">Vitrin</span>
+<button type="button" aria-label="{{ it.favLabel }}" aria-pressed="{{ it.fav }}" onClick="{{ it.toggle }}" style="position:absolute; top:0; right:0; width:44px; height:44px; display:flex; align-items:center; justify-content:center; padding:0; border:0; background:transparent; cursor:pointer"><span style="width:30px; height:30px; display:flex; align-items:center; justify-content:center; border-radius:50%; background:rgba(255,255,255,.92)"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="{{ it.heartFill }}" stroke="#173f32" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path></svg></span></button>
+</div>
+<div style="display:flex; flex-direction:column; gap:1px; padding:0 2px 2px; min-width:0">
+<span style="font-size:17px; font-weight:700; line-height:1.25; color:#173f32">{{ it.price }}</span>
+<span style="font-size:13px; font-weight:600; line-height:1.3; color:#20352b; white-space:nowrap; overflow:hidden; text-overflow:ellipsis">{{ it.title }}</span>
+<span style="font-size:12px; line-height:1.35; color:#646d64">{{ it.city }}</span>
+</div>
+</article>
+</sc-for>
+</div>
+</div>
+
+<nav aria-label="Mobil naviqasiya" style="position:absolute; left:0; right:0; bottom:0; height:78px; display:grid; grid-template-columns:repeat(5, minmax(0, 1fr)); align-items:start; padding:8px 4px 0; background:#ffffff; border-top:1px solid #dee3d9">
+<a href="#ana" aria-current="page" style="height:52px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; color:#173f32; text-decoration:none; font-size:11px; font-weight:700"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"></path><path d="M3 10a2 2 0 0 1 .71-1.53l7-6a2 2 0 0 1 2.58 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>Ana səhifə</a>
+<a href="#axtaris" style="height:52px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; color:#646d64; text-decoration:none; font-size:11px"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg>Axtarış</a>
+<a href="#elan-yerlesdir" style="height:52px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; color:#646d64; text-decoration:none; font-size:11px"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v8M8 12h8"></path></svg>Elan yerləşdir</a>
+<a href="#secilmisler" style="height:52px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; color:#646d64; text-decoration:none; font-size:11px"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path></svg>Seçilmişlər</a>
+<a href="#profil" style="height:52px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; color:#646d64; text-decoration:none; font-size:11px"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"></path></svg>Profil</a>
+</nav>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    var self = this;
+    var s = this.state || {};
+    var tab = s.tab || 'all';
+    var f = s.f || {};
+    var favs = s.favs || {};
+    function set(p) { self.setState(p); }
+    function setF(id, v) { var n = Object.assign({}, f); if (v === null) { delete n[id]; } else { n[id] = v; } set({ f: n }); }
+
+    var tabs = [['all', 'Hamısı'], ['mehsul', 'Məhsullar'], ['xidmet', 'Xidmətlər']].map(function (t) {
+      var on = tab === t[0];
+      return { label: t[1], pressed: on, line: on ? '#173f32' : 'transparent', fg: on ? '#173f32' : '#4f5a51', pick: function () { set({ tab: t[0] }); } };
+    });
+    var placeholder = tab === 'xidmet' ? 'Məsələn, çim salınması' : 'Məsələn, zeytun ağacı';
+
+    var CATS = [
+      ['Ağaclar', '1 240', 'M12 3a6 6 0 1 1 0 12 6 6 0 0 1 0-12zM12 15v6M9 21h6'],
+      ['Kollar', '860', 'M3.5 17h17a3.5 3.5 0 0 0-2.8-5.6A5.7 5.7 0 0 0 7.2 10a3.8 3.8 0 0 0-3.7 7zM12 17v4'],
+      ['Güllər və çiçəklər', '530', 'M7 5l2.5 2.5L12 4l2.5 3.5L17 5v4a5 5 0 0 1-10 0zM12 14v7M12 18c-1.8-1.8-3.6-2.4-5.5-2.2'],
+      ['Otaq bitkiləri', '410', 'M7 14h10l-1.4 7H8.4zM12 14V9M12 9c0-3 2-5 5-5 0 3-2 5-5 5zM12 11.5c0-2.5-1.8-4-4.5-4 0 2.5 1.8 4 4.5 4z'],
+      ['Fidan və toxum', '290', 'M12 20v-7M12 13c0-4 2.8-6 7-6 0 4-2.8 6-7 6zM12 15c0-3-2.2-5-6-5 0 3 2.2 5 6 5zM5 20h14'],
+      ['Rulon çəmən', '75', 'M7 8h10a4 4 0 0 1 0 8H7a4 4 0 0 1 0-8zM7 10.2a1.8 1.8 0 1 1 0 3.6 1.8 1.8 0 0 1 0-3.6zM11 12h6'],
+      ['Gübrə və torpaq', '180', 'M8 3h8l-1 3 2 3v11a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1V9l2-3zM10 17c0-2.6 1.6-4.2 4.2-4.2 0 2.6-1.6 4.2-4.2 4.2z'],
+      ['Bağ alətləri', '220', 'M13 11 4 20M13 11c1-4.2 4-6.8 7.5-7.5-.6 3.4-3.3 6.5-7.5 7.5z'],
+      ['Suvarma', '140', 'M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11zM9.5 14.5a2.5 2.5 0 0 0 2.5 2.5'],
+      ['Bağ xidmətləri', '95', 'M10 3.5a3.5 3.5 0 1 1 0 7 3.5 3.5 0 0 1 0-7zM3.5 20c.8-4 3.4-6.2 6.5-6.2 1.6 0 3 .5 4.1 1.5M14.5 20.5c0-3.6 2.2-5.8 6-6 .2 3.8-2 6-6 6z']
+    ];
+    var cats = CATS.map(function (c, i) {
+      var on = f.cat === i;
+      return { name: c[0], count: c[1], d: c[2], pressed: on, bg: on ? '#173f32' : '#ffffff', fg: on ? '#ffffff' : '#173f32', ring: on ? '#173f32' : '#d3dccf', pick: function () { setF('cat', on ? null : i); } };
+    });
+
+    var CH = [
+      { id: 'cat', label: 'Kateqoriya' },
+      { id: 'price', label: 'Qiymət' },
+      { id: 'height', label: 'Hündürlük', productOnly: true },
+      { id: 'delivery', label: 'Çatdırılma', toggle: true },
+      { id: 'planting', label: 'Əkin daxil', toggle: true }
+    ];
+    var chips = CH.filter(function (c) { return !(c.productOnly && tab === 'xidmet'); }).map(function (c) {
+      var has = f[c.id] !== undefined;
+      var text = c.label;
+      if (c.id === 'cat' && has) text = CATS[f.cat][0];
+      return {
+        text: text, pressed: c.toggle ? (has ? 'true' : 'false') : undefined,
+        bg: has ? '#173f32' : '#ffffff', fg: has ? '#ffffff' : '#20352b', bd: has ? '#173f32' : '#cfd8cc',
+        checkShow: c.toggle && has ? 'inline' : 'none', caretShow: c.toggle ? 'none' : 'inline',
+        click: function () { if (c.toggle) setF(c.id, has ? null : true); else if (c.id === 'cat' && has) setF('cat', null); }
+      };
+    });
+    var activeCount = Object.keys(f).length;
+
+    var DATA = [
+      { id: 'a', img: '/_blob/134669bc2502fa9c3f63e98c7e913f97', price: '145 ₼', title: 'Zeytun ağacı', city: 'Abşeron' },
+      { id: 'b', img: '/_blob/35f7b19f5f26009b164dc1d32ac24975', price: '85 ₼', title: 'Mavi küknar', city: 'Bakı' },
+      { id: 'c', img: '/_blob/f191c80467deef0a071e696dca3c7108', price: '120 ₼', title: 'Yapon ağcaqayını', city: 'Quba' },
+      { id: 'd', img: '/_blob/15471483630c942b7185325daf7e8af3', price: '65 ₼', title: 'Limon ağacı', city: 'Lənkəran' }
+    ];
+    var cards = DATA.map(function (x) {
+      var fav = !!favs[x.id];
+      return Object.assign({}, x, {
+        fav: fav, favLabel: fav ? 'Seçilmişlərdən çıxar' : 'Seçilmişlərə əlavə et', heartFill: fav ? '#173f32' : 'none',
+        toggle: function () { var n = Object.assign({}, favs); n[x.id] = !fav; set({ favs: n }); }
+      });
+    });
+
+    return {
+      tabs: tabs, placeholder: placeholder, cats: cats, chips: chips, cards: cards,
+      activeCount: activeCount, countShow: activeCount ? 'inline-flex' : 'none',
+      noop: function (e) { if (e && e.preventDefault) e.preventDefault(); }
+    };
+  }
+}
+</script>
+</body>
+</html>
