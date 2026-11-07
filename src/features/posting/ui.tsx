@@ -226,8 +226,9 @@ export function DraftCard({ draft, cover }: { draft: PostingDraft; cover?: strin
         {cover ? <img src={cover} alt="" className="size-full object-cover" /> : <ImageIcon size={28} strokeWidth={1.6} />}
       </div>
       <div className="flex flex-col gap-[3px] px-1 pb-1">
-        <p className="text-[21px] leading-[1.25] font-bold text-forest tabular-nums">
-          {draft.price || draft.priceType === 'agreement' ? price.amount : '— ₼'}
+        {/* Before a price is written the card says «Qiymət» in muted text, like «Elanın başlığı» below. */}
+        <p className={cn('text-[21px] leading-[1.25] font-bold tabular-nums', draft.price || draft.priceType === 'agreement' ? 'text-forest' : 'text-muted')}>
+          {draft.price || draft.priceType === 'agreement' ? price.amount : 'Qiymət'}
           {price.unit && draft.price && <span className="ml-1 text-sm font-normal text-muted">{price.unit}</span>}
         </p>
         <p className={cn('line-clamp-2 text-[15px] leading-[1.35] font-semibold break-words', draft.title ? 'text-ink' : 'text-muted')}>

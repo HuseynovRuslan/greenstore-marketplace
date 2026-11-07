@@ -40,22 +40,23 @@ export function SellerContactButtons({ seller }: { seller: Seller }) {
       )}
       {!phone && <p className="text-sm leading-[1.5] text-muted">Əlaqə nömrəsi göstərilmir.</p>}
       {(seller.instagram || seller.website) && (
-        <div className="flex flex-wrap gap-x-4">
+        // A long handle or address breaks anywhere rather than running out of the card (break-ui, Nov 2026).
+        <div className="flex min-w-0 flex-wrap gap-x-4">
           {seller.instagram && (
             <a
               href={`https://instagram.com/${seller.instagram}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex min-h-11 items-center gap-1.5 text-sm font-medium text-forest hover:underline"
+              className="inline-flex min-h-11 max-w-full min-w-0 items-center gap-1.5 text-sm font-medium wrap-anywhere text-forest hover:underline"
             >
-              <AtSign aria-hidden size={16} strokeWidth={1.8} />
-              {seller.instagram}
+              <AtSign aria-hidden size={16} strokeWidth={1.8} className="shrink-0" />
+              <span className="min-w-0">{seller.instagram}</span>
             </a>
           )}
           {seller.website && (
-            <a href={seller.website} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center gap-1.5 text-sm font-medium text-forest hover:underline">
-              <Globe aria-hidden size={16} strokeWidth={1.8} />
-              {seller.website.replace(/^https?:\/\//, '')}
+            <a href={seller.website} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 max-w-full min-w-0 items-center gap-1.5 text-sm font-medium wrap-anywhere text-forest hover:underline">
+              <Globe aria-hidden size={16} strokeWidth={1.8} className="shrink-0" />
+              <span className="min-w-0">{seller.website.replace(/^https?:\/\//, '')}</span>
             </a>
           )}
         </div>

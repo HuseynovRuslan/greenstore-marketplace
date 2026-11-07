@@ -33,7 +33,7 @@ export function ServiceTile({ service, className }: { service: Service; classNam
           </Link>
         </h3>
         <p className="mt-auto flex min-w-0 items-center gap-1 pt-0.5 text-xs leading-[1.4] text-muted md:text-[13px]">
-          <span className="truncate">
+          <span className="truncate" title={`${providerName(service.providerId)} · ${service.areas.join(', ')}`}>
             {providerName(service.providerId)} · {service.areas.join(', ')}
           </span>
           {service.verified && <BadgeCheck aria-label="Təsdiqlənmiş" role="img" size={15} strokeWidth={2} className="shrink-0 text-success" />}

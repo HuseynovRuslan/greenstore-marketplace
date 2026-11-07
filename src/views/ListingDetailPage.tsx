@@ -254,8 +254,8 @@ export function ListingDetail({ listing, seller, category, others, similar, mode
                   <div className="flex flex-col gap-2">
                     <h3 className="text-sm leading-[1.4] font-semibold text-ink">Satıcının məsləhəti</h3>
                     <ul className="flex flex-col gap-2 text-sm leading-[1.55] text-ink">
-                      {listing.careTips.map((tip) => (
-                        <li key={tip} className="flex gap-2.5">
+                      {listing.careTips.map((tip, i) => (
+                        <li key={i} className="flex gap-2.5">
                           <Sprout aria-hidden size={16} strokeWidth={1.8} className="mt-0.5 shrink-0 text-olive" />
                           {tip}
                         </li>
@@ -269,8 +269,8 @@ export function ListingDetail({ listing, seller, category, others, similar, mode
             {listing.description && listing.description.length > 0 && (
               <Section title="Təsvir" id="tesvir">
                 <div className="flex max-w-[68ch] flex-col gap-3 text-[15px] leading-[1.6] break-words text-ink">
-                  {listing.description.map((p) => (
-                    <p key={p}>{p}</p>
+                  {listing.description.map((p, i) => (
+                    <p key={i}>{p}</p>
                   ))}
                 </div>
               </Section>
@@ -334,7 +334,7 @@ export function ListingDetail({ listing, seller, category, others, similar, mode
         )}
       </div>
 
-      {!preview && <MobileContactBar info={contact} price={price.unit ? `${price.amount} ${price.unit}` : price.amount} />}
+      {!preview && <MobileContactBar info={contact} amount={price.amount} unit={price.unit} />}
     </RevealProvider>
   )
 }

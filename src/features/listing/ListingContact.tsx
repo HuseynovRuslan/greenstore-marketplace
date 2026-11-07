@@ -62,7 +62,7 @@ export function ContactButtons({ info, layout = 'panel' }: { info: ContactInfo; 
       {localPhone(phone)}
     </a>
   ) : (
-    <Button onClick={onReveal} className={bar ? 'w-full min-w-0 px-2' : 'w-full'} icon={<Phone aria-hidden size={18} strokeWidth={1.8} />}>
+    <Button onClick={onReveal} className={bar ? 'w-full min-w-0 px-2' : 'w-full'} icon={<Phone aria-hidden size={18} strokeWidth={1.8} className={cn(bar && 'max-[359px]:hidden')} />}>
       {bar ? 'Zəng et' : 'Nömrəni göstər'}
     </Button>
   )
@@ -96,14 +96,18 @@ export function ContactButtons({ info, layout = 'panel' }: { info: ContactInfo; 
  * Phones (< 768 px): price and the contact buttons in a bar that stays above the bottom navigation while the page
  * scrolls (`sticky` inside the page, so it settles above the footer at the end and never covers content).
  */
-export function MobileContactBar({ info, price }: { info: ContactInfo; price: string }) {
+export function MobileContactBar({ info, amount, unit }: { info: ContactInfo; amount: string; unit?: string }) {
   return (
     <div
       role="region"
       aria-label="Satıcı ilə əlaqə"
-      className="gs-keyboard-aside sticky bottom-[calc(86px+env(safe-area-inset-bottom,0px))] z-30 flex w-full items-center gap-3 border-t border-line bg-surface/95 px-5 py-2.5 backdrop-blur-md md:hidden"
+      className="gs-keyboard-aside sticky bottom-[calc(86px+env(safe-area-inset-bottom,0px))] z-30 flex w-full items-center gap-2.5 border-t border-line bg-surface/95 px-5 py-2.5 backdrop-blur-md md:hidden"
     >
-      <p className="max-w-[36%] min-w-0 shrink truncate text-[17px] leading-[1.2] font-bold text-forest tabular-nums">{price}</p>
+      {/* A price is never cut: the amount keeps its width (15 px under 360 px), the unit sits under it. */}
+      <p className="flex shrink-0 flex-col tabular-nums">
+        <span className="text-[17px] leading-[1.2] font-bold whitespace-nowrap text-forest max-[359px]:text-[15px]">{amount}</span>
+        {unit && <span className="text-xs leading-[1.3] whitespace-nowrap text-muted">{unit}</span>}
+      </p>
       <ContactButtons info={info} layout="bar" />
     </div>
   )

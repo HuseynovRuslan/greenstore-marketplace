@@ -61,6 +61,17 @@ describe('listing facts', () => {
     expect(responseLabel(30)).toBe('Adətən 30 dəqiqə ərzində cavab verir')
     expect(responseLabel(180)).toBe('Adətən 3 saat ərzində cavab verir')
   })
+
+  it('survives worst-case seller data (break-ui)', () => {
+    // Quotes, digits and legal forms in business names do not become initials; an empty name still shows something.
+    expect(initials('«Yaşıl Ev» MMC')).toBe('YE')
+    expect(initials('4 Fəsil Bağ')).toBe('FB')
+    expect(initials('   ')).toBe('?')
+    // A reply time of days is not "within a day".
+    expect(responseLabel(1440)).toBe('Adətən bir gün ərzində cavab verir')
+    expect(responseLabel(2 * 24 * 60)).toBe('Adətən 2 gün ərzində cavab verir')
+    expect(responseLabel(0)).toBe('Adətən 1 dəqiqə ərzində cavab verir')
+  })
 })
 
 describe('listing page', () => {

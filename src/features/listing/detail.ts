@@ -14,7 +14,8 @@ import type { Listing, ListingStatus, Spec } from '@/types'
  * them; otherwise every photo the data attaches to the listing, cover first.
  */
 export function listingGallery(listing: Listing): string[] {
-  const dedicated = listing.images.filter((src) => /-gallery-\d+\./.test(src))
+  // The same photo twice (an upload repeated) is shown once: the gallery keys its slides by address.
+  const dedicated = Array.from(new Set(listing.images.filter((src) => /-gallery-\d+\./.test(src))))
   if (dedicated.length) return dedicated
   return Array.from(new Set([listing.cover, ...listing.images].filter(Boolean)))
 }

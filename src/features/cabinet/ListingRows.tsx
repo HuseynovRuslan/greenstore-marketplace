@@ -29,6 +29,7 @@ import { listingPrice } from '@/features/listing/facts'
 import { ownerPreviewPath } from '@/features/listing/ownerPreview'
 import { STEPS, type PostingDraft } from '@/features/posting/draft'
 import { cn, formatDayMonth, formatNumber } from '@/lib/format'
+import { useBrokenImage } from '@/lib/useBrokenImage'
 import type { Listing, ListingStats } from '@/types'
 import { actionsFor, daysLeft, expiryLabel, statusBadges, type CabinetAction } from './model'
 
@@ -40,10 +41,18 @@ const strong = cn(actionClass, 'border-forest bg-forest text-white hover:bg-fore
 /** «Önə çıxar» in the «Önə çıxan» badge colours: an offer, not the one thing to do on every row. */
 const promote = cn(actionClass, 'border-olive/40 bg-vip text-olive-text hover:border-olive')
 
+/** The row's photo; no photo, or one that fails to load, shows the photo icon on mint. */
 function Thumb({ src }: { src?: string }) {
+  const { failed, imgProps } = useBrokenImage()
   return (
     <div className="size-[76px] shrink-0 overflow-hidden rounded-lg bg-mint md:h-[84px] md:w-[112px]">
-      {src ? <img src={src} alt="" loading="lazy" className="size-full object-cover" /> : <span className="flex size-full items-center justify-center text-muted"><ImageIcon aria-hidden size={22} strokeWidth={1.6} /></span>}
+      {src && !failed ? (
+        <img src={src} alt="" loading="lazy" {...imgProps} className="size-full object-cover" />
+      ) : (
+        <span className="flex size-full items-center justify-center text-muted">
+          <ImageIcon aria-hidden size={22} strokeWidth={1.6} />
+        </span>
+      )}
     </div>
   )
 }
@@ -163,13 +172,13 @@ export function ListingRowCard({ listing, stats, now, handlers }: { listing: Lis
           <div className="flex flex-wrap items-center gap-1.5">
             <Badge tone={badge.tone}>{badge.label}</Badge>
             {promo && (
-              <span className="inline-flex items-center gap-1 rounded-[5px] bg-vip px-2 py-[5px] text-xs leading-[normal] font-semibold text-olive-text">
+              <span className="inline-flex items-center gap-1 rounded-[5px] bg-vip px-2 py-[5px] text-xs leading-[normal] font-semibold whitespace-nowrap text-olive-text">
                 <Rocket aria-hidden size={12} strokeWidth={2.2} />
-                {promotionPackage(promo.packageId)?.name} · {formatDayMonth(promo.until)}-dək
+                {promotionPackage(promo.packageId)?.name}
               </span>
             )}
           </div>
-          <h3 className="line-clamp-2 text-[15px] leading-[1.35] font-semibold break-words text-ink">
+          <h3 className="line-clamp-2 text-[15px] leading-[1.35] font-semibold break-words text-ink" title={listing.title}>
             <Link href={href} className="hover:text-forest hover:underline">
               {listing.title}
             </Link>
@@ -218,6 +227,7 @@ export function ListingRowCard({ listing, stats, now, handlers }: { listing: Lis
               </span>
             </>
           )}
+          {promo && <span className="text-olive-text">Reklam {formatDayMonth(promo.until)}-dək</span>}
           {expiry && <span className={cn('font-medium', expiry.soon ? 'text-warning' : 'text-muted')}>{expiry.text}</span>}
         </div>
         <div className="flex flex-wrap gap-2">{actionsFor(listing.status).map((a) => buttons[a])}</div>

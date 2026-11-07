@@ -1,5 +1,6 @@
 import { Fragment } from 'react'
 import Link from 'next/link'
+import { cn } from '@/lib/format'
 
 /** "Ana səhifə / Məhsullar / Ağaclar / Zeytun ağacı" — 12 px / 1.5, muted; the last item is the current page. */
 export function Breadcrumb({ items }: { items: Array<{ label: string; to?: string }> }) {
@@ -13,7 +14,7 @@ export function Breadcrumb({ items }: { items: Array<{ label: string; to?: strin
                 {' / '}
               </li>
             )}
-            <li className="min-w-0">
+            <li className={cn('min-w-0', !item.to && 'max-md:max-w-full max-md:truncate')}>
               {item.to ? (
                 <Link href={item.to} className="hover:text-forest">
                   {item.label}
