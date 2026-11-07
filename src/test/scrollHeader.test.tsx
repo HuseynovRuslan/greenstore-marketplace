@@ -126,7 +126,7 @@ describe('home header search pill', () => {
   function renderHome() {
     render(
       <AppStoreProvider>
-        <SiteHeader variant="home" />
+        <SiteHeader />
         <div id="hero-search">
           <input id="hero-q" aria-label="Axtarış sözü" />
         </div>

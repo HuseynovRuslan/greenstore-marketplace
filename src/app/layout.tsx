@@ -10,6 +10,7 @@ import { PRE_HYDRATION_SCRIPT } from '@/state/bootstrap'
 import { InlineScript } from '@/components/layout/InlineScript'
 import { SkipLink } from '@/components/layout/SkipLink'
 import { MotionProvider } from '@/components/motion/MotionProvider'
+import { ToastProvider } from '@/components/ui/Toast'
 import { siteUrl } from '@/seo/env'
 import { robotsFor } from '@/seo/metadata'
 import { DEFAULT_OG_IMAGE, SITE_DESCRIPTION, SITE_LOCALE, SITE_NAME, SITE_TITLE } from '@/seo/site'
@@ -42,7 +43,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         {/* First Tab stop of every page; each frame's <main id="main"> is its target. */}
         <SkipLink />
         <AppStoreProvider>
-          <MotionProvider>{children}</MotionProvider>
+          <MotionProvider>
+            <ToastProvider>{children}</ToastProvider>
+          </MotionProvider>
         </AppStoreProvider>
       </body>
     </html>

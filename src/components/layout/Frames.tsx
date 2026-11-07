@@ -25,7 +25,7 @@ export function HomeFrame({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-dvh flex-col pb-[calc(86px+env(safe-area-inset-bottom,0px))] md:pb-0">
       <DemoBanner />
-      <SiteHeader variant="home" />
+      <SiteHeader />
       <Main>{children}</Main>
       <SiteFooter />
       <MobileNav />
@@ -33,7 +33,10 @@ export function HomeFrame({ children }: { children: ReactNode }) {
   )
 }
 
-/** Inner public pages: 82 px header + "Yığcam sonluq" (search, detail, services, seller, cabinet…). */
+/**
+ * Inner public pages (catalogue, listing, seller, services, favourites, cabinet…): the same Variant 2 header as the
+ * home page, so the main sections are one click away everywhere, + "Yığcam sonluq".
+ */
 export function MainFrame({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-dvh flex-col pb-[calc(86px+env(safe-area-inset-bottom,0px))] md:pb-0">
@@ -46,7 +49,7 @@ export function MainFrame({ children }: { children: ReactNode }) {
   )
 }
 
-/** Login / registration: header only (Figma "Daxil ol", "Qeydiyyat"). */
+/** Login / registration / password reset: the Variant 2 header, no footer. */
 export function AuthFrame({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-dvh flex-col pb-[calc(86px+env(safe-area-inset-bottom,0px))] md:pb-0">

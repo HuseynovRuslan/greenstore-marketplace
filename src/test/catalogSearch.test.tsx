@@ -39,10 +39,11 @@ describe('header on catalogue pages', () => {
     expect(screen.queryByRole('search')).not.toBeInTheDocument()
   })
 
-  it('keeps the default header with its search on a listing page', () => {
+  it('gives a listing page the same header, with no section marked', () => {
     renderHeader('/elanlar/zeytun-agaci-olea-europaea')
-    expect(screen.queryByRole('navigation', { name: 'Əsas bölmələr' })).not.toBeInTheDocument()
-    expect(screen.getByRole('search')).toBeInTheDocument()
+    const nav = screen.getByRole('navigation', { name: 'Əsas bölmələr' })
+    expect(within(nav).getByRole('link', { name: 'Məhsullar' })).not.toHaveAttribute('aria-current')
+    expect(screen.queryByRole('search')).not.toBeInTheDocument()
   })
 })
 
