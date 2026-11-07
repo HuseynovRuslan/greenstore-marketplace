@@ -57,12 +57,12 @@ export function ContactButtons({ info, layout = 'panel' }: { info: ContactInfo; 
   const bar = layout === 'bar'
   const callable = Boolean(phone) && !phoneHidden
   const call = !callable ? null : revealed && phone ? (
-    <a ref={linkRef} href={telHref(phone)} aria-label={`Zəng et: ${localPhone(phone)}`} className={buttonClass('primary', cn('tabular-nums', bar ? 'min-w-0 flex-1 px-3' : 'w-full text-base'))}>
+    <a ref={linkRef} href={telHref(phone)} aria-label={`Zəng et: ${localPhone(phone)}`} className={buttonClass('primary', cn('tabular-nums', bar ? 'w-full min-w-0 px-2' : 'w-full text-base'))}>
       <Phone aria-hidden size={18} strokeWidth={1.8} />
       {localPhone(phone)}
     </a>
   ) : (
-    <Button onClick={onReveal} className={bar ? 'min-w-0 flex-1 px-3' : 'w-full'} icon={<Phone aria-hidden size={18} strokeWidth={1.8} />}>
+    <Button onClick={onReveal} className={bar ? 'w-full min-w-0 px-2' : 'w-full'} icon={<Phone aria-hidden size={18} strokeWidth={1.8} />}>
       {bar ? 'Zəng et' : 'Nömrəni göstər'}
     </Button>
   )
@@ -72,9 +72,10 @@ export function ContactButtons({ info, layout = 'panel' }: { info: ContactInfo; 
         href={whatsappMessageHref(phone, title)}
         target="_blank"
         rel="noopener noreferrer"
-        className={buttonClass(callable ? 'secondary' : 'primary', bar ? 'min-w-0 flex-1 px-3' : 'w-full')}
+        className={buttonClass(callable ? 'secondary' : 'primary', bar ? 'w-full min-w-0 px-2' : 'w-full')}
       >
-        <MessageCircle aria-hidden size={18} strokeWidth={1.8} />
+        {/* Narrow phones: the word alone, so two buttons and the price fit one row. */}
+        <MessageCircle aria-hidden size={18} strokeWidth={1.8} className={cn(bar && 'max-[419px]:hidden')} />
         {bar ? 'WhatsApp' : 'WhatsApp-a yaz'}
       </a>
     ) : null
@@ -83,7 +84,7 @@ export function ContactButtons({ info, layout = 'panel' }: { info: ContactInfo; 
     return <p className="text-sm leading-[1.5] text-muted">Satıcının əlaqə nömrəsi göstərilmir.</p>
   }
   return (
-    <div className={cn('flex gap-2.5', bar ? 'w-full' : 'flex-col')}>
+    <div className={cn('gap-2.5', bar ? (call && chat ? 'grid min-w-0 flex-1 grid-cols-2' : 'grid min-w-0 flex-1') : 'flex flex-col')}>
       {call}
       {chat}
       {phoneHidden && !bar && <p className="text-xs leading-[1.5] text-muted">Satıcı zəng qəbul etmir — WhatsApp-a yazın.</p>}
@@ -102,7 +103,7 @@ export function MobileContactBar({ info, price }: { info: ContactInfo; price: st
       aria-label="Satıcı ilə əlaqə"
       className="sticky bottom-[calc(86px+env(safe-area-inset-bottom,0px))] z-30 flex w-full items-center gap-3 border-t border-line bg-surface/95 px-5 py-2.5 backdrop-blur-md md:hidden"
     >
-      <p className="max-w-[34%] shrink-0 truncate text-[17px] leading-[1.2] font-bold text-forest tabular-nums">{price}</p>
+      <p className="max-w-[36%] min-w-0 shrink truncate text-[17px] leading-[1.2] font-bold text-forest tabular-nums">{price}</p>
       <ContactButtons info={info} layout="bar" />
     </div>
   )
