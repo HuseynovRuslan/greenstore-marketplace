@@ -110,9 +110,13 @@ export function Lightbox({ images, title, start, onClose }: LightboxProps) {
       </div>
 
       <div className="relative min-h-0 flex-1">
+        {/* Focusable, so a keyboard can scroll a zoomed photo too (← → move between photos on the whole dialog). */}
         <div
           ref={trackRef}
-          className={cn('scrollbar-none flex h-full overscroll-contain', zoomed ? 'overflow-hidden' : 'snap-x snap-mandatory overflow-x-auto')}
+          tabIndex={0}
+          role="group"
+          aria-label="Şəkillər: ← və → ilə keçin"
+          className={cn('scrollbar-none flex h-full overscroll-contain outline-none focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-olive', zoomed ? 'overflow-hidden' : 'snap-x snap-mandatory overflow-x-auto')}
         >
           {images.map((src, i) => (
             <div

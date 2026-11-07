@@ -105,5 +105,9 @@ Update after every commit (newest last).
 | 5 + 6 · Kabinet (statuses, renew/edit/deactivate/delete/promote, stats) + favourites + saved searches | done | 17ba8ae |
 | 7 · Promotion packages (/reklam) with mock checkout; owner strip on the listing page | done | b798bb0 |
 | 8 · Services catalogue and service page + «Usta çağır» | done | f855d5f |
-| 9 · 404, support pages (Kömək, Elan qaydaları, Təhlükəsiz alış, Əlaqə + form, şərtlər, məxfilik), footer links, admin headings | done | (this commit) |
-| 10 · Wrap-up: screenshots, handoff, summary | next | |
+| 9 · 404, support pages (Kömək, Elan qaydaları, Təhlükəsiz alış, Əlaqə + form, şərtlər, məxfilik), footer links, admin headings | done | 8fb1803 |
+| Fix · phone contact bar with worst-case prices (break-ui pass) | done | 2a10775 |
+| 10 · Wrap-up: screenshots (docs/design/pages-v2), handoff (docs/handoff/pages-v2.md), viewer a11y fix | done | (this commit) |
+
+All steps done. Next (not in this pass): messaging, price history, balance/payments, admin layouts, the site-wide
+motion pass, real-device checks — see [pages-v2.md](../handoff/pages-v2.md) → open questions.

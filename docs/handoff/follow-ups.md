@@ -42,3 +42,9 @@ purpose. Kept up to date as steps land; remove an item when it is done.
   listings in client code. The catalogue and home no longer do: client components use the data-free
   `searchUrl.ts`, `taxonomy.ts` and `services/listingSort.ts`. Server-only code uses `searchState.ts` and
   `species.ts`.
+
+## From the pages-v2 pass (Nov 2026)
+
+- Open questions for management and the backend: [pages-v2.md → Open questions](pages-v2.md#open-questions).
+- In dev mode, `notFound()` pages log a React performance-track error («cannot have a negative time stamp»); it is a
+  dev-tooling message, not shown to users. Re-check after the next Next.js update.
