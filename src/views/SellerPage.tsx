@@ -80,7 +80,7 @@ export default function SellerPage({ seller, listingQuery }: { seller: Seller; l
             <RevealablePhone phone={seller.phone} />
             <WhatsAppLink phone={seller.phone} />
             {!seller.phone && <p className="-mt-2 w-full text-xs leading-[1.5] text-muted">Satıcının əlaqə nömrəsi göstərilmir.</p>}
-            <ComplaintButton kind="seller" fullWidth />
+            <ComplaintButton kind="seller" targetId={seller.id} fullWidth />
           </Panel>
         </div>
 

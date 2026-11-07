@@ -165,8 +165,8 @@ export interface UserProfile {
 /** How the price is meant: a fixed price, a price open to bargaining, or no price («Razılaşma yolu ilə»). */
 export type PriceType = 'fixed' | 'negotiable' | 'agreement'
 
-/** What one price buys. Display names live in the frontend (features/posting/options.ts). */
-export type PriceUnit = 'piece' | 'kg' | 'litre' | 'sqm' | 'bag' | 'set' | 'metre'
+/** What one price buys (`hour` and `job` are for services). Display names: features/listing/facts.ts. */
+export type PriceUnit = 'piece' | 'kg' | 'litre' | 'sqm' | 'bag' | 'set' | 'metre' | 'hour' | 'job'
 
 /** Wholesale («topdan») price per unit from a minimum quantity. */
 export interface WholesalePrice {

@@ -14,6 +14,9 @@ site-wide entrance/scroll animation.
 
 ## Order and contents
 
+Order change while building: the **listing page (3) is built before the posting flow (1)**, so the posting preview
+renders the real listing components instead of a look-alike.
+
 ### 0. Foundation
 - Contract additions (types, repository, mock data: plant facts, care tips, wholesale, hours, promotion packages,
   OTP mock, stats) + handoff doc.
@@ -91,5 +94,8 @@ Update after every commit (newest last).
 
 | Step | Status | Commit |
 |---|---|---|
-| Phase 0 inventory, Phase 1 analysis, Phase 2 plan | done | (this commit) |
-| 0 · Contract additions + mock data | in progress | |
+| Phase 0 inventory, Phase 1 analysis, Phase 2 plan | done | 58fbb83 |
+| 0 · Contract additions + mock data | done | e87f2ff |
+| 0 · One header everywhere, shared form controls, toast, share | done | c7bf7e1 |
+| 3 · Listing page (gallery + lightbox, price/wholesale/stock, contact, attributes, care, report) | done | (this commit) |
+| 1 · Posting flow | next | |

@@ -66,7 +66,7 @@ export function listingSpecs(listing: Listing): Spec[] {
 }
 
 /** "Satıcının digər elanları" — the seller's other public listings in the seller page order. */
-export function otherSellerListings(listing: Listing, limit = 3): Listing[] {
+export function otherSellerListings(listing: Listing, limit = 4): Listing[] {
   if (!listing.sellerId) return []
   const own = publicListings.filter((l) => l.sellerId === listing.sellerId && l.id !== listing.id)
   return sortSellerListings(listing.sellerId, own, 'newest').slice(0, limit)

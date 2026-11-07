@@ -36,6 +36,7 @@ export function OwnerListingPreview({ slug }: { slug: string }) {
   return (
     <ListingDetail
       key={listing.id}
+      mode="owner"
       listing={listing}
       seller={sellerById(listing.sellerId)}
       category={categoryById(listing.categoryId)}

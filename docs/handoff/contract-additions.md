@@ -30,7 +30,7 @@ exhaustive `switch`/`Record` code on your side — please check.
 | `expiresAt` | ISO string | Listing lifetime (30 days); «4 gün qalıb» and «Müddəti bitib» in the cabinet |
 | `bumpedAt` | ISO string | Last «İrəli çək»; «Ən yenilər» should sort by `max(publishedAt, bumpedAt)` |
 | `priceType` | `'fixed' \| 'negotiable' \| 'agreement'` | «Qiymət razılaşma ilə», and price-less listings (`price` 0 today — see follow-ups) |
-| `priceUnit` | `'piece' \| 'kg' \| 'litre' \| 'sqm' \| 'bag' \| 'set' \| 'metre'` | «38 ₼ / ədəd», «8 ₼ / kisə», «6 ₼ / m²» |
+| `priceUnit` | `'piece' \| 'kg' \| 'litre' \| 'sqm' \| 'bag' \| 'set' \| 'metre' \| 'hour' \| 'job'` | «38 ₼ / ədəd», «8 ₼ / kisə», «6 ₼ / m²»; services «20 ₼ / saat», «350 ₼ / iş» |
 | `wholesale` | `{ price, minQuantity }` | «Topdan: 32 ₼ / ədəd, 20 ədəddən» |
 | `quantityAvailable` | number | «Stokda: 300 ədəd» |
 | `area` | string | Village / district after the city: «Abşeron, Məhəmmədi qəsəbəsi» |

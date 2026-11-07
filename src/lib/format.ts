@@ -13,6 +13,11 @@ const AZ_MONTHS = [
   'dekabr',
 ]
 
+/** 3 → "mart" (1 = January) */
+export function monthName(month: number): string {
+  return AZ_MONTHS[(month - 1 + 12) % 12]
+}
+
 /** 2480 → "2 480" (thin grouping used throughout the Figma copy) */
 export function formatNumber(value: number): string {
   return Math.round(value)
