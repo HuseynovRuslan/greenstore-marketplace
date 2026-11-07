@@ -9,6 +9,11 @@ export const metadata = privateMetadata('Elan yerləşdir')
 
 type Props = { params: Promise<{ step: string }> }
 
+/** The six steps are static shells (the form is client-side), so they prefetch and open at once. */
+export function generateStaticParams() {
+  return Array.from({ length: STEP_COUNT }, (_, i) => ({ step: String(i + 1) }))
+}
+
 /** /elan-yerlesdir/1…6. Any other step redirects to step 1; a step past the furthest one reached goes back there. */
 export default async function Page({ params }: Props) {
   const { step } = await params

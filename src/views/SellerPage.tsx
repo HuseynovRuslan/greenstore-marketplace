@@ -1,5 +1,4 @@
 import { BadgeCheck, Check, Clock3, MapPin, Search } from 'lucide-react'
-import { ServiceCard } from '@/components/cards/ServiceCard'
 import { ButtonLink } from '@/components/ui/Button'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { ShareButton } from '@/components/ui/ShareButton'
@@ -12,6 +11,7 @@ import { mapHref, offerLabels } from '@/features/seller/hours'
 import { HoursTable, SellerContactButtons } from '@/features/seller/SellerContact'
 import { SellerListings } from '@/features/seller/SellerListings'
 import { Breadcrumb } from '@/features/seller/ui'
+import { ServiceTile } from '@/features/services/ServiceTile'
 import { formatNumber } from '@/lib/format'
 import type { Seller, Service } from '@/types'
 
@@ -139,9 +139,9 @@ export default function SellerPage({ seller, listingQuery, services }: { seller:
                 <h2 id="xidmetleri" className={heading}>
                   Xidmətləri
                 </h2>
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div className="grid w-full grid-cols-2 gap-3 md:grid-cols-3 md:gap-5">
                   {services.map((s) => (
-                    <ServiceCard key={s.id} service={s} image={s.cover} />
+                    <ServiceTile key={s.id} service={s} />
                   ))}
                 </div>
               </section>

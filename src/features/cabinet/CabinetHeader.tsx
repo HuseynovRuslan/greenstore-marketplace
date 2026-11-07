@@ -1,8 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { BadgeCheck, LogOut, Plus } from 'lucide-react'
-import { ButtonLink } from '@/components/ui/Button'
+import { BadgeCheck, LogOut } from 'lucide-react'
 import { UnderlineTabs } from '@/components/ui/UnderlineTabs'
 import { useAccount, firstName } from '@/features/account/useAccount'
 
@@ -16,8 +15,9 @@ const sections: Array<{ key: CabinetSection; label: string; href: string }> = [
 ]
 
 /**
- * Top of every cabinet page: greeting, account line (business name, verified), «Elan yerləşdir», the section tabs
- * and «Çıxış» (kept apart from the tabs: signing out is not a section).
+ * Top of every cabinet page: greeting, account line (business name, verified), the section tabs and «Çıxış» (kept
+ * apart from the tabs: signing out is not a section). «Elan yerləşdir» is not repeated here: the site header has it
+ * from 768 px and the bottom nav below that.
  */
 export function CabinetHeader({ active, counts }: { active: CabinetSection; counts?: Partial<Record<CabinetSection, number>> }) {
   const { account, signOut } = useAccount()
@@ -51,9 +51,6 @@ export function CabinetHeader({ active, counts }: { active: CabinetSection; coun
             <LogOut aria-hidden size={16} strokeWidth={1.8} />
             Çıxış
           </button>
-          <ButtonLink href="/elan-yerlesdir" icon={<Plus aria-hidden size={18} strokeWidth={1.8} />} className="max-sm:hidden">
-            Elan yerləşdir
-          </ButtonLink>
         </div>
       </div>
       <UnderlineTabs

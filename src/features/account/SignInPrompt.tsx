@@ -19,8 +19,8 @@ export function SignInPrompt({ next }: { next: string }) {
             </ButtonLink>
             <p className="w-full text-sm leading-[1.5] text-ink">
               Hesabınız yoxdur?{' '}
-              <Link href={`/qeydiyyat${query}`} className="hover:text-olive-text hover:underline">
-                Qeydiyyatdan keçin →
+              <Link href={`/qeydiyyat${query}`} className="font-semibold text-forest hover:underline">
+                Qeydiyyatdan keçin
               </Link>
             </p>
           </>

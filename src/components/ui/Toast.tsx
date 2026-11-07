@@ -32,6 +32,8 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     const id = nextId.current++
     setItems((prev) => [...prev.slice(-2), { id, message, tone }])
   }, [])
+  // Stable, so a new toast does not restart the timers of the ones already showing.
+  const remove = useCallback((id: number) => setItems((prev) => prev.filter((t) => t.id !== id)), [])
   const value = useMemo(() => ({ toast }), [toast])
   return (
     <ToastContext.Provider value={value}>
@@ -42,23 +44,23 @@ export function ToastProvider({ children }: { children: ReactNode }) {
         className="pointer-events-none fixed inset-x-0 bottom-[calc(100px+env(safe-area-inset-bottom,0px))] z-[60] flex flex-col items-center gap-2 px-4 md:bottom-8"
       >
         {items.map((item) => (
-          <ToastView key={item.id} item={item} onDone={() => setItems((prev) => prev.filter((t) => t.id !== item.id))} />
+          <ToastView key={item.id} item={item} onDone={remove} />
         ))}
       </div>
     </ToastContext.Provider>
   )
 }
 
-function ToastView({ item, onDone }: { item: ToastItem; onDone: () => void }) {
+function ToastView({ item, onDone }: { item: ToastItem; onDone: (id: number) => void }) {
   const [leaving, setLeaving] = useState(false)
   useEffect(() => {
     const hide = window.setTimeout(() => setLeaving(true), VISIBLE_MS)
-    const remove = window.setTimeout(onDone, VISIBLE_MS + 200)
+    const remove = window.setTimeout(() => onDone(item.id), VISIBLE_MS + 200)
     return () => {
       window.clearTimeout(hide)
       window.clearTimeout(remove)
     }
-  }, [onDone])
+  }, [onDone, item.id])
   const Icon = item.tone === 'error' ? CircleAlert : CircleCheck
   return (
     <div

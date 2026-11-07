@@ -35,7 +35,10 @@ import { actionsFor, daysLeft, expiryLabel, statusBadges, type CabinetAction } f
 const actionClass =
   'inline-flex h-9 shrink-0 items-center justify-center gap-1.5 rounded-lg border px-3 text-[13px] leading-[normal] font-semibold whitespace-nowrap transition-[background-color,border-color,color,scale] duration-(--dur-fast) ease-out active:scale-[0.97] pointer-coarse:h-11 motion-reduce:active:scale-100'
 const quiet = cn(actionClass, 'border-line bg-surface text-forest hover:border-olive')
+/** Forest fill only for the action that puts a listing back on the site (fix, renew, activate, continue a draft). */
 const strong = cn(actionClass, 'border-forest bg-forest text-white hover:bg-forest-hover')
+/** «Önə çıxar» in the «Önə çıxan» badge colours: an offer, not the one thing to do on every row. */
+const promote = cn(actionClass, 'border-olive/40 bg-vip text-olive-text hover:border-olive')
 
 function Thumb({ src }: { src?: string }) {
   return (
@@ -73,7 +76,7 @@ export function ListingRowCard({ listing, stats, now, handlers }: { listing: Lis
 
   const buttons: Record<CabinetAction, ReactNode> = {
     promote: (
-      <Link key="promote" href={`/reklam?elan=${listing.id}`} className={strong}>
+      <Link key="promote" href={`/reklam?elan=${listing.id}`} className={promote}>
         <Rocket aria-hidden size={15} strokeWidth={2} />
         Önə çıxar
       </Link>

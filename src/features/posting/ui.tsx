@@ -11,15 +11,17 @@ import { controlClass, describedBy, FieldShell, useFieldIds } from '@/components
 import type { FilterOption } from '@/features/search/filterDefs'
 import { STEPS, type PostingDraft, type StepNumber } from './draft'
 import { attributeLine } from './attributes'
+import { markStepChange, type StepDirection } from './stepMotion'
 import { fieldDomId } from './validation'
 
 export const stepPath = (n: number) => `/elan-yerlesdir/${n}`
 
 /**
  * Progress of the six steps: a segmented bar (done and current in forest) and, from 768 px, the step names; steps
- * already reached are links, so Back is never the only way back.
+ * already reached are links, so Back is never the only way back. Moving forward, the new step's segment fills from
+ * the left (.gs-fill).
  */
-export function StepProgress({ step, reached }: { step: StepNumber; reached: StepNumber }) {
+export function StepProgress({ step, reached, dir }: { step: StepNumber; reached: StepNumber; dir?: StepDirection }) {
   return (
     <nav aria-label="Addımlar" className="flex flex-col gap-2.5">
       <ol className="grid grid-cols-6 gap-1.5">
@@ -33,6 +35,7 @@ export function StepProgress({ step, reached }: { step: StepNumber; reached: Ste
                 className={cn(
                   'block h-1.5 rounded-full transition-colors duration-(--dur-base) ease-out',
                   state === 'todo' ? (s.n <= reached ? 'bg-line-strong' : 'bg-line') : 'bg-forest',
+                  state === 'current' && dir === 'forward' && 'gs-fill',
                 )}
               />
               <span
@@ -52,7 +55,7 @@ export function StepProgress({ step, reached }: { step: StepNumber; reached: Ste
           return (
             <li key={s.n} className="min-w-0">
               {reachable ? (
-                <Link href={stepPath(s.n)} className="block rounded-sm py-1 hover:opacity-80">
+                <Link href={stepPath(s.n)} onClick={() => markStepChange(step, s.n)} className="block rounded-sm py-1 hover:opacity-80">
                   <span className="sr-only">Addım {s.n}: </span>
                   {content}
                 </Link>

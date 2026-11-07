@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react'
+import { useEffect, useRef, useState, useTransition, type FormEvent, type ReactNode } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { ArrowLeft, ArrowRight, CloudCheck, LogIn, RotateCcw, Send } from 'lucide-react'
@@ -15,6 +15,7 @@ import { PhotoManager } from './PhotoManager'
 import { PostingSkeleton } from './PostingSkeleton'
 import { photoStore, thumbnailDataUrl } from './photos'
 import { ReviewStep } from './ReviewStep'
+import { clearStepChange, markStepChange, stepDirection } from './stepMotion'
 import { CategoryStep, ContactStep, DetailsStep, PriceStep, type StepProps } from './steps'
 import { DraftCard, ErrorSummary, StepProgress, stepPath } from './ui'
 import { LAST_SENT_KEY, usePhotoUrls, usePostingDraft } from './useDraft'
@@ -77,6 +78,9 @@ export function PostingWizard({ step }: { step: StepNumber }) {
   const [sent, setSent] = useState(false)
   const summaryRef = useRef<HTMLDivElement>(null)
   const headingRef = useRef<HTMLHeadingElement>(null)
+  // Reached from another step: the heading and the form come in from that side (index.css → .gs-step).
+  const [dir] = useState(() => stepDirection(step))
+  const [navigating, startNavigation] = useTransition()
 
   // Deep link beyond the furthest reached step → back to it.
   const allowed = step <= draft.reachedStep
@@ -87,7 +91,19 @@ export function PostingWizard({ step }: { step: StepNumber }) {
   // A new step: its heading takes focus, so a screen reader announces where the user is.
   useEffect(() => {
     headingRef.current?.focus({ preventScroll: true })
+    clearStepChange()
   }, [step])
+
+  // The neighbouring steps are fetched ahead, so «Davam et» and «Geri» answer at once.
+  useEffect(() => {
+    if (step < 6) router.prefetch(stepPath(step + 1))
+    if (step > 1) router.prefetch(stepPath(step - 1))
+  }, [step, router])
+
+  const go = (to: number) => {
+    markStepChange(step, to)
+    startNavigation(() => router.push(stepPath(to)))
+  }
 
   const errors = validateStep(step, draft)
   const shown = Object.fromEntries(Object.entries(errors).filter(([k]) => attempted || touched[k]))
@@ -110,12 +126,12 @@ export function PostingWizard({ step }: { step: StepNumber }) {
     if (step < 6) {
       const n = (step + 1) as StepNumber
       update((d) => ({ ...d, reachedStep: Math.max(d.reachedStep, n) as StepNumber }))
-      router.push(stepPath(n))
+      go(n)
       return
     }
     // Step 6: send.
     const invalid = firstInvalidStep(draft)
-    if (invalid) return router.push(stepPath(invalid))
+    if (invalid) return go(invalid)
     if (!user) return
     setSending(true)
     setSendError(undefined)
@@ -123,7 +139,7 @@ export function PostingWizard({ step }: { step: StepNumber }) {
     if (!result.ok) {
       setSending(false)
       setSendError(result.error)
-      if (result.step) router.push(stepPath(result.step))
+      if (result.step) go(result.step)
       return
     }
     // The demo keeps a copy in «Elanlarım» with small photos (data URLs survive a reload; blob URLs don't).
@@ -180,7 +196,7 @@ export function PostingWizard({ step }: { step: StepNumber }) {
     <div className="page-x mx-auto flex w-full max-w-[1200px] flex-col gap-6 pt-5 pb-[calc(112px+env(safe-area-inset-bottom,0px))] md:gap-8 md:pt-8 md:pb-16">
       <header className="flex flex-col gap-5">
         <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-2">
-          <div className="flex flex-col gap-1.5">
+          <div data-dir={dir} className="gs-step flex flex-col gap-1.5">
             <p className="text-[13px] leading-[normal] font-medium text-muted">
               {editing ? 'Elanı redaktə edirsiniz · ' : ''}Addım {step} / {STEPS.length} · {meta.title}
             </p>
@@ -201,13 +217,16 @@ export function PostingWizard({ step }: { step: StepNumber }) {
             </div>
           )}
         </div>
-        <StepProgress step={step} reached={draft.reachedStep} />
+        <StepProgress step={step} reached={draft.reachedStep} dir={dir} />
       </header>
 
       <div className={cn('grid grid-cols-1 gap-8', !review && 'lg:grid-cols-[minmax(0,1fr)_300px] xl:grid-cols-[minmax(0,1fr)_320px]')}>
         <form id="elan-formu" onSubmit={next} noValidate className="flex min-w-0 flex-col gap-6">
           <ErrorSummary ref={summaryRef} errors={attempted ? errors : {}} labels={LABELS} />
-          <div className={cn(!review && 'rounded-2xl border border-line bg-surface p-5 md:p-7')}>{body}</div>
+          {/* The phone button bar below is position: fixed, so it stays outside the animated box (a transform would hold it). */}
+          <div data-dir={dir} className={cn('gs-step', !review && 'rounded-2xl border border-line bg-surface p-5 md:p-7')}>
+            {body}
+          </div>
 
           {sendError && (
             <Notice tone="danger" title="Elan göndərilmədi">
@@ -231,7 +250,13 @@ export function PostingWizard({ step }: { step: StepNumber }) {
           {/* ≥ 768 px: the buttons under the form. Phones: the same buttons in a bar fixed to the bottom. */}
           <div className="fixed inset-x-0 bottom-0 z-30 flex gap-3 border-t border-line bg-surface/95 px-5 pt-3 pb-[calc(12px+env(safe-area-inset-bottom,0px))] backdrop-blur-md md:static md:z-auto md:border-0 md:bg-transparent md:p-0 md:backdrop-blur-none">
             {back ? (
-              <ButtonLink href={back} variant="secondary" icon={<ArrowLeft aria-hidden size={18} strokeWidth={1.8} />} className="max-md:px-3.5">
+              <ButtonLink
+                href={back}
+                onClick={() => markStepChange(step, step - 1)}
+                variant="secondary"
+                icon={<ArrowLeft aria-hidden size={18} strokeWidth={1.8} />}
+                className="max-md:px-3.5"
+              >
                 Geri
               </ButtonLink>
             ) : (
@@ -239,7 +264,7 @@ export function PostingWizard({ step }: { step: StepNumber }) {
                 Ləğv et
               </ButtonLink>
             )}
-            <Button type="submit" disabled={sending || guestAtEnd} aria-busy={sending} className="flex-1 md:ml-auto md:flex-none md:min-w-[180px]">
+            <Button type="submit" disabled={sending || navigating || guestAtEnd} aria-busy={sending || navigating} className="flex-1 md:ml-auto md:flex-none md:min-w-[180px]">
               {primaryLabel}
               {primaryIcon}
             </Button>
@@ -280,7 +305,7 @@ export function PostingWizard({ step }: { step: StepNumber }) {
               setResetOpen(false)
               setAttempted(false)
               setTouched({})
-              router.push(stepPath(1))
+              go(1)
             }}
           >
             Sil və yenidən başla

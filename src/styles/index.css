@@ -311,6 +311,55 @@
 }
 
 /*
+ * «Elan yerləşdir» step change (PostingWizard, stepMotion.ts): the new step's heading and form come 12 px in from the
+ * side the user is heading to (forward: from the right, back: from the left) and fade in; moving forward, the step's
+ * progress segment fills from the left. Only on a step change, never on a first load or a reload. `backwards` drops
+ * the transform once done, so the fixed phone button bar is never held by it. Reduced motion: a short fade, no fill.
+ */
+@layer components {
+  .gs-step[data-dir='forward'] {
+    animation: gs-step-forward var(--dur-base) var(--ease-out) backwards;
+  }
+  .gs-step[data-dir='back'] {
+    animation: gs-step-back var(--dur-base) var(--ease-out) backwards;
+  }
+  .gs-fill {
+    transform-origin: left;
+    animation: gs-fill var(--dur-slow) var(--ease-out) backwards;
+  }
+  @keyframes gs-step-forward {
+    from {
+      opacity: 0;
+      transform: translateX(12px);
+    }
+  }
+  @keyframes gs-step-back {
+    from {
+      opacity: 0;
+      transform: translateX(-12px);
+    }
+  }
+  @keyframes gs-fill {
+    from {
+      transform: scaleX(0);
+    }
+  }
+  @keyframes gs-fade-in {
+    from {
+      opacity: 0;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .gs-step[data-dir] {
+      animation: gs-fade-in var(--dur-fast) var(--ease-out) backwards;
+    }
+    .gs-fill {
+      animation: none;
+    }
+  }
+}
+
+/*
  * The hero entrance plays once per page load: HeroSearchCard sets html[data-hero-seen] once it has finished, so a
  * later visit to the home page (client navigation, back/forward cache) shows the hero at rest. In the utilities
  * layer, so its higher specificity outranks the animate-* utilities.

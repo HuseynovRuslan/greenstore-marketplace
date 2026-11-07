@@ -2,6 +2,9 @@
 
 import { useRef, useState, type DragEvent } from 'react'
 import { ChevronLeft, ChevronRight, ImagePlus, Star, Trash2, TriangleAlert } from 'lucide-react'
+import { AnimatePresence, m } from 'motion/react'
+import { loadDomMax, MotionFeatures, useFeaturesReady } from '@/components/motion/MotionFeatures'
+import { chipEnter, chipExit, chipLayout } from '@/components/motion/springs'
 import { buttonClass } from '@/components/ui/Button'
 import { useToast } from '@/components/ui/Toast'
 import { cn } from '@/lib/format'
@@ -33,7 +36,6 @@ export function PhotoManager({ draft, update, error, urls }: StepProps & { urls:
   const [busy, setBusy] = useState(0)
   const [problems, setProblems] = useState<string[]>([])
   const [dropping, setDropping] = useState(false)
-  const [dragIndex, setDragIndex] = useState<number | null>(null)
   const { toast } = useToast()
   const photos = draft.photos
 
@@ -154,81 +156,19 @@ export function PhotoManager({ draft, update, error, urls }: StepProps & { urls:
       )}
 
       {(photos.length > 0 || busy > 0) && (
-        <ol aria-label="Əlavə olunan şəkillər" className="grid grid-cols-2 gap-3 xs:grid-cols-3 md:grid-cols-4">
-          {photos.map((photo, i) => (
-            <li
-              key={photo.id}
-              draggable
-              onDragStart={(e) => {
-                setDragIndex(i)
-                e.dataTransfer.effectAllowed = 'move'
-              }}
-              onDragOver={(e) => {
-                if (dragIndex !== null) e.preventDefault()
-              }}
-              onDrop={(e) => {
-                if (dragIndex === null) return
-                e.preventDefault()
-                e.stopPropagation()
-                setPhotos(movePhoto(photos, dragIndex, i))
-                setDragIndex(null)
-              }}
-              onDragEnd={() => setDragIndex(null)}
-              className={cn(
-                'group relative aspect-[4/3] overflow-hidden rounded-lg border bg-mint transition-[opacity,border-color] duration-(--dur-fast)',
-                i === 0 ? 'border-forest shadow-[inset_0_0_0_1px_var(--color-forest)]' : 'border-line',
-                dragIndex === i && 'opacity-40',
-                dragIndex !== null && dragIndex !== i && 'cursor-copy',
-              )}
-            >
-              {urls[photo.id] ? (
-                <img src={urls[photo.id]} alt={`Şəkil ${i + 1}${i === 0 ? ' (örtük)' : ''}: ${photo.name}`} className="size-full object-cover select-none" draggable={false} />
-              ) : (
-                <span className="flex size-full animate-pulse items-center justify-center text-xs text-muted">Yüklənir…</span>
-              )}
-              {i === 0 && (
-                <span className="absolute top-2 left-2 inline-flex items-center gap-1 rounded-[5px] bg-forest px-2 py-1 text-[11px] leading-[normal] font-semibold text-white">
-                  <Star aria-hidden size={11} strokeWidth={2.4} fill="currentColor" />
-                  Örtük
-                </span>
-              )}
-              <button type="button" onClick={() => remove(i)} aria-label={`Şəkil ${i + 1}-i sil`} className={cn(iconButton, 'absolute top-1.5 right-1.5 text-danger')}>
-                <Trash2 aria-hidden size={16} strokeWidth={1.8} />
-              </button>
-              <div className="absolute inset-x-1.5 bottom-1.5 flex items-center justify-between gap-1">
-                <button type="button" disabled={i === 0} onClick={() => setPhotos(movePhoto(photos, i, i - 1))} aria-label={`Şəkil ${i + 1}: sola`} className={iconButton}>
-                  <ChevronLeft aria-hidden size={18} strokeWidth={2} />
-                </button>
-                {i > 0 && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setPhotos(makeCover(photos, i))
-                      toast('Örtük şəkli dəyişdi')
-                    }}
-                    className="relative h-9 rounded-full bg-surface/95 px-2.5 text-xs font-semibold whitespace-nowrap text-forest shadow-sm transition-[scale] duration-(--dur-fast) ease-out active:scale-[0.96] motion-reduce:active:scale-100 after:absolute after:-inset-1 after:content-['']"
-                  >
-                    Örtük et
-                  </button>
-                )}
-                <button
-                  type="button"
-                  disabled={i === photos.length - 1}
-                  onClick={() => setPhotos(movePhoto(photos, i, i + 1))}
-                  aria-label={`Şəkil ${i + 1}: sağa`}
-                  className={iconButton}
-                >
-                  <ChevronRight aria-hidden size={18} strokeWidth={2} />
-                </button>
-              </div>
-            </li>
-          ))}
-          {Array.from({ length: busy }, (_, i) => (
-            <li key={`busy-${i}`} aria-label="Şəkil hazırlanır" className="flex aspect-[4/3] animate-pulse items-center justify-center rounded-lg bg-disabled text-xs text-muted">
-              Hazırlanır…
-            </li>
-          ))}
-        </ol>
+        <MotionFeatures load={loadDomMax}>
+          <PhotoGrid
+            photos={photos}
+            urls={urls}
+            busy={busy}
+            onMove={(from, to) => setPhotos(movePhoto(photos, from, to))}
+            onCover={(i) => {
+              setPhotos(makeCover(photos, i))
+              toast('Örtük şəkli dəyişdi')
+            }}
+            onRemove={remove}
+          />
+        </MotionFeatures>
       )}
 
       <ul className="flex flex-col gap-1.5 text-[13px] leading-[1.5] text-ink-soft">
@@ -243,5 +183,106 @@ export function PhotoManager({ draft, update, error, urls }: StepProps & { urls:
         {busy > 0 ? `${busy} şəkil hazırlanır` : `${photos.length} şəkil əlavə olunub`}
       </p>
     </div>
+  )
+}
+
+interface PhotoGridProps {
+  photos: DraftPhoto[]
+  urls: Record<string, string | undefined>
+  busy: number
+  onMove: (from: number, to: number) => void
+  onCover: (index: number) => void
+  onRemove: (index: number) => void
+}
+
+/**
+ * The photos in gallery order. A photo that moves (drag, «Sola» / «Sağa», «Örtük et») slides to its new place and its
+ * neighbours make room, so the eye can follow it; a new photo grows in from .95, a removed one shrinks away and the
+ * rest close the gap (Motion layout, the chip springs). Reduced motion: no sliding, opacity only. The native
+ * drag-and-drop handlers sit on an inner box: Motion keeps onDragStart / onDragEnd for its own gestures.
+ */
+function PhotoGrid({ photos, urls, busy, onMove, onCover, onRemove }: PhotoGridProps) {
+  const ready = useFeaturesReady()
+  const [dragIndex, setDragIndex] = useState<number | null>(null)
+  return (
+    <ol aria-label="Əlavə olunan şəkillər" className="relative grid grid-cols-2 gap-3 xs:grid-cols-3 md:grid-cols-4">
+      <AnimatePresence initial={false} mode="popLayout">
+        {photos.map((photo, i) => (
+          <m.li
+            key={photo.id}
+            layout
+            initial={ready ? { opacity: 0, scale: 0.95 } : false}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95, transition: chipExit }}
+            transition={{ default: chipEnter, layout: chipLayout }}
+            className={cn(
+              'group relative aspect-[4/3] overflow-hidden rounded-lg border bg-mint transition-[border-color] duration-(--dur-fast)',
+              i === 0 ? 'border-forest shadow-[inset_0_0_0_1px_var(--color-forest)]' : 'border-line',
+            )}
+          >
+            <div
+              draggable
+              onDragStart={(e) => {
+                setDragIndex(i)
+                e.dataTransfer.effectAllowed = 'move'
+              }}
+              onDragOver={(e) => {
+                if (dragIndex !== null) e.preventDefault()
+              }}
+              onDrop={(e) => {
+                if (dragIndex === null) return
+                e.preventDefault()
+                e.stopPropagation()
+                onMove(dragIndex, i)
+                setDragIndex(null)
+              }}
+              onDragEnd={() => setDragIndex(null)}
+              className={cn(
+                'size-full transition-opacity duration-(--dur-fast)',
+                dragIndex === i && 'opacity-40',
+                dragIndex !== null && dragIndex !== i && 'cursor-copy',
+              )}
+            >
+              {urls[photo.id] ? (
+                <img src={urls[photo.id]} alt={`Şəkil ${i + 1}${i === 0 ? ' (örtük)' : ''}: ${photo.name}`} className="size-full object-cover select-none" draggable={false} />
+              ) : (
+                <span className="flex size-full animate-pulse items-center justify-center text-xs text-muted">Yüklənir…</span>
+              )}
+            </div>
+            {i === 0 && (
+              <span className="absolute top-2 left-2 inline-flex items-center gap-1 rounded-[5px] bg-forest px-2 py-1 text-[11px] leading-[normal] font-semibold text-white">
+                <Star aria-hidden size={11} strokeWidth={2.4} fill="currentColor" />
+                Örtük
+              </span>
+            )}
+            <button type="button" onClick={() => onRemove(i)} aria-label={`Şəkil ${i + 1}-i sil`} className={cn(iconButton, 'absolute top-1.5 right-1.5 text-danger')}>
+              <Trash2 aria-hidden size={16} strokeWidth={1.8} />
+            </button>
+            <div className="absolute inset-x-1.5 bottom-1.5 flex items-center justify-between gap-1">
+              <button type="button" disabled={i === 0} onClick={() => onMove(i, i - 1)} aria-label={`Şəkil ${i + 1}: sola`} className={iconButton}>
+                <ChevronLeft aria-hidden size={18} strokeWidth={2} />
+              </button>
+              {i > 0 && (
+                <button
+                  type="button"
+                  onClick={() => onCover(i)}
+                  className="relative h-9 rounded-full bg-surface/95 px-2.5 text-xs font-semibold whitespace-nowrap text-forest shadow-sm transition-[scale] duration-(--dur-fast) ease-out active:scale-[0.96] motion-reduce:active:scale-100 after:absolute after:-inset-1 after:content-['']"
+                >
+                  Örtük et
+                </button>
+              )}
+              <button type="button" disabled={i === photos.length - 1} onClick={() => onMove(i, i + 1)} aria-label={`Şəkil ${i + 1}: sağa`} className={iconButton}>
+                <ChevronRight aria-hidden size={18} strokeWidth={2} />
+              </button>
+            </div>
+          </m.li>
+        ))}
+      </AnimatePresence>
+      {Array.from({ length: busy }, (_, i) => (
+        <li key={`busy-${i}`} aria-label="Şəkil hazırlanır" className="flex aspect-[4/3] animate-pulse items-center justify-center rounded-lg bg-disabled text-xs text-muted">
+          Hazırlanır…
+        </li>
+      ))}
+    </ol>
   )
 }
