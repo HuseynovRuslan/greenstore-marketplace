@@ -77,7 +77,7 @@ export function AdminFrame({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-dvh flex-col">
       <DemoBanner />
-      <WorkflowHeader right={<span>İdarəetmə · Aysel Həsənova</span>} />
+      <WorkflowHeader right={<span className="truncate text-sm text-ink-soft">İdarəetmə · Aysel Həsənova</span>} />
       <Main>{children}</Main>
     </div>
   )

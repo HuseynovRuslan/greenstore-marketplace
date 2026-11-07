@@ -1,15 +1,15 @@
 import { ClientGate } from '@/components/layout/ClientGate'
-import { WizardSkeleton } from '@/features/post-ad/WizardSkeleton'
+import { PostingSkeleton } from '@/features/posting/PostingSkeleton'
+import { PostingWizard } from '@/features/posting/PostingWizard'
 import { privateMetadata } from '@/seo/metadata'
-import PostAdPage from '@/views/post-ad/PostAdPage'
 
 export const metadata = privateMetadata('Elan yerləşdir')
 
-/** /elan-yerlesdir — step 1 of the wizard. The draft lives in localStorage, so the wizard renders after hydration. */
+/** /elan-yerlesdir — step 1 of the posting flow. The draft lives in browser storage, so it renders after hydration. */
 export default function Page() {
   return (
-    <ClientGate fallback={<WizardSkeleton step={1} />}>
-      <PostAdPage step={1} />
+    <ClientGate fallback={<PostingSkeleton />}>
+      <PostingWizard key={1} step={1} />
     </ClientGate>
   )
 }

@@ -169,13 +169,15 @@ interface SwitchProps {
   description?: ReactNode
   disabled?: boolean
   className?: string
+  id?: string
 }
 
 /** On/off setting with role="switch": the whole row (≥ 44 px) toggles it. */
-export function Switch({ checked, onCheckedChange, label, description, disabled, className }: SwitchProps) {
-  const ids = useFieldIds()
+export function Switch({ checked, onCheckedChange, label, description, disabled, className, id }: SwitchProps) {
+  const ids = useFieldIds(id)
   return (
     <button
+      id={ids.fieldId}
       type="button"
       role="switch"
       aria-checked={checked}
@@ -256,23 +258,26 @@ interface ChoiceCardProps {
   meta?: ReactNode
   className?: string
   describedById?: string
+  /** Id of the radio input (error summaries focus it) */
+  id?: string
 }
 
 /**
  * A radio choice drawn as a card (account type, business kind, price type, promotion package). A native radio
  * inside a label: arrow keys move within the group, the group needs a <fieldset> + <legend> around it.
  */
-export function ChoiceCard({ name, value, checked, onChange, title, description, icon, meta, className, describedById }: ChoiceCardProps) {
+export function ChoiceCard({ name, value, checked, onChange, title, description, icon, meta, className, describedById, id }: ChoiceCardProps) {
   return (
     <label
       className={cn(
-        'relative flex cursor-pointer gap-3 rounded-xl border bg-surface p-4 text-left transition-[border-color,background-color,box-shadow,scale] duration-(--dur-fast) ease-out active:scale-[0.99] motion-reduce:active:scale-100',
+        'relative flex cursor-pointer gap-3 rounded-xl border p-4 text-left transition-[border-color,background-color,box-shadow,scale] duration-(--dur-fast) ease-out active:scale-[0.99] motion-reduce:active:scale-100',
         'has-[input:focus-visible]:outline-2 has-[input:focus-visible]:outline-offset-2 has-[input:focus-visible]:outline-olive',
-        checked ? 'border-forest bg-mint shadow-[inset_0_0_0_1px_var(--color-forest)]' : 'border-line hover:border-line-strong',
+        checked ? 'border-forest bg-mint shadow-[inset_0_0_0_1px_var(--color-forest)]' : 'border-line bg-surface hover:border-line-strong',
         className,
       )}
     >
       <input
+        id={id}
         type="radio"
         name={name}
         value={value}

@@ -97,5 +97,6 @@ Update after every commit (newest last).
 | Phase 0 inventory, Phase 1 analysis, Phase 2 plan | done | 58fbb83 |
 | 0 · Contract additions + mock data | done | e87f2ff |
 | 0 · One header everywhere, shared form controls, toast, share | done | c7bf7e1 |
-| 3 · Listing page (gallery + lightbox, price/wholesale/stock, contact, attributes, care, report) | done | (this commit) |
-| 1 · Posting flow | next | |
+| 3 · Listing page (gallery + lightbox, price/wholesale/stock, contact, attributes, care, report) | done | 91db55d |
+| 1 · Posting flow (6 steps, autosave, photos in IndexedDB, preview = listing page, promotion, success) | done | (this commit) |
+| 2 · Auth (login, registration with business kinds, SMS code, password reset) | next | |

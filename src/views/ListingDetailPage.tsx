@@ -74,7 +74,7 @@ interface ListingDetailProps {
   similar: Listing[]
   /**
    * `public` (the page), `owner` (the seller's own unpublished listing: a status notice on top) or `preview` (the
-   * posting flow's last step: nothing links away and contact buttons are inert).
+   * posting flow's last step: no breadcrumb, related lists or report; contact and favourite look real but are inert).
    */
   mode?: 'public' | 'owner' | 'preview'
 }
@@ -187,16 +187,17 @@ export function ListingDetail({ listing, seller, category, others, similar, mode
                   </ul>
                 )}
 
-                <div className="max-md:hidden">
-                  <ContactButtons info={contact} disabled={preview} />
+                {/* In the posting preview the buttons look exactly as published but do nothing (inert). */}
+                <div inert={preview || undefined} className="max-md:hidden">
+                  <ContactButtons info={contact} />
                 </div>
-                <div className="flex gap-2.5">
-                  <FavoriteToggle id={listing.id} disabled={preview} />
-                  {!preview && <ShareButton title={listing.title} iconOnly />}
+                <div inert={preview || undefined} className="flex gap-2.5">
+                  <FavoriteToggle id={listing.id} />
+                  <ShareButton title={listing.title} iconOnly />
                 </div>
               </div>
 
-              <SellerSummary listing={listing} seller={preview ? undefined : seller} />
+              <SellerSummary listing={listing} seller={seller} />
 
               <div className="flex gap-3 rounded-xl bg-sand p-4 text-[13px] leading-[1.5] text-ink">
                 <ShieldAlert aria-hidden size={20} strokeWidth={1.8} className="shrink-0 text-forest" />

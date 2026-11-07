@@ -1,15 +1,15 @@
 import { ClientGate } from '@/components/layout/ClientGate'
-import { PageSkeleton } from '@/views/ListingSkeleton'
+import { PostingDone } from '@/features/posting/PostingDone'
+import { PostingSkeleton } from '@/features/posting/PostingSkeleton'
 import { privateMetadata } from '@/seo/metadata'
-import PostAdSubmittedPage from '@/views/post-ad/PostAdSubmittedPage'
 
 export const metadata = privateMetadata('Elan yoxlamaya göndərildi')
 
-/** Private page driven by browser storage: rendered after hydration (see ClientGate). */
+/** Confirmation after «Elanı göndər». Private and driven by browser storage: rendered after hydration. */
 export default function Page() {
   return (
-    <ClientGate fallback={<PageSkeleton />}>
-      <PostAdSubmittedPage />
+    <ClientGate fallback={<PostingSkeleton />}>
+      <PostingDone />
     </ClientGate>
   )
 }

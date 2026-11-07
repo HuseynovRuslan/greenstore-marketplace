@@ -34,6 +34,11 @@ interface ListboxProps {
   align?: PanelAlign
   className?: string
   triggerClassName?: string
+  /** Id of the trigger button (so a form's error summary can move focus to it) */
+  id?: string
+  /** The field's error, announced with the trigger */
+  invalid?: boolean
+  describedBy?: string
 }
 
 /** Type-ahead keeps the typed letters for this long (WAI-ARIA APG). */
@@ -51,7 +56,7 @@ const PAGE = 10
  *         Esc closes without changing the value.
  * Pointer: click the trigger to toggle, click an option to select it, press outside to close.
  */
-export function Listbox({ label, value, onChange, options, icon, name, align, className, triggerClassName }: ListboxProps) {
+export function Listbox({ label, value, onChange, options, icon, name, align, className, triggerClassName, id, invalid, describedBy }: ListboxProps) {
   const baseId = useId()
   const labelId = `${baseId}-label`
   const listboxId = `${baseId}-listbox`
@@ -185,9 +190,12 @@ export function Listbox({ label, value, onChange, options, icon, name, align, cl
       </span>
       <button
         ref={triggerRef}
+        id={id}
         type="button"
         role="combobox"
         aria-labelledby={labelId}
+        aria-invalid={invalid || undefined}
+        aria-describedby={describedBy}
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-controls={listboxId}

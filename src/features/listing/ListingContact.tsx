@@ -33,9 +33,9 @@ export function localPhone(phone: string) {
 /**
  * «Nömrəni göstər» → the number as a «call» link (focus moves to it), counted for the seller's statistics in the
  * background (a failed count never blocks the number). «WhatsApp-a yaz» when the seller takes messages. A seller who
- * hid the number gets WhatsApp only, with a line saying so. `disabled` is the posting preview.
+ * hid the number gets WhatsApp only, with a line saying so.
  */
-export function ContactButtons({ info, layout = 'panel', disabled }: { info: ContactInfo; layout?: 'panel' | 'bar'; disabled?: boolean }) {
+export function ContactButtons({ info, layout = 'panel' }: { info: ContactInfo; layout?: 'panel' | 'bar' }) {
   const { revealed, reveal } = useReveal()
   const linkRef = useRef<HTMLAnchorElement>(null)
   const requested = useRef(false)
@@ -62,27 +62,21 @@ export function ContactButtons({ info, layout = 'panel', disabled }: { info: Con
       {localPhone(phone)}
     </a>
   ) : (
-    <Button onClick={onReveal} disabled={disabled} className={bar ? 'min-w-0 flex-1 px-3' : 'w-full'} icon={<Phone aria-hidden size={18} strokeWidth={1.8} />}>
+    <Button onClick={onReveal} className={bar ? 'min-w-0 flex-1 px-3' : 'w-full'} icon={<Phone aria-hidden size={18} strokeWidth={1.8} />}>
       {bar ? 'Zəng et' : 'Nömrəni göstər'}
     </Button>
   )
   const chat =
     whatsapp && phone ? (
-      disabled ? (
-        <Button variant="secondary" disabled className={bar ? 'min-w-0 flex-1 px-3' : 'w-full'} icon={<MessageCircle aria-hidden size={18} strokeWidth={1.8} />}>
-          WhatsApp
-        </Button>
-      ) : (
-        <a
-          href={whatsappMessageHref(phone, title)}
-          target="_blank"
-          rel="noopener noreferrer"
-          className={buttonClass(callable ? 'secondary' : 'primary', bar ? 'min-w-0 flex-1 px-3' : 'w-full')}
-        >
-          <MessageCircle aria-hidden size={18} strokeWidth={1.8} />
-          {bar ? 'WhatsApp' : 'WhatsApp-a yaz'}
-        </a>
-      )
+      <a
+        href={whatsappMessageHref(phone, title)}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={buttonClass(callable ? 'secondary' : 'primary', bar ? 'min-w-0 flex-1 px-3' : 'w-full')}
+      >
+        <MessageCircle aria-hidden size={18} strokeWidth={1.8} />
+        {bar ? 'WhatsApp' : 'WhatsApp-a yaz'}
+      </a>
     ) : null
 
   if (!call && !chat) {
@@ -118,14 +112,13 @@ export function MobileContactBar({ info, price }: { info: ContactInfo; price: st
  * «Seçilmişlərə əlavə et» / «Seçilmişlərdədir»: the label itself says the state (so no aria-pressed, whose name must
  * not change), and a toast confirms the change for everyone, screen readers included.
  */
-export function FavoriteToggle({ id, className, disabled }: { id: string; className?: string; disabled?: boolean }) {
+export function FavoriteToggle({ id, className }: { id: string; className?: string }) {
   const { isFavorite, toggleFavorite } = useFavorites()
   const { toast } = useToast()
   const saved = isFavorite('listing', id)
   return (
     <button
       type="button"
-      disabled={disabled}
       onClick={() => {
         toggleFavorite('listing', id)
         toast(saved ? 'Seçilmişlərdən çıxarıldı' : 'Seçilmişlərə əlavə edildi')

@@ -1,39 +1,26 @@
-'use client'
-
 import type { ReactNode } from 'react'
 import Link from 'next/link'
-import { useSession } from '@/state/store'
-import { preHydrationClass } from '@/state/bootstrap'
-import { useHydrated } from './ClientGate'
+import { X } from 'lucide-react'
+import { Logo } from '@/components/ui/Logo'
 
-/* Figma "İş axını başlığı" (Elan yerləşdir / İdarəetmə): white, bottom border, px 64 py 24, 25 px wordmark, 14 px account link */
+/**
+ * Focused header of the posting flow (and the moderator tools): the logo and one way out. Leaving keeps the draft,
+ * and the link says so. 58 px on phones, 68 px from 768 px.
+ */
 export function WorkflowHeader({ right }: { right?: ReactNode }) {
-  const { user } = useSession()
-  const hydrated = useHydrated()
   return (
-    <header className="w-full bg-surface text-forest shadow-[inset_0_-1px_0_var(--color-line)]">
-      <div className="page-x mx-auto flex w-full max-w-[1440px] items-start justify-between gap-4 py-6 leading-[normal] whitespace-nowrap">
-        <Link href="/" className="text-[22px] md:text-[25px]">
-          GreenStore
-        </Link>
-        <div className="truncate pt-1.5 text-sm md:pt-[9px]">
-          {right ??
-            (hydrated ? (
-              <Link href={user ? '/kabinet' : '/daxil-ol'} className="hover:text-olive-text">
-                {user ? `${user.fullName} · Şəxsi kabinet` : 'Daxil ol'}
-              </Link>
-            ) : (
-              // Before hydration: both variants, CSS shows the one the browser knows (src/state/bootstrap.ts).
-              <>
-                <Link href="/kabinet" className={`hover:text-olive-text ${preHydrationClass('user')}`}>
-                  <span className="auth-user-name" /> · Şəxsi kabinet
-                </Link>
-                <Link href="/daxil-ol" className={`hover:text-olive-text ${preHydrationClass('guest')}`}>
-                  Daxil ol
-                </Link>
-              </>
-            ))}
-        </div>
+    <header className="sticky top-0 z-40 w-full bg-surface shadow-[inset_0_-1px_0_var(--color-line)]">
+      <div className="page-x mx-auto flex h-[58px] w-full max-w-[1440px] items-center justify-between gap-4 md:h-[68px]">
+        <Logo />
+        {right ?? (
+          <Link
+            href="/"
+            className="-mr-2 inline-flex h-11 items-center gap-1.5 rounded-option px-3 text-sm leading-[normal] font-medium text-ink transition-colors duration-(--dur-fast) hover:bg-mint hover:text-forest"
+          >
+            <X aria-hidden size={18} strokeWidth={1.8} />
+            Çıx<span className="sr-only">: qaralama saxlanılır</span>
+          </Link>
+        )}
       </div>
     </header>
   )
