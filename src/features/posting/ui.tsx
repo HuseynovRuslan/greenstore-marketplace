@@ -55,7 +55,12 @@ export function StepProgress({ step, reached, dir }: { step: StepNumber; reached
           return (
             <li key={s.n} className="min-w-0">
               {reachable ? (
-                <Link href={stepPath(s.n)} onClick={() => markStepChange(step, s.n)} className="block rounded-sm py-1 hover:opacity-80">
+                <Link
+                  href={stepPath(s.n)}
+                  onClick={() => markStepChange(step, s.n)}
+                  // The bar is 6 px: the hit area grows to 44 px tall around it without moving anything.
+                  className="relative block rounded-sm py-1 after:absolute after:inset-x-0 after:-inset-y-[15px] after:content-[''] hover:opacity-80 md:after:-inset-y-1.5"
+                >
                   <span className="sr-only">Addım {s.n}: </span>
                   {content}
                 </Link>

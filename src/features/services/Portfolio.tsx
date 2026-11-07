@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useState } from 'react'
-import { ImageViewer } from './ImageViewer'
+import { Lightbox } from '@/features/listing/Lightbox'
 import { cn } from '@/lib/format'
 
 /** "Tamamlanmış layihələr": 2-column grid of "Məlumat paneli" cards (photo 270 px, title 15 px semibold, text 13 px muted). */
@@ -33,12 +33,15 @@ export function Portfolio({ projects }: { projects: Array<{ title: string; descr
           </div>
         ))}
       </div>
-      <ImageViewer
-        images={projects.map((p) => ({ src: p.image, alt: p.title, title: p.title, description: p.description }))}
-        index={viewerIndex}
-        onClose={closeViewer}
-        label="Tamamlanmış layihələr"
-      />
+      {viewerIndex !== null && (
+        <Lightbox
+          images={projects.map((p) => p.image)}
+          captions={projects.map((p) => ({ title: p.title, description: p.description }))}
+          title="Tamamlanmış layihələr"
+          start={viewerIndex}
+          onClose={closeViewer}
+        />
+      )}
     </section>
   )
 }

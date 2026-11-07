@@ -16,7 +16,7 @@ import type { StepProps } from './steps'
 import { fieldDomId } from './validation'
 
 const iconButton =
-  'relative flex size-9 items-center justify-center rounded-full bg-surface/95 text-forest shadow-sm transition-[background-color,scale] duration-(--dur-fast) ease-out hover:bg-surface active:scale-[0.94] disabled:opacity-35 motion-reduce:active:scale-100 ' +
+  'relative flex size-9 shrink-0 items-center justify-center rounded-full bg-surface/95 text-forest shadow-sm transition-[background-color,scale] duration-(--dur-fast) ease-out hover:bg-surface active:scale-[0.94] disabled:opacity-35 motion-reduce:active:scale-100 ' +
   // 44 px hit area around the 36 px button
   "after:absolute after:-inset-1 after:content-['']"
 

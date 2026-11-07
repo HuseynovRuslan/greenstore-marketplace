@@ -248,7 +248,7 @@ export function PostingWizard({ step }: { step: StepNumber }) {
           )}
 
           {/* ≥ 768 px: the buttons under the form. Phones: the same buttons in a bar fixed to the bottom. */}
-          <div className="fixed inset-x-0 bottom-0 z-30 flex gap-3 border-t border-line bg-surface/95 px-5 pt-3 pb-[calc(12px+env(safe-area-inset-bottom,0px))] backdrop-blur-md md:static md:z-auto md:border-0 md:bg-transparent md:p-0 md:backdrop-blur-none">
+          <div className="gs-keyboard-aside fixed inset-x-0 bottom-0 z-30 flex gap-3 border-t border-line bg-surface/95 px-5 pt-3 pb-[calc(12px+env(safe-area-inset-bottom,0px))] backdrop-blur-md md:static md:z-auto md:border-0 md:bg-transparent md:p-0 md:backdrop-blur-none">
             {back && (
               <ButtonLink
                 href={back}

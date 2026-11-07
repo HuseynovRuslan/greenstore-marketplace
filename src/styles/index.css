@@ -104,6 +104,8 @@
   html {
     -webkit-text-size-adjust: 100%;
     scroll-behavior: smooth;
+    /* No grey flash over tapped controls: every control has its own press state (:active scale or fade). */
+    -webkit-tap-highlight-color: transparent;
   }
   body {
     @apply bg-cream font-sans text-ink antialiased;
@@ -125,6 +127,17 @@
     -webkit-user-select: none;
     user-select: none;
   }
+  /* Controls never wait for a double-tap zoom: the tap fires at once (pinch zoom still works). */
+  :is(a, button, label, summary, [role='button'], [role='option'], [role='switch']) {
+    touch-action: manipulation;
+  }
+  /*
+   * Text links have no press state of their own: they dim while pressed, in place of the tap highlight. Links styled
+   * as buttons or chips (an `active:` class) and links stretched over a card (the card scales) keep theirs.
+   */
+  :where(a:not([class*='active:'], [class*='after:inset-0'])):active {
+    opacity: 0.7;
+  }
   :focus-visible {
     outline: 2px solid var(--color-olive);
     outline-offset: 2px;
@@ -133,6 +146,19 @@
     html {
       scroll-behavior: auto;
     }
+  }
+}
+
+/*
+ * Phones: while the software keyboard is up (a text field has focus), the bars fixed to the bottom of the screen —
+ * the bottom nav, the posting buttons, the listing's contact bar, the promotion checkout bar — step aside like a
+ * native tab bar, so none of them sits on the keyboard or over the field being typed in. The form's own return key
+ * («Davam et», «Axtar») still submits. Touch screens under 768 px only: that is where these bars are fixed.
+ */
+@media (pointer: coarse) and (width < 48rem) {
+  html:has(:is(input:not([type='checkbox'], [type='radio'], [type='range'], [type='file'], [type='button'], [type='submit']), textarea):focus)
+    .gs-keyboard-aside {
+    visibility: hidden;
   }
 }
 

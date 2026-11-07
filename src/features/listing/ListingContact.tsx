@@ -101,7 +101,7 @@ export function MobileContactBar({ info, price }: { info: ContactInfo; price: st
     <div
       role="region"
       aria-label="Satıcı ilə əlaqə"
-      className="sticky bottom-[calc(86px+env(safe-area-inset-bottom,0px))] z-30 flex w-full items-center gap-3 border-t border-line bg-surface/95 px-5 py-2.5 backdrop-blur-md md:hidden"
+      className="gs-keyboard-aside sticky bottom-[calc(86px+env(safe-area-inset-bottom,0px))] z-30 flex w-full items-center gap-3 border-t border-line bg-surface/95 px-5 py-2.5 backdrop-blur-md md:hidden"
     >
       <p className="max-w-[36%] min-w-0 shrink truncate text-[17px] leading-[1.2] font-bold text-forest tabular-nums">{price}</p>
       <ContactButtons info={info} layout="bar" />

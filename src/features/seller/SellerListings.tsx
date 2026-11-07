@@ -127,6 +127,9 @@ export function SellerListings({ seller, initialQuery = '' }: { seller: Seller; 
               <span className="sr-only">Satıcının elanlarında axtar</span>
               <input
                 type="search"
+                enterKeyHint="search"
+                // Results update while typing; the return key just puts the keyboard away.
+                onKeyDown={(e) => e.key === 'Enter' && e.currentTarget.blur()}
                 placeholder="Bu satıcının elanlarında axtar"
                 value={q}
                 maxLength={100}

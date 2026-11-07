@@ -11,6 +11,8 @@ interface LightboxProps {
   title: string
   start: number
   onClose: (index: number) => void
+  /** A title and a line under each photo (a provider's completed projects); listings have none. */
+  captions?: Array<{ title: string; description?: string }>
 }
 
 const FOCUSABLE = 'button:not([disabled])'
@@ -18,12 +20,13 @@ const roundButton =
   'flex size-11 shrink-0 items-center justify-center rounded-full bg-surface/10 text-white transition-[background-color,scale] duration-(--dur-fast) ease-out hover:bg-surface/20 active:scale-[0.95] disabled:opacity-30 motion-reduce:active:scale-100'
 
 /**
- * Full-screen photo viewer. Swipe (scroll snap), ← / → and the side buttons move between photos; «Böyüt», a double
+ * Full-screen photo viewer (listing gallery, a provider's completed projects with `captions`). Swipe (scroll snap),
+ * ← / → and the side buttons move between photos; «Böyüt», a double
  * click or a double tap zooms the current photo to twice its size, and then it pans by scrolling or dragging a finger
  * (the swipe between photos is paused while zoomed). Esc or «Bağla» closes it and focus returns to the photo that
  * opened it; Tab stays inside. It fades in (opacity only, so reduced motion needs nothing else) and closes at once.
  */
-export function Lightbox({ images, title, start, onClose }: LightboxProps) {
+export function Lightbox({ images, title, start, onClose, captions }: LightboxProps) {
   const rootRef = useRef<HTMLDivElement>(null)
   const { trackRef, index, goTo } = useSnapIndex(images.length, start)
   const [zoomed, setZoomed] = useState(false)
@@ -126,7 +129,7 @@ export function Lightbox({ images, title, start, onClose }: LightboxProps) {
             >
               <img
                 src={src}
-                alt={`${title} — şəkil ${i + 1}`}
+                alt={captions?.[i]?.title ?? `${title} — şəkil ${i + 1}`}
                 loading={Math.abs(i - start) <= 1 ? 'eager' : 'lazy'}
                 decoding="async"
                 draggable={false}
@@ -149,9 +152,15 @@ export function Lightbox({ images, title, start, onClose }: LightboxProps) {
           </>
         )}
       </div>
-      <p className="shrink-0 px-5 pt-3 pb-[max(16px,env(safe-area-inset-bottom))] text-center text-xs text-footer-text md:hidden">
-        Sürüşdürün · iki dəfə toxunub böyüdün
-      </p>
+      <div className="flex shrink-0 flex-col items-center gap-1 px-5 pt-3 pb-[max(16px,env(safe-area-inset-bottom))] text-center">
+        {captions?.[index] && (
+          <div aria-live="polite" className="flex max-w-[70ch] flex-col gap-0.5">
+            <p className="text-[15px] leading-[1.45] font-semibold">{captions[index].title}</p>
+            {captions[index].description && <p className="text-[13px] leading-[1.5] text-footer-text">{captions[index].description}</p>}
+          </div>
+        )}
+        <p className="text-xs text-footer-text md:hidden">Sürüşdürün · iki dəfə toxunub böyüdün</p>
+      </div>
     </div>,
     document.body,
   )

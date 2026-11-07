@@ -23,7 +23,7 @@ export default function NotFoundPage() {
         <label className="flex min-w-0 flex-1 items-center gap-2.5 px-3">
           <Search aria-hidden size={20} strokeWidth={2} className="shrink-0 text-muted" />
           <span className="sr-only">Axtarış sözü</span>
-          <input type="search" name="q" maxLength={100} placeholder="Məsələn, tuya" className="h-12 min-w-0 flex-1 bg-transparent text-base text-ink outline-none placeholder:text-muted" />
+          <input type="search" name="q" enterKeyHint="search" maxLength={100} placeholder="Məsələn, tuya" className="h-12 min-w-0 flex-1 bg-transparent text-base text-ink outline-none placeholder:text-muted" />
         </label>
         <button type="submit" className="h-12 shrink-0 rounded-xl bg-forest px-6 text-base font-semibold text-white transition-[background-color,scale] duration-(--dur-fast) ease-out hover:bg-forest-hover active:scale-[0.97] motion-reduce:active:scale-100">
           Axtar

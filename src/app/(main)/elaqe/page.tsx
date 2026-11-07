@@ -18,12 +18,19 @@ export default function Page() {
     <HelpShell title="Bizimlə əlaqə" lead="Elan, hesab və ya ödənişlə bağlı sualınızı yazın — 2 saat ərzində cavab veririk. Elan haqqındadırsa, «Elan №»-ni qeyd edin.">
       <ul className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         {ways.map(({ icon: Icon, label, value, href }) => (
-          <li key={label} className="flex items-start gap-3 rounded-xl border border-line bg-surface p-4">
+          <li
+            key={label}
+            className="relative flex items-start gap-3 rounded-xl border border-line bg-surface p-4 has-[a:focus-visible]:outline-2 has-[a:focus-visible]:outline-offset-2 has-[a:focus-visible]:outline-olive"
+          >
             <Icon aria-hidden size={20} strokeWidth={1.8} className="mt-0.5 shrink-0 text-forest" />
             <div className="flex flex-col gap-0.5">
               <p className="text-[13px] text-muted">{label}</p>
               {href ? (
-                <a href={href} className="text-[15px] font-semibold text-ink hover:text-forest hover:underline">
+                <a
+                  href={href}
+                  // The whole card is the target (44 px+ on a phone), not only the line of text.
+                  className="text-[15px] font-semibold text-ink after:absolute after:inset-0 after:rounded-xl after:content-[''] hover:text-forest hover:underline focus-visible:outline-none"
+                >
                   {value}
                 </a>
               ) : (

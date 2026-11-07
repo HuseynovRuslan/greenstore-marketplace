@@ -28,7 +28,17 @@ export const metadata: Metadata = {
 
 // viewport-fit=cover: the page paints edge to edge on notched phones; the bottom nav, the sheet footer and the page
 // gutters pad themselves with env(safe-area-inset-*). Zoom stays enabled (fields are 16 px on touch screens instead).
-export const viewport: Viewport = { width: 'device-width', initialScale: 1, viewportFit: 'cover' }
+// interactive-widget=resizes-content: on Android the keyboard shrinks the layout like on iOS, so bottom sheets and
+// dvh heights stay above it. theme-color is the header's white (--color-surface): the browser bar runs into it. The
+// site has one, light, colour scheme, so form controls never turn dark under a dark OS setting.
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
+  interactiveWidget: 'resizes-content',
+  themeColor: '#ffffff',
+  colorScheme: 'light',
+}
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
