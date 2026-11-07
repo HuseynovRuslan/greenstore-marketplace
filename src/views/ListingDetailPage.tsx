@@ -16,6 +16,7 @@ import { Gallery } from '@/features/listing/Gallery'
 import { narrowCardImages, withCardImage } from '@/features/listing/cardImages'
 import { ContactButtons, FavoriteToggle, MobileContactBar, type ContactInfo } from '@/features/listing/ListingContact'
 import { SellerSummary } from '@/features/listing/SellerSummary'
+import { OwnerStrip } from '@/features/listing/OwnerStrip'
 import { listingGallery, shortTitle, statusInfo } from '@/features/listing/detail'
 import { careItems, factRows, listingPrice, placeLabel, stockLabel, wholesaleLabel, type CareItem } from '@/features/listing/facts'
 import { cn, formatFullDate, formatNumber } from '@/lib/format'
@@ -108,6 +109,8 @@ export function ListingDetail({ listing, seller, category, others, similar, mode
     <RevealProvider>
       <div className={cn('page-x mx-auto flex w-full max-w-[1440px] flex-col gap-4 pb-12 md:gap-5', preview ? 'pt-0' : 'pt-3 md:pt-5')}>
         {!preview && <Breadcrumb items={listingCrumbs(listing, category)} />}
+
+        {mode === 'public' && <OwnerStrip sellerId={listing.sellerId} listingId={listing.id} />}
 
         {mode === 'owner' && status.notice && (
           <Notice tone={status.notice.tone} title={status.notice.title}>

@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useLocalStorage, readStored, writeStored } from '@/hooks/useLocalStorage'
 import { useMyListings } from '@/state/store'
-import type { Listing, ListingStats, UserProfile } from '@/types'
+import type { Listing, ListingStats, PromotionPackageId, UserProfile } from '@/types'
 import { hasProgress, restoreDraft, type PostingDraft } from '@/features/posting/draft'
 import { importPhotos, listingToDraft } from '@/features/posting/fromListing'
 import { photoStore } from '@/features/posting/photos'
@@ -85,5 +85,13 @@ export function useCabinet(user: UserProfile | null) {
     deactivate: (id: string) => change(id, { status: 'inactive', updatedAt: new Date().toISOString() }),
     activate: (id: string) => change(id, { status: 'active', updatedAt: new Date().toISOString() }),
     remove: (id: string) => change(id, { removed: true }),
+    /** After a paid promotion (DEMO: the API would apply it once the payment is confirmed). */
+    promote: (id: string, packageId: PromotionPackageId, days = 1) => {
+      const now = Date.now()
+      change(id, {
+        promotion: { packageId, until: new Date(now + days * 86_400_000).toISOString() },
+        ...(packageId !== 'one-cixar' ? { bumpedAt: new Date(now).toISOString() } : {}),
+      })
+    },
   }
 }
