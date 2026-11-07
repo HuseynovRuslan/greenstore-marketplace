@@ -1,4 +1,5 @@
 import type { Listing } from '@/types'
+import { listingExtras } from './listingExtras'
 
 const img = (file: string) => `/images/listings/${file}.webp`
 
@@ -19,7 +20,7 @@ const img = (file: string) => `/images/listings/${file}.webp`
  * follows the Figma filter state ("Ağaclar / Dekorativ ağaclar" → the same 6 results, mobile filter panel).
  * `publishedAt` times only preserve the Figma ordering of "Son elanlar" (all cards say "12 oktyabr").
  */
-export const listings: Listing[] = [
+const figmaListings: Listing[] = [
   {
     id: 'zeytun-agaci',
     slug: 'zeytun-agaci-olea-europaea',
@@ -358,7 +359,46 @@ export const listings: Listing[] = [
     status: 'expired',
     views: 92,
   },
+  /* ---- Added Nov 2026 so «Elanlarım» shows every status (sample data, not from Figma) ---- */
+  {
+    id: 'sarv-tingleri-topdan',
+    slug: 'sarv-tingleri-topdan',
+    number: 10531,
+    title: 'Sərv tingləri — topdan, 100 ədəddən',
+    price: 5,
+    attributes: ['30–40 sm', '1 yaş'],
+    cityId: 'abseron',
+    publishedAt: '2026-11-03T16:20:00',
+    vip: false,
+    categoryId: 'agaclar',
+    subcategory: 'İynəyarpaqlılar',
+    sellerId: 'abseron-tingcilik',
+    cover: '/images/listings/leyland-servi-1.webp',
+    images: ['/images/listings/leyland-servi-1.webp'],
+    status: 'rejected',
+  },
+  {
+    id: 'yasil-hasar-paketi',
+    slug: 'yasil-hasar-paketi',
+    number: 10377,
+    title: 'Yaşıl hasar dəsti — 10 tuya + əkin',
+    price: 520,
+    attributes: ['10 ting', 'əkin daxil'],
+    cityId: 'abseron',
+    publishedAt: '2026-10-02T11:00:00',
+    vip: false,
+    categoryId: 'agaclar',
+    subcategory: 'İynəyarpaqlılar',
+    sellerId: 'abseron-tingcilik',
+    cover: '/images/listings/tuya-smaragd-1.webp',
+    images: ['/images/listings/tuya-smaragd-1.webp'],
+    status: 'inactive',
+    views: 61,
+  },
 ]
+
+/** The Figma listings with their plant-world fields (listingExtras.ts). */
+export const listings: Listing[] = figmaListings.map((l) => ({ ...l, ...listingExtras[l.id] }))
 
 /** Listings visible to buyers (search, home, seller page). */
 export const publicListings = listings.filter((l) => l.status === 'active')

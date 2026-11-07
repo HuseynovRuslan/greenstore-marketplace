@@ -10,7 +10,27 @@ import type { ServiceQuery } from '@/features/services/query'
 import { dataSource } from '@/seo/env'
 import type { ListingSort } from './marketplace'
 import { mockRepository } from './mockRepository'
-import type { Category, City, Listing, Seller, Service, ServiceProvider } from '@/types'
+import type {
+  Category,
+  City,
+  Listing,
+  ListingInput,
+  ListingStats,
+  ListingSubmitResult,
+  OtpChallenge,
+  OtpPurpose,
+  OtpVerifyResult,
+  PromotionOrder,
+  PromotionPackage,
+  PromotionPackageId,
+  RegistrationInput,
+  ReportInput,
+  Seller,
+  Service,
+  ServiceProvider,
+  ServiceRequestInput,
+  ServiceRequestResult,
+} from '@/types'
 
 export interface PageResult<T> {
   items: T[]
@@ -59,6 +79,33 @@ export interface MarketplaceRepository {
   listServices(): Promise<Service[]>
   getService(slug: string): Promise<Service | undefined>
   getServiceProvider(id: string): Promise<ServiceProvider | undefined>
+
+  /*
+   * Added Nov 2026 (docs/handoff/contract-additions.md). Reads first, then writes. Writes are called from Server
+   * Actions (src/features/** /actions.ts); in DATA_SOURCE=mock they validate and answer like the API would, but
+   * nothing is stored: the demo keeps the user's own data in the browser.
+   */
+  /** Services a provider publishes (provider page and «Bu ustanın digər xidmətləri»). */
+  listProviderServices(providerId: string): Promise<Service[]>
+  /** Every listing of a seller in every status — the owner's «Elanlarım». Authorised by the session in the API. */
+  listOwnListings(sellerId: string): Promise<Listing[]>
+  /** Owner-only numbers for one listing. */
+  getListingStats(listingId: string): Promise<ListingStats | undefined>
+  /** «Önə çıxar», «İrəli çək» and the bundle, with their prices. */
+  listPromotionPackages(): Promise<PromotionPackage[]>
+
+  submitListing(input: ListingInput): Promise<ListingSubmitResult>
+  /** Counts a «Nömrəni göstər» click and returns the number (hidden numbers stay hidden). */
+  revealPhone(listingId: string): Promise<{ phone?: string }>
+  createPromotionOrder(input: { listingId: string; packageId: PromotionPackageId; optionId: string }): Promise<PromotionOrder>
+  submitReport(input: ReportInput): Promise<{ id: string }>
+  submitServiceRequest(input: ServiceRequestInput): Promise<ServiceRequestResult>
+
+  /* Accounts: SMS code, registration, password reset */
+  requestOtp(input: { phone: string; purpose: OtpPurpose }): Promise<OtpChallenge>
+  verifyOtp(input: { challengeId: string; code: string }): Promise<OtpVerifyResult>
+  register(input: RegistrationInput): Promise<{ userId: string }>
+  resetPassword(input: { otpChallengeId: string; password: string }): Promise<{ ok: boolean }>
 }
 
 export function getRepository(): MarketplaceRepository {

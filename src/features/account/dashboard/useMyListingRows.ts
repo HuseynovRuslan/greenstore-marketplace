@@ -19,7 +19,7 @@ export interface MyListingRow {
 
 export type StatusFilter = 'all' | 'active' | 'pending' | 'expired'
 
-type Counts = Record<StatusFilter | 'inactive' | 'rejected', number>
+type Counts = Record<StatusFilter | 'inactive' | 'rejected' | 'draft', number>
 
 /**
  * Rows of "Elanlarım" in the seller cabinet:
@@ -59,7 +59,7 @@ export function useMyListingRows(sellerId: string | undefined) {
   }, [submitted, sellerId, overrides])
 
   const counts = useMemo<Counts>(() => {
-    const c: Counts = { ...dashboardTotals, inactive: 0, rejected: 0 }
+    const c: Counts = { ...dashboardTotals, inactive: 0, rejected: 0, draft: 0 }
     if (!sellerId) (Object.keys(c) as Array<keyof Counts>).forEach((k) => (c[k] = 0))
     for (const row of rows) {
       if (row.source === 'submitted') {

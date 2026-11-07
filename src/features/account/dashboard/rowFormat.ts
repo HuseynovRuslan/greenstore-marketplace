@@ -11,6 +11,7 @@ export const statusBadge: Record<ListingStatus, { label: string; tone: BadgeTone
   rejected: { label: 'Rədd edilib', tone: 'danger' },
   expired: { label: 'Müddəti bitib', tone: 'neutral' },
   inactive: { label: 'Deaktiv', tone: 'neutral' },
+  draft: { label: 'Qaralama', tone: 'neutral' },
 }
 
 /** "№ 10482 · Abşeron · 12 oktyabr 2026 · 248 baxış" */

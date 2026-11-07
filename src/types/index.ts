@@ -37,7 +37,8 @@ export interface City {
   name: string
 }
 
-export type ListingStatus = 'active' | 'pending' | 'rejected' | 'expired' | 'inactive'
+/** `draft` (added Nov 2026): started in «Elan yerləşdir» but not sent; only the owner sees it. */
+export type ListingStatus = 'active' | 'pending' | 'rejected' | 'expired' | 'inactive' | 'draft'
 
 export interface Spec {
   label: string
@@ -154,4 +155,282 @@ export interface UserProfile {
   phone: string
   accountType: SellerType
   sellerId?: string
+}
+
+/* ======================================================================================================== *
+ * Plant-world additions (Nov 2026). All of them are additive and optional: existing fields keep their      *
+ * meaning. Backend notes with example payloads: docs/handoff/contract-additions.md (for Ruslan).           *
+ * ======================================================================================================== */
+
+/** How the price is meant: a fixed price, a price open to bargaining, or no price («Razılaşma yolu ilə»). */
+export type PriceType = 'fixed' | 'negotiable' | 'agreement'
+
+/** What one price buys. Display names live in the frontend (features/posting/options.ts). */
+export type PriceUnit = 'piece' | 'kg' | 'litre' | 'sqm' | 'bag' | 'set' | 'metre'
+
+/** Wholesale («topdan») price per unit from a minimum quantity. */
+export interface WholesalePrice {
+  price: number
+  minQuantity: number
+}
+
+/** «Dibçəkdə» (container), «Torpaq kürəsi ilə» (root ball), «Açıq kök» (bare root). */
+export type RootSystem = 'container' | 'rootball' | 'bare-root'
+export type SunNeed = 'full-sun' | 'part-shade' | 'shade'
+export type WaterNeed = 'low' | 'medium' | 'high'
+export type Foliage = 'evergreen' | 'deciduous'
+
+/** Facts about a living plant, shown as the attributes table and the care block of a listing. */
+export interface PlantFacts {
+  /** Latin name, e.g. "Olea europaea" */
+  species?: string
+  /** Height in cm; `max` omitted for one value */
+  heightCm?: { min: number; max?: number }
+  ageYears?: number
+  rootSystem?: RootSystem
+  /** Container size in litres (when `rootSystem` is "container") */
+  potLitres?: number
+  sun?: SunNeed
+  water?: WaterNeed
+  /** Lowest winter temperature the plant survives, °C (e.g. -12) */
+  frostHardinessC?: number
+  foliage?: Foliage
+  /** Best planting months, 1–12 */
+  plantingMonths?: number[]
+}
+
+export type PromotionPackageId = 'one-cixar' | 'ireli-cek' | 'paket'
+
+/** A paid promotion running on a listing. */
+export interface ListingPromotion {
+  packageId: PromotionPackageId
+  /** ISO date the promotion ends */
+  until: string
+}
+
+/** Owner-only numbers for one listing («Elanlarım»). */
+export interface ListingStats {
+  views: number
+  phoneReveals: number
+  favourites: number
+  /** Last 14 days, oldest first */
+  viewsByDay: Array<{ date: string; views: number }>
+}
+
+/** Optional listing fields added for the plant world (declaration merging keeps the original block untouched). */
+export interface Listing {
+  /** ISO date of the last edit or renewal («Yeniləndi») */
+  updatedAt?: string
+  /** ISO date the listing stops being public unless renewed */
+  expiresAt?: string
+  /** ISO date of the last «İrəli çək» (sorts with `publishedAt` in «Ən yenilər») */
+  bumpedAt?: string
+  priceType?: PriceType
+  priceUnit?: PriceUnit
+  wholesale?: WholesalePrice
+  /** Units in stock, when the seller states it */
+  quantityAvailable?: number
+  /** Village / district / street, shown after the city */
+  area?: string
+  plant?: PlantFacts
+  /** The seller's own care tips, one per item */
+  careTips?: string[]
+  /** «Əkin xidməti var»: the seller can plant it on site */
+  plantingAvailable?: boolean
+  /** Where the seller delivers, e.g. "Bakı və Abşeron" */
+  deliveryAreas?: string
+  /** Contact for listings without a seller profile (individuals) */
+  contactName?: string
+  contactPhone?: string
+  /** The phone number also takes WhatsApp messages */
+  whatsapp?: boolean
+  /** The seller asked to hide the number: buyers write on WhatsApp only */
+  phoneHidden?: boolean
+  promotion?: ListingPromotion
+  /** Moderator's reason, for status "rejected" */
+  rejectionReason?: string
+  /** Owner-only statistics (never sent on public endpoints) */
+  stats?: ListingStats
+}
+
+/** «Tingçilik təsərrüfatı», «Bağ mərkəzi», «Landşaft şirkəti». `Seller.kind` keeps the display text. */
+export type BusinessKind = 'nursery' | 'garden-centre' | 'landscaping'
+
+/** What a business offers besides selling («Çatdırılma», «Əkin», …). */
+export type SellerOffer = 'delivery' | 'planting' | 'design' | 'wholesale' | 'care'
+
+/** Opening hours for one weekday (1 = Monday … 7 = Sunday); `closed` days have no times. */
+export interface OpeningHours {
+  day: 1 | 2 | 3 | 4 | 5 | 6 | 7
+  open?: string
+  close?: string
+  closed?: boolean
+}
+
+/** Optional seller fields added for business profiles (nurseries, garden centres, landscaping companies). */
+export interface Seller {
+  businessKind?: BusinessKind
+  /** Square logo (path under /public) */
+  logo?: string
+  hours?: OpeningHours[]
+  whatsapp?: boolean
+  instagram?: string
+  website?: string
+  /** Map pin of the address */
+  location?: { lat: number; lng: number }
+  offers?: SellerOffer[]
+  /** Typical reply time in minutes («Adətən 1 saat ərzində cavab verir») */
+  responseMinutes?: number
+  /** Services this business publishes on /xidmetler */
+  serviceIds?: string[]
+}
+
+/* ---------- Promotion ---------- */
+
+export interface PromotionOption {
+  id: string
+  /** "7 gün", "1 dəfə" */
+  label: string
+  price: number
+  /** How long it runs */
+  days?: number
+  /** «İrəli çək»: how many times the listing is lifted */
+  bumps?: number
+}
+
+export interface PromotionPackage {
+  id: PromotionPackageId
+  name: string
+  summary: string
+  benefits: string[]
+  options: PromotionOption[]
+}
+
+export interface PromotionOrder {
+  id: string
+  listingId: string
+  packageId: PromotionPackageId
+  optionId: string
+  amount: number
+  /** The mock pays at once; a real payment returns "pending" until the provider confirms */
+  status: 'paid' | 'pending' | 'failed'
+  createdAt: string
+}
+
+/* ---------- Posting ---------- */
+
+/** What «Elan yerləşdir» sends. Photos are uploaded first; `photoIds` keep the gallery order, cover first. */
+export interface ListingInput {
+  kind: CategoryKind
+  categoryId: string
+  subcategory?: string
+  title: string
+  description: string
+  /** Category attributes from the posting form, keyed by attribute id (see features/posting/attributes.ts) */
+  attributes: Record<string, string>
+  plant?: PlantFacts
+  priceType: PriceType
+  price?: number
+  priceUnit?: PriceUnit
+  wholesale?: WholesalePrice
+  quantityAvailable?: number
+  cityId: string
+  area?: string
+  deliveryAvailable: boolean
+  deliveryAreas?: string
+  plantingAvailable: boolean
+  contactName: string
+  contactPhone: string
+  whatsapp: boolean
+  phoneHidden: boolean
+  photoIds: string[]
+  /** Promotion chosen while posting; paid after moderation approves the listing */
+  promotion?: { packageId: PromotionPackageId; optionId: string }
+}
+
+export interface ListingSubmitResult {
+  id: string
+  slug: string
+  number: number
+  status: 'pending'
+}
+
+/* ---------- Phone verification (SMS code) ---------- */
+
+export type OtpPurpose = 'register' | 'login' | 'reset-password' | 'change-phone'
+
+export interface OtpChallenge {
+  challengeId: string
+  /** "+994 50 *** ** 34" */
+  phoneMasked: string
+  expiresInSec: number
+  /** Seconds before «Kodu yenidən göndər» is allowed */
+  resendInSec: number
+  /** DEMO ONLY: the mock returns the code so the flow can be tried without SMS. Never set by a real API. */
+  demoCode?: string
+}
+
+export interface OtpVerifyResult {
+  ok: boolean
+  error?: 'wrong-code' | 'expired' | 'too-many-attempts'
+  attemptsLeft?: number
+}
+
+/* ---------- Accounts ---------- */
+
+export interface RegistrationInput {
+  accountType: SellerType
+  businessKind?: BusinessKind
+  companyName?: string
+  fullName: string
+  phone: string
+  email?: string
+  password: string
+  /** Proof that the phone was verified (OtpChallenge.challengeId after a successful verifyOtp) */
+  otpChallengeId: string
+}
+
+/* ---------- Reports, service requests, saved searches ---------- */
+
+export type ReportTarget = 'listing' | 'seller' | 'service'
+
+export interface ReportInput {
+  target: ReportTarget
+  targetId: string
+  reason: string
+  comment?: string
+}
+
+/** «Usta çağır»: a request sent to a service provider (or to all providers of a category when none is chosen). */
+export interface ServiceRequestInput {
+  serviceId?: string
+  providerId?: string
+  categoryId: string
+  cityId: string
+  area?: string
+  /** ISO date the customer prefers */
+  preferredDate?: string
+  /** Rough size of the job, e.g. "120 m²" */
+  size?: string
+  description: string
+  name: string
+  phone: string
+}
+
+export interface ServiceRequestResult {
+  id: string
+  /** "Sorğu № 3021" */
+  number: number
+}
+
+/** «Axtarışı yadda saxla»: a named catalogue search with optional alerts about new matches. */
+export interface SavedSearch {
+  id: string
+  name: string
+  /** The catalogue query string, e.g. "kateqoriya=agaclar&seher=baki" */
+  query: string
+  alerts: boolean
+  createdAt: string
+  /** New matches since the user last opened it (computed by the API) */
+  newCount?: number
 }
