@@ -5,6 +5,9 @@ The "everything else" pass after the home page and `/elanlar`: GreenStore as the
 [pages inventory](../research/pages-inventory.md) · [turbo.az functional analysis](../research/turbo-functional-analysis.md) ·
 [roadmap with progress](../plan/pages-roadmap.md) · [contract additions for Ruslan](contract-additions.md).
 
+A second pass with the design, writing, mobile, worst-case data and accessibility skills followed: see
+[skills-pass.md](skills-pass.md) (changes, findings, before / after).
+
 Screenshots of every page and key state at 1440 and 390: [`docs/design/pages-v2/`](../design/pages-v2/)
 (`<nn>-<page>-<width>.jpg`; `10-posting-*` and `15-auth-*` are full walk-throughs).
 
