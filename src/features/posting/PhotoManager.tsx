@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState, type DragEvent } from 'react'
+import { useLayoutEffect, useRef, useState, type DragEvent } from 'react'
 import { ChevronLeft, ChevronRight, ImagePlus, Star, Trash2, TriangleAlert } from 'lucide-react'
 import { AnimatePresence, m } from 'motion/react'
 import { loadDomMax, MotionFeatures, useFeaturesReady } from '@/components/motion/MotionFeatures'
@@ -69,11 +69,14 @@ export function PhotoManager({ draft, update, error, urls }: StepProps & { urls:
 
   const setPhotos = (next: DraftPhoto[]) => update({ photos: next })
   const remove = (index: number) => {
+    setMoved('')
     const photo = photos[index]
     setPhotos(photos.filter((_, i) => i !== index))
     void photoStore.remove([photo.id])
     forgetPhotoUrl(photo.id)
     toast('Şəkil silindi')
+    // The last photo: the grid goes away with its buttons, so focus returns to «Şəkil seç».
+    if (photos.length === 1) requestAnimationFrame(() => document.getElementById(fieldDomId('photos'))?.focus())
   }
 
   const onDrop = (e: DragEvent) => {
@@ -82,6 +85,8 @@ export function PhotoManager({ draft, update, error, urls }: StepProps & { urls:
     void addFiles([...e.dataTransfer.files])
   }
 
+  // What the last reorder did, for screen readers («2-ci şəkil indi 3-cü yerdədir»).
+  const [moved, setMoved] = useState('')
   const room = MAX_PHOTOS - photos.length - busy
   const errorMessage = error('photos')
 
@@ -140,7 +145,7 @@ export function PhotoManager({ draft, update, error, urls }: StepProps & { urls:
       </div>
 
       {errorMessage && (
-        <p id="photos-error" role="alert" className="text-xs leading-[1.5] text-danger">
+        <p id="photos-error" className="text-xs leading-[1.5] text-danger">
           {errorMessage}
         </p>
       )}
@@ -162,9 +167,13 @@ export function PhotoManager({ draft, update, error, urls }: StepProps & { urls:
             photos={photos}
             urls={urls}
             busy={busy}
-            onMove={(from, to) => setPhotos(movePhoto(photos, from, to))}
+            onMove={(from, to) => {
+              setPhotos(movePhoto(photos, from, to))
+              setMoved(`${ordinal(from + 1)} şəkil indi ${ordinal(to + 1)} yerdədir`)
+            }}
             onCover={(i) => {
               setPhotos(makeCover(photos, i))
+              setMoved('')
               toast('Örtük şəkli dəyişdi')
             }}
             onRemove={remove}
@@ -181,7 +190,7 @@ export function PhotoManager({ draft, update, error, urls }: StepProps & { urls:
         ))}
       </ul>
       <p className="sr-only" aria-live="polite">
-        {busy > 0 ? `${busy} şəkil hazırlanır` : `${photos.length} şəkil əlavə olunub`}
+        {busy > 0 ? `${busy} şəkil hazırlanır` : moved || `${photos.length} şəkil əlavə olunub`}
       </p>
     </div>
   )
@@ -205,12 +214,35 @@ interface PhotoGridProps {
 function PhotoGrid({ photos, urls, busy, onMove, onCover, onRemove }: PhotoGridProps) {
   const ready = useFeaturesReady()
   const [dragIndex, setDragIndex] = useState<number | null>(null)
+  const listRef = useRef<HTMLOListElement>(null)
+  // Where focus goes once the grid has re-rendered: the moved photo's arrow in the same direction (the other one at
+  // the end of the row), the next photo's «sil» after a removal, «Şəkil seç» when none is left. Without this the
+  // pressed button disappears or turns disabled and focus falls back to the page.
+  const focusNext = useRef<{ id: string; control: 'left' | 'right' } | { removedAt: number } | null>(null)
+  useLayoutEffect(() => {
+    const target = focusNext.current
+    if (!target) return
+    focusNext.current = null
+    const list = listRef.current
+    let el: HTMLElement | null | undefined
+    if ('id' in target) {
+      const item = list?.querySelector<HTMLElement>(`[data-photo="${target.id}"]`)
+      const want = item?.querySelector<HTMLButtonElement>(`[data-control="${target.control}"]`)
+      el = want && !want.disabled ? want : item?.querySelector<HTMLButtonElement>(`[data-control="${target.control === 'left' ? 'right' : 'left'}"]:not(:disabled)`)
+    } else {
+      // The removed photo is still on screen while it fades out: pick from the photos that remain.
+      const next = photos[Math.min(target.removedAt, photos.length - 1)]
+      el = next ? list?.querySelector<HTMLElement>(`[data-photo="${next.id}"] [data-control="remove"]`) : document.getElementById(fieldDomId('photos'))
+    }
+    el?.focus()
+  })
   return (
-    <ol aria-label="Əlavə olunan şəkillər" className="relative grid grid-cols-2 gap-3 xs:grid-cols-3 md:grid-cols-4">
+    <ol ref={listRef} aria-label="Əlavə olunan şəkillər" className="relative grid grid-cols-2 gap-3 xs:grid-cols-3 md:grid-cols-4">
       <AnimatePresence initial={false} mode="popLayout">
         {photos.map((photo, i) => (
           <m.li
             key={photo.id}
+            data-photo={photo.id}
             layout
             initial={ready ? { opacity: 0, scale: 0.95 } : false}
             animate={{ opacity: 1, scale: 1 }}
@@ -246,8 +278,17 @@ function PhotoGrid({ photos, urls, busy, onMove, onCover, onRemove }: PhotoGridP
             >
               {urls[photo.id] ? (
                 <img src={urls[photo.id]} alt={`Şəkil ${i + 1}${i === 0 ? ' (örtük)' : ''}: ${photo.name}`} className="size-full object-cover select-none" draggable={false} />
+              ) : urls[photo.id] === '' ? (
+                <span className="flex size-full flex-col items-center justify-center gap-0.5 px-3 pb-10 text-center text-xs leading-[1.4] text-ink-soft">
+                  <span className="font-semibold text-ink">Şəkil tapılmadı</span>
+                  Silib yenidən əlavə edin
+                </span>
               ) : (
-                <span className="flex size-full animate-pulse items-center justify-center text-xs text-muted">Yüklənir…</span>
+                // The pulse is on the backdrop only: text that fades with it would drop below 4.5:1.
+                <span className="relative flex size-full items-center justify-center text-xs text-ink-soft">
+                  <span aria-hidden className="absolute inset-0 animate-pulse bg-disabled motion-reduce:animate-none" />
+                  <span className="relative">Yüklənir…</span>
+                </span>
               )}
             </div>
             {i === 0 && (
@@ -256,24 +297,54 @@ function PhotoGrid({ photos, urls, busy, onMove, onCover, onRemove }: PhotoGridP
                 Örtük
               </span>
             )}
-            <button type="button" onClick={() => onRemove(i)} aria-label={`${ordinal(i + 1)} şəkli sil`} className={cn(iconButton, 'absolute top-1.5 right-1.5 text-danger')}>
+            <button
+              type="button"
+              data-control="remove"
+              onClick={() => {
+                focusNext.current = { removedAt: i }
+                onRemove(i)
+              }}
+              aria-label={`${ordinal(i + 1)} şəkli sil`} className={cn(iconButton, 'absolute top-1.5 right-1.5 text-danger')}>
               <Trash2 aria-hidden size={16} strokeWidth={1.8} />
             </button>
             <div className="absolute inset-x-1.5 bottom-1.5 flex items-center justify-between gap-1">
-              <button type="button" disabled={i === 0} onClick={() => onMove(i, i - 1)} aria-label={`${ordinal(i + 1)} şəkli sola çək`} className={iconButton}>
+              <button
+                type="button"
+                data-control="left"
+                disabled={i === 0}
+                onClick={() => {
+                  focusNext.current = { id: photo.id, control: 'left' }
+                  onMove(i, i - 1)
+                }}
+                aria-label={`${ordinal(i + 1)} şəkli sola çək`}
+                className={iconButton}
+              >
                 <ChevronLeft aria-hidden size={18} strokeWidth={2} />
               </button>
               {i > 0 && (
                 <button
                   type="button"
-                  onClick={() => onCover(i)}
+                  onClick={() => {
+                    focusNext.current = { id: photo.id, control: 'right' }
+                    onCover(i)
+                  }}
                   aria-label={`${ordinal(i + 1)} şəkli örtük et`}
                   className="relative h-9 rounded-full bg-surface/95 px-2.5 text-xs font-semibold whitespace-nowrap text-forest shadow-sm transition-[scale] duration-(--dur-fast) ease-out active:scale-[0.96] motion-reduce:active:scale-100 after:absolute after:-inset-1 after:content-['']"
                 >
                   Örtük et
                 </button>
               )}
-              <button type="button" disabled={i === photos.length - 1} onClick={() => onMove(i, i + 1)} aria-label={`${ordinal(i + 1)} şəkli sağa çək`} className={iconButton}>
+              <button
+                type="button"
+                data-control="right"
+                disabled={i === photos.length - 1}
+                onClick={() => {
+                  focusNext.current = { id: photo.id, control: 'right' }
+                  onMove(i, i + 1)
+                }}
+                aria-label={`${ordinal(i + 1)} şəkli sağa çək`}
+                className={iconButton}
+              >
                 <ChevronRight aria-hidden size={18} strokeWidth={2} />
               </button>
             </div>
@@ -281,8 +352,9 @@ function PhotoGrid({ photos, urls, busy, onMove, onCover, onRemove }: PhotoGridP
         ))}
       </AnimatePresence>
       {Array.from({ length: busy }, (_, i) => (
-        <li key={`busy-${i}`} aria-label="Şəkil hazırlanır" className="flex aspect-[4/3] animate-pulse items-center justify-center rounded-lg bg-disabled text-xs text-muted">
-          Hazırlanır…
+        <li key={`busy-${i}`} className="relative flex aspect-[4/3] items-center justify-center overflow-hidden rounded-lg bg-mint text-xs text-ink-soft">
+          <span aria-hidden className="absolute inset-0 animate-pulse bg-disabled motion-reduce:animate-none" />
+          <span className="relative">Hazırlanır…</span>
         </li>
       ))}
     </ol>

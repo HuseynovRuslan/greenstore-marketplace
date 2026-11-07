@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { Check, Clock3, Plus, Rocket, Sprout } from 'lucide-react'
 import { ButtonLink } from '@/components/ui/Button'
@@ -28,6 +29,12 @@ export function PostingDone() {
   const last = readStored<{ id?: string; promotion?: { optionId: string } | null; edited?: boolean } | null>(LAST_SENT_KEY, null)
   const listing = submitted.find((l) => l.id === last?.id) ?? submitted[0]
   const promo = last?.promotion ? promotionOption(last.promotion.optionId) : undefined
+  // Arriving from «Elanı göndər» the focus would be left on the page body: the result's heading takes it, so a
+  // screen reader says what happened.
+  const headingRef = useRef<HTMLHeadingElement>(null)
+  useEffect(() => {
+    headingRef.current?.focus({ preventScroll: true })
+  }, [])
 
   if (!listing) {
     return (
@@ -51,7 +58,7 @@ export function PostingDone() {
         <span aria-hidden className="flex size-16 animate-pop-in items-center justify-center rounded-full bg-success-soft text-success motion-reduce:animate-none">
           <Check size={32} strokeWidth={2.4} />
         </span>
-        <h1 className="text-[26px] leading-[1.2] font-semibold tracking-[-0.02em] text-forest md:text-[32px]">
+        <h1 ref={headingRef} tabIndex={-1} className="text-[26px] leading-[1.2] font-semibold tracking-[-0.02em] text-forest outline-none md:text-[32px]">
           {last?.edited ? 'Dəyişikliklər yoxlamaya göndərildi' : 'Elan yoxlamaya göndərildi'}
         </h1>
         <p className="max-w-[46ch] text-[15px] leading-[1.55] text-ink-soft">Təşəkkür edirik! Yoxlamadan keçən kimi elan saytda görünəcək və alıcılar sizinlə əlaqə saxlayacaq.</p>

@@ -146,7 +146,7 @@ export function PromotionPlanner({ packages }: { packages: PromotionPackage[] })
         )}
       </section>
 
-      <div className="gs-keyboard-aside sticky bottom-[calc(86px+env(safe-area-inset-bottom,0px))] z-20 flex flex-col gap-3 rounded-2xl border border-line bg-surface/95 p-4 shadow-popover backdrop-blur-md sm:flex-row sm:items-center sm:justify-between md:bottom-4">
+      <div data-bottom-bar="checkout" className="gs-keyboard-aside sticky bottom-[calc(86px+env(safe-area-inset-bottom,0px))] z-20 flex flex-col gap-3 rounded-2xl border border-line bg-surface/95 p-4 shadow-popover backdrop-blur-md sm:flex-row sm:items-center sm:justify-between md:bottom-4">
         <p className="text-sm leading-[1.45] text-ink" aria-live="polite">
           {pkg && option ? (
             <>

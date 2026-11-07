@@ -1,6 +1,6 @@
 'use client'
 
-import { useId, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes, type TextareaHTMLAttributes } from 'react'
+import { createContext, useContext, useId, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes, type TextareaHTMLAttributes } from 'react'
 import { ChevronDown } from 'lucide-react'
 import { cn } from '@/lib/format'
 
@@ -44,7 +44,24 @@ interface FieldShellProps {
   children: ReactNode
 }
 
+const ErrorsAnnounced = createContext(true)
+
+/**
+ * Inside a form with an error summary (the posting flow) a field's error is not a live region: the summary takes
+ * focus once per «Davam et» and each error is read with its field (aria-describedby), so fixing a field while typing
+ * never triggers a stream of announcements. Elsewhere an error appears only on submit and is announced (role=alert).
+ */
+export function QuietFieldErrors({ children }: { children: ReactNode }) {
+  return <ErrorsAnnounced.Provider value={false}>{children}</ErrorsAnnounced.Provider>
+}
+
+/** `role="alert"` for a field error, unless inside QuietFieldErrors. */
+export function useErrorRole(): 'alert' | undefined {
+  return useContext(ErrorsAnnounced) ? 'alert' : undefined
+}
+
 export function FieldShell({ label, hint, error, htmlFor, hintId, errorId, optional, aside, className, children }: FieldShellProps) {
+  const errorRole = useErrorRole()
   return (
     <div className={cn('flex min-w-0 flex-col items-start gap-[7px]', className)}>
       {(label || aside) && (
@@ -60,7 +77,7 @@ export function FieldShell({ label, hint, error, htmlFor, hintId, errorId, optio
       )}
       {children}
       {error ? (
-        <p id={errorId} role="alert" className="w-full text-xs leading-[1.5] text-danger">
+        <p id={errorId} role={errorRole} className="w-full text-xs leading-[1.5] text-danger">
           {error}
         </p>
       ) : (

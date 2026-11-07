@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { render, screen, within } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { attributeLine, attributesFor, parseNumberValue, plantFacts, unitsFor, visibleAttributes } from '@/features/posting/attributes'
 import { createDraft, restoreDraft, toListing, toListingInput, withCategory, type PostingDraft } from '@/features/posting/draft'
@@ -189,8 +189,12 @@ describe('posting wizard', () => {
     )
     expect(screen.getByRole('heading', { level: 1, name: 'Nə yerləşdirirsiniz?' })).toHaveFocus()
     await user.click(screen.getByRole('button', { name: /Davam et/ }))
-    const summary = screen.getByRole('alert', { name: /düzəldin/ })
+    // The summary is announced by taking focus (no role=alert: it would speak again on every keystroke).
+    const summary = screen.getByRole('group', { name: /düzəldin/ })
+    await waitFor(() => expect(summary).toHaveFocus())
     expect(within(summary).getByRole('link', { name: /Məhsul və ya xidmət seçin/ })).toBeInTheDocument()
+    // Field errors inside the flow are read with their field, not as live alerts.
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
     expect(push).not.toHaveBeenCalled()
 
     await user.click(screen.getByRole('radio', { name: /Məhsul satıram/ }))

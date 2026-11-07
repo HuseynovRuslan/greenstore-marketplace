@@ -101,6 +101,7 @@ export function MobileContactBar({ info, amount, unit }: { info: ContactInfo; am
     <div
       role="region"
       aria-label="Satıcı ilə əlaqə"
+      data-bottom-bar="contact"
       className="gs-keyboard-aside sticky bottom-[calc(86px+env(safe-area-inset-bottom,0px))] z-30 flex w-full items-center gap-2.5 border-t border-line bg-surface/95 px-5 py-2.5 backdrop-blur-md md:hidden"
     >
       {/* A price is never cut: the amount keeps its width (15 px under 360 px), the unit sits under it. */}

@@ -4,7 +4,7 @@ import { useState, type InputHTMLAttributes, type ReactNode, type Ref } from 're
 import { Check, Eye, EyeOff } from 'lucide-react'
 import { cn } from '@/lib/format'
 import { formatLocal, localDigits, phoneValue } from '@/lib/phone'
-import { controlClass, describedBy, FieldShell, useFieldIds } from './Field'
+import { controlClass, describedBy, FieldShell, useFieldIds, useErrorRole } from './Field'
 
 /*
  * Form controls added for the posting flow, auth and the cabinet (Nov 2026). They share Field.tsx's shell: a
@@ -225,6 +225,7 @@ interface CheckboxFieldProps extends Omit<InputHTMLAttributes<HTMLInputElement>,
 /** Checkbox with its label in one ≥ 44 px row; forest when checked. */
 export function CheckboxField({ label, error, className, id, ...rest }: CheckboxFieldProps) {
   const ids = useFieldIds(id)
+  const errorRole = useErrorRole()
   return (
     <div className={cn('flex flex-col gap-1', className)}>
       <label htmlFor={ids.fieldId} className="flex min-h-11 cursor-pointer items-start gap-3 py-2.5 text-sm leading-[1.45] text-ink">
@@ -239,7 +240,7 @@ export function CheckboxField({ label, error, className, id, ...rest }: Checkbox
         <span>{label}</span>
       </label>
       {error && (
-        <p id={ids.errorId} role="alert" className="text-xs leading-[1.5] text-danger">
+        <p id={ids.errorId} role={errorRole} className="text-xs leading-[1.5] text-danger">
           {error}
         </p>
       )}
@@ -313,6 +314,7 @@ export function ChoiceCard({ name, value, checked, onChange, title, description,
 /** Fieldset with a visible legend in the label style — the wrapper for ChoiceCard groups and option pills. */
 export function FieldGroup({ legend, hint, error, optional, children, className }: { legend: ReactNode; hint?: ReactNode; error?: string; optional?: boolean; children: ReactNode; className?: string }) {
   const ids = useFieldIds()
+  const errorRole = useErrorRole()
   return (
     <fieldset aria-describedby={error ? ids.errorId : hint ? ids.hintId : undefined} aria-invalid={error ? true : undefined} className={cn('flex min-w-0 flex-col gap-2.5', className)}>
       <legend className="mb-2.5 text-[13px] leading-[normal] font-semibold text-ink">
@@ -321,7 +323,7 @@ export function FieldGroup({ legend, hint, error, optional, children, className 
       </legend>
       {children}
       {error ? (
-        <p id={ids.errorId} role="alert" className="text-xs leading-[1.5] text-danger">
+        <p id={ids.errorId} role={errorRole} className="text-xs leading-[1.5] text-danger">
           {error}
         </p>
       ) : (

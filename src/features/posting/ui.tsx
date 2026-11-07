@@ -78,12 +78,15 @@ export function StepProgress({ step, reached, dir }: { step: StepNumber; reached
   )
 }
 
-/** After a failed «Davam et»: what to fix, each item a link to its field. Receives focus. */
+/**
+ * After a failed «Davam et»: what to fix, each item a link to its field. It takes focus, which is what announces it
+ * (no role=alert: that would speak again on every keystroke while the list shrinks).
+ */
 export const ErrorSummary = forwardRef<HTMLDivElement, { errors: Record<string, string>; labels: Record<string, string> }>(function ErrorSummary({ errors, labels }, ref) {
   const keys = Object.keys(errors)
   if (!keys.length) return null
   return (
-    <div ref={ref} tabIndex={-1} role="alert" aria-labelledby="xeta-basliq" className="rounded-xl border border-danger/40 bg-danger-soft p-4 outline-none">
+    <div ref={ref} tabIndex={-1} role="group" aria-labelledby="xeta-basliq" className="rounded-xl border border-danger/40 bg-danger-soft p-4 outline-none">
       <p id="xeta-basliq" className="text-sm leading-[1.5] font-semibold text-ink">
         Davam etmək üçün {keys.length === 1 ? 'bir xananı' : `${keys.length} xananı`} düzəldin
       </p>

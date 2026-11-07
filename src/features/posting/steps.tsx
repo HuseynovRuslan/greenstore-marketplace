@@ -388,7 +388,7 @@ export function PriceStep({ draft, update, error, touch }: StepProps) {
               />
             </div>
             {error('cityId') && (
-              <p id={`${id('cityId')}-error`} role="alert" className="text-xs leading-[1.5] text-danger">
+              <p id={`${id('cityId')}-error`} className="text-xs leading-[1.5] text-danger">
                 {error('cityId')}
               </p>
             )}
@@ -469,7 +469,7 @@ export function ContactStep({ draft, update, error, touch, user }: StepProps) {
           description="Elanda «WhatsApp-a yaz» düyməsi olacaq. Alıcıların çoxu əvvəl yazır."
         />
         {error('whatsapp') && (
-          <p role="alert" className="text-xs leading-[1.5] text-danger">
+          <p className="text-xs leading-[1.5] text-danger">
             {error('whatsapp')}
           </p>
         )}

@@ -52,12 +52,14 @@ export function ListingNotFound() {
 }
 
 /** Section of the listing page: a white panel with a semibold forest heading (Variant 2). */
-function Section({ title, id, children, className }: { title: string; id: string; children: ReactNode; className?: string }) {
+function Section({ title, id, children, className, nested }: { title: string; id: string; children: ReactNode; className?: string; nested?: boolean }) {
+  // In the posting preview the page sits under the step's «Önizləmə» heading, so its headings move one level down.
+  const Heading = nested ? 'h3' : 'h2'
   return (
     <section aria-labelledby={id} className={cn('flex flex-col gap-4 rounded-xl border border-line bg-surface p-5 md:p-6', className)}>
-      <h2 id={id} className="text-lg leading-[1.3] font-semibold tracking-[-0.01em] text-forest">
+      <Heading id={id} className="text-lg leading-[1.3] font-semibold tracking-[-0.01em] text-forest">
         {title}
-      </h2>
+      </Heading>
       {children}
     </section>
   )
@@ -89,6 +91,8 @@ interface ListingDetailProps {
  */
 export function ListingDetail({ listing, seller, category, others, similar, mode = 'public' }: ListingDetailProps) {
   const preview = mode === 'preview'
+  const Title = preview ? 'h3' : 'h1'
+  const Sub = preview ? 'h4' : 'h3'
   const status = statusInfo(listing.status)
   const price = listingPrice(listing)
   const wholesale = wholesaleLabel(listing)
@@ -136,7 +140,7 @@ export function ListingDetail({ listing, seller, category, others, similar, mode
                   </div>
                 )}
                 <div className="flex flex-col gap-1.5">
-                  <h1 className="text-[22px] leading-[1.25] font-semibold tracking-[-0.015em] break-words text-forest md:text-[26px]">{listing.title}</h1>
+                  <Title className="text-[22px] leading-[1.25] font-semibold tracking-[-0.015em] break-words text-forest md:text-[26px]">{listing.title}</Title>
                   <p className="flex items-center gap-1.5 text-sm leading-[1.4] text-muted">
                     <MapPin aria-hidden size={15} strokeWidth={1.8} className="shrink-0" />
                     {placeLabel(listing)}
@@ -218,7 +222,7 @@ export function ListingDetail({ listing, seller, category, others, similar, mode
 
           <div className="flex min-w-0 flex-col gap-5 lg:col-start-1 lg:row-start-2">
             {facts.length > 0 && (
-              <Section title="Xüsusiyyətlər" id="xususiyyetler">
+              <Section nested={preview} title="Xüsusiyyətlər" id="xususiyyetler">
                 <dl className="grid grid-cols-1 gap-x-8 md:grid-cols-2">
                   {facts.map((f) => (
                     <div key={f.label} className="flex justify-between gap-4 border-b border-line py-2.5 text-sm leading-[1.45]">
@@ -231,7 +235,7 @@ export function ListingDetail({ listing, seller, category, others, similar, mode
             )}
 
             {(care.length > 0 || listing.careTips?.length) && (
-              <Section title="Qulluq" id="qulluq">
+              <Section nested={preview} title="Qulluq" id="qulluq">
                 {care.length > 0 && (
                   <ul className="grid grid-cols-1 gap-2.5 xs:grid-cols-2">
                     {care.map((c) => {
@@ -252,7 +256,7 @@ export function ListingDetail({ listing, seller, category, others, similar, mode
                 )}
                 {listing.careTips && listing.careTips.length > 0 && (
                   <div className="flex flex-col gap-2">
-                    <h3 className="text-sm leading-[1.4] font-semibold text-ink">Satıcının məsləhəti</h3>
+                    <Sub className="text-sm leading-[1.4] font-semibold text-ink">Satıcının məsləhəti</Sub>
                     <ul className="flex flex-col gap-2 text-sm leading-[1.55] text-ink">
                       {listing.careTips.map((tip, i) => (
                         <li key={i} className="flex gap-2.5">
@@ -267,7 +271,7 @@ export function ListingDetail({ listing, seller, category, others, similar, mode
             )}
 
             {listing.description && listing.description.length > 0 && (
-              <Section title="Təsvir" id="tesvir">
+              <Section nested={preview} title="Təsvir" id="tesvir">
                 <div className="flex max-w-[68ch] flex-col gap-3 text-[15px] leading-[1.6] break-words text-ink">
                   {listing.description.map((p, i) => (
                     <p key={i}>{p}</p>

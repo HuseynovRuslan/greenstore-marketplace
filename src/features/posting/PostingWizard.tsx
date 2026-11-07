@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { ArrowLeft, ArrowRight, CloudCheck, LogIn, RotateCcw, Send } from 'lucide-react'
 import { Button, ButtonLink } from '@/components/ui/Button'
 import { Dialog } from '@/components/ui/Dialog'
+import { QuietFieldErrors } from '@/components/ui/Field'
 import { Notice } from '@/components/ui/Notice'
 import { cn } from '@/lib/format'
 import { useMyListings, useSession } from '@/state/store'
@@ -225,7 +226,7 @@ export function PostingWizard({ step }: { step: StepNumber }) {
           <ErrorSummary ref={summaryRef} errors={attempted ? errors : {}} labels={LABELS} />
           {/* The phone button bar below is position: fixed, so it stays outside the animated box (a transform would hold it). */}
           <div data-dir={dir} className={cn('gs-step', !review && 'rounded-2xl border border-line bg-surface p-5 md:p-7')}>
-            {body}
+            <QuietFieldErrors>{body}</QuietFieldErrors>
           </div>
 
           {sendError && (

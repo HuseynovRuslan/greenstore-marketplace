@@ -35,6 +35,8 @@ export function OtpVerify({ challenge: initial, phone, purpose, onVerified, onCh
   const [error, setError] = useState<string>()
   const [busy, setBusy] = useState(false)
   const [wait, setWait] = useState(initial.resendInSec)
+  // Said by a screen reader when a new code goes out (the field takes focus again, which alone says nothing new).
+  const [notice, setNotice] = useState('')
   const fieldRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -73,6 +75,7 @@ export function OtpVerify({ challenge: initial, phone, purpose, onVerified, onCh
     setWait(result.resendInSec)
     setCode('')
     setError(undefined)
+    setNotice(`Yeni kod ${result.phoneMasked} nömrəsinə göndərildi.`)
   }
 
   const submit = (e: FormEvent) => {
@@ -103,6 +106,9 @@ export function OtpVerify({ challenge: initial, phone, purpose, onVerified, onCh
       <Button type="submit" fullWidth disabled={busy} aria-busy={busy}>
         {busy ? 'Yoxlanılır…' : submitLabel}
       </Button>
+      <p role="status" className="sr-only">
+        {notice}
+      </p>
       <p className="text-center text-sm leading-[1.5] text-muted">
         {wait > 0 ? (
           <span>

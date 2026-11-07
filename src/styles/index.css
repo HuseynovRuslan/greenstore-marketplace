@@ -163,6 +163,33 @@
 }
 
 /*
+ * Focus is never hidden under the sticky header or the bars fixed to the bottom (WCAG 2.4.11): the browser scrolls a
+ * control that takes focus into the part of the window they leave free. Bottom: the bottom nav or the posting bar
+ * (≈ 90 px), the listing / service contact bar above the nav (≈ 155 px), the promotion checkout bar above the nav.
+ */
+@layer base {
+  html {
+    scroll-padding-top: 72px;
+  }
+  @media (width >= 48rem) {
+    html {
+      scroll-padding-top: 92px;
+    }
+  }
+  @media (width < 48rem) {
+    html:has(.gs-keyboard-aside) {
+      scroll-padding-bottom: calc(var(--gs-bottom-ui, 104px) + env(safe-area-inset-bottom, 0px));
+    }
+    html:has([data-bottom-bar='contact']) {
+      --gs-bottom-ui: 172px;
+    }
+    html:has([data-bottom-bar='checkout']) {
+      --gs-bottom-ui: 236px;
+    }
+  }
+}
+
+/*
  * Catalogue sidebar (useStickySide sets --side-h): one that fits the window sticks 16 px under the 76 px header;
  * a taller one scrolls with the page, then sticks by its bottom edge. No inner scroll area, so its Listbox panels
  * are never clipped.

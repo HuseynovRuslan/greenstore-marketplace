@@ -67,7 +67,8 @@ export function usePhotoUrls(photos: DraftPhoto[]): Record<string, string | unde
         if (blob && !urlCache.has(p.id)) urlCache.set(p.id, URL.createObjectURL(blob))
       }),
     ).then(() => {
-      if (!cancelled) setUrls(Object.fromEntries(photos.map((p) => [p.id, urlCache.get(p.id)])))
+      // '' = looked up and not found (site data cleared, another browser): the grid says so instead of loading forever.
+      if (!cancelled) setUrls(Object.fromEntries(photos.map((p) => [p.id, urlCache.get(p.id) ?? ''])))
     })
     return () => {
       cancelled = true
