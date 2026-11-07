@@ -19,7 +19,7 @@ export function ListingRow({ listing }: { listing: Listing }) {
     <article
       className={cn(
         // Press: the row dips to .99 (it is wide; .98 would move its edges by 20 px at 1440).
-        'group relative flex w-full items-start gap-3 rounded-xl border border-line bg-surface p-[7px] transition-[border-color,box-shadow,scale] duration-(--dur-base) ease-out hover:border-olive hover:shadow-card-hover has-[a:active]:scale-[0.99] has-[a:active]:duration-(--dur-fast) motion-reduce:has-[a:active]:scale-100 md:gap-5 md:p-[11px]',
+        'group/card relative flex w-full items-start gap-3 rounded-xl border border-line bg-surface p-[7px] transition-[border-color,box-shadow,scale] duration-(--dur-base) ease-out hover:border-olive hover:shadow-card-hover has-[a:active]:scale-[0.99] has-[a:active]:duration-(--dur-fast) motion-reduce:has-[a:active]:scale-100 md:gap-5 md:p-[11px]',
         cardFocusClass,
       )}
     >
@@ -27,7 +27,7 @@ export function ListingRow({ listing }: { listing: Listing }) {
         <CardImage
           src={listing.cover}
           className="aspect-[4/3] rounded-lg"
-          imgClassName="transition-transform duration-(--dur-base) ease-out motion-safe:group-hover:scale-[1.03]"
+          imgClassName="transition-transform duration-(--dur-base) ease-out motion-safe:group-hover/card:scale-[1.03]"
         />
         {listing.vip && <PromotedBadge size="card" className="absolute top-2 left-2 max-md:hidden" />}
         <FavoriteButton kind="listing" id={listing.id} title={listing.title} className="absolute top-0.5 right-0.5" />

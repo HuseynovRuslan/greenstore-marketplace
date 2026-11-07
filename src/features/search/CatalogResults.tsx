@@ -132,7 +132,7 @@ export function CatalogResults(props: CatalogResultsProps) {
           aria-labelledby={headingId}
           aria-busy={isPending || undefined}
           data-pending={isPending || undefined}
-          className="group flex min-w-0 flex-1 scroll-mt-28 flex-col gap-4"
+          className="group/results flex min-w-0 flex-1 scroll-mt-28 flex-col gap-4"
         >
           <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
             <div className="flex min-w-0 flex-wrap items-baseline gap-x-3 gap-y-1">
@@ -165,7 +165,7 @@ export function CatalogResults(props: CatalogResultsProps) {
           {/* The old results stay while new ones load; they dim after 150 ms, and brighten at once when done. The
               fade stays under reduced motion (it is not movement): without the transition the delay went too, and
               every load, however short, flashed the results. */}
-          <div className="flex flex-col gap-8 transition-opacity duration-(--dur-base) ease-out group-data-pending:opacity-55 group-data-pending:delay-150">
+          <div className="flex flex-col gap-8 transition-opacity duration-(--dur-base) ease-out group-data-pending/results:opacity-55 group-data-pending/results:delay-150">
             {total === 0 ? (
               <CatalogEmptyState
                 chips={shownChips}

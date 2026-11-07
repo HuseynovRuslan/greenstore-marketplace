@@ -40,6 +40,15 @@ describe.each([
     expect(screen.queryByText('Önə çıxan')).not.toBeInTheDocument()
   })
 
+  it('zooms its photo on its own hover only', () => {
+    // The results section is a group too: with a plain `group-hover`, hovering one card zoomed every photo.
+    const { container } = renderIn(<Card listing={plain} />)
+    expect(screen.getByRole('article')).toHaveClass('group/card')
+    const img = container.querySelector('img')!
+    expect(img).toHaveClass('motion-safe:group-hover/card:scale-[1.03]')
+    expect(img.className).not.toMatch(/group-hover:/)
+  })
+
   it('toggles the favourite without following the link', async () => {
     const user = userEvent.setup()
     renderIn(<Card listing={plain} />)

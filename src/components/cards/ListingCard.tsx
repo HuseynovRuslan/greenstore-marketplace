@@ -35,7 +35,7 @@ export function ListingCard({ listing, className }: { listing: Listing; classNam
     <article
       className={cn(
         // Press (the title link covers the card): the card dips to .98; not when the favourite button is pressed.
-        'group relative flex h-full w-full min-w-0 flex-col gap-2 rounded-xl border border-line bg-surface p-[7px] transition-[border-color,box-shadow,scale] duration-(--dur-base) ease-out hover:border-olive hover:shadow-card-hover has-[a:active]:scale-[0.98] has-[a:active]:duration-(--dur-fast) motion-reduce:has-[a:active]:scale-100 md:gap-3 md:p-[11px]',
+        'group/card relative flex h-full w-full min-w-0 flex-col gap-2 rounded-xl border border-line bg-surface p-[7px] transition-[border-color,box-shadow,scale] duration-(--dur-base) ease-out hover:border-olive hover:shadow-card-hover has-[a:active]:scale-[0.98] has-[a:active]:duration-(--dur-fast) motion-reduce:has-[a:active]:scale-100 md:gap-3 md:p-[11px]',
         cardFocusClass,
         className,
       )}
@@ -46,7 +46,8 @@ export function ListingCard({ listing, className }: { listing: Listing; classNam
           src={listing.cover}
           sources={sources}
           className="aspect-square rounded-lg md:aspect-[4/3]"
-          imgClassName="transition-transform duration-(--dur-base) ease-out motion-safe:group-hover:scale-[1.03]"
+          // A named group: a plain `group-hover` also fired for the results section (`group` too), zooming every card.
+          imgClassName="transition-transform duration-(--dur-base) ease-out motion-safe:group-hover/card:scale-[1.03]"
         />
         {listing.vip && <PromotedBadge size="card" className="absolute top-1.5 left-1.5 md:top-2 md:left-2" />}
       </div>
