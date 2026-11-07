@@ -27,7 +27,7 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
   const filtered = hasActiveFilters(parsed)
   const page = parsePage(query.get('sehife'))
   return pageMetadata({
-    title: page > 1 ? `Landşaft və bağçılıq xidmətləri — səhifə ${page}` : 'Landşaft və bağçılıq xidmətləri',
+    title: page > 1 ? `Bağ xidmətləri — səhifə ${page}` : 'Bağ xidmətləri: landşaft, əkin, çim, suvarma',
     description: `Bağınızın işini peşəkara həvalə edin: dizayndan gündəlik qulluğa — Azərbaycanda ${formatNumber(platformServiceTotal)} xidmət elanı.`,
     canonical: filtered ? undefined : withPage('/xidmetler', page),
     index: !filtered,
@@ -37,12 +37,12 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
 /** /xidmetler — services catalogue; state in the query string, results and pagination server-rendered. */
 export default async function Page({ searchParams }: Props) {
   const query = toSearchParams(await searchParams).toString()
-  const { result, outOfRange } = await load(query)
+  const { parsed, result, outOfRange } = await load(query)
   if (outOfRange) notFound()
   return (
     <>
       <JsonLd data={crumbsJsonLd(servicesCrumbs)} />
-      <ServicesPage query={query} result={result} />
+      <ServicesPage query={query} parsed={parsed} result={result} />
     </>
   )
 }

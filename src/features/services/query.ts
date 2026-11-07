@@ -156,3 +156,16 @@ export function searchServices(query: ServiceQuery) {
     active,
   }
 }
+
+/** `query` with `patch` applied; page resets unless it is the patch. */
+export function serviceHref(query: string, patch: Record<string, string | undefined>) {
+  const params = new URLSearchParams(query)
+  for (const [k, v] of Object.entries(patch)) {
+    if (v) params.set(k, v)
+    else params.delete(k)
+  }
+  if (!('sehife' in patch)) params.delete('sehife')
+  params.delete('seher')
+  const s = params.toString()
+  return s ? `/xidmetler?${s}` : '/xidmetler'
+}

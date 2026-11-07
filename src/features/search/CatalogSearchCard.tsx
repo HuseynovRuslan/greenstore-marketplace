@@ -23,6 +23,11 @@ interface CatalogSearchCardProps {
   cityCounts?: CityCounts
   onSearch: (q: string, cityIds: string[]) => void
   className?: string
+  /** Where the form goes without JavaScript (default /elanlar; /xidmetler reuses the card) */
+  action?: string
+  placeholder?: string
+  /** Accessible name of the search region */
+  label?: string
 }
 
 /**
@@ -30,7 +35,7 @@ interface CatalogSearchCardProps {
  * the category pages. Search word · city · «Axtar». It carries the hero ids, so the header's search pill leads back
  * to it once it has scrolled away. Older links with several cities keep them as one extra option.
  */
-export function CatalogSearchCard({ q, cityIds, query, cityCounts, onSearch, className }: CatalogSearchCardProps) {
+export function CatalogSearchCard({ q, cityIds, query, cityCounts, onSearch, className, action = '/elanlar', placeholder = 'Məsələn, zeytun ağacı', label = 'Elan axtarışı' }: CatalogSearchCardProps) {
   const urlCity = cityIds.join(',')
   const [text, setText] = useState(q)
   const [city, setCity] = useState(urlCity)
@@ -61,7 +66,7 @@ export function CatalogSearchCard({ q, cityIds, query, cityCounts, onSearch, cla
       id={HERO_SEARCH_ID}
       className={cn('w-full scroll-mt-28 rounded-2xl border border-line-strong bg-surface shadow-search md:rounded-search', className)}
     >
-      <form role="search" aria-label="Elan axtarışı" action="/elanlar" method="get" onSubmit={submit}>
+      <form role="search" aria-label={label} action={action} method="get" onSubmit={submit}>
         {hidden.map(([key, value]) => (
           <input key={key} type="hidden" name={key} value={value} />
         ))}
@@ -82,7 +87,7 @@ export function CatalogSearchCard({ q, cityIds, query, cityCounts, onSearch, cla
               maxLength={QUERY_MAX}
               value={text}
               onChange={(e) => setText(e.target.value)}
-              placeholder="Məsələn, zeytun ağacı"
+              placeholder={placeholder}
               className="h-full min-w-0 flex-1 bg-transparent text-base text-ink outline-none placeholder:text-muted md:text-[17px]"
             />
           </label>

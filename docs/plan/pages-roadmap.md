@@ -102,5 +102,6 @@ Update after every commit (newest last).
 | 2 · Auth (login by password or SMS, registration with business kinds + SMS code, password reset) | done | bde3a68 |
 | 4 · Seller / nursery page + /saticilar directory | done | d9ac549 |
 | 5 + 6 · Kabinet (statuses, renew/edit/deactivate/delete/promote, stats) + favourites + saved searches | done | 17ba8ae |
-| 7 · Promotion packages (/reklam) with mock checkout; owner strip on the listing page | done | (this commit) |
-| 8 · Services catalogue and service page + «Usta çağır» | next | |
+| 7 · Promotion packages (/reklam) with mock checkout; owner strip on the listing page | done | b798bb0 |
+| 8 · Services catalogue and service page + «Usta çağır» | done | (this commit) |
+| 9 · 404, footer/help pages, full footer, admin header | next | |

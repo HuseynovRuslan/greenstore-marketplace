@@ -35,7 +35,10 @@ export default async function Page({ params }: Props) {
   const repo = getRepository()
   const service = await repo.getService(slug)
   if (!service) notFound()
-  const provider = await repo.getServiceProvider(service.providerId)
+  const [provider, fromProvider, all] = await Promise.all([repo.getServiceProvider(service.providerId), repo.listProviderServices(service.providerId), repo.listServices()])
+  const others = fromProvider.filter((s) => s.id !== service.id).slice(0, 4)
+  const shown = new Set([service.id, ...others.map((s) => s.id)])
+  const similar = [...all.filter((s) => !shown.has(s.id) && s.categoryId === service.categoryId), ...all.filter((s) => !shown.has(s.id) && s.categoryId !== service.categoryId)].slice(0, 4)
   const categoryName = serviceCategories.find((c) => c.id === service.categoryId)?.name
   return (
     <>
@@ -45,7 +48,7 @@ export default async function Page({ params }: Props) {
           serviceJsonLd(service, { categoryName, provider }),
         ]}
       />
-      <ServiceDetailPage service={service} provider={provider} />
+      <ServiceDetailPage service={service} provider={provider} others={others} similar={similar} />
     </>
   )
 }

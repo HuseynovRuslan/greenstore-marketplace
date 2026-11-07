@@ -112,15 +112,15 @@ export function MobileContactBar({ info, price }: { info: ContactInfo; price: st
  * «Seçilmişlərə əlavə et» / «Seçilmişlərdədir»: the label itself says the state (so no aria-pressed, whose name must
  * not change), and a toast confirms the change for everyone, screen readers included.
  */
-export function FavoriteToggle({ id, className }: { id: string; className?: string }) {
+export function FavoriteToggle({ id, kind = 'listing', className }: { id: string; kind?: 'listing' | 'service'; className?: string }) {
   const { isFavorite, toggleFavorite } = useFavorites()
   const { toast } = useToast()
-  const saved = isFavorite('listing', id)
+  const saved = isFavorite(kind, id)
   return (
     <button
       type="button"
       onClick={() => {
-        toggleFavorite('listing', id)
+        toggleFavorite(kind, id)
         toast(saved ? 'Seçilmişlərdən çıxarıldı' : 'Seçilmişlərə əlavə edildi')
       }}
       className={buttonClass('secondary', cn('flex-1', saved && 'border-forest', className))}

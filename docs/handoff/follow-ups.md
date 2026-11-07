@@ -3,17 +3,8 @@
 A running list of known gaps from the Variant 2 work (home, then the catalogue) that were left out of a step on
 purpose. Kept up to date as steps land; remove an item when it is done.
 
-## Copy that still uses the old category names
-
-- **`/xidmetler` title and breadcrumb** say «Landşaft və bağçılıq xidmətləri», while the category is now «Bağ xidmətləri».
-  Sources: `src/app/(main)/xidmetler/page.tsx` (metadata title), `src/views/ServicesPage.tsx` (`servicesCrumbs`, heading).
-
 ## Design
 
-- **`/xidmetler`** has the home header only ([elanlar.md](elanlar.md)). Its own step still covers:
-  - the search form and the «Xidmət ərazisi seçin» select;
-  - the category buttons and the sort control;
-  - the service cards and the no-results state.
 - **Page links** do not dim the results while the next page loads; filter changes do.
 - **Filter column gap:** when the sidebar is shorter than the window and the header hides, a 76 px gap shows above it.
 
