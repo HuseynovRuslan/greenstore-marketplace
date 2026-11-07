@@ -35,12 +35,17 @@ export default async function Page({ params, searchParams }: Props) {
   const { slug } = await params
   const seller = await getRepository().getSeller(slug)
   if (!seller) notFound()
+  const repo = getRepository()
+  // The services a business publishes: its own list, or those of the provider linked to this page.
+  const services = (await repo.listServices()).filter(
+    (s) => seller.serviceIds?.includes(s.id) || s.providerId === seller.id,
+  )
   const business = sellerJsonLd(seller)
   const crumbs = sellerCrumbs(seller)
   return (
     <>
       <JsonLd data={[crumbsJsonLd(crumbs), ...(business ? [business] : [])]} />
-      <SellerPage seller={seller} listingQuery={toSearchParams(await searchParams).toString()} />
+      <SellerPage seller={seller} listingQuery={toSearchParams(await searchParams).toString()} services={services} />
     </>
   )
 }

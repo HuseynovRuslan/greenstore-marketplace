@@ -17,7 +17,7 @@ const sectionLinks = [
   { label: 'Kateqoriyalar', to: '/#kateqoriyalar' },
   { label: 'Məhsullar', to: '/elanlar' },
   { label: 'Xidmətlər', to: '/xidmetler' },
-  { label: 'Satıcılar', to: '/#saticilar' },
+  { label: 'Satıcılar', to: '/saticilar' },
 ]
 
 const searchPlaceholder = 'Bitki, ağac və ya xidmət axtar'
@@ -26,7 +26,7 @@ const searchPlaceholder = 'Bitki, ağac və ya xidmət axtar'
 const homeNav = [
   { label: 'Məhsullar', to: '/elanlar', section: (path: string) => path === '/elanlar' || path.startsWith('/kateqoriyalar/') },
   { label: 'Xidmətlər', to: '/xidmetler', section: (path: string) => path === '/xidmetler' },
-  { label: 'Satıcılar', to: '/#saticilar', section: () => false },
+  { label: 'Satıcılar', to: '/saticilar', section: (path: string) => path === '/saticilar' || path.startsWith('/saticilar/') },
 ]
 
 const iconButton =

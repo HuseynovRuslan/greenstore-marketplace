@@ -84,6 +84,35 @@ export const sellers: Seller[] = [
     offers: ['wholesale', 'delivery'],
     responseMinutes: 180,
   },
+  {
+    // Nov 2026: a landscaping company page (sample data), so the directory shows all three business kinds.
+    id: 'yasil-mekan-landsaft',
+    slug: 'yasil-mekan-landsaft',
+    name: 'Yaşıl Məkan Landşaft',
+    kind: 'Landşaft şirkəti',
+    type: 'business',
+    cityId: 'baki',
+    activeListings: 0,
+    verified: true,
+    memberSince: 2018,
+    image: '/images/services/landsaft-dizayni-1.webp',
+    coverImage: '/images/services/landsaft-dizayni-gallery-1.webp',
+    phone: '+994 50 212 44 18',
+    address: 'Bakı, Nərimanov rayonu, Təbriz küçəsi 18',
+    contactPerson: 'Rauf Həsənli',
+    about:
+      'Həyətlər, villalar və kommersiya məkanları üçün landşaft layihələri hazırlayırıq: ölçü, 3D konsepsiya, bitki seçimi, əkin, çim və avtomatik suvarma bir komandadan.',
+    terms: 'İlk baxış Bakı daxilində pulsuzdur. Layihənin qiyməti sahəyə və materiallara görə razılaşdırılır.',
+    businessKind: 'landscaping',
+    hours: [...weekdays('09:00', '18:00'), { day: 6, open: '09:00', close: '18:00' }, { day: 7, closed: true }],
+    whatsapp: true,
+    instagram: 'yasilmekan.landsaft',
+    website: 'https://yasilmekan.az',
+    location: { lat: 40.4093, lng: 49.8671 },
+    offers: ['design', 'planting', 'care'],
+    responseMinutes: 120,
+    serviceIds: ['landsaft-dizayni', 'cim-salinmasi'],
+  },
 ]
 
 /** Order used by the home page grid (Figma columns 1 → 3). */

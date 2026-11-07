@@ -3,7 +3,7 @@ import Link from 'next/link'
 const platform = [
   { label: 'Məhsullar', to: '/elanlar' },
   { label: 'Xidmətlər', to: '/xidmetler' },
-  { label: 'Peşəkar satıcılar', to: '/#saticilar' },
+  { label: 'Satıcılar', to: '/saticilar' },
   { label: 'Elan yerləşdir', to: '/elan-yerlesdir' },
 ]
 const support = ['Tez-tez verilən suallar', 'Təhlükəsiz alış məsləhətləri', 'Elan qaydaları', 'Bizimlə əlaqə']

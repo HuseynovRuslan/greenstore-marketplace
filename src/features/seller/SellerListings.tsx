@@ -5,8 +5,8 @@ import { ArrowDownUp, ChevronRight, Search } from 'lucide-react'
 import { ListingCard } from '@/components/cards/ListingCard'
 import { Button, ButtonLink, buttonClass } from '@/components/ui/Button'
 import { EmptyState } from '@/components/ui/EmptyState'
-import { TextField } from '@/components/ui/Field'
-import { SectionHeader } from '@/components/ui/SectionHeader'
+import { Listbox } from '@/components/ui/Listbox'
+import { optionClass } from '@/features/search/filterStyles'
 import { categoryById } from '@/data/categories'
 import { cn } from '@/lib/format'
 import { listingSortOptions, type ListingSort } from '@/services/listingSort'
@@ -81,60 +81,74 @@ export function SellerListings({ seller, initialQuery = '' }: { seller: Seller; 
   const clearFilters = () => update({ kateqoriya: undefined, q: undefined })
 
   return (
-    <section ref={sectionRef} aria-labelledby={`${panelId}-title`} className="flex w-full scroll-mt-24 flex-col items-start gap-7">
-      <SectionHeader
-        title={<span id={`${panelId}-title`}>Satıcının aktiv elanları</span>}
-        subtitle={`${total} elan · yalnız hazırda satışda olan təkliflər`}
-      />
+    <section ref={sectionRef} aria-labelledby={`${panelId}-title`} className="flex w-full scroll-mt-24 flex-col items-start gap-4">
+      <div className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5">
+        <h2 id={`${panelId}-title`} className="text-lg leading-[1.3] font-semibold tracking-[-0.01em] text-forest md:text-[22px]">
+          Elanlar
+        </h2>
+        <p className="text-sm leading-[normal] text-muted tabular-nums">{total} aktiv elan</p>
+      </div>
 
       {available.length === 0 ? (
         <EmptyState
           icon={<Search aria-hidden size={30} strokeWidth={1.8} absoluteStrokeWidth />}
-          title="Uyğun elan tapılmadı"
-          description="Bu satıcının elanları hazırda göstərilmir."
+          title="Hazırda aktiv elan yoxdur"
+          description="Satıcının yeni elanları burada görünəcək. Oxşar bitkiləri ümumi axtarışda tapa bilərsiniz."
           action={
             <ButtonLink href="/elanlar" fullWidth>
-              Elanlara bax
+              Bütün elanlara bax
             </ButtonLink>
           }
         />
       ) : (
         <>
-          <div role="tablist" aria-label="Elan kateqoriyaları" className="scrollbar-none -mx-5 flex w-[calc(100%+40px)] items-start gap-2 overflow-x-auto px-5 md:mx-0 md:w-full md:flex-wrap md:px-0">
+          <div role="group" aria-label="Kateqoriya" className="scrollbar-none -mx-5 flex w-[calc(100%+40px)] gap-2 overflow-x-auto px-5 md:mx-0 md:w-full md:flex-wrap md:px-0">
             {tabs.map((t) => {
               const active = t.categoryId === categoryId
               return (
                 <button
                   key={t.label}
-                  role="tab"
                   type="button"
-                  aria-selected={active}
+                  aria-pressed={active}
                   aria-controls={panelId}
                   onClick={() => update({ kateqoriya: t.categoryId })}
-                  className={cn(
-                    'min-h-11 shrink-0 rounded-lg p-3 text-[13px] leading-[normal] whitespace-nowrap text-forest transition-colors',
-                    active ? 'bg-forest font-semibold text-white' : 'bg-mint hover:bg-[#dfe8de]',
-                  )}
+                  className={cn(optionClass(active), 'inline-flex items-center gap-1.5 pointer-coarse:h-11')}
                 >
-                  {t.label} · {t.count}
+                  {t.label}
+                  <span className={cn('tabular-nums', active ? 'text-white/80' : 'text-muted')}>{t.count}</span>
                 </button>
               )
             })}
           </div>
 
-          <div className="flex w-full items-end gap-3 md:items-start" role="search">
-            <TextField
-              containerClassName="min-w-0 flex-1"
-              type="search"
-              label="Satıcının elanlarında axtar"
-              placeholder="Bitki və ya məhsul adı"
-              value={q}
-              onChange={(e) => update({ q: e.target.value || undefined })}
-            />
-            <SortSelect value={sort} onChange={(value) => update({ siralama: value === 'newest' ? undefined : value })} />
+          <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center" role="search">
+            <label className="flex h-12 min-w-0 flex-1 items-center gap-2.5 rounded-lg border border-line bg-surface px-3.5 focus-within:border-olive focus-within:shadow-[inset_0_0_0_1px_var(--color-olive)]">
+              <Search aria-hidden size={18} strokeWidth={1.8} className="shrink-0 text-muted" />
+              <span className="sr-only">Satıcının elanlarında axtar</span>
+              <input
+                type="search"
+                placeholder="Bu satıcının elanlarında axtar"
+                value={q}
+                maxLength={100}
+                onChange={(e) => update({ q: e.target.value || undefined })}
+                className="h-full min-w-0 flex-1 bg-transparent text-sm text-ink outline-none placeholder:text-muted pointer-coarse:text-base"
+              />
+            </label>
+            <div className="h-12 shrink-0 rounded-lg border border-line bg-surface sm:w-[200px]">
+              <Listbox
+                label="Sıralama"
+                className="h-full"
+                align="end"
+                value={sort}
+                onChange={(value) => update({ siralama: value === 'newest' ? undefined : value })}
+                options={listingSortOptions.map((o) => ({ value: o.value, label: o.label }))}
+                icon={<ArrowDownUp aria-hidden size={16} strokeWidth={1.8} className="shrink-0 text-muted" />}
+                triggerClassName="h-full text-sm"
+              />
+            </div>
           </div>
 
-          <div id={panelId} role="tabpanel" className="w-full">
+          <div id={panelId} className="w-full">
             {items.length > 0 ? (
               <div className="grid w-full grid-cols-2 gap-3 md:grid-cols-3 md:gap-5">
                 {items.map((l) => (
@@ -161,33 +175,6 @@ export function SellerListings({ seller, initialQuery = '' }: { seller: Seller; 
         </>
       )}
     </section>
-  )
-}
-
-/** Figma "Ən yenilər" button (arrow-down-up) — a native select layered over the button face. */
-function SortSelect({ value, onChange }: { value: ListingSort; onChange: (value: ListingSort) => void }) {
-  const id = useId()
-  const current = listingSortOptions.find((o) => o.value === value) ?? listingSortOptions[0]
-  return (
-    <div className={buttonClass('secondary', 'relative focus-within:ring-[3px] focus-within:ring-olive focus-within:ring-inset')}>
-      <ArrowDownUp {...icon} />
-      <span aria-hidden>{current.label}</span>
-      <label htmlFor={id} className="sr-only">
-        Sıralama
-      </label>
-      <select
-        id={id}
-        value={value}
-        onChange={(e) => onChange(e.target.value as ListingSort)}
-        className="absolute inset-0 cursor-pointer appearance-none opacity-0 pointer-coarse:text-base"
-      >
-        {listingSortOptions.map((o) => (
-          <option key={o.value} value={o.value}>
-            {o.label}
-          </option>
-        ))}
-      </select>
-    </div>
   )
 }
 

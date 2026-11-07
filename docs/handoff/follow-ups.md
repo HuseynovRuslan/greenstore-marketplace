@@ -7,8 +7,6 @@ purpose. Kept up to date as steps land; remove an item when it is done.
 
 - **`/xidmetler` title and breadcrumb** say «Landşaft və bağçılıq xidmətləri», while the category is now «Bağ xidmətləri».
   Sources: `src/app/(main)/xidmetler/page.tsx` (metadata title), `src/views/ServicesPage.tsx` (`servicesCrumbs`, heading).
-- **Seller page tabs** (Figma, Abşeron Tingçilik) say «Tinglər» and «Torpaq və gübrələr». The categories are now «Fidan və toxum»
-  and «Gübrə və torpaq». Source: `src/features/seller/sellerStats.ts`.
 
 ## Design
 
@@ -16,8 +14,6 @@ purpose. Kept up to date as steps land; remove an item when it is done.
   - the search form and the «Xidmət ərazisi seçin» select;
   - the category buttons and the sort control;
   - the service cards and the no-results state.
-- **Seller page sort** (`src/features/seller/SellerListings.tsx`) is its own native select; it could use the catalogue's
-  `SortSelect`.
 - **Page links** do not dim the results while the next page loads; filter changes do.
 - **Filter column gap:** when the sidebar is shorter than the window and the header hides, a 76 px gap shows above it.
 

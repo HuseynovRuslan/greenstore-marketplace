@@ -10,29 +10,8 @@ import { pricePresets, type FilterOption, type PriceRange } from './filterDefs'
  * fields and the «Filtrlər» button. 38 px pills on desktop; `touch` makes them 44 px (the touch-target minimum).
  */
 
-/** Filter chip: a chip with a value is forest-filled and shows it ("Qiymət: 50–150 ₼"). */
-export function chipClass(state: { on: boolean; open?: boolean; touch?: boolean }) {
-  return cn(
-    'flex shrink-0 items-center gap-[7px] rounded-full border px-3.5 text-sm leading-[normal] font-medium whitespace-nowrap',
-    state.touch ? 'h-11' : 'h-[38px]',
-    // `scale`, not `transform`: Tailwind's scale-* sets the scale property, so the press was not animated before.
-    'transition-[background-color,border-color,color,scale] duration-(--dur-fast) ease-out active:scale-[0.97] motion-reduce:active:scale-100',
-    state.on
-      ? 'border-forest bg-forest text-white hover:border-forest-hover hover:bg-forest-hover'
-      : state.open
-        ? 'border-forest bg-mint text-ink'
-        : 'border-line-strong bg-surface text-ink hover:border-forest',
-  )
-}
-
-/** An option pill inside a popover, the sheet or the sidebar. */
-export function optionClass(on: boolean, touch?: boolean) {
-  return cn(
-    'rounded-full border px-3.5 text-sm leading-[normal] font-medium whitespace-nowrap transition-[color,background-color,border-color,scale] duration-(--dur-fast) ease-out active:scale-[0.97] motion-reduce:active:scale-100',
-    touch ? 'h-11' : 'h-[38px]',
-    on ? 'border-forest bg-forest text-white' : 'border-line-strong bg-surface text-ink hover:border-forest',
-  )
-}
+export { chipClass, optionClass } from './filterStyles'
+import { optionClass } from './filterStyles'
 
 /** Check mark of an active toggle; it pops in from .6 (no motion under reduced motion). */
 export function ToggleCheck() {

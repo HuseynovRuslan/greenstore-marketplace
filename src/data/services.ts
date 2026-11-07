@@ -11,6 +11,8 @@ export const providers: ServiceProvider[] = [
     kind: 'company',
     summary: 'Landşaft şirkəti · 2018-ci ildən fəaliyyət göstərir · Bakı, Nərimanov rayonu',
     workingHours: 'B.e.–Şənbə 09:00–18:00',
+    // Nov 2026: the company also has a business page (sample data)
+    sellerId: 'yasil-mekan-landsaft',
   },
   { id: 'aquabag', name: 'AquaBağ', verified: true },
   { id: 'bag-ustasi', name: 'Bağ Ustası', verified: true },

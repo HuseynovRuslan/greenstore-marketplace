@@ -99,5 +99,6 @@ Update after every commit (newest last).
 | 0 · One header everywhere, shared form controls, toast, share | done | c7bf7e1 |
 | 3 · Listing page (gallery + lightbox, price/wholesale/stock, contact, attributes, care, report) | done | 91db55d |
 | 1 · Posting flow (6 steps, autosave, photos in IndexedDB, preview = listing page, promotion, success) | done | eb219a1 |
-| 2 · Auth (login by password or SMS, registration with business kinds + SMS code, password reset) | done | (this commit) |
-| 4 · Seller / nursery page + directory | next | |
+| 2 · Auth (login by password or SMS, registration with business kinds + SMS code, password reset) | done | bde3a68 |
+| 4 · Seller / nursery page + /saticilar directory | done | (this commit) |
+| 5 · Kabinet («Elanlarım» by status, actions, stats, profile) | next | |

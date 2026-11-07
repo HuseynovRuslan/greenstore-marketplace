@@ -31,8 +31,8 @@ export const sellerStats: SellerStats[] = [
     total: 24,
     tabs: [
       { categoryId: 'agaclar', label: 'Ağaclar', count: 14 },
-      { categoryId: 'tingler-fidanlar', label: 'Tinglər', count: 6 },
-      { categoryId: 'torpaq-gubreler', label: 'Torpaq və gübrələr', count: 4 },
+      { categoryId: 'tingler-fidanlar', label: 'Fidan və toxum', count: 6 },
+      { categoryId: 'torpaq-gubreler', label: 'Gübrə və torpaq', count: 4 },
     ],
     listingOrder: ['zeytun-agaci', 'tuya-smaragd', 'defne-agaci', 'torpaq-qarisigi', 'nar-fidani', 'uzvi-kompost'],
   },
