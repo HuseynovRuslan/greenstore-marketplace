@@ -229,16 +229,29 @@ export function DetailsStep(props: StepProps) {
         onBlur={() => touch('title')}
       />
 
-      {attrs.length > 0 && (
-        <fieldset className="flex flex-col gap-5">
-          <legend className="mb-4 text-[15px] leading-[1.35] font-semibold text-forest">{plant ? 'Bitkinin xüsusiyyətləri' : 'Xüsusiyyətlər'}</legend>
-          <div className="grid grid-cols-1 gap-x-4 gap-y-5 md:grid-cols-2">
-            {attrs.map((a) => (
-              <AttributeField key={a.id} a={a} {...props} />
-            ))}
-          </div>
-        </fieldset>
-      )}
+      {/* Plants: «Bitki» (what it is, its size, roots, whether it is in stock) and «Qulluq» (all optional) as two
+          bounded groups, so a long form reads as two short ones. Other categories: one group. */}
+      {(plant
+        ? [
+            { key: 'plant', legend: 'Bitki', hint: undefined, items: attrs.filter((a) => a.group !== 'care') },
+            { key: 'care', legend: 'Qulluq', hint: 'Hamısı istəyə bağlıdır. Doldursanız, elanda «Qulluq» bölməsi görünür.', items: attrs.filter((a) => a.group === 'care') },
+          ]
+        : [{ key: 'all', legend: 'Xüsusiyyətlər', hint: undefined, items: attrs }]
+      )
+        .filter((g) => g.items.length > 0)
+        .map((g) => (
+          <fieldset key={g.key} className="flex flex-col gap-5 border-t border-line pt-6">
+            <legend className="float-left mb-1 w-full">
+              <span className="block text-[15px] leading-[1.35] font-semibold text-forest">{g.legend}</span>
+              {g.hint && <span className="mt-1 block text-[13px] leading-[1.5] font-normal text-muted">{g.hint}</span>}
+            </legend>
+            <div className="grid grid-cols-1 gap-x-4 gap-y-5 md:grid-cols-2">
+              {g.items.map((a) => (
+                <AttributeField key={a.id} a={a} {...props} />
+              ))}
+            </div>
+          </fieldset>
+        ))}
 
       <TextAreaField
         id={id('description')}

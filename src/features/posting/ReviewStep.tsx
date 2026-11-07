@@ -35,7 +35,8 @@ export function ReviewStep({ draft, update, error, urls, user }: StepProps & { u
             <Eye aria-hidden size={18} strokeWidth={1.8} />
             Önizləmə
           </h2>
-          <nav aria-label="Düzəliş et" className="flex flex-wrap gap-x-1 gap-y-1">
+          {/* Phones only: from 768 px the step names above are the same links. */}
+          <nav aria-label="Düzəliş et" className="flex flex-wrap gap-x-1 gap-y-1 md:hidden">
             {STEPS.slice(0, 5).map((s) => (
               <Link
                 key={s.n}

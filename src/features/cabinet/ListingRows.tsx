@@ -11,6 +11,7 @@ import {
   EyeOff,
   Heart,
   ImageIcon,
+  MoreHorizontal,
   Pencil,
   Phone,
   Play,
@@ -22,6 +23,7 @@ import {
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { Dialog } from '@/components/ui/Dialog'
+import { Popover } from '@/components/ui/Popover'
 import { useToast } from '@/components/ui/Toast'
 import { cityName } from '@/data/cities'
 import { promotionPackage } from '@/data/promotions'
@@ -70,6 +72,7 @@ export function ListingRowCard({ listing, stats, now, handlers }: { listing: Lis
   const router = useRouter()
   const { toast } = useToast()
   const [dialog, setDialog] = useState<'stats' | 'remove' | null>(null)
+  const [moreOpen, setMoreOpen] = useState(false)
   const [busy, setBusy] = useState(false)
   const badge = statusBadges[listing.status]
   const price = listingPrice(listing)
@@ -164,6 +167,14 @@ export function ListingRowCard({ listing, stats, now, handlers }: { listing: Lis
     ),
   }
 
+  const actions = actionsFor(listing.status)
+  // Four or more actions: the rare and the destructive one («Deaktiv et», «Sil») go under «Daha çox», so a row shows
+  // the three things people do most and «Sil» is never one tap away from «Statistika».
+  const tucked: CabinetAction[] = actions.length > 3 ? actions.filter((a) => a === 'deactivate' || a === 'remove') : []
+  const shown = actions.filter((a) => !tucked.includes(a))
+  const menuItem =
+    'flex min-h-11 w-full items-center gap-2.5 rounded-option px-3 text-left text-sm font-semibold transition-colors duration-(--dur-fast) hover:bg-mint'
+
   return (
     <li className="flex flex-col gap-3 rounded-xl border border-line bg-surface p-3 md:p-4">
       <div className="flex gap-3 md:gap-4">
@@ -230,7 +241,58 @@ export function ListingRowCard({ listing, stats, now, handlers }: { listing: Lis
           {promo && <span className="text-olive-text">Reklam {formatDayMonth(promo.until)}-dək</span>}
           {expiry && <span className={cn('font-medium', expiry.soon ? 'text-warning' : 'text-muted')}>{expiry.text}</span>}
         </div>
-        <div className="flex flex-wrap gap-2">{actionsFor(listing.status).map((a) => buttons[a])}</div>
+        <div className="flex flex-wrap gap-2">
+          {shown.map((a) => buttons[a])}
+          {tucked.length > 0 && (
+            <Popover
+              open={moreOpen}
+              onOpenChange={setMoreOpen}
+              label={`«${listing.title}»: digər əməliyyatlar`}
+              align="end"
+              panelClassName="w-56 p-1.5"
+              trigger={(props) => (
+                <button {...props} className={quiet}>
+                  <MoreHorizontal aria-hidden size={15} strokeWidth={2} />
+                  Daha çox
+                </button>
+              )}
+            >
+              {(close) => (
+                <div className="flex flex-col">
+                  {tucked.includes('deactivate') && (
+                    <button
+                      type="button"
+                      className={cn(menuItem, 'text-forest')}
+                      onClick={() => {
+                        close()
+                        handlers.deactivate(listing.id)
+                        toast('Elan axtarışdan gizlədildi')
+                      }}
+                    >
+                      <EyeOff aria-hidden size={16} strokeWidth={2} />
+                      Deaktiv et
+                    </button>
+                  )}
+                  {tucked.includes('remove') && (
+                    <button
+                      type="button"
+                      aria-haspopup="dialog"
+                      className={cn(menuItem, 'text-danger hover:bg-danger-soft')}
+                      onClick={() => {
+                        // Focus goes back to «Daha çox» first, so the confirm dialog returns it there.
+                        close()
+                        setDialog('remove')
+                      }}
+                    >
+                      <Trash2 aria-hidden size={16} strokeWidth={2} />
+                      Elanı sil
+                    </button>
+                  )}
+                </div>
+              )}
+            </Popover>
+          )}
+        </div>
       </div>
 
       <Dialog open={dialog === 'stats'} onClose={() => setDialog(null)} title="Elanın statistikası" className="sm:max-w-[520px]">

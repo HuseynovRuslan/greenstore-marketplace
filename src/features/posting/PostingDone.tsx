@@ -4,7 +4,6 @@ import { useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { Check, Clock3, Plus, Rocket, Sprout } from 'lucide-react'
 import { ButtonLink } from '@/components/ui/Button'
-import { ShareButton } from '@/components/ui/ShareButton'
 import { Badge } from '@/components/ui/Badge'
 import { promotionOption } from '@/data/promotions'
 import { listingPrice } from '@/features/listing/facts'
@@ -131,9 +130,10 @@ export function PostingDone() {
         <ButtonLink href="/elan-yerlesdir" variant="secondary" icon={<Plus aria-hidden size={18} strokeWidth={1.8} />} className="sm:flex-1">
           Yeni elan
         </ButtonLink>
-        <ShareButton title={listing.title} url={`/elanlar/${listing.slug}`} text="Elanım GreenStore-da" className="sm:flex-1" />
       </div>
-      <p className="text-center text-xs leading-[1.5] text-muted">Paylaşdığınız keçid elan təsdiqləndikdən sonra açılacaq.</p>
+      {/* No «Paylaş» here: until the listing is approved its link opens «tapılmadı» for whoever gets it. Sharing is on
+          the listing page once it is live. */}
+      <p className="text-center text-xs leading-[1.5] text-muted">Elan təsdiqlənəndə onu öz səhifəsindən paylaşa biləcəksiniz.</p>
     </div>
   )
 }

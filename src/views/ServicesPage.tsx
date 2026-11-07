@@ -45,7 +45,8 @@ export default function ServicesPage({ query, parsed, result }: { query: string;
   const categoryLinks = [{ id: undefined as string | undefined, name: 'Hamısı' }, ...serviceCategories].map((c) => {
     const active = parsed.categoryId === c.id
     const Icon = c.id ? categoryIcons[c.id] : Fence
-    return { ...c, active, Icon, count: countFor(c.id), href: serviceHref(query, { kateqoriya: c.id }) }
+    // «Hamısı» says the same number as the heading («95 xidmət»), not only the services loaded here.
+    return { ...c, active, Icon, count: c.id ? countFor(c.id) : Math.max(countFor(undefined), parsed.categoryId ? 0 : result.displayTotal), href: serviceHref(query, { kateqoriya: c.id }) }
   })
 
   const otherFilters = (

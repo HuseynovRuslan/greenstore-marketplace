@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, useTransition, type FormEvent, type ReactNode } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft, ArrowRight, CloudCheck, LogIn, RotateCcw, Send } from 'lucide-react'
+import { ArrowLeft, ArrowRight, CloudCheck, Info, LogIn, RotateCcw, Send } from 'lucide-react'
 import { Button, ButtonLink } from '@/components/ui/Button'
 import { Dialog } from '@/components/ui/Dialog'
 import { QuietFieldErrors } from '@/components/ui/Field'
@@ -164,6 +164,8 @@ export function PostingWizard({ step }: { step: StepNumber }) {
 
   if (!allowed || sent) return sent ? <PostingSkeleton /> : null
   const meta = STEPS[step - 1]
+  // A service is not a plant or a product: its details step says so.
+  const heading = step === 2 && draft.kind === 'service' ? 'Xidmət haqqında' : meta.heading
   const editing = Boolean(draft.editing)
   const back = step > 1 ? stepPath(step - 1) : undefined
 
@@ -202,7 +204,7 @@ export function PostingWizard({ step }: { step: StepNumber }) {
               {editing ? 'Elanı redaktə edirsiniz · ' : ''}Addım {step} / {STEPS.length} · {meta.title}
             </p>
             <h1 ref={headingRef} tabIndex={-1} className="text-[24px] leading-[1.2] font-semibold tracking-[-0.02em] text-forest outline-none md:text-[30px]">
-              {meta.heading}
+              {heading}
             </h1>
           </div>
           {draft.savedAt && hasProgress(draft) && (
@@ -224,6 +226,16 @@ export function PostingWizard({ step }: { step: StepNumber }) {
       <div className={cn('grid grid-cols-1 gap-8', !review && 'lg:grid-cols-[minmax(0,1fr)_300px] xl:grid-cols-[minmax(0,1fr)_320px]')}>
         <form id="elan-formu" onSubmit={next} noValidate className="flex min-w-0 flex-col gap-6">
           <ErrorSummary ref={summaryRef} errors={attempted ? errors : {}} labels={LABELS} />
+          {/* Guests learn at the start, not at the last step, that sending needs an account (the draft waits). */}
+          {step === 1 && !user && (
+            <p className="flex items-start gap-2 rounded-xl bg-mint px-4 py-3 text-[13px] leading-[1.5] text-ink">
+              <Info aria-hidden size={16} strokeWidth={2} className="mt-0.5 shrink-0 text-forest" />
+              <span>
+                Hesabsız doldura bilərsiniz: göndərməzdən əvvəl daxil olmağınızı və ya qeydiyyatdan keçməyinizi istəyəcəyik.
+                Qaralama bu brauzerdə saxlanılır.
+              </span>
+            </p>
+          )}
           {/* The phone button bar below is position: fixed, so it stays outside the animated box (a transform would hold it). */}
           <div data-dir={dir} className={cn('gs-step', !review && 'rounded-2xl border border-line bg-surface p-5 md:p-7')}>
             <QuietFieldErrors>{body}</QuietFieldErrors>

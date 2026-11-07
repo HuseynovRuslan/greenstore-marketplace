@@ -104,14 +104,17 @@ export default function FavoritesPage() {
         </section>
       )}
 
-      <div role="group" aria-label="Seçilmişlərin növü" className="flex flex-wrap gap-2">
-        {kinds.map((k) => (
-          <button key={k.value} type="button" aria-pressed={kind === k.value} onClick={() => setKind(k.value)} className={cn(optionClass(kind === k.value), 'inline-flex items-center gap-1.5 pointer-coarse:h-11')}>
-            {k.label}
-            <span className={cn('tabular-nums', kind === k.value ? 'text-white/80' : 'text-muted')}>{formatNumber(k.count)}</span>
-          </button>
-        ))}
-      </div>
+      {/* Filters only once there is something to filter: three «0» pills above an empty state are noise. */}
+      {total > 0 && (
+        <div role="group" aria-label="Seçilmişlərin növü" className="flex flex-wrap gap-2">
+          {kinds.map((k) => (
+            <button key={k.value} type="button" aria-pressed={kind === k.value} onClick={() => setKind(k.value)} className={cn(optionClass(kind === k.value), 'inline-flex items-center gap-1.5 pointer-coarse:h-11')}>
+              {k.label}
+              <span className={cn('tabular-nums', kind === k.value ? 'text-white/80' : 'text-muted')}>{formatNumber(k.count)}</span>
+            </button>
+          ))}
+        </div>
+      )}
 
       {!showListings && !showServices ? (
         <div className="flex justify-center py-4">

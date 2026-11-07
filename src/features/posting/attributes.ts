@@ -32,6 +32,8 @@ export interface AttrDef {
   maxLength?: number
   /** Only asked when another attribute has this value */
   when?: { id: string; value: string }
+  /** Plants: the form shows the plant itself and its care as two groups (all care fields are optional). */
+  group?: 'plant' | 'care'
 }
 
 /** Living-plant categories: the plant facts, care and availability apply. */
@@ -54,14 +56,16 @@ const plantAttrs = (opts: { foliage: boolean }): AttrDef[] => [
     placeholder: 'Məsələn: Thuja occidentalis',
     hint: 'Latınca adı bilirsinizsə yazın: alıcılar dəqiq növü axtarır.',
     maxLength: 60,
+    group: 'plant',
   },
-  { id: 'height', label: filterTitles.height, kind: 'range', unit: 'sm', required: true, min: 1, max: 3000, hint: 'Dibçəklə birlikdə. Tinglər müxtəlif boydadırsa, ən hündürünü yanındakı xanaya yazın.' },
-  { id: 'age', label: filterTitles.age, kind: 'number', unit: 'yaş', min: 0, max: 200 },
-  { id: 'rootSystem', label: 'Kök sistemi', kind: 'choice', required: true, options: rootSystemOptions },
-  { id: 'potLitres', label: 'Dibçəyin həcmi', kind: 'number', unit: 'litr', min: 0.5, max: 2000, when: { id: 'rootSystem', value: 'container' } },
-  ...(opts.foliage ? [{ id: 'foliage', label: 'Yarpaq', kind: 'choice' as const, options: options(foliageLabels) }] : []),
-  { id: 'sun', label: 'İşıq', kind: 'choice', options: options(sunLabels) },
-  { id: 'water', label: 'Suvarma', kind: 'choice', options: options(waterLabels) },
+  { id: 'height', label: filterTitles.height, kind: 'range', unit: 'sm', required: true, min: 1, max: 3000, hint: 'Dibçəklə birlikdə. Tinglər müxtəlif boydadırsa, ən hündürünü yanındakı xanaya yazın.', group: 'plant' },
+  { id: 'age', label: filterTitles.age, kind: 'number', unit: 'yaş', min: 0, max: 200, group: 'plant' },
+  { id: 'rootSystem', label: 'Kök sistemi', kind: 'choice', required: true, options: rootSystemOptions, group: 'plant' },
+  { id: 'potLitres', label: 'Dibçəyin həcmi', kind: 'number', unit: 'litr', min: 0.5, max: 2000, when: { id: 'rootSystem', value: 'container' }, group: 'plant' },
+  { ...availability, group: 'plant' },
+  ...(opts.foliage ? [{ id: 'foliage', label: 'Yarpaq', kind: 'choice' as const, options: options(foliageLabels), group: 'care' as const }] : []),
+  { id: 'sun', label: 'İşıq', kind: 'choice', options: options(sunLabels), group: 'care' },
+  { id: 'water', label: 'Suvarma', kind: 'choice', options: options(waterLabels), group: 'care' },
   {
     id: 'frost',
     label: 'Şaxtaya davamlılıq',
@@ -71,9 +75,9 @@ const plantAttrs = (opts: { foliage: boolean }): AttrDef[] => [
     min: -60,
     max: 30,
     hint: 'Bitkinin dözdüyü ən aşağı temperatur. Məsələn: −15.',
+    group: 'care',
   },
-  { id: 'plantingMonths', label: 'Əkin vaxtı', kind: 'months', hint: 'Əkmək üçün ən yaxşı aylar.' },
-  availability,
+  { id: 'plantingMonths', label: 'Əkin vaxtı', kind: 'months', hint: 'Əkmək üçün ən yaxşı aylar.', group: 'care' },
 ]
 
 const packAttrs: AttrDef[] = [

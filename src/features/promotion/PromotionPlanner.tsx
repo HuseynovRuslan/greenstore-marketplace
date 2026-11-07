@@ -146,7 +146,9 @@ export function PromotionPlanner({ packages }: { packages: PromotionPackage[] })
         )}
       </section>
 
-      <div data-bottom-bar="checkout" className="gs-keyboard-aside sticky bottom-[calc(86px+env(safe-area-inset-bottom,0px))] z-20 flex flex-col gap-3 rounded-2xl border border-line bg-surface/95 p-4 shadow-popover backdrop-blur-md sm:flex-row sm:items-center sm:justify-between md:bottom-4">
+      {/* Phones: the summary and «ödə» stay above the bottom nav. From 768 px the page fits the choice and the
+          summary side by side, so the bar sits after the listing picker instead of floating over the packages. */}
+      <div data-bottom-bar="checkout" className="gs-keyboard-aside z-20 flex flex-col gap-3 rounded-2xl border border-line bg-surface/95 p-4 shadow-popover backdrop-blur-md max-md:sticky max-md:bottom-[calc(86px+env(safe-area-inset-bottom,0px))] sm:flex-row sm:items-center sm:justify-between md:border-forest/30 md:bg-mint md:shadow-none md:backdrop-blur-none">
         <p className="text-sm leading-[1.45] text-ink" aria-live="polite">
           {pkg && option ? (
             <>

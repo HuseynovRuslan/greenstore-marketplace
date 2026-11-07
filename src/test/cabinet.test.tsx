@@ -7,6 +7,7 @@ import { listingToDraft } from '@/features/posting/fromListing'
 import { filterQuery, searchSummary, suggestedName } from '@/features/saved-searches/useSavedSearches'
 import { firstInvalidStep } from '@/features/posting/validation'
 import { AppStoreProvider } from '@/state/store'
+import { ListingRowCard } from '@/features/cabinet/ListingRows'
 import SavedSearchesPage from '@/views/account/SavedSearchesPage'
 import type { Listing } from '@/types'
 
@@ -102,5 +103,34 @@ describe('saved searches', () => {
     await user.click(within(second).getByRole('button', { name: 'Sil' }))
     await user.click(within(screen.getByRole('dialog', { name: 'Axtarışı silək?' })).getByRole('button', { name: 'Axtarışı sil' }))
     expect(screen.queryByRole('link', { name: 'Tuya, 50 ₼-a qədər' })).not.toBeInTheDocument()
+  })
+})
+
+describe('a listing row (design critique, Nov 2026)', () => {
+  it('keeps three actions on the row and tucks «Deaktiv et» and «Sil» under «Daha çox»', async () => {
+    const user = userEvent.setup()
+    const handlers = { renew: vi.fn(), deactivate: vi.fn(), activate: vi.fn(), remove: vi.fn(), startEdit: vi.fn(async () => {}) }
+    render(
+      <AppStoreProvider>
+        <ul>
+          <ListingRowCard listing={own('tuya-smaragd', { status: 'active' })} now={Date.parse('2026-11-07T10:00:00Z')} handlers={handlers} />
+        </ul>
+      </AppStoreProvider>,
+    )
+    expect(screen.getByRole('link', { name: /Önə çıxar/ })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Redaktə et/ })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /Deaktiv et/ })).not.toBeInTheDocument()
+
+    const more = screen.getByRole('button', { name: /Daha çox/ })
+    await user.click(more)
+    await user.click(screen.getByRole('button', { name: /Elanı sil/ }))
+    const confirm = screen.getByRole('dialog', { name: 'Elanı silək?' })
+    await user.click(within(confirm).getByRole('button', { name: 'Elan qalsın' }))
+    expect(handlers.remove).not.toHaveBeenCalled()
+
+    await user.click(more)
+    await user.click(screen.getByRole('button', { name: /Deaktiv et/ }))
+    expect(handlers.deactivate).toHaveBeenCalledWith('tuya-smaragd')
+    expect(more).toHaveFocus()
   })
 })
