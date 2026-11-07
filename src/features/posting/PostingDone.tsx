@@ -25,7 +25,7 @@ const timeline = [
  */
 export function PostingDone() {
   const { submitted } = useMyListings()
-  const last = readStored<{ id?: string; promotion?: { optionId: string } | null } | null>(LAST_SENT_KEY, null)
+  const last = readStored<{ id?: string; promotion?: { optionId: string } | null; edited?: boolean } | null>(LAST_SENT_KEY, null)
   const listing = submitted.find((l) => l.id === last?.id) ?? submitted[0]
   const promo = last?.promotion ? promotionOption(last.promotion.optionId) : undefined
 
@@ -51,7 +51,9 @@ export function PostingDone() {
         <span aria-hidden className="flex size-16 animate-pop-in items-center justify-center rounded-full bg-success-soft text-success motion-reduce:animate-none">
           <Check size={32} strokeWidth={2.4} />
         </span>
-        <h1 className="text-[26px] leading-[1.2] font-semibold tracking-[-0.02em] text-forest md:text-[32px]">Elan yoxlamaya göndərildi</h1>
+        <h1 className="text-[26px] leading-[1.2] font-semibold tracking-[-0.02em] text-forest md:text-[32px]">
+          {last?.edited ? 'Dəyişikliklər yoxlamaya göndərildi' : 'Elan yoxlamaya göndərildi'}
+        </h1>
         <p className="max-w-[46ch] text-[15px] leading-[1.55] text-ink-soft">Təşəkkür edirik! Yoxlamadan keçən kimi elan saytda görünəcək və alıcılar sizinlə əlaqə saxlayacaq.</p>
       </div>
 

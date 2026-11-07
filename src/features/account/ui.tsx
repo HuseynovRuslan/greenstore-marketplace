@@ -28,10 +28,10 @@ export function Checkbox({ label, className, ...rest }: { label: ReactNode } & O
   )
 }
 
-/** 23 px panel title ("Şirkət və əlaqə məlumatları", "Təhlükəsizlik", "Bildiriş seçimləri"). */
+/** Panel title of the cabinet forms (Variant 2 heading: 18 px semibold forest). */
 export function PanelTitle({ children, id, as: Tag = 'h2' }: { children: ReactNode; id?: string; as?: 'h2' | 'h3' }) {
   return (
-    <Tag id={id} className="w-full text-[23px] leading-[1.35] font-normal text-ink">
+    <Tag id={id} className="w-full text-lg leading-[1.3] font-semibold tracking-[-0.01em] text-forest">
       {children}
     </Tag>
   )
@@ -43,5 +43,5 @@ export function PanelTitle({ children, id, as: Tag = 'h2' }: { children: ReactNo
  * No default gap — pass the Figma one (gap-5 = 20 px in most panels).
  */
 export function Card({ className, ...rest }: HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn('flex flex-col items-start rounded-xl border border-line bg-surface p-[23px]', className)} {...rest} />
+  return <div className={cn('flex flex-col items-start rounded-xl border border-line bg-surface p-5 md:p-6', className)} {...rest} />
 }

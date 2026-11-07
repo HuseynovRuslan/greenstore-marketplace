@@ -1,176 +1,149 @@
 'use client'
 
-import { useCallback, useState } from 'react'
-import { Plus } from 'lucide-react'
+import { useSyncExternalStore } from 'react'
+import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
+import { CircleAlert, Clock3, Plus, RotateCcw, Sprout } from 'lucide-react'
 import { Button, ButtonLink } from '@/components/ui/Button'
-import { Dialog } from '@/components/ui/Dialog'
-import { InfoNotice, Notice } from '@/components/ui/Notice'
-import { SectionHeader } from '@/components/ui/SectionHeader'
-import { dashboardStats } from '@/data/dashboard'
-import { formatNumber } from '@/lib/format'
-import { AccountTabs, STATS_ANCHOR } from '@/features/account/AccountTabs'
+import { EmptyState } from '@/components/ui/EmptyState'
+import { SkeletonBlock } from '@/components/ui/Skeleton'
+import { UnderlineTabs } from '@/components/ui/UnderlineTabs'
 import { SignInPrompt } from '@/features/account/SignInPrompt'
-import { AccountPage } from '@/features/account/ui'
-import { pillClass } from '@/features/account/pill'
-import { firstName, useAccount } from '@/features/account/useAccount'
-import { MyListingRowCard } from '@/features/account/dashboard/MyListingRowCard'
-import { ViewsChart } from '@/features/account/dashboard/ViewsChart'
-import { useMyListingRows, type MyListingRow, type StatusFilter } from '@/features/account/dashboard/useMyListingRows'
+import { useAccount } from '@/features/account/useAccount'
+import { CabinetHeader } from '@/features/cabinet/CabinetHeader'
+import { DraftRowCard, ListingRowCard } from '@/features/cabinet/ListingRows'
+import { cabinetTabs, daysLeft, tabFromParam, type CabinetTab } from '@/features/cabinet/model'
+import { useCabinet } from '@/features/cabinet/useCabinet'
+import { formatNumber } from '@/lib/format'
 
-const filters: Array<{ value: StatusFilter; label: string }> = [
-  { value: 'all', label: 'Hamısı' },
-  { value: 'active', label: 'Aktiv' },
-  { value: 'pending', label: 'Yoxlamada' },
-  { value: 'expired', label: 'Müddəti bitib' },
-]
+const empty: Record<CabinetTab, { title: string; text: string }> = {
+  all: { title: 'Hələ elanınız yoxdur', text: 'Bir neçə dəqiqəyə ilk elanınızı yerləşdirin: şəkil, qiymət, əlaqə — bu qədər.' },
+  active: { title: 'Aktiv elan yoxdur', text: 'Yoxlamadan keçən elanlar burada görünəcək.' },
+  pending: { title: 'Yoxlamada elan yoxdur', text: 'Yeni və dəyişdirilmiş elanlar moderasiya zamanı burada olur.' },
+  expired: { title: 'Müddəti bitən elan yoxdur', text: 'Elanlar 30 gün saytda qalır; bitəndə burada pulsuz yeniləyə bilərsiniz.' },
+  rejected: { title: 'Rədd edilən elan yoxdur', text: 'Əla! Bütün elanlarınız qaydalara uyğundur.' },
+  inactive: { title: 'Deaktiv elan yoxdur', text: 'Satılan və ya müvəqqəti gizlətdiyiniz elanlar burada olur.' },
+  draft: { title: 'Qaralama yoxdur', text: 'Yarımçıq qalan elan avtomatik saxlanılır və burada görünür.' },
+}
 
-/** "Leyland sərvi — 120 sm (№ 10524)" */
-const listingLabel = (row: MyListingRow) => (row.listing.number ? `${row.listing.title} (№ ${row.listing.number})` : row.listing.title)
+const subscribe = () => () => {}
+let pageNow: number | undefined
 
-/** Figma "Şəxsi kabinet · 1440" (/kabinet). Requires a session. */
+/**
+ * /kabinet — «Elanlarım»: the owner's numbers (14 days), what needs attention (rejected, expiring), status tabs with
+ * counts in the URL (?status=), and a card per listing with its numbers and the actions its status allows. Loading
+ * shows placeholders; a failed load offers «Yenidən cəhd et».
+ */
 export default function DashboardPage() {
   const { account } = useAccount()
+  const params = useSearchParams()
+  const cabinet = useCabinet(account)
+  const now = useSyncExternalStore(subscribe, () => (pageNow ??= Date.now()), () => 0)
   if (!account) return <SignInPrompt next="/kabinet" />
-  return <Dashboard sellerId={account.sellerId} name={account.fullName} subtitle={accountSubtitle(account)} />
-}
 
-function accountSubtitle(account: NonNullable<ReturnType<typeof useAccount>['account']>) {
-  const name = account.companyName || account.fullName
-  if (account.accountType === 'business') return `${name} · ${account.verified ? 'Təsdiqlənmiş biznes hesabı' : 'Biznes hesabı'}`
-  return `${name} · Fərdi hesab`
-}
+  const tab = tabFromParam(params.get('status'))
+  const { listings, stats, counts, draft } = cabinet
+  const shown = tab === 'all' ? listings : listings.filter((l) => l.status === tab)
+  const showDraft = Boolean(draft) && (tab === 'all' || tab === 'draft')
+  const total = (key: 'views' | 'phoneReveals' | 'favourites') => listings.reduce((sum, l) => sum + (stats[l.id]?.[key] ?? 0), 0)
+  const views14 = listings.reduce((sum, l) => sum + (stats[l.id]?.viewsByDay.reduce((s, d) => s + d.views, 0) ?? 0), 0)
+  const expiringSoon = listings.filter((l) => l.status === 'active' && (daysLeft(l, now) ?? 99) <= 3).length
 
-function Dashboard({ sellerId, name, subtitle }: { sellerId?: string; name: string; subtitle: string }) {
-  const { rows, counts, setStatus } = useMyListingRows(sellerId)
-  const [filter, setFilter] = useState<StatusFilter>('all')
-  const [showMore, setShowMore] = useState(false)
-  const [confirm, setConfirm] = useState<MyListingRow | null>(null)
-  const [notice, setNotice] = useState<{ title: string; text: string } | null>(null)
-  const closeDialog = useCallback(() => setConfirm(null), [])
-
-  const filtered = rows.filter((r) => filter === 'all' || r.status === filter)
-  const visible = showMore ? filtered : filtered.filter((r) => r.source !== 'more')
-  const hasMore = !showMore && visible.length < filtered.length
-  const pending = rows.find((r) => r.status === 'pending')
-
-  const stats = [
-    { label: 'Aktiv elanlar', value: counts.active },
-    { label: 'Yoxlamada olanlar', value: counts.pending },
-    { label: 'Müddəti bitmiş elanlar', value: counts.expired },
-    { label: 'Son 30 günün baxışları', value: dashboardStats.views30d },
+  const tiles = [
+    { label: 'Aktiv elan', value: counts.active },
+    { label: 'Baxış, son 14 gün', value: views14 },
+    { label: 'Nömrəyə baxış', value: total('phoneReveals') },
+    { label: 'Seçilmişlərdə', value: total('favourites') },
   ]
 
   return (
-    <AccountPage>
-      <SectionHeader as="h1" title={`Salam, ${firstName(name)}!`} subtitle={subtitle} />
-      <AccountTabs active="listings" />
+    <div className="page-x mx-auto flex w-full max-w-[1200px] flex-col gap-6 pt-5 pb-14 md:pt-8">
+      <CabinetHeader active="listings" counts={{ listings: counts.all }} />
 
-      <section aria-label="Hesab göstəriciləri" className="grid w-full grid-cols-2 gap-3 md:gap-4 xl:grid-cols-4">
-        {stats.map((s) => (
-          <div key={s.label} className="flex min-w-0 flex-col items-start gap-5 rounded-xl border border-line bg-surface p-[19px] md:p-[23px]">
-            <p className="w-full text-xs leading-[1.5] text-muted">{s.label}</p>
-            <p className="text-[30px] leading-[1.5] font-semibold text-ink">{formatNumber(s.value)}</p>
-          </div>
-        ))}
-      </section>
-
-      {pending && (
-        <Notice tone="warning" title="Yeni elanınız yoxlamadadır">
-          {listingLabel(pending)} moderasiya üçün göndərilib. Yoxlama adətən 24 saat ərzində tamamlanır.
-        </Notice>
-      )}
-
-      <section aria-labelledby="my-listings-title" className="flex w-full flex-col items-start gap-7">
-        <div className="flex w-full items-start justify-between gap-4">
-          <h2 id="my-listings-title" className="text-[23px] leading-[1.35] font-normal text-ink">
-            Elanlarım
-          </h2>
-          <ButtonLink href="/elan-yerlesdir" icon={<Plus aria-hidden size={18} strokeWidth={1.8} absoluteStrokeWidth />}>
-            Elan yerləşdir
-          </ButtonLink>
+      {cabinet.load.status === 'error' ? (
+        <div role="alert" className="flex flex-col items-start gap-3 rounded-xl bg-danger-soft p-5">
+          <p className="flex items-center gap-2 text-[15px] font-semibold text-ink">
+            <CircleAlert aria-hidden size={18} strokeWidth={2} className="text-danger" />
+            {cabinet.load.error}
+          </p>
+          <Button variant="secondary" onClick={cabinet.retry} icon={<RotateCcw aria-hidden size={16} strokeWidth={1.8} />}>
+            Yenidən cəhd et
+          </Button>
         </div>
-
-        <div role="group" aria-label="Elan statusu" className="flex w-full flex-wrap items-start gap-2">
-          {filters.map((f) => (
-            <button
-              key={f.value}
-              type="button"
-              aria-pressed={filter === f.value}
-              onClick={() => {
-                setFilter(f.value)
-                setShowMore(false)
-              }}
-              className={pillClass(filter === f.value)}
-            >
-              {f.label} · {formatNumber(counts[f.value])}
-            </button>
-          ))}
-        </div>
-
-        {notice && (
-          <Notice tone="success" title={notice.title}>
-            {notice.text}
-          </Notice>
-        )}
-
-        {visible.length > 0 ? (
-          <div className="flex w-full flex-col gap-3.5">
-            {visible.map((row) => (
-              <MyListingRowCard
-                key={row.listing.id}
-                row={row}
-                onDeactivate={setConfirm}
-                onRenew={(r) => {
-                  setStatus(r, 'active')
-                  setNotice({ title: 'Elan yeniləndi', text: `${listingLabel(r)} yenidən aktivdir.` })
-                }}
-                onActivate={(r) => {
-                  setStatus(r, 'active')
-                  setNotice({ title: 'Elan aktiv edildi', text: `${listingLabel(r)} yenidən axtarışda görünür.` })
-                }}
-              />
+      ) : cabinet.load.status === 'loading' ? (
+        <div aria-busy className="flex flex-col gap-4">
+          <p role="status" className="sr-only">
+            Elanlar yüklənir…
+          </p>
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+            {Array.from({ length: 4 }, (_, i) => (
+              <SkeletonBlock key={i} className="h-[84px] rounded-xl" />
             ))}
           </div>
-        ) : (
-          <p className="text-sm leading-[1.5] text-muted">Bu bölmədə göstəriləcək elan yoxdur.</p>
-        )}
-
-        {hasMore && (
-          <Button variant="secondary" onClick={() => setShowMore(true)}>
-            Daha çox elan göstər
-          </Button>
-        )}
-      </section>
-
-      <div className="flex w-full flex-col items-start gap-6 xl:flex-row">
-        <ViewsChart id={STATS_ANCHOR} />
-        <div className="flex w-full shrink-0 flex-col items-start xl:w-[380px]">
-          <InfoNotice title="Biznes üçün daha çox imkan">
-            Genişləndirilmiş satıcı profili və ətraflı statistika ilə abunə paketləri tezliklə təqdim ediləcək.
-          </InfoNotice>
-          <p className="w-full text-xs leading-[1.5] text-muted">«Önə çıxan» nişanı yalnız seçilən elanlarda göstərilir.</p>
+          {Array.from({ length: 3 }, (_, i) => (
+            <SkeletonBlock key={i} className="h-[150px] rounded-xl" />
+          ))}
         </div>
-      </div>
+      ) : (
+        <>
+          <dl className="grid grid-cols-2 gap-3 md:grid-cols-4">
+            {tiles.map((t) => (
+              <div key={t.label} className="flex flex-col gap-1 rounded-xl border border-line bg-surface px-4 py-3.5">
+                <dt className="text-[13px] leading-[1.3] text-muted">{t.label}</dt>
+                <dd className="text-[24px] leading-[1.15] font-bold tracking-[-0.01em] text-forest tabular-nums">{formatNumber(t.value)}</dd>
+              </div>
+            ))}
+          </dl>
 
-      <Dialog open={confirm !== null} title="Elanı deaktiv etmək?" onClose={closeDialog}>
-        <p className="text-sm leading-[1.5] text-ink">Elan axtarışdan gizlədiləcək. İstədiyiniz vaxt yenidən aktiv edə bilərsiniz.</p>
-        <Button
-          variant="danger"
-          fullWidth
-          onClick={() => {
-            if (confirm) {
-              setStatus(confirm, 'inactive')
-              setNotice({ title: 'Elan deaktiv edildi', text: `${listingLabel(confirm)} axtarışdan gizlədildi.` })
-            }
-            setConfirm(null)
-          }}
-        >
-          Deaktiv et
-        </Button>
-        <Button variant="secondary" fullWidth onClick={closeDialog}>
-          Ləğv et
-        </Button>
-      </Dialog>
-    </AccountPage>
+          {(counts.rejected > 0 || expiringSoon > 0) && (
+            <div className="flex flex-col gap-2">
+              {counts.rejected > 0 && (
+                <Link href="/kabinet?status=redd" scroll={false} className="flex items-center gap-2.5 rounded-xl bg-danger-soft px-4 py-3 text-sm leading-[1.4] text-ink hover:underline">
+                  <CircleAlert aria-hidden size={18} strokeWidth={2} className="shrink-0 text-danger" />
+                  <span>
+                    <span className="font-semibold">{counts.rejected} elan rədd edilib.</span> Səbəbinə baxın, düzəldib yenidən göndərin.
+                  </span>
+                </Link>
+              )}
+              {expiringSoon > 0 && (
+                <Link href="/kabinet?status=aktiv" scroll={false} className="flex items-center gap-2.5 rounded-xl bg-warning-soft px-4 py-3 text-sm leading-[1.4] text-ink hover:underline">
+                  <Clock3 aria-hidden size={18} strokeWidth={2} className="shrink-0 text-warning" />
+                  <span>
+                    <span className="font-semibold">{expiringSoon} elanın müddəti 3 gün ərzində bitir.</span> Bitəndə pulsuz yeniləyə bilərsiniz.
+                  </span>
+                </Link>
+              )}
+            </div>
+          )}
+
+          <UnderlineTabs
+            label="Elanın vəziyyəti"
+            tabs={cabinetTabs.map((t) => ({ key: t.key, label: t.label, count: counts[t.key], href: t.param ? `/kabinet?status=${t.param}` : '/kabinet', active: t.key === tab }))}
+          />
+
+          {shown.length === 0 && !showDraft ? (
+            <div className="flex justify-center py-4">
+              <EmptyState
+                icon={<Sprout aria-hidden size={30} strokeWidth={1.8} absoluteStrokeWidth />}
+                title={empty[tab].title}
+                description={empty[tab].text}
+                action={
+                  <ButtonLink href="/elan-yerlesdir" fullWidth icon={<Plus aria-hidden size={18} strokeWidth={1.8} />}>
+                    Elan yerləşdir
+                  </ButtonLink>
+                }
+              />
+            </div>
+          ) : (
+            <ul className="flex flex-col gap-3">
+              {showDraft && draft && <DraftRowCard draft={draft} onDiscard={cabinet.discardDraft} />}
+              {shown.map((l) => (
+                <ListingRowCard key={l.id} listing={l} stats={stats[l.id]} now={now} handlers={cabinet} />
+              ))}
+            </ul>
+          )}
+        </>
+      )}
+    </div>
   )
 }

@@ -98,7 +98,7 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
   const listingsValue = useMemo<MyListingsValue>(
     () => ({
       submitted,
-      addListing: (listing) => setSubmitted((prev) => [listing, ...prev]),
+      addListing: (listing) => setSubmitted((prev) => [listing, ...prev.filter((l) => l.id !== listing.id)]),
       updateListing: (id, patch) => setSubmitted((prev) => prev.map((l) => (l.id === id ? { ...l, ...patch } : l))),
       removeListing: (id) => setSubmitted((prev) => prev.filter((l) => l.id !== id)),
     }),

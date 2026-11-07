@@ -100,5 +100,6 @@ Update after every commit (newest last).
 | 3 · Listing page (gallery + lightbox, price/wholesale/stock, contact, attributes, care, report) | done | 91db55d |
 | 1 · Posting flow (6 steps, autosave, photos in IndexedDB, preview = listing page, promotion, success) | done | eb219a1 |
 | 2 · Auth (login by password or SMS, registration with business kinds + SMS code, password reset) | done | bde3a68 |
-| 4 · Seller / nursery page + /saticilar directory | done | (this commit) |
-| 5 · Kabinet («Elanlarım» by status, actions, stats, profile) | next | |
+| 4 · Seller / nursery page + /saticilar directory | done | d9ac549 |
+| 5 + 6 · Kabinet (statuses, renew/edit/deactivate/delete/promote, stats) + favourites + saved searches | done | (this commit) |
+| 7 · Promotion packages (/reklam) with mock checkout | next | |

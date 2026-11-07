@@ -70,6 +70,8 @@ export interface PostingDraft {
   reachedStep: StepNumber
   /** ISO time of the last change («Qaralama saxlanıldı · 14:32») */
   savedAt: string
+  /** Set when the draft edits a published listing («Redaktə et»): the category is locked and the number kept */
+  editing?: { id: string; number?: number; slug: string }
 }
 
 export function createDraft(contact?: { name?: string; phone?: string }): PostingDraft {

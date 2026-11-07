@@ -32,6 +32,20 @@ const id = fieldDomId
 
 export function CategoryStep({ draft, update, error }: StepProps) {
   const subs = draft.kind === 'service' ? serviceTypes : (subcategoriesByCategory[draft.categoryId] ?? [])
+  if (draft.editing) {
+    // Editing a published listing: the category can't change (a different plant is a new listing).
+    const name = productCategories.find((c) => c.id === draft.categoryId)?.name ?? 'Bağ xidmətləri'
+    return (
+      <div className="flex flex-col gap-5">
+        <p className="text-[15px] leading-[1.5] text-ink">
+          Kateqoriya: <span className="font-semibold">{[name, draft.subcategory].filter(Boolean).join(' / ')}</span>
+        </p>
+        <p className="rounded-xl bg-mint p-4 text-sm leading-[1.5] text-ink">
+          Dərc olunmuş elanın kateqoriyasını dəyişmək olmur. Başqa bitki satırsınızsa, yeni elan yerləşdirin.
+        </p>
+      </div>
+    )
+  }
   return (
     <div className="flex flex-col gap-7">
       <FieldGroup legend="Elanın növü" error={error('kind')}>
@@ -108,7 +122,7 @@ export function CategoryStep({ draft, update, error }: StepProps) {
 
 /* ---------- 2 · Məlumat ---------- */
 
-const monthOptions = Array.from({ length: 12 }, (_, i) => ({ value: String(i + 1), label: monthName(i + 1).slice(0, 3) }))
+const monthOptions = Array.from({ length: 12 }, (_, i) => ({ value: String(i + 1), label: monthName(i + 1) }))
 
 function AttributeField({ a, draft, update, error, touch }: StepProps & { a: AttrDef }) {
   const value = draft.attrs[a.id] ?? ''

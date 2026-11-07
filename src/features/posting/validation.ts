@@ -37,6 +37,8 @@ export function validateStep(step: StepNumber, d: PostingDraft): StepErrors {
 
   switch (step) {
     case 1: {
+      // An edit keeps the published listing's category (locked in the form).
+      if (d.editing) break
       if (!d.kind) e.kind = 'Məhsul və ya xidmət seçin.'
       else if (!d.categoryId) e.categoryId = d.kind === 'service' ? 'Xidmət növünü seçin.' : 'Kateqoriyanı seçin.'
       else if (d.kind === 'service' ? !d.subcategory : subcategoriesByCategory[d.categoryId]?.length && !d.subcategory)

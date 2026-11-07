@@ -129,10 +129,14 @@ export function PostingWizard({ step }: { step: StepNumber }) {
     // The demo keeps a copy in «Elanlarım» with small photos (data URLs survive a reload; blob URLs don't).
     const blobs = await Promise.all(draft.photos.map((p) => photoStore.get(p.id)))
     const images = (await Promise.all(blobs.map((b) => (b ? thumbnailDataUrl(b) : undefined)))).filter((u): u is string => Boolean(u))
-    const listing = toListing(draft, { images, now: new Date(), number: result.result.number, sellerId: user.sellerId })
+    const editing = draft.editing
+    const number = editing?.number ?? result.result.number
+    const built = toListing(draft, { images, now: new Date(), number, sellerId: user.sellerId })
+    // An edit keeps the listing's id, number and address; it goes back to review.
+    const listing = editing ? { ...built, id: editing.id, slug: editing.slug, updatedAt: new Date().toISOString() } : built
     addListing(listing)
     try {
-      window.localStorage.setItem(LAST_SENT_KEY, JSON.stringify({ id: listing.id, promotion: draft.promotion }))
+      window.localStorage.setItem(LAST_SENT_KEY, JSON.stringify({ id: listing.id, promotion: draft.promotion, edited: Boolean(editing) }))
     } catch {
       /* storage full: the confirmation page falls back to «Elanlarım» */
     }
@@ -143,6 +147,7 @@ export function PostingWizard({ step }: { step: StepNumber }) {
 
   if (!allowed || sent) return sent ? <PostingSkeleton /> : null
   const meta = STEPS[step - 1]
+  const editing = Boolean(draft.editing)
   const back = step > 1 ? stepPath(step - 1) : undefined
 
   let body: ReactNode
@@ -167,7 +172,7 @@ export function PostingWizard({ step }: { step: StepNumber }) {
   }
 
   const review = step === 6
-  const primaryLabel = review ? (sending ? 'Göndərilir…' : 'Elanı göndər') : 'Davam et'
+  const primaryLabel = review ? (sending ? 'Göndərilir…' : editing ? 'Dəyişiklikləri göndər' : 'Elanı göndər') : 'Davam et'
   const primaryIcon = review ? <Send aria-hidden size={18} strokeWidth={1.8} /> : <ArrowRight aria-hidden size={18} strokeWidth={1.8} />
   const guestAtEnd = review && !user
 
@@ -177,7 +182,7 @@ export function PostingWizard({ step }: { step: StepNumber }) {
         <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-2">
           <div className="flex flex-col gap-1.5">
             <p className="text-[13px] leading-[normal] font-medium text-muted">
-              Addım {step} / {STEPS.length} · {meta.title}
+              {editing ? 'Elanı redaktə edirsiniz · ' : ''}Addım {step} / {STEPS.length} · {meta.title}
             </p>
             <h1 ref={headingRef} tabIndex={-1} className="text-[24px] leading-[1.2] font-semibold tracking-[-0.02em] text-forest outline-none md:text-[30px]">
               {meta.heading}

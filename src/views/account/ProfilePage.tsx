@@ -3,19 +3,19 @@
 import { Badge } from '@/components/ui/Badge'
 import { ButtonLink } from '@/components/ui/Button'
 import { Notice } from '@/components/ui/Notice'
-import { SectionHeader } from '@/components/ui/SectionHeader'
 import { sellerById } from '@/data/sellers'
 import type { AccountProfile, NotificationSettings } from '@/data/user'
-import { AccountTabs } from '@/features/account/AccountTabs'
+import { CabinetHeader } from '@/features/cabinet/CabinetHeader'
 import { SignInPrompt } from '@/features/account/SignInPrompt'
-import { AccountPage, Card, Checkbox, PanelTitle } from '@/features/account/ui'
+import { Card, PanelTitle } from '@/features/account/ui'
+import { Switch } from '@/components/ui/FormControls'
 import { useAccount } from '@/features/account/useAccount'
 import { ProfileForm } from '@/features/account/profile/ProfileForm'
 import { SecurityForm } from '@/features/account/profile/SecurityForm'
 
 const notificationOptions: Array<{ key: keyof NotificationSettings; label: string }> = [
-  { key: 'moderation', label: 'Elanın moderasiya nəticəsi' },
-  { key: 'expiry', label: 'Müddətin bitməsi haqqında xəbərdarlıq' },
+  { key: 'moderation', label: 'Elan yoxlamadan keçəndə və ya rədd ediləndə' },
+  { key: 'expiry', label: 'Elanın müddəti bitməzdən 3 gün əvvəl' },
   { key: 'news', label: 'Yeniliklər və xüsusi təkliflər' },
 ]
 const defaultNotifications: NotificationSettings = { moderation: true, expiry: true, news: false }
@@ -29,9 +29,8 @@ export default function ProfilePage() {
   const notifications = account.notifications ?? defaultNotifications
 
   return (
-    <AccountPage>
-      <SectionHeader as="h1" title="Profil məlumatları" subtitle="Hesabınızı və alıcılara görünən məlumatları idarə edin." />
-      <AccountTabs active="profile" />
+    <div className="page-x mx-auto flex w-full max-w-[1200px] flex-col gap-6 pt-5 pb-14 md:pt-8">
+      <CabinetHeader active="profile" />
 
       <div className="grid w-full grid-cols-1 items-start gap-6 xl:grid-cols-[926fr_358fr] xl:gap-7">
         <div className="flex min-w-0 flex-col gap-6">
@@ -45,15 +44,16 @@ export default function ProfilePage() {
 
           <Card className="w-full gap-5">
             <PanelTitle>Bildiriş seçimləri</PanelTitle>
-            {notificationOptions.map((o) => (
-              <Checkbox
-                key={o.key}
-                className="w-full text-sm leading-[1.5]"
-                label={o.label}
-                checked={notifications[o.key]}
-                onChange={(e) => updateAccount({ notifications: { ...notifications, [o.key]: e.target.checked } })}
-              />
-            ))}
+            <div className="flex w-full flex-col gap-1">
+              {notificationOptions.map((o) => (
+                <Switch
+                  key={o.key}
+                  label={o.label}
+                  checked={notifications[o.key]}
+                  onCheckedChange={(on) => updateAccount({ notifications: { ...notifications, [o.key]: on } })}
+                />
+              ))}
+            </div>
           </Card>
 
           {account.verified && account.accountType === 'business' && (
@@ -63,7 +63,7 @@ export default function ProfilePage() {
           )}
         </div>
       </div>
-    </AccountPage>
+    </div>
   )
 }
 

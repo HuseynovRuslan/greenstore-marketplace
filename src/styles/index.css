@@ -25,7 +25,7 @@
   --color-vip: #f1f2e6; /* VIP badge background */
   --color-success: #287247;
   --color-success-soft: #eaf5ec;
-  --color-warning: #96691e;
+  --color-warning: #8a5f17; /* darkened from #96691e (Nov 2026): 12 px badge text reaches 5.0:1 on warning-soft */
   --color-warning-soft: #fbf2dc;
   --color-danger: #b6443f;
   --color-danger-soft: #faece9;

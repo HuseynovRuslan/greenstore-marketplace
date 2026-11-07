@@ -13,6 +13,7 @@ import type { FilterOption } from './filterDefs'
 import { ActiveFilterRow, SortSelect, ViewToggle } from './SearchControls'
 import { catalogHref, chipActive, emptySearchState, withoutFilters, withSort, withView, type FilterChip, type SearchState, type SearchView } from './searchUrl'
 import { useStickySide } from './useStickySide'
+import { SaveSearchButton } from '@/features/saved-searches/SaveSearchButton'
 
 export const RESULTS_ID = 'axtaris-neticeleri'
 
@@ -141,12 +142,16 @@ export function CatalogResults(props: CatalogResultsProps) {
               </h1>
               <p className="text-[15px] leading-[normal] whitespace-nowrap text-muted tabular-nums">{formatNumber(total)} elan</p>
             </div>
-            {total > 0 && (
-              <div className="hidden items-center gap-2 xl:flex">
-                <SortSelect value={shownSort} onChange={changeSort} />
-                <ViewToggle view={shownView} onChange={changeView} />
-              </div>
-            )}
+            <div className="flex items-center gap-2">
+              {/* Saving a search with no results makes sense too: the alert says when something appears. */}
+              <SaveSearchButton query={stateQuery} />
+              {total > 0 && (
+                <div className="hidden items-center gap-2 xl:flex">
+                  <SortSelect value={shownSort} onChange={changeSort} />
+                  <ViewToggle view={shownView} onChange={changeView} />
+                </div>
+              )}
+            </div>
           </div>
 
           {/* < 1280 px: «Filtrlər (n)», sort and view stay at hand under the header (and take its place when it hides). */}
