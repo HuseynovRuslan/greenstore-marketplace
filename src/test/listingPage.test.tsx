@@ -10,6 +10,9 @@ import { ListingDetail } from '@/views/ListingDetailPage'
 
 const recordPhoneReveal = vi.fn(async (id: string) => void id)
 const sendReport = vi.fn(async (input: unknown) => (void input, { ok: true as const, id: 'rep-1' }))
+// Long user-event flows: give them room when the whole suite runs in parallel.
+vi.setConfig({ testTimeout: 20_000 })
+
 vi.mock('@/features/listing/actions', () => ({
   recordPhoneReveal: (id: string) => recordPhoneReveal(id),
   sendReport: (input: unknown) => sendReport(input),

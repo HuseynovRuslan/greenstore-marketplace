@@ -119,6 +119,9 @@ export const mockRepository: MarketplaceRepository = {
   async submitReport() {
     return { id: `rep-${mockSequence('report', 880)}` }
   },
+  async submitSupportMessage() {
+    return { ticket: mockSequence('support', 7210) }
+  },
   async submitServiceRequest() {
     const number = mockSequence('service-request', 3021)
     return { id: `req-${number}`, number }

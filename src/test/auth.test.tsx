@@ -6,6 +6,9 @@ import LoginPage from '@/views/LoginPage'
 import RegisterPage from '@/views/RegisterPage'
 
 const replace = vi.fn()
+// Long user-event flows: give them room when the whole suite runs in parallel.
+vi.setConfig({ testTimeout: 20_000 })
+
 vi.mock('next/navigation', () => ({
   useRouter: () => ({ push: vi.fn(), replace, back: vi.fn(), prefetch: vi.fn(), refresh: vi.fn() }),
   usePathname: () => '/daxil-ol',

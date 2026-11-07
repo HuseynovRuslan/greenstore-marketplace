@@ -140,7 +140,7 @@ export default function ComplaintsPage() {
           {selected ? (
             <>
               <Panel aria-labelledby="complaint-title" className="w-full">
-                <h2 id="complaint-title" className="w-full text-[23px] leading-[1.35] font-normal text-ink">
+                <h2 id="complaint-title" className="w-full text-lg leading-[1.3] font-semibold tracking-[-0.01em] text-forest">
                   {selected.code} · {selected.reason}
                 </h2>
                 <p className="w-full text-sm leading-[1.5] text-ink">
@@ -155,7 +155,7 @@ export default function ComplaintsPage() {
                     />
                   )}
                   <div className="flex min-w-0 flex-1 flex-col items-start gap-3">
-                    <h3 className="w-full text-[23px] leading-[1.35] font-normal text-ink">{listing?.title ?? `Elan № ${selected.listingNumber}`}</h3>
+                    <h3 className="w-full text-lg leading-[1.3] font-semibold tracking-[-0.01em] text-forest">{listing?.title ?? `Elan № ${selected.listingNumber}`}</h3>
                     {listing && <p className="text-2xl leading-[1.5] font-semibold whitespace-nowrap text-ink">{formatPrice(listing.price)}</p>}
                     <p className="w-full text-[13px] leading-[1.5] text-ink">{complaintListingMeta(selected, listing)}</p>
                     <div className="flex flex-wrap items-center gap-3">

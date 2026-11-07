@@ -205,7 +205,12 @@ export function ListingDetail({ listing, seller, category, others, similar, mode
               <div className="flex gap-3 rounded-xl bg-sand p-4 text-[13px] leading-[1.5] text-ink">
                 <ShieldAlert aria-hidden size={20} strokeWidth={1.8} className="shrink-0 text-forest" />
                 <p>
-                  <span className="font-semibold">Bitkini görmədən beh göndərməyin.</span> Kök sistemini, yarpaqları və ölçünü yerində yoxlayın, ödənişi sonra edin.
+                  <span className="font-semibold">Bitkini görmədən beh göndərməyin.</span> Kök sistemini, yarpaqları və ölçünü yerində yoxlayın, ödənişi sonra edin.{' '}
+                  {!preview && (
+                    <Link href="/tehlukesiz-alis" className="font-semibold text-forest underline underline-offset-2">
+                      Necə yoxlamalı
+                    </Link>
+                  )}
                 </p>
               </div>
             </StickyAside>

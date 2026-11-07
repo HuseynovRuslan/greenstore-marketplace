@@ -112,7 +112,7 @@ The catalogue's pending «Kök sistemi» filter can use `plant.rootSystem`.
 
 `PromotionPackage`, `PromotionOption`, `PromotionOrder`, `ListingStats`, `ListingInput`, `ListingSubmitResult`,
 `OtpChallenge`, `OtpVerifyResult`, `OtpPurpose`, `RegistrationInput`, `ReportInput`, `ServiceRequestInput`,
-`ServiceRequestResult`, `SavedSearch`, `BusinessKind`, `SellerOffer`, `OpeningHours`. Shapes and comments are in
+`ServiceRequestResult`, `SavedSearch`, `SupportMessageInput`, `BusinessKind`, `SellerOffer`, `OpeningHours`. Shapes and comments are in
 `src/types/index.ts`.
 
 ## 2. Repository methods
@@ -128,6 +128,7 @@ The catalogue's pending «Kök sistemi» filter can use `plant.rootSystem`.
 | `createPromotionOrder(input)` | prices the option, status `paid` at once | `POST /api/promotion-orders` → payment provider redirect |
 | `submitReport(input)` | returns an id | `POST /api/reports` |
 | `submitServiceRequest(input)` | returns «Sorğu № 3021…» | `POST /api/service-requests` |
+| `submitSupportMessage(input)` | returns a ticket number [footer pages] | `POST /api/support` (to the support inbox) |
 | `requestOtp({ phone, purpose })` | challenge id, masked phone, 300 s expiry, 60 s resend, **`demoCode: "1234"`** | `POST /api/otp` (sends the SMS; never returns the code) |
 | `verifyOtp({ challengeId, code })` | accepts `1234`; 5 attempts; expires after 5 min | `POST /api/otp/verify` |
 | `register(input)` | needs a recent verified challenge | `POST /api/accounts` |

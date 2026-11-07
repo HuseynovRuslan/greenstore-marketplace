@@ -30,6 +30,7 @@ import type {
   ServiceProvider,
   ServiceRequestInput,
   ServiceRequestResult,
+  SupportMessageInput,
 } from '@/types'
 
 export interface PageResult<T> {
@@ -100,6 +101,8 @@ export interface MarketplaceRepository {
   createPromotionOrder(input: { listingId: string; packageId: PromotionPackageId; optionId: string }): Promise<PromotionOrder>
   submitReport(input: ReportInput): Promise<{ id: string }>
   submitServiceRequest(input: ServiceRequestInput): Promise<ServiceRequestResult>
+  /** «Bizimlə əlaqə» (support form); returns the ticket number. */
+  submitSupportMessage(input: SupportMessageInput): Promise<{ ticket: number }>
 
   /* Accounts: SMS code, registration, password reset */
   requestOtp(input: { phone: string; purpose: OtpPurpose }): Promise<OtpChallenge>

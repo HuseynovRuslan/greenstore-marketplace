@@ -198,7 +198,7 @@ export default function ModerationPage() {
             <>
               <Panel aria-labelledby="review-title" className="w-full">
                 <div className="flex w-full items-start gap-3">
-                  <h2 id="review-title" className="min-w-0 flex-1 text-[23px] leading-[1.35] font-normal text-ink">
+                  <h2 id="review-title" className="min-w-0 flex-1 text-lg leading-[1.3] font-semibold tracking-[-0.01em] text-forest">
                     {selected.title}
                   </h2>
                   <Badge tone={badge.tone}>{badge.label}</Badge>

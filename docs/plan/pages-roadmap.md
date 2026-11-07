@@ -82,7 +82,8 @@ phones) with success state; «Usta çağır» also from the catalogue.
 
 ### 9. The rest
 404 with search and categories; footer pages (Elan qaydaları, Təhlükəsiz alış, Kömək, Əlaqə with a form, İstifadə
-şərtləri, Məxfilik siyasəti) and the full footer on inner pages; admin header aligned (internal tool, light touch).
+şərtləri, Məxfilik siyasəti); the compact footer on inner pages becomes a row of real links (the full footer stays on
+the home page); admin header and headings aligned (internal tool, light touch).
 
 ### 10. Wrap-up
 Screenshots of every page and key state at 1440 / 390 in `docs/design/pages-v2/`; `docs/handoff/pages-v2.md`
@@ -103,5 +104,6 @@ Update after every commit (newest last).
 | 4 · Seller / nursery page + /saticilar directory | done | d9ac549 |
 | 5 + 6 · Kabinet (statuses, renew/edit/deactivate/delete/promote, stats) + favourites + saved searches | done | 17ba8ae |
 | 7 · Promotion packages (/reklam) with mock checkout; owner strip on the listing page | done | b798bb0 |
-| 8 · Services catalogue and service page + «Usta çağır» | done | (this commit) |
-| 9 · 404, footer/help pages, full footer, admin header | next | |
+| 8 · Services catalogue and service page + «Usta çağır» | done | f855d5f |
+| 9 · 404, support pages (Kömək, Elan qaydaları, Təhlükəsiz alış, Əlaqə + form, şərtlər, məxfilik), footer links, admin headings | done | (this commit) |
+| 10 · Wrap-up: screenshots, handoff, summary | next | |

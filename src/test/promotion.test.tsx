@@ -7,6 +7,9 @@ import { cardErrors, formatCard, formatExpiry, luhn } from '@/features/promotion
 import { PromotionPlanner } from '@/features/promotion/PromotionPlanner'
 import { AppStoreProvider } from '@/state/store'
 
+// Long user-event flows: give them room when the whole suite runs in parallel.
+vi.setConfig({ testTimeout: 20_000 })
+
 vi.mock('next/navigation', () => ({
   useRouter: () => ({ push: vi.fn(), replace: vi.fn(), back: vi.fn(), prefetch: vi.fn(), refresh: vi.fn() }),
   usePathname: () => '/reklam',

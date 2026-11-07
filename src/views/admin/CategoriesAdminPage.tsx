@@ -191,7 +191,7 @@ export default function CategoriesAdminPage() {
         <div ref={panelRef} className="w-full min-w-0 scroll-mt-4">
           <Panel className="w-full">
             <form noValidate onSubmit={save} aria-labelledby="category-form-title" className="flex w-full flex-col items-start gap-5">
-              <h2 id="category-form-title" className="w-full text-[23px] leading-[1.35] font-normal text-ink">
+              <h2 id="category-form-title" className="w-full text-lg leading-[1.3] font-semibold tracking-[-0.01em] text-forest">
                 {editingRow ? 'Kateqoriyanı redaktə et' : 'Kateqoriya əlavə et'}
               </h2>
               {saved && (

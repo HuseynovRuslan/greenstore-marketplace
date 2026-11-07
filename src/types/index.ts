@@ -434,3 +434,13 @@ export interface SavedSearch {
   /** New matches since the user last opened it (computed by the API) */
   newCount?: number
 }
+
+/** «Bizimlə əlaqə» form (support). `contact` is a phone or an e-mail. */
+export interface SupportMessageInput {
+  topic: 'listing' | 'account' | 'payment' | 'complaint' | 'other'
+  name: string
+  contact: string
+  message: string
+  /** «Elan №», when the question is about a listing */
+  listingNumber?: number
+}

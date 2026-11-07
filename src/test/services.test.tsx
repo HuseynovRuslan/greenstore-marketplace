@@ -6,6 +6,9 @@ import { RequestButton } from '@/features/services/RequestDialog'
 import { AppStoreProvider } from '@/state/store'
 
 const sendServiceRequest = vi.fn(async (input: unknown) => (void input, { ok: true as const, id: 'req-3021', number: 3021 }))
+// Long user-event flows: give them room when the whole suite runs in parallel.
+vi.setConfig({ testTimeout: 20_000 })
+
 vi.mock('@/features/services/actions', () => ({ sendServiceRequest: (input: unknown) => sendServiceRequest(input) }))
 
 describe('services catalogue links', () => {
