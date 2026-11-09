@@ -8,9 +8,7 @@ const img = (file: string) => `/images/listings/${file}.webp`
  */
 
 /** 3-column cards (424 × 340, photo 396 × 210): "Satıcının digər elanları", seller page grid. */
-export const wideCardImages: Record<string, string> = {
-  'torpaq-qarisigi': img('torpaq-qarisigi-4'),
-}
+export const wideCardImages: Record<string, string> = {}
 
 /** 4-column cards (313 × 340, photo 285 × 210): "Oxşar elanlar". */
 export const narrowCardImages: Record<string, string> = {

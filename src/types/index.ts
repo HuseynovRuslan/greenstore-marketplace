@@ -4,12 +4,17 @@
  * so the mock data modules in `src/data` can later be swapped for HTTP calls in `src/services`.
  */
 
-/** Lucide icon names used by the Figma design (e.g. category cards). `shrub` was added for "Kollar" (Variant 2). */
+/**
+ * Lucide icon names used by the Figma design (e.g. category cards). `shrub` was added for "Kollar" (Variant 2);
+ * `grape` («Sarmaşıqlar», the vine) and `clover` («Yer örtücü bitkilər») for the November 2026 categories.
+ */
 export type IconName =
   | 'trees'
   | 'shrub'
   | 'flower-2'
   | 'flower'
+  | 'grape'
+  | 'clover'
   | 'sprout'
   | 'wheat'
   | 'shovel'
@@ -63,7 +68,7 @@ export interface Listing {
   /** Promoted listing — shown in "Önə çıxan elanlar" with the "Önə çıxan" badge (`?vip=1` in URLs) */
   vip: boolean
   categoryId: string
-  /** e.g. "Dekorativ ağaclar" (detail page breadcrumb/specs) */
+  /** Sub-category name, e.g. "Meyvə ağacları" (detail page breadcrumb/specs; ids: src/data/categories.ts) */
   subcategory?: string
   sellerId?: string
   /** Image used on listing cards (path under /public) — the photo of the 1440 desktop frames */

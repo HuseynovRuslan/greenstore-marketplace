@@ -11,20 +11,6 @@ export const cities: City[] = [
   { id: 'lenkeran', name: 'Lənkəran' },
 ]
 
-/**
- * Listings per city (mock), shown next to each option of the home search city field.
- * `City` has no count field, so the numbers live here; they add up to `listingTotals.all` ("Bütün şəhərlər").
- */
-export const cityListingCounts: Record<string, number> = {
-  baki: 1620,
-  abseron: 980,
-  sumqayit: 310,
-  gence: 420,
-  seki: 210,
-  quba: 290,
-  lenkeran: 210,
-}
-
 const byId = new Map(cities.map((c) => [c.id, c]))
 
 export function cityName(id: string): string {

@@ -1,6 +1,5 @@
 import Link from 'next/link'
 import { CategoryIcon } from '@/components/ui/CategoryIcon'
-import { categories } from '@/data/categories'
 import { cn, formatNumber } from '@/lib/format'
 import { categoryHref } from '@/seo/catalog'
 import type { Category } from '@/types'
@@ -9,10 +8,10 @@ import type { Category } from '@/types'
  * Variant 2 categories row: a 48 px white circle with the category icon, the name (two lines reserved so the counts
  * line up) and the listing count. Ten equal columns from lg; phones and tablets scroll it sideways (78 px items).
  * `selected` mirrors the Kateqoriya filter of the search card (forest circle, white icon).
- * `#kateqoriyalar` is the target of the menu link "Kateqoriyalar". `items` is the data (the dev worst-case page
- * passes its own).
+ * `#kateqoriyalar` is the target of the menu link "Kateqoriyalar". `items` are the product categories with their
+ * counts (heroCounts.ts; the dev worst-case page passes its own).
  */
-export function HeroCategories({ selected, className, items = categories }: { selected?: string; className?: string; items?: Category[] }) {
+export function HeroCategories({ items, selected, className }: { items: Category[]; selected?: string; className?: string }) {
   return (
     <div id="kateqoriyalar" className={cn('scroll-mt-24', className)}>
       <h2 className="sr-only">Kateqoriyalar</h2>

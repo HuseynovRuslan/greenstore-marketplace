@@ -70,6 +70,7 @@ export function catalogRule(state: SearchState, count: number, page: number): In
     species: state.species !== '',
     height: state.height !== '',
     age: state.age !== '',
+    root: state.root !== '',
     vip: state.vip,
     delivery: state.delivery,
     seller: state.sellerType !== '',
@@ -81,6 +82,7 @@ export function catalogRule(state: SearchState, count: number, page: number): In
     filters.species ||
     filters.height ||
     filters.age ||
+    filters.root ||
     filters.vip ||
     filters.delivery ||
     filters.seller

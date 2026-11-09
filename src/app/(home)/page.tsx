@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import HomePage from '@/views/HomePage'
+import { loadHeroCounts } from '@/features/home/heroCounts'
 import { getRepository } from '@/services/repository'
 import { JsonLd } from '@/seo/StructuredData'
 import { websiteJsonLd } from '@/seo/jsonld'
@@ -13,11 +14,12 @@ export const metadata: Metadata = {
 }
 
 export default async function Page() {
-  const content = await getRepository().getHomeContent()
+  const repo = getRepository()
+  const [content, hero] = await Promise.all([repo.getHomeContent(), loadHeroCounts(repo)])
   return (
     <>
       <JsonLd data={websiteJsonLd()} />
-      <HomePage content={content} />
+      <HomePage content={content} hero={hero} />
     </>
   )
 }

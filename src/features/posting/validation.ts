@@ -1,4 +1,4 @@
-import { subcategoriesByCategory } from '@/features/search/taxonomy'
+import { subcategoriesOf } from '@/data/categories'
 import { phoneFieldError } from '@/lib/phone'
 import { parseNumberValue, SERVICE_CATEGORY, visibleAttributes } from './attributes'
 import { DESCRIPTION_MAX, DESCRIPTION_MIN, MAX_PHOTOS, TITLE_MAX, TITLE_MIN, type PostingDraft, type StepNumber } from './draft'
@@ -41,7 +41,7 @@ export function validateStep(step: StepNumber, d: PostingDraft): StepErrors {
       if (d.editing) break
       if (!d.kind) e.kind = 'Məhsul və ya xidmət seçin.'
       else if (!d.categoryId) e.categoryId = d.kind === 'service' ? 'Xidmət növünü seçin.' : 'Kateqoriyanı seçin.'
-      else if (d.kind === 'service' ? !d.subcategory : subcategoriesByCategory[d.categoryId]?.length && !d.subcategory)
+      else if (d.kind === 'service' ? !d.subcategory : subcategoriesOf(d.categoryId).length > 0 && !d.subcategory)
         e.subcategory = d.kind === 'service' ? 'Xidmətin növünü seçin.' : 'Alt kateqoriyanı seçin.'
       break
     }

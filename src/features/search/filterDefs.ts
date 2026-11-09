@@ -7,6 +7,7 @@
  * The catalogue state itself (`SearchState`) stays in searchState.ts: the repository contract uses it.
  */
 import { formatNumber } from '@/lib/format'
+import type { RootSystem } from '@/types'
 
 /* ---------- URL params ---------- */
 
@@ -30,6 +31,8 @@ export const PARAM = {
   height: 'hundurluk',
   /** Age range in years ("2-5", "5-"). */
   age: 'yas',
+  /** «Kök sistemi»: dibcek | torpaq-kuresi | aciq-kok (Nov 2026; categories with the filter: src/data/categories.ts). */
+  root: 'kok',
   vip: 'vip',
   delivery: 'catdirilma',
   seller: 'saticiNovu',
@@ -131,6 +134,20 @@ export function ageLabel(value: string): string {
   return `${to} yaşa qədər`
 }
 
+/* ---------- Root system ---------- */
+
+/** «Kök sistemi» options: the `kok` URL values, worded like the posting form (docs/handoff/categories.md). */
+export const rootOptions: FilterOption[] = [
+  { value: 'dibcek', label: 'Dibçəkdə' },
+  { value: 'torpaq-kuresi', label: 'Torpaq kürəsi ilə' },
+  { value: 'aciq-kok', label: 'Açıq kök' },
+]
+
+/** `kok` value → `PlantFacts.rootSystem` in the contract. */
+export const rootSystemOf: Record<string, RootSystem> = { dibcek: 'container', 'torpaq-kuresi': 'rootball', 'aciq-kok': 'bare-root' }
+
+export const rootLabel = (value: string) => rootOptions.find((o) => o.value === value)?.label
+
 /* ---------- Seller ---------- */
 
 export type SellerTypeParam = '' | 'biznes' | 'ferdi'
@@ -156,6 +173,7 @@ export const filterTitles = {
   price: 'Qiymət, ₼',
   height: 'Bitkinin hündürlüyü',
   age: 'Yaş',
+  root: 'Kök sistemi',
   species: 'Növ',
   seller: 'Satıcı',
   extra: 'Əlavə',

@@ -6,6 +6,7 @@ import { ServiceCard } from '@/components/cards/ServiceCard'
 import { SellerCard } from '@/components/cards/SellerCard'
 import { ButtonLink } from '@/components/ui/Button'
 import { Reveal } from '@/components/ui/Reveal'
+import type { HeroCounts } from '@/features/home/heroCounts'
 import { HeroSearchCard } from '@/features/home/HeroSearchCard'
 import { cn } from '@/lib/format'
 import type { HomeContent } from '@/services/repository'
@@ -14,7 +15,7 @@ import type { HomeContent } from '@/services/repository'
  * Variant 2 hero (docs/design/variant-2): heading on mint, then the search island (card, phone filter row,
  * categories row). The heading is the LCP element, so it is never faded in.
  */
-function Hero() {
+function Hero({ counts }: { counts: HeroCounts }) {
   return (
     <section aria-labelledby="hero-title" className="w-full bg-mint">
       <div className="page-x mx-auto flex w-full max-w-[1440px] flex-col items-center gap-3.5 pt-[18px] pb-3.5 md:gap-[26px] md:pt-11 lg:pb-[30px]">
@@ -33,7 +34,7 @@ function Hero() {
             Ağac, gül, tinglər və bağçılıq xidmətləri — satıcı ilə birbaşa əlaqə saxlayın.
           </p>
         </div>
-        <HeroSearchCard />
+        <HeroSearchCard counts={counts} />
       </div>
     </section>
   )
@@ -184,12 +185,12 @@ function BuyingGuide() {
 }
 
 /** "/" — Figma "Ana səhifə" 1440 / 768 / 390. Server-rendered; the data comes from the repository (route file). */
-export default function HomePage({ content }: { content: HomeContent }) {
+export default function HomePage({ content, hero }: { content: HomeContent; hero: HeroCounts }) {
   const { vip, latest, sellers } = content
 
   return (
     <>
-      <Hero />
+      <Hero counts={hero} />
 
       <Section id="one-cixan-elanlar" labelledBy="one-cixan-elanlar-title" className="max-md:pt-3.5">
         <HomeHeading

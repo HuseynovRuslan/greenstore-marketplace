@@ -22,7 +22,7 @@ export interface ModerationReview {
   /** Large photo on the review panel */
   image?: string
   price?: number
-  /** "Ağaclar / Dekorativ ağaclar · 120 sm · 2 yaş · Dibçəkdə · Abşeron, Məhəmmədi" */
+  /** "Ağaclar / İynəyarpaqlı ağaclar · 120 sm · 2 yaş · Dibçəkdə · Abşeron, Məhəmmədi" */
   details?: string
   description?: string
   /** Seller line (muted, 13 px) */
@@ -63,7 +63,7 @@ export const moderationQueue: ModerationItem[] = [
     review: {
       image: '/images/admin/moderation-leyland.webp',
       price: 38,
-      details: 'Ağaclar / Dekorativ ağaclar · 120 sm · 2 yaş · Dibçəkdə · Abşeron, Məhəmmədi',
+      details: 'Ağaclar / İynəyarpaqlı ağaclar · 120 sm · 2 yaş · Dibçəkdə · Abşeron, Məhəmmədi',
       description:
         'Sağlam Leyland sərvi fidanları satışdadır. Canlı hasar və bağların yaşıllaşdırılması üçün uyğundur. Bakı və Abşerona çatdırılma razılaşma ilə mümkündür. Əkin və qulluq barədə məsləhət veririk.',
       seller: 'Abşeron Tingçilik · Elvin Əliyev · +994 50 555 12 34 · Təsdiqlənmiş biznes · 24 aktiv elan',
@@ -82,12 +82,13 @@ export const moderationQueue: ModerationItem[] = [
     listingId: 'qizilgul-fidani',
   },
   {
+    // Figma: "Bağ üçün çim toxumu" (Rulon çəmən, taken off the site in Nov 2026); now a ground-cover listing.
     id: 'mod-10522',
     number: 10522,
-    title: 'Bağ üçün çim toxumu',
+    title: 'Sürünən floks tingləri',
     sellerName: 'Nigar Rzayeva',
     submittedAt: '2026-10-12T10:48:00',
-    categoryId: 'cim-toxumlar',
+    categoryId: 'yer-ortucu-bitkiler',
     kind: 'recheck',
     status: 'pending',
   },
@@ -128,81 +129,33 @@ export interface CategoryFilter {
   enabled: boolean
 }
 
+/**
+ * Admin-only fields of a category. By default the edit panel shows the category's own sub-categories and its
+ * /elanlar filters (features/admin/categories.ts), in the order of `@/data/categories`; these override that.
+ */
 export interface CategoryAdminFields {
-  subcategories: string[]
-  filters: CategoryFilter[]
+  /** Sub-categories when they are not the catalogue's (the services umbrella) */
+  subcategories?: string[]
+  /** Filters when they are not the catalogue's (the services umbrella) */
+  filters?: CategoryFilter[]
+  /** Checkbox labels in the edit panel that differ from "<label> filtri" (filter id → label) */
+  formLabels?: Record<string, string>
   /** "Görünmə sırası" */
-  order: number
-  active: boolean
+  order?: number
+  active?: boolean
   /** Order of the filter checkboxes in the edit panel when it differs from the list row (filter ids) */
   formOrder?: string[]
 }
 
-const filters = (...items: Array<[id: string, label: string, formLabel?: string]>): CategoryFilter[] =>
+export const adminFilters = (...items: Array<[id: string, label: string, formLabel?: string]>): CategoryFilter[] =>
   items.map(([id, label, formLabel]) => ({ id, label, formLabel: formLabel ?? `${label} filtri`, enabled: true }))
 
-/** Admin-only fields for `@/data/categories`, keyed by category id (Figma "Kateqoriyalar siyahısı"). */
+/** Overrides keyed by category id (Figma "Kateqoriyalar siyahısı" wording for Ağaclar; the services umbrella). */
 export const categoryAdminFields: Record<string, CategoryAdminFields> = {
-  agaclar: {
-    subcategories: ['Dekorativ ağaclar', 'Meyvə ağacları', 'İynəyarpaqlılar'],
-    filters: filters(['nov', 'Növ', 'Ağac növü filtri'], ['hundurluk', 'Hündürlük'], ['yas', 'Yaş']),
-    formOrder: ['hundurluk', 'yas', 'nov'],
-    order: 1,
-    active: true,
-  },
-  kollar: {
-    subcategories: ['Həmişəyaşıl kollar', 'Çiçəkli kollar', 'Sarmaşıqlar'],
-    filters: filters(['bitki-novu', 'Bitki növü'], ['hundurluk', 'Hündürlük'], ['yas', 'Yaş']),
-    order: 2,
-    active: true,
-  },
-  guller: {
-    subcategories: ['Qızılgüllər', 'Mövsümi güllər', 'Çoxillik güllər'],
-    filters: filters(['reng', 'Rəng'], ['ciceklme', 'Çiçəkləmə dövrü']),
-    order: 3,
-    active: true,
-  },
-  'otaq-bitkileri': {
-    subcategories: ['Dekorativ yarpaqlı bitkilər', 'Çiçəkli otaq bitkiləri', 'Sukkulentlər'],
-    filters: filters(['bitki-novu', 'Bitki növü'], ['olcu', 'Ölçü'], ['isiq', 'İşıq tələbi']),
-    order: 4,
-    active: true,
-  },
-  'tingler-fidanlar': {
-    subcategories: ['Meyvə fidanları', 'Üzüm tingləri', 'Giləmeyvə tingləri'],
-    filters: filters(['sort', 'Sort'], ['yas', 'Yaş'], ['kok', 'Kök forması']),
-    order: 5,
-    active: true,
-  },
-  'cim-toxumlar': {
-    subcategories: ['Rulon çim', 'Çim toxumu', 'Çiçək toxumu'],
-    filters: filters(['toxum-novu', 'Toxum növü'], ['ceki', 'Çəki'], ['sahe', 'Sahə']),
-    order: 6,
-    active: true,
-  },
-  'torpaq-gubreler': {
-    subcategories: ['Torpaq qarışıqları', 'Kompost', 'Mineral gübrələr'],
-    filters: filters(['terkib', 'Tərkib'], ['hecm', 'Həcm'], ['teyinat', 'Təyinat']),
-    order: 7,
-    active: true,
-  },
-  'bag-avadanliqlari': {
-    subcategories: ['Əl alətləri', 'Çim biçənlər', 'Bağ qayçıları', 'Dibçəklər və dekor'],
-    filters: filters(['alet-novu', 'Alət növü'], ['marka', 'Marka'], ['veziyyet', 'Vəziyyət']),
-    order: 8,
-    active: true,
-  },
-  'suvarma-sistemleri': {
-    subcategories: ['Damcı suvarma', 'Çiləyicilər', 'İdarəedicilər'],
-    filters: filters(['sistem-novu', 'Sistem növü'], ['marka', 'Marka'], ['teyinat', 'Təyinat']),
-    order: 9,
-    active: true,
-  },
+  agaclar: { formLabels: { nov: 'Ağac növü filtri' }, formOrder: ['hundurluk', 'yas', 'kok', 'nov'] },
   'landsaft-xidmetleri': {
     subcategories: ['Landşaft dizaynı', 'Əkin', 'Bağ baxımı'],
-    filters: filters(['xidmet-novu', 'Xidmət növü'], ['erazi', 'Ərazi'], ['qiymet-formasi', 'Qiymət forması']),
-    order: 10,
-    active: true,
+    filters: adminFilters(['xidmet-novu', 'Xidmət növü'], ['erazi', 'Ərazi'], ['qiymet-formasi', 'Qiymət forması']),
   },
 }
 
@@ -215,6 +168,8 @@ export const categoryIconLabels: Record<IconName, string> = {
   shrub: 'Kol',
   'flower-2': 'Dekorativ bitki',
   flower: 'Gül',
+  grape: 'Tənək',
+  clover: 'Yonca',
   sprout: 'Ting',
   wheat: 'Sünbül',
   shovel: 'Kürək',
@@ -309,8 +264,9 @@ export const complaints: Complaint[] = [
     status: 'resolved',
     complainant: 'Nərmin Həsənli',
     createdAt: '2026-10-12',
-    listingId: 'terrakota-dibcek',
-    listingNumber: 10388,
+    // Figma: the terracotta pot (№ 10388), removed with «Bağ alətləri» in Nov 2026; now a demo listing.
+    listingId: 'petuniya',
+    listingNumber: 10452,
     history: [],
   },
 ]

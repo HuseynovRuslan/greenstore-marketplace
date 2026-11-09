@@ -11,7 +11,13 @@ import { searchServices } from '@/features/services/query'
 import { filterListings } from './marketplace'
 import { mockListingStats, mockOtp, mockSequence } from './mockWrites'
 import type { MarketplaceRepository, PageResult } from './repository'
-import type { Seller, Service } from '@/types'
+import type { Category, Seller, Service } from '@/types'
+import type { CategoryDef } from '@/data/categories'
+
+/** A category with its number of public listings (the sample data has no separate counts). */
+function withListingCount({ id, slug, name, icon, kind, description }: CategoryDef): Category {
+  return { id, slug, name, icon, kind, description, listingCount: publicListings.filter((l) => l.categoryId === id).length }
+}
 
 function page<T>(all: T[], requested: number, size: number): PageResult<T> {
   const pageCount = Math.max(1, Math.ceil(all.length / size))
@@ -21,11 +27,11 @@ function page<T>(all: T[], requested: number, size: number): PageResult<T> {
 
 export const mockRepository: MarketplaceRepository = {
   async listProductCategories() {
-    return productCategories
+    return productCategories.map(withListingCount)
   },
   async getProductCategory(id) {
     const category = categoryById(id)
-    return category?.kind === 'product' ? category : undefined
+    return category?.kind === 'product' ? withListingCount(category) : undefined
   },
   async listCities() {
     return cities

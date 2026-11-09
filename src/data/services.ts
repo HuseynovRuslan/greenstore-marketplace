@@ -126,6 +126,12 @@ export const services: Service[] = [
   },
 ]
 
+/**
+ * Platform-wide number of service listings ("95 xidmət elanı", the «Xidmətlər» tab on the home page). A mock total:
+ * the sample data holds only the six services above. Kept as it was when the product categories changed (Nov 2026).
+ */
+export const serviceListingTotal = 95
+
 /** Service categories (tiles on "Xidmətlər · 1440", in Figma order). */
 export const serviceCategories = [
   { id: 'landsaft-dizayni', name: 'Landşaft dizaynı' },

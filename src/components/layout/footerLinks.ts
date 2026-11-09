@@ -11,6 +11,9 @@ import { contactHref } from '@/features/support/contactTopics'
 import { categoryHref } from '@/seo/catalog'
 import type { Category, City, PromotionPackageId } from '@/types'
 
+/** What the footer needs of a category (the data has no counts; tests pass their own). */
+type FooterCategory = Pick<Category, 'id' | 'name' | 'kind'>
+
 export interface FooterLink {
   label: string
   href: string
@@ -33,7 +36,7 @@ export const FOOTER_CATEGORY_LIMIT = 10
 const promotionHref = (id: PromotionPackageId) => `/reklam#${id}`
 
 /** The footer's link groups. `categories` / `cities` default to the site data (tests pass their own). */
-export function footerGroups({ categories = allCategories, cities = allCities }: { categories?: Category[]; cities?: City[] } = {}): FooterGroup[] {
+export function footerGroups({ categories = allCategories, cities = allCities }: { categories?: FooterCategory[]; cities?: City[] } = {}): FooterGroup[] {
   return [
     {
       id: 'kateqoriyalar',

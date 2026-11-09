@@ -1,14 +1,14 @@
 /**
  * Read-side "API" for the frontend. Today it filters the typed mock data in `src/data`;
  * the function signatures mirror the query endpoints planned for the ASP.NET Core Web API
- * (GET /api/listings?q=&categoryId=&cityIds=&minPrice=&maxPrice=&vip=&delivery=&sellerType=&sort=).
+ * (GET /api/listings?q=&categoryId=&cityIds=&minPrice=&maxPrice=&vip=&delivery=&sellerType=&rootSystem=&sort=).
  */
 import { ageYears, heightRange, publicListings } from '@/data/listings'
 import { cityName } from '@/data/cities'
 import { categoryById } from '@/data/categories'
 import { sellerById } from '@/data/sellers'
 import { normalizeSearch } from '@/lib/format'
-import type { Listing, SellerType } from '@/types'
+import type { Listing, RootSystem, SellerType } from '@/types'
 
 import type { ListingSort } from './listingSort'
 
@@ -28,6 +28,8 @@ export interface ListingFilters {
   heightMax?: number
   ageMin?: number
   ageMax?: number
+  /** «Kök sistemi» (Nov 2026) */
+  rootSystem?: RootSystem
 }
 
 function matchesQuery(listing: Listing, q: string): boolean {
@@ -65,6 +67,7 @@ export function filterListings(source: Listing[], f: ListingFilters): Listing[] 
       if (f.ageMin != null && a < f.ageMin) return false
       if (f.ageMax != null && a > f.ageMax) return false
     }
+    if (f.rootSystem && l.plant?.rootSystem !== f.rootSystem) return false
     return true
   })
 }

@@ -22,7 +22,7 @@ export interface Crumb {
 }
 
 /**
- * Breadcrumb of the catalogue: "Ana səhifə / Məhsullar / Ağaclar / Dekorativ ağaclar".
+ * Breadcrumb of the catalogue: "Ana səhifə / Məhsullar / Ağaclar / Meyvə ağacları".
  * On a category × city page the city is the last item.
  */
 export function searchCrumbs(state: SearchState, opts: { cityPage?: boolean } = {}): Crumb[] {

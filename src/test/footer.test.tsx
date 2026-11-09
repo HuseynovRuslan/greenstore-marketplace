@@ -8,22 +8,24 @@ import { categories } from '@/data/categories'
 import { cities } from '@/data/cities'
 import { accountTypeFromParam, signUpHref } from '@/features/auth/validation'
 import { contactHref, topicFromParam } from '@/features/support/contactTopics'
-import type { Category } from '@/types'
 
 const group = (id: string, groups = footerGroups()) => groups.find((g) => g.id === id)!
 
 describe('footer links', () => {
-  it('lists the categories of the home page in their order, with their real URLs', () => {
+  it('lists the categories of the data in their order, with their real URLs', () => {
     const kat = group('kateqoriyalar')
     expect(kat.links.map((l) => l.label)).toEqual(categories.slice(0, FOOTER_CATEGORY_LIMIT).map((c) => c.name))
+    expect(kat.links.map((l) => l.label)).toEqual(['Ağaclar', 'Kollar', 'Güllər', 'Sarmaşıqlar', 'Yer örtücü bitkilər', 'Bağ xidmətləri'])
     expect(kat.links[0]).toEqual({ label: 'Ağaclar', href: '/kateqoriyalar/agaclar' })
+    expect(kat.links[4]).toEqual({ label: 'Yer örtücü bitkilər', href: '/kateqoriyalar/yer-ortucu-bitkiler' })
     // The services umbrella opens the services catalogue, as on the home page
     expect(kat.links.find((l) => l.label === 'Bağ xidmətləri')?.href).toBe('/xidmetler')
     expect(kat.more).toBeUndefined()
   })
 
   it('shows at most 10 categories, then «Bütün kateqoriyalar»', () => {
-    const many: Category[] = [...categories, { ...categories[0], id: 'kaktuslar', slug: 'kaktuslar', name: 'Kaktuslar' }]
+    const extra = ['Palmalar', 'Otlar', 'Toxumlar', 'Gübrələr', 'Kaktuslar'].map((name, i) => ({ ...categories[0], id: `x${i}`, slug: `x${i}`, name }))
+    const many = [...categories, ...extra]
     const kat = group('kateqoriyalar', footerGroups({ categories: many }))
     expect(kat.links).toHaveLength(10)
     expect(kat.links.map((l) => l.label)).not.toContain('Kaktuslar')

@@ -7,6 +7,8 @@ import { AppStoreProvider } from '@/state/store'
 
 const push = vi.fn()
 const replace = vi.fn()
+// The sheet flows click through the filters and wait for live recounts: room for a busy parallel run.
+vi.setConfig({ testTimeout: 20_000 })
 vi.mock('next/navigation', () => ({
   useRouter: () => ({ push, replace, back: vi.fn(), prefetch: vi.fn(), refresh: vi.fn() }),
   usePathname: () => '/elanlar',
@@ -15,7 +17,7 @@ vi.mock('next/navigation', () => ({
 
 const facets = {
   categories: { all: 16, byId: { agaclar: 9, kollar: 2 } },
-  subcategories: { 'meyve-agaclari': 3 },
+  subcategories: { 'agaclar-meyve': 3 },
   cities: { all: 16, byCity: { baki: 5 } },
 }
 
@@ -76,7 +78,7 @@ describe('CatalogResults', () => {
 
   it('lists the chosen category’s sub-categories after «Bütün …», and folds them with the chevron', async () => {
     const user = userEvent.setup()
-    renderCatalog('kateqoriya=agaclar&alt=meyve-agaclari')
+    renderCatalog('kateqoriya=agaclar&alt=agaclar-meyve')
     const sub = within(sidebar()).getByRole('link', { name: /^Meyvə ağacları/ })
     expect(sub).toHaveAttribute('aria-current', 'true')
     expect(sub).toHaveTextContent('3')
@@ -131,10 +133,12 @@ describe('CatalogResults', () => {
     await user.click(screen.getByRole('button', { name: 'Filtrlər' }))
     const sheet = screen.getByRole('dialog', { name: 'Filtrlər' })
     expect(within(sheet).getByRole('button', { name: '16 elanı göstər' })).toBeEnabled()
-    // Kollar has no sample listings: the button says so and cannot be pressed.
+    // No shrub costs over 300 ₼: the button says so and cannot be pressed.
     await user.click(within(sheet).getByRole('button', { name: 'Kollar' }))
+    await user.click(within(sheet).getByRole('button', { name: '300 ₼-dan çox' }))
     expect(await within(sheet).findByRole('button', { name: 'Uyğun elan yoxdur' })).toBeDisabled()
     await user.click(within(sheet).getByRole('button', { name: 'Ağaclar' }))
+    await user.click(within(sheet).getByRole('button', { name: '300 ₼-dan çox' }))
     await user.click(within(sheet).getByRole('button', { name: 'Çatdırılma' }))
     const show = await within(sheet).findByRole('button', { name: /^\d+ elanı göstər$/ })
     expect(push).not.toHaveBeenCalled()

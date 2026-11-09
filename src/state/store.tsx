@@ -13,9 +13,10 @@ import type { Listing, UserProfile } from '@/types'
 export type FavoriteKind = 'listing' | 'service'
 const favKey = (kind: FavoriteKind, id: string) => `${kind}:${id}`
 
+// Figma had the terracotta pot and the Monstera here; they left with their categories (Nov 2026).
 const ACCOUNT_FAVORITES = [
-  'listing:terrakota-dibcek',
-  'listing:monstera-deliciosa',
+  'listing:limon-agaci',
+  'listing:qizilgul-fidani',
   'listing:mavi-kuknar',
   'listing:zeytun-agaci',
   'service:landsaft-dizayni',

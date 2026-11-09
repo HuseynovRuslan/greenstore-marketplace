@@ -3,21 +3,16 @@
 import { useEffect, useId, useLayoutEffect, useRef, useState, type FormEvent } from 'react'
 import { useRouter } from 'next/navigation'
 import { Search } from 'lucide-react'
-import { listingTotals } from '@/data/categories'
-import { cities, cityListingCounts } from '@/data/cities'
+import { cities } from '@/data/cities'
 import { cn, formatNumber } from '@/lib/format'
 import { CityField } from '@/features/search/CityField'
 import { priceError, QUERY_MAX } from '@/features/search/filterDefs'
 import { FilterChips } from './FilterChips'
 import { HeroCategories } from './HeroCategories'
+import type { HeroCounts } from './heroCounts'
 import { HeroFilterSheet, MobileFilterRow } from './HeroFilterSheet'
 import { HERO_QUERY_ID, HERO_SEARCH_ID } from './ids'
 import { emptyHeroFilters, filtersForTab, heroSearchUrl, heroTabs, type FilterId, type HeroFilters, type HeroTab } from './heroSearch'
-
-const cityOptions = [
-  { value: '', label: 'Bütün şəhərlər', meta: formatNumber(listingTotals.all) },
-  ...cities.map((c) => ({ value: c.id, label: c.name, meta: formatNumber(cityListingCounts[c.id] ?? 0) })),
-]
 
 /** The hero entrance is over by then (card 320 ms; last category 390 ms delay + 320 ms). */
 const HERO_ENTRANCE_MS = 1000
@@ -26,10 +21,15 @@ const HERO_ENTRANCE_MS = 1000
  * Home hero search (docs/design/variant-2): the card with Hamısı / Məhsullar / Xidmətlər, the search row
  * (text · city · «Axtar») and the filter chips (≥ md); on phones the scrolling chip row and the «Filtrlər» sheet;
  * then the categories row, whose selected item follows the Kateqoriya filter. Submitting opens the catalogue with
- * its own URL params (heroSearch.ts); without JavaScript the form is a plain GET to /elanlar.
+ * its own URL params (heroSearch.ts); without JavaScript the form is a plain GET to /elanlar. The counts (tabs,
+ * cities, categories) are counted on the server (heroCounts.ts).
  */
-export function HeroSearchCard() {
+export function HeroSearchCard({ counts }: { counts: HeroCounts }) {
   const router = useRouter()
+  const cityOptions = [
+    { value: '', label: 'Bütün şəhərlər', meta: formatNumber(counts.tabs.products) },
+    ...cities.map((c) => ({ value: c.id, label: c.name, meta: formatNumber(counts.cities[c.id] ?? 0) })),
+  ]
   const [tab, setTab] = useState<HeroTab>('all')
   const [q, setQ] = useState('')
   const [city, setCity] = useState('')
@@ -74,7 +74,7 @@ export function HeroSearchCard() {
         // relative z-10: its popovers paint above the categories row, which also animates in.
         className="relative z-10 w-full max-w-[1080px] animate-fade-up scroll-mt-28 rounded-2xl border border-line-strong bg-surface shadow-search motion-reduce:animate-none md:rounded-search"
       >
-        <TypeTabs value={tab} onChange={changeTab} />
+        <TypeTabs value={tab} counts={counts.tabs} onChange={changeTab} />
 
         <form role="search" aria-label="Elan axtarışı" action="/elanlar" method="get" onSubmit={submit} noValidate>
           <div className="flex flex-col gap-2 p-2.5 md:flex-row md:items-center md:gap-2.5 md:pt-3.5 md:pr-3.5 md:pb-2.5 md:pl-[22px]">
@@ -137,7 +137,7 @@ export function HeroSearchCard() {
         onSearch={search}
       />
 
-      <HeroCategories selected={filters.category} className="-mx-5 self-stretch border-t border-line pt-4 md:-mx-7 lg:mx-0 lg:pt-[22px]" />
+      <HeroCategories items={counts.categories} selected={filters.category} className="-mx-5 self-stretch border-t border-line pt-4 md:-mx-7 lg:mx-0 lg:pt-[22px]" />
     </>
   )
 }
@@ -147,7 +147,7 @@ export function HeroSearchCard() {
  * readers announce "radio button, 2 of 3, checked". One shared indicator moves with translateX + scaleX; until it
  * has been measured (server HTML) the checked tab draws its own underline.
  */
-function TypeTabs({ value, onChange }: { value: HeroTab; onChange: (tab: HeroTab) => void }) {
+function TypeTabs({ value, counts, onChange }: { value: HeroTab; counts: HeroCounts['tabs']; onChange: (tab: HeroTab) => void }) {
   const name = useId()
   const listRef = useRef<HTMLFieldSetElement>(null)
   const barRef = useRef<HTMLSpanElement>(null)
@@ -196,7 +196,7 @@ function TypeTabs({ value, onChange }: { value: HeroTab; onChange: (tab: HeroTab
             {t.label}
             <span className="max-md:hidden">
               {' '}
-              <span className="text-[13px] font-medium text-muted tabular-nums">{formatNumber(t.count)}</span>
+              <span className="text-[13px] font-medium text-muted tabular-nums">{formatNumber(counts[t.value])}</span>
               <span className="sr-only"> elan</span>
             </span>
             {checked && <span aria-hidden className="absolute inset-x-0 -bottom-px h-0.5 bg-forest group-data-ready:hidden" />}

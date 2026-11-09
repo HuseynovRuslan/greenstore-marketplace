@@ -1,3 +1,4 @@
+import { subcategoriesOf, subcategoryById } from '@/data/categories'
 import { normalizeSearch } from '@/lib/format'
 
 /** ASCII URL slug for Azerbaijani labels ("İynəyarpaqlılar" → "iyneyarpaqlilar", "Zeytun ağacı" → "zeytun-agaci"). */
@@ -7,30 +8,18 @@ export function slugify(value: string): string {
     .replace(/^-+|-+$/g, '')
 }
 
-/**
- * Sub-categories per product category, from Figma "İdarəetmə · Kateqoriyalar" (second line of each row).
- * Variant 2: `kollar` and `otaq-bitkileri` replace "Dekorativ bitkilər" (their lists are placeholders until the
- * backend taxonomy exists) and "Dibçəklər və dekor" moved to `bag-avadanliqlari`. The same lists are kept in
- * @/data/postAd and @/data/admin. Used by the sidebar's sub-category list.
- *
- * No listing data here: client components import this module. Species (derived from the listings) are in species.ts.
+/*
+ * Sub-categories as the catalogue uses them: the URL's `alt` holds the sub-category id, which is unique across
+ * categories (src/data/categories.ts). No listing data here: client components import this module. Species
+ * (derived from the listings) are in species.ts.
  */
-export const subcategoriesByCategory: Record<string, string[]> = {
-  agaclar: ['Dekorativ ağaclar', 'Meyvə ağacları', 'İynəyarpaqlılar'],
-  kollar: ['Həmişəyaşıl kollar', 'Çiçəkli kollar', 'Sarmaşıqlar'],
-  guller: ['Qızılgüllər', 'Mövsümi güllər', 'Çoxillik güllər'],
-  'otaq-bitkileri': ['Dekorativ yarpaqlı bitkilər', 'Çiçəkli otaq bitkiləri', 'Sukkulentlər'],
-  'tingler-fidanlar': ['Meyvə fidanları', 'Üzüm tingləri', 'Giləmeyvə tingləri'],
-  'cim-toxumlar': ['Rulon çim', 'Çim toxumu', 'Çiçək toxumu'],
-  'torpaq-gubreler': ['Torpaq qarışıqları', 'Kompost', 'Mineral gübrələr'],
-  'bag-avadanliqlari': ['Əl alətləri', 'Çim biçənlər', 'Bağ qayçıları', 'Dibçəklər və dekor'],
-  'suvarma-sistemleri': ['Damcı suvarma', 'Çiləyicilər', 'İdarəedicilər'],
-}
 
 export function subcategoryOptions(categoryId: string): Array<{ value: string; label: string }> {
-  return (subcategoriesByCategory[categoryId] ?? []).map((name) => ({ value: slugify(name), label: name }))
+  return subcategoriesOf(categoryId).map((s) => ({ value: s.id, label: s.name }))
 }
 
-export function subcategoryName(categoryId: string, slug: string): string | undefined {
-  return subcategoriesByCategory[categoryId]?.find((name) => slugify(name) === slug)
+/** The name of a sub-category id, when it belongs to the category. */
+export function subcategoryName(categoryId: string, id: string): string | undefined {
+  const sub = subcategoryById(id)
+  return sub && sub.categoryId === categoryId ? sub.name : undefined
 }

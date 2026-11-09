@@ -1,3 +1,4 @@
+import { categoryById, subcategoriesOf } from '@/data/categories'
 import { serviceCategories } from '@/data/services'
 import { normalizeSearch } from '@/lib/format'
 import { phoneValue } from '@/lib/phone'
@@ -112,12 +113,22 @@ export function restoreDraft(raw: unknown, contact?: { name?: string; phone?: st
   const base = createDraft(contact)
   if (!raw || typeof raw !== 'object' || (raw as { version?: unknown }).version !== 2) return base
   const d = { ...base, ...(raw as Partial<PostingDraft>) }
-  return {
+  const restored: PostingDraft = {
     ...d,
     attrs: d.attrs && typeof d.attrs === 'object' ? d.attrs : {},
     photos: Array.isArray(d.photos) ? d.photos.filter((p) => p && typeof p.id === 'string').slice(0, MAX_PHOTOS) : [],
     reachedStep: ([1, 2, 3, 4, 5, 6] as const).includes(d.reachedStep) ? d.reachedStep : 1,
   }
+  // The category list changes (src/data/categories.ts): a draft saved under a category or sub-category that is no
+  // longer offered goes back to step 1 to choose again. An edit keeps its locked category.
+  if (restored.kind !== 'product' || restored.editing) return restored
+  if (restored.categoryId && !categoryById(restored.categoryId)) {
+    return { ...restored, categoryId: '', subcategory: '', attrs: {}, priceUnit: '', reachedStep: 1 }
+  }
+  if (restored.subcategory && !subcategoriesOf(restored.categoryId).some((s) => s.name === restored.subcategory)) {
+    return { ...restored, subcategory: '', reachedStep: 1 }
+  }
+  return restored
 }
 
 /** Has the seller entered anything yet? (The resume note and «Yenidən başla» only make sense then.) */

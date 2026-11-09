@@ -2,6 +2,7 @@ import { describe, expect, it, beforeEach, vi } from 'vitest'
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { AppStoreProvider } from '@/state/store'
+import { loadHeroCounts } from '@/features/home/heroCounts'
 import { mockRepository } from '@/services/mockRepository'
 import HomePage from '@/views/HomePage'
 
@@ -13,10 +14,10 @@ vi.mock('next/navigation', () => ({
 }))
 
 async function renderHome() {
-  const content = await mockRepository.getHomeContent()
+  const [content, hero] = await Promise.all([mockRepository.getHomeContent(), loadHeroCounts(mockRepository)])
   render(
     <AppStoreProvider>
-      <HomePage content={content} />
+      <HomePage content={content} hero={hero} />
     </AppStoreProvider>,
   )
 }
@@ -98,28 +99,23 @@ describe('HomePage', () => {
     expect(screen.queryByText('Daha rahat və təhlükəsiz seçim')).not.toBeInTheDocument()
   })
 
-  it('shows the ten categories in the hero, linked to their pages', async () => {
+  it('shows the five plant categories in the hero with counts from the listings, linked to their pages', async () => {
     await renderHome()
     const list = screen.getByRole('heading', { level: 2, name: 'Kateqoriyalar' }).nextElementSibling as HTMLElement
     expect(within(list).getAllByRole('link').map((l) => l.getAttribute('href'))).toEqual([
       '/kateqoriyalar/agaclar',
       '/kateqoriyalar/kollar',
       '/kateqoriyalar/guller',
-      '/kateqoriyalar/otaq-bitkileri',
-      '/kateqoriyalar/tingler-fidanlar',
-      '/kateqoriyalar/cim-toxumlar',
-      '/kateqoriyalar/torpaq-gubreler',
-      '/kateqoriyalar/bag-avadanliqlari',
-      '/kateqoriyalar/suvarma-sistemleri',
-      '/xidmetler',
+      '/kateqoriyalar/sarmasiqlar',
+      '/kateqoriyalar/yer-ortucu-bitkiler',
     ])
-    expect(screen.getByRole('link', { name: 'Ağaclar 1 240 elan' })).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: 'Bağ xidmətləri 95 elan' })).toHaveAttribute('href', '/xidmetler')
+    expect(screen.getByRole('link', { name: 'Ağaclar 16 elan' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Yer örtücü bitkilər 12 elan' })).toBeInTheDocument()
   })
 
   it('marks the category chosen in the Kateqoriya filter', async () => {
     await renderHome()
-    const circle = () => screen.getByRole('link', { name: 'Kollar 860 elan' }).querySelector('span')!
+    const circle = () => screen.getByRole('link', { name: 'Kollar 7 elan' }).querySelector('span')!
     expect(circle()).not.toHaveClass('bg-forest')
     const form = screen.getByRole('search', { name: 'Elan axtarışı' })
     await userEvent.click(within(form).getByRole('button', { name: 'Kateqoriya' }))

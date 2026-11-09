@@ -24,7 +24,7 @@ import { categoryPath } from '@/seo/catalog'
 import type { Category, Listing, Seller } from '@/types'
 
 /** Breadcrumb of a listing page (also used for its BreadcrumbList JSON-LD). */
-export function listingCrumbs(listing: Listing, category?: Category): Array<{ label: string; to?: string }> {
+export function listingCrumbs(listing: Listing, category?: Pick<Category, 'id' | 'name'>): Array<{ label: string; to?: string }> {
   return [
     { label: 'Ana səhifə', to: '/' },
     { label: 'Məhsullar', to: '/elanlar' },
@@ -70,7 +70,7 @@ const careIcons: Record<CareItem['key'], typeof Sun> = { sun: Sun, water: Drople
 interface ListingDetailProps {
   listing: Listing
   seller?: Seller
-  category?: Category
+  category?: Pick<Category, 'id' | 'name'>
   /** «Satıcının digər elanları» */
   others: Listing[]
   /** «Oxşar elanlar» */

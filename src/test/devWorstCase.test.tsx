@@ -1,7 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import Page from '@/app/(main)/dev/worst-case/page'
 import { TITLE_MAX } from '@/data/postAd'
-import { categories } from '@/data/categories'
 import { LONGEST_TITLE, parseWorstCaseMode, worstCaseCategories, worstCaseListings } from '@/dev/worstCase'
 import { buildSitemap } from '@/seo/sitemap'
 import { mockRepository } from '@/services/mockRepository'
@@ -35,6 +34,7 @@ describe('/dev/worst-case', () => {
     expect(worst.map((l) => l.id)).toEqual(['wc-title', 'wc-price', 'wc-photo', 'wc-details', 'wc-zero', 'wc-short'])
     expect(worst.map((l) => l.price)).toContain(9_999_999)
     expect(new Set(worst.map((l) => l.id)).size).toBe(worst.length)
+    const categories = await mockRepository.listProductCategories()
     const row = worstCaseCategories(categories)
     expect(row.map((c) => c.listingCount).slice(0, 2)).toEqual([99_999, 0])
     expect(row).toHaveLength(categories.length)
