@@ -54,6 +54,7 @@ export function PromotionPlanner({ packages }: { packages: PromotionPackage[] })
             return (
               <article
                 key={p.id}
+                id={p.id}
                 className={cn(
                   'relative flex flex-col gap-4 rounded-2xl border bg-surface p-5 transition-[border-color,box-shadow] duration-(--dur-base) ease-out md:p-6',
                   selected ? 'border-forest shadow-[inset_0_0_0_1px_var(--color-forest)]' : 'border-line',

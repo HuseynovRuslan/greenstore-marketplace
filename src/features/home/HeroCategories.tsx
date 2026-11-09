@@ -2,10 +2,8 @@ import Link from 'next/link'
 import { CategoryIcon } from '@/components/ui/CategoryIcon'
 import { categories } from '@/data/categories'
 import { cn, formatNumber } from '@/lib/format'
+import { categoryHref } from '@/seo/catalog'
 import type { Category } from '@/types'
-
-/** Product categories open their own page; the services umbrella opens the services catalogue. */
-const categoryHref = (c: Category) => (c.kind === 'service' ? '/xidmetler' : `/kateqoriyalar/${c.slug}`)
 
 /**
  * Variant 2 categories row: a 48 px white circle with the category icon, the name (two lines reserved so the counts

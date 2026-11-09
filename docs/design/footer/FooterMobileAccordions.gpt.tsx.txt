@@ -1,0 +1,73 @@
+"use client";
+
+import { useState } from "react";
+import Link from "next/link";
+import { ChevronDown } from "lucide-react";
+import type { FooterNavGroup } from "./SiteFooter";
+
+const focusOnDark =
+  "focus-visible:rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-mint";
+
+export default function FooterMobileAccordions({
+  groups,
+}: {
+  groups: readonly FooterNavGroup[];
+}) {
+  const [openId, setOpenId] = useState<FooterNavGroup["id"] | null>(
+    "kateqoriyalar",
+  );
+
+  return (
+    <nav aria-label="Mobil alt menyu bölmələri" className="mt-9 xl:hidden">
+      <div className="divide-y divide-mint/20 border-y border-mint/20">
+        {groups.map((group) => {
+          const expanded = openId === group.id;
+          const regionId = `greenstore-footer-${group.id}`;
+
+          return (
+            <section key={group.id} aria-label={group.title}>
+              <h3>
+                <button
+                  type="button"
+                  aria-expanded={expanded}
+                  aria-controls={regionId}
+                  onClick={() => setOpenId(expanded ? null : group.id)}
+                  className={`flex min-h-14 w-full items-center justify-between gap-4 py-3 text-left text-sm font-semibold leading-6 text-white ${focusOnDark}`}
+                >
+                  <span>{group.title}</span>
+                  <ChevronDown
+                    size={18}
+                    strokeWidth={1.8}
+                    aria-hidden="true"
+                    className={`shrink-0 transition-transform duration-200 ${expanded ? "rotate-180" : ""}`}
+                  />
+                </button>
+              </h3>
+
+              <div id={regionId} hidden={!expanded}>
+                <ul
+                  className={
+                    group.layout === "two-columns"
+                      ? "grid grid-cols-2 gap-x-4 pb-4 pt-1"
+                      : "flex flex-col pb-4 pt-1"
+                  }
+                >
+                  {group.links.map((link) => (
+                    <li key={`${link.href}-${link.label}`} className="min-w-0">
+                      <Link
+                        href={link.href}
+                        className={`inline-flex min-h-11 w-full items-center rounded-sm py-2 text-sm font-normal leading-5 text-mint hover:text-white hover:underline hover:underline-offset-4 ${focusOnDark}`}
+                      >
+                        {link.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </section>
+          );
+        })}
+      </div>
+    </nav>
+  );
+}

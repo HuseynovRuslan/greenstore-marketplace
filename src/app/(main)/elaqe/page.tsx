@@ -1,6 +1,7 @@
+import { Suspense } from 'react'
 import type { Metadata } from 'next'
 import { Clock3, Mail, Phone } from 'lucide-react'
-import { ContactForm } from '@/features/support/ContactForm'
+import { ContactForm, ContactFormFromUrl } from '@/features/support/ContactForm'
 import { pageMetadata } from '@/seo/metadata'
 import { HelpShell } from '@/views/HelpPage'
 
@@ -40,7 +41,10 @@ export default function Page() {
           </li>
         ))}
       </ul>
-      <ContactForm />
+      {/* Static HTML has the plain form; in the browser ?movzu= picks its topic (footer «Problem bildir»). */}
+      <Suspense fallback={<ContactForm />}>
+        <ContactFormFromUrl />
+      </Suspense>
     </HelpShell>
   )
 }

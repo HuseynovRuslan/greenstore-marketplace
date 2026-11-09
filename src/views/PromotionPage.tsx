@@ -70,11 +70,15 @@ export default function PromotionPage({ packages }: { packages: PromotionPackage
         <HowItShows />
       </div>
 
+      {/* Each package card has its id as an anchor (/reklam#one-cixar, #ireli-cek — footer links); the skeletons
+          carry the same ids, so a link opened in a new tab lands on the right card before the planner mounts. */}
       <ClientGate
         fallback={
           <div aria-busy className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-            {[0, 1, 2].map((i) => (
-              <SkeletonBlock key={i} className="h-[420px] rounded-2xl" />
+            {packages.map((p) => (
+              <div key={p.id} id={p.id}>
+                <SkeletonBlock className="h-[420px] rounded-2xl" />
+              </div>
             ))}
           </div>
         }

@@ -6,9 +6,10 @@
 
 /** --ease-out */
 export const EASE_OUT = [0.22, 1, 0.36, 1] as const
-/** --dur-fast (120 ms) and --dur-base (180 ms), in seconds. */
+/** --dur-fast (120 ms), --dur-base (180 ms) and --dur-slow (280 ms), in seconds. */
 export const DUR_FAST = 0.12
 export const DUR_BASE = 0.18
+export const DUR_SLOW = 0.28
 
 /** An opacity change (the reduced-motion stand-in for movement). */
 export const fade = { duration: DUR_BASE, ease: EASE_OUT }
@@ -39,6 +40,24 @@ export const PROJECTION_SECONDS = (0.998 / (1 - 0.998)) / 1000
 /** Centred dialog (640 px and wider): settles from .97 without overshoot; leaves quicker. */
 export const dialogEnter = { type: 'spring', visualDuration: 0.2, bounce: 0 } as const
 export const dialogExit = { duration: DUR_FAST, ease: EASE_OUT }
+
+/* ---------- Footer accordions (phones) ---------- */
+
+/*
+ * The one place height animates (an explicit request for the footer; elsewhere only transform and opacity move).
+ * Opening: the panel grows over --dur-slow, its links fade in a beat later so they never show squashed. Closing is
+ * quicker (--dur-base) and the links fade out first. The chevron turns with the height.
+ */
+export const accordionOpen = {
+  height: { duration: DUR_SLOW, ease: EASE_OUT },
+  opacity: { duration: DUR_BASE, ease: EASE_OUT, delay: 0.06 },
+  rotate: { duration: DUR_SLOW, ease: EASE_OUT },
+}
+export const accordionClose = {
+  height: { duration: DUR_BASE, ease: EASE_OUT },
+  opacity: { duration: DUR_FAST, ease: EASE_OUT },
+  rotate: { duration: DUR_BASE, ease: EASE_OUT },
+}
 
 /* ---------- Favourite heart ---------- */
 

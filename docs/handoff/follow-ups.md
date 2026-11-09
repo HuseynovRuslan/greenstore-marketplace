@@ -13,7 +13,6 @@ purpose. Kept up to date as steps land; remove an item when it is done.
 - **Targets under 44 px** (audit of 5 Nov, item 6). All of them meet the WCAG 2.5.8 minimum of 24 px, but not the
   44 px the project aims for. The favourite button is done (44 px since the card step). Still under 44 px:
   - section links («Bütün elanlara bax», «Bütün xidmətlər», «Biznes satıcıların elanları») 20 px tall;
-  - footer links 17 px tall;
   - bottom-nav items 40 px.
 - **Screen reader pass:** nothing has been checked with NVDA or VoiceOver yet; so far only axe-core and keyboard checks.
 
