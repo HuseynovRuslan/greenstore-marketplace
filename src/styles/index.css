@@ -20,13 +20,14 @@
   --color-ink-soft: #4f5a51; /* secondary text on mint: hero subtitle, inactive tabs (6.2:1 on mint) */
   --color-muted: #646d64; /* Köməkçi mətn — Figma #727c72 darkened to reach 4.5:1 on mint (4.6:1) */
   --color-mint: #eaf0e9; /* search band, chips, secondary button */
-  --color-sand: #f0eee4; /* "Daha rahat və təhlükəsiz seçim" band */
+  --color-sand: #f0eee4; /* quiet panels: help aside, safety tips on listing and service pages */
   --color-disabled: #e8ebe5; /* disabled button / field, skeleton */
   --color-vip: #f1f2e6; /* VIP badge background */
   --color-success: #287247;
   --color-success-soft: #eaf5ec;
   --color-warning: #8a5f17; /* darkened from #96691e (Nov 2026): 12 px badge text reaches 5.0:1 on warning-soft */
   --color-warning-soft: #fbf2dc;
+  --color-warning-line: #ecdcb6; /* warning panel border (home «Bitkini almadan əvvəl»); at 50 % its icon square */
   --color-danger: #b6443f;
   --color-danger-soft: #faece9;
   --color-footer-text: #d6dfd2;

@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import Link from 'next/link'
-import { ArrowRight, Eye, MessageCircle, Rocket, ShieldCheck } from 'lucide-react'
+import { ArrowRight, MapPin, MessageCircle, Rocket, Search, TriangleAlert } from 'lucide-react'
 import { ListingCard } from '@/components/cards/ListingCard'
 import { ServiceCard } from '@/components/cards/ServiceCard'
 import { SellerCard } from '@/components/cards/SellerCard'
@@ -114,11 +114,74 @@ function MobileMore({ to, label }: { to: string; label: string }) {
   )
 }
 
-const trustTips = [
-  { icon: ShieldCheck, title: 'Satıcını tanıyın', text: 'Təsdiqlənmiş satıcı nişanına və profil məlumatlarına diqqət edin.' },
-  { icon: Eye, title: 'Məhsulu yoxlayın', text: 'Bitkinin sağlamlığını, ölçüsünü və çatdırılma şərtlərini əvvəlcədən dəqiqləşdirin.' },
-  { icon: MessageCircle, title: 'Birbaşa əlaqə saxlayın', text: 'GreenStore alıcı və satıcını birləşdirir. Şübhəli elanları bizə bildirin.' },
+const buyingSteps = [
+  { icon: Search, step: '01', label: 'Tapın', title: 'Uyğun elanı tapın', text: 'Bitki, ağac və ya bağ məhsulunu seçin, elanın məlumatlarına baxın.' },
+  { icon: MessageCircle, step: '02', label: 'Dəqiqləşdirin', title: 'Satıcı ilə əlaqə saxlayın', text: 'Ölçü, yaş, dibçək və çatdırılma şərtlərini əvvəlcədən soruşun.' },
+  { icon: MapPin, step: '03', label: 'Yoxlayın', title: 'Yerində baxın və razılaşın', text: 'Bitkinin vəziyyətini görün, sonra alış barədə qərar verin.' },
 ]
+
+const beforeBuying = ['Yarpaqları, kökləri və zərərvericiləri yoxlayın', 'Ölçünü və dibçəyi dəqiqləşdirin', 'Tanımadığınız satıcıya öncədən pul göndərməyin']
+
+/**
+ * «GreenStore-da alış necə baş verir?» (docs/design/home/alis-bolmesi.png): three steps as an ordered list, then the
+ * «Bitkini almadan əvvəl» notice. No band of its own: it sits on the page's cream, 64 px below the sellers like every
+ * home section, and 48 / 64 px above the footer so the two don't read as one block. Three columns from 1024 px;
+ * narrower, the cards stack (at 768 px a column is too narrow for «02 · DƏQİQLƏŞDİRİN» beside the icon). The
+ * label's capitals come from CSS with lang="az", so «Dəqiqləşdirin» becomes «DƏQİQLƏŞDİRİN» and screen readers
+ * get the word, not the letters.
+ *
+ * Contrast: subtitle muted on cream 5.2:1, step label olive-text on white 5.7:1, card text muted on white 5.4:1,
+ * notice title warning on warning-soft 5.0:1, notice text ink on warning-soft 11.7:1, warning icon on its square 4.6:1.
+ */
+function BuyingGuide() {
+  return (
+    <section aria-labelledby="alis-title" className="page-x mx-auto w-full max-w-[1440px] pt-8 pb-12 md:pb-16">
+      <div className="flex flex-col gap-2 md:gap-3">
+        {/* Tracking follows Inter's size table: ≈ −0.019em at 24 px, −0.021em at 32 px. */}
+        <h2 id="alis-title" className="text-2xl leading-[1.2] font-semibold tracking-[-0.02em] text-balance text-forest md:text-[32px]">
+          GreenStore-da alış necə baş verir?
+        </h2>
+        <p className="text-[15px] leading-[1.5] text-muted md:text-base">
+          Səbət və onlayn ödəniş yoxdur. Alış şərtlərini satıcı ilə özünüz razılaşdırırsınız.
+        </p>
+      </div>
+
+      <Reveal as="ol" className="mt-7 grid gap-3 md:mt-9 lg:grid-cols-3 lg:gap-5">
+        {buyingSteps.map(({ icon: Icon, step, label, title, text }) => (
+          <div key={step} className="flex h-full flex-col gap-3 rounded-2xl border border-line bg-surface p-5 md:p-6">
+            <div className="flex items-center justify-between gap-3">
+              <span className="flex size-[46px] shrink-0 items-center justify-center rounded-full bg-mint text-forest">
+                <Icon aria-hidden size={22} strokeWidth={1.8} />
+              </span>
+              <p className="text-right text-[13px] leading-4 font-semibold tracking-[0.06em] text-olive-text uppercase">
+                {step} · {label}
+              </p>
+            </div>
+            <h3 className="text-[17px] leading-[1.3] font-semibold tracking-[-0.01em] text-forest md:text-lg">{title}</h3>
+            <p className="text-sm leading-[1.6] text-muted">{text}</p>
+          </div>
+        ))}
+      </Reveal>
+
+      <div className="mt-6 flex items-start gap-3 rounded-2xl border border-warning-line bg-warning-soft p-4 md:gap-4 md:px-6 md:py-[18px]">
+        <span className="flex size-10 shrink-0 items-center justify-center rounded-option bg-warning-line/50 text-warning">
+          <TriangleAlert aria-hidden size={20} strokeWidth={1.8} />
+        </span>
+        <div className="flex min-w-0 flex-col gap-1.5 xl:gap-1">
+          <h3 className="text-[15px] leading-[1.4] font-semibold text-warning">Bitkini almadan əvvəl</h3>
+          {/* Below 1280 px one tip per line (the three need ≈ 900 px; at 1024 the third would wrap alone); from 1280 px one row. */}
+          <ul className="flex flex-col gap-1.5 text-sm leading-[1.5] text-ink xl:flex-row xl:flex-wrap xl:gap-x-5 xl:gap-y-1">
+            {beforeBuying.map((tip) => (
+              <li key={tip} className="flex gap-2 before:mt-2 before:size-[5px] before:shrink-0 before:rounded-full before:bg-warning">
+                {tip}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </section>
+  )
+}
 
 /** "/" — Figma "Ana səhifə" 1440 / 768 / 390. Server-rendered; the data comes from the repository (route file). */
 export default function HomePage({ content }: { content: HomeContent }) {
@@ -178,20 +241,7 @@ export default function HomePage({ content }: { content: HomeContent }) {
         <MobileMore to="/elanlar?saticiNovu=biznes" label="Biznes satıcıların elanları" />
       </Section>
 
-      <section className="w-full bg-sand">
-        <div className="page-x mx-auto flex w-full max-w-[1440px] flex-col items-start gap-4 py-10 md:gap-6">
-          <HomeHeading title="Daha rahat və təhlükəsiz seçim" />
-          <div className="flex w-full flex-col gap-7 md:flex-row">
-            {trustTips.map(({ icon: Icon, title, text }) => (
-              <div key={title} className="flex min-w-0 flex-1 flex-col items-start gap-2.5">
-                <Icon aria-hidden size={26} strokeWidth={1.8} absoluteStrokeWidth className="text-forest" />
-                <h3 className="w-full text-[15px] leading-[1.5] font-semibold text-ink">{title}</h3>
-                <p className="w-full text-sm leading-[1.5] text-muted">{text}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      <BuyingGuide />
     </>
   )
 }

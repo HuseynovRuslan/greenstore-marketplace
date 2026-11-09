@@ -65,6 +65,21 @@ describe('Reveal (scroll reveal once)', () => {
     expect(disconnect).toHaveBeenCalled()
   })
 
+  it('keeps list semantics: as="ol" wraps each child in an li', () => {
+    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue({ top: 2000 } as DOMRect)
+    render(
+      <Reveal as="ol">
+        <span>A</span>
+        <span>B</span>
+      </Reveal>,
+    )
+    const list = screen.getByRole('list')
+    expect(list.tagName).toBe('OL')
+    expect(list).toHaveAttribute('data-reveal', 'pending')
+    expect([...list.children].map((c) => c.tagName)).toEqual(['LI', 'LI'])
+    expect(list.children[1]).toHaveClass('gs-reveal-item')
+  })
+
   it('leaves a grid that is already on screen alone', () => {
     vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue({ top: 100 } as DOMRect)
     renderGrid()

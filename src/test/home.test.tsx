@@ -67,6 +67,37 @@ describe('HomePage', () => {
     expect(screen.queryByText(/→/)).not.toBeInTheDocument()
   })
 
+  it('explains how buying works: three steps in order, then the warning before buying', async () => {
+    await renderHome()
+    const heading = screen.getByRole('heading', { level: 2, name: 'GreenStore-da alış necə baş verir?' })
+    const section = heading.closest('section')!
+    expect(section).toHaveAccessibleName('GreenStore-da alış necə baş verir?')
+    expect(within(section).getByText('Səbət və onlayn ödəniş yoxdur. Alış şərtlərini satıcı ilə özünüz razılaşdırırsınız.')).toBeInTheDocument()
+
+    const [steps, tips] = within(section).getAllByRole('list')
+    expect(steps.tagName).toBe('OL')
+    const items = within(steps).getAllByRole('listitem')
+    expect(items.map((li) => within(li).getByRole('heading', { level: 3 }).textContent)).toEqual([
+      'Uyğun elanı tapın',
+      'Satıcı ilə əlaqə saxlayın',
+      'Yerində baxın və razılaşın',
+    ])
+    // Sentence case in the DOM (screen readers read the word); the capitals come from CSS with lang="az".
+    expect(items.map((li) => li.querySelector('p')!.textContent)).toEqual(['01 · Tapın', '02 · Dəqiqləşdirin', '03 · Yoxlayın'])
+    expect(items[0].querySelector('p')).toHaveClass('uppercase')
+
+    expect(within(section).getByRole('heading', { level: 3, name: 'Bitkini almadan əvvəl' })).toBeInTheDocument()
+    expect(within(tips).getAllByRole('listitem').map((li) => li.textContent)).toEqual([
+      'Yarpaqları, kökləri və zərərvericiləri yoxlayın',
+      'Ölçünü və dibçəyi dəqiqləşdirin',
+      'Tanımadığınız satıcıya öncədən pul göndərməyin',
+    ])
+    // A static tip, not a live region; no «Bütün məsləhətlər» link in this section.
+    expect(within(section).queryByRole('status')).not.toBeInTheDocument()
+    expect(within(section).queryByRole('link')).not.toBeInTheDocument()
+    expect(screen.queryByText('Daha rahat və təhlükəsiz seçim')).not.toBeInTheDocument()
+  })
+
   it('shows the ten categories in the hero, linked to their pages', async () => {
     await renderHome()
     const list = screen.getByRole('heading', { level: 2, name: 'Kateqoriyalar' }).nextElementSibling as HTMLElement
