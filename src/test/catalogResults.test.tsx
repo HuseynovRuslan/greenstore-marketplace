@@ -7,7 +7,7 @@ import { AppStoreProvider } from '@/state/store'
 
 const push = vi.fn()
 const replace = vi.fn()
-// The sheet flows click through the filters and wait for live recounts: room for a busy parallel run.
+// The sheet flows click through the accordion and wait for live recounts: room for a busy parallel run.
 vi.setConfig({ testTimeout: 20_000 })
 vi.mock('next/navigation', () => ({
   useRouter: () => ({ push, replace, back: vi.fn(), prefetch: vi.fn(), refresh: vi.fn() }),
@@ -66,22 +66,25 @@ describe('CatalogResults', () => {
     await user.click(within(sidebar()).getByRole('button', { name: '1–2 m' }))
     expect(push).toHaveBeenCalledWith('/elanlar?kateqoriya=agaclar&hundurluk=100-200&siralama=ucuz', { scroll: false })
     // Categories are links with counts; the chosen one opens its list, where «Bütün ağaclar» is the current row.
-    const trees = within(sidebar()).getByRole('link', { name: /^Ağaclar/ })
-    expect(trees).toHaveTextContent('9')
+    const trees = within(sidebar()).getByRole('link', { name: 'Ağaclar 9 elan' })
     expect(trees).not.toHaveAttribute('aria-current')
-    const all = within(sidebar()).getByRole('link', { name: /^Bütün ağaclar/ })
-    expect(all).toHaveAttribute('aria-current', 'true')
-    expect(all).toHaveTextContent('9')
-    await user.click(within(sidebar()).getByRole('link', { name: /Kollar/ }))
+    const all = within(sidebar()).getByRole('link', { name: 'Bütün ağaclar 9 elan' })
+    expect(all).toHaveAttribute('aria-current', 'page')
+    // One list open at a time: the other categories' lists are out of reach until chosen.
+    expect(within(sidebar()).queryByRole('link', { name: /^Həmişəyaşıl kollar/ })).not.toBeInTheDocument()
+    expect(within(sidebar()).getByRole('link', { name: 'Güllər 0 elan' })).toHaveClass('text-muted')
+    await user.click(within(sidebar()).getByRole('link', { name: /^Kollar/ }))
     expect(push).toHaveBeenLastCalledWith('/elanlar?kateqoriya=kollar&siralama=ucuz', { scroll: false })
   })
 
   it('lists the chosen category’s sub-categories after «Bütün …», and folds them with the chevron', async () => {
     const user = userEvent.setup()
     renderCatalog('kateqoriya=agaclar&alt=agaclar-meyve')
-    const sub = within(sidebar()).getByRole('link', { name: /^Meyvə ağacları/ })
-    expect(sub).toHaveAttribute('aria-current', 'true')
-    expect(sub).toHaveTextContent('3')
+    const sub = within(sidebar()).getByRole('link', { name: 'Meyvə ağacları 3 elan' })
+    expect(sub).toHaveAttribute('aria-current', 'page')
+    expect(sub).toHaveAttribute('href', '/elanlar?kateqoriya=agaclar&alt=agaclar-meyve')
+    // A sub-category without listings is muted but still a link
+    expect(within(sidebar()).getByRole('link', { name: 'İynəyarpaqlı ağaclar 0 elan' })).toHaveClass('text-muted')
     // «Bütün ağaclar» is the category itself: it drops the sub-category.
     const all = within(sidebar()).getByRole('link', { name: /^Bütün ağaclar/ })
     expect(all).not.toHaveAttribute('aria-current')
@@ -93,10 +96,10 @@ describe('CatalogResults', () => {
     await user.click(fold)
     expect(fold).toHaveAttribute('aria-expanded', 'false')
     expect(within(sidebar()).queryByRole('link', { name: /^Meyvə ağacları/ })).not.toBeInTheDocument()
-    // Folded, the category row itself is the current one.
-    expect(within(sidebar()).getByRole('link', { name: /^Ağaclar/ })).toHaveAttribute('aria-current', 'true')
+    // Folded, the list leaves the tab order.
+    expect(document.getElementById(fold.getAttribute('aria-controls')!)).toHaveAttribute('inert')
     await user.click(fold)
-    expect(within(sidebar()).getByRole('link', { name: /^Meyvə ağacları/ })).toHaveAttribute('aria-current', 'true')
+    expect(within(sidebar()).getByRole('link', { name: /^Meyvə ağacları/ })).toHaveAttribute('aria-current', 'page')
   })
 
   it('removes a chip, and «Sıfırla» keeps the search word', async () => {
@@ -133,17 +136,20 @@ describe('CatalogResults', () => {
     await user.click(screen.getByRole('button', { name: 'Filtrlər' }))
     const sheet = screen.getByRole('dialog', { name: 'Filtrlər' })
     expect(within(sheet).getByRole('button', { name: '16 elanı göstər' })).toBeEnabled()
-    // No shrub costs over 300 ₼: the button says so and cannot be pressed.
-    await user.click(within(sheet).getByRole('button', { name: 'Kollar' }))
-    await user.click(within(sheet).getByRole('button', { name: '300 ₼-dan çox' }))
-    expect(await within(sheet).findByRole('button', { name: 'Uyğun elan yoxdur' })).toBeDisabled()
-    await user.click(within(sheet).getByRole('button', { name: 'Ağaclar' }))
-    await user.click(within(sheet).getByRole('button', { name: '300 ₼-dan çox' }))
+    // The same accordion as the sidebar, as toggle buttons; «Kök sistemi» appears for Kollar.
+    await user.click(within(sheet).getByRole('button', { name: /^Kollar/ }))
+    expect(within(sheet).getByRole('button', { name: /^Kollar/ })).toHaveAttribute('aria-pressed', 'true')
+    expect(within(sheet).getByRole('button', { name: 'Alt kateqoriyalar — Kollar' })).toHaveAttribute('aria-expanded', 'true')
+    await user.click(within(sheet).getByRole('button', { name: 'Açıq kök' }))
     await user.click(within(sheet).getByRole('button', { name: 'Çatdırılma' }))
+    // No bare-root shrub is delivered: the button says so and cannot be pressed; the accordion recounts.
+    expect(await within(sheet).findByRole('button', { name: 'Uyğun elan yoxdur' })).toBeDisabled()
+    expect(within(sheet).getByRole('button', { name: /^Yarpaqtökən kollar/ })).toHaveTextContent('0')
+    await user.click(within(sheet).getByRole('button', { name: /^Ağaclar/ }))
     const show = await within(sheet).findByRole('button', { name: /^\d+ elanı göstər$/ })
     expect(push).not.toHaveBeenCalled()
     await user.click(show)
-    expect(push).toHaveBeenCalledWith('/elanlar?kateqoriya=agaclar&catdirilma=1', { scroll: false })
+    expect(push).toHaveBeenCalledWith('/elanlar?kateqoriya=agaclar&kok=aciq-kok&catdirilma=1', { scroll: false })
     expect(screen.queryByRole('dialog', { name: 'Filtrlər' })).not.toBeInTheDocument()
   })
 
@@ -165,10 +171,10 @@ describe('CatalogResults', () => {
     const user = userEvent.setup()
     renderCatalog('', 16)
     await user.click(screen.getByRole('button', { name: 'Filtrlər' }))
-    await user.click(within(screen.getByRole('dialog', { name: 'Filtrlər' })).getByRole('button', { name: 'Ağaclar' }))
+    await user.click(within(screen.getByRole('dialog', { name: 'Filtrlər' })).getByRole('button', { name: /^Ağaclar/ }))
     await user.keyboard('{Escape}')
     await user.click(screen.getByRole('button', { name: 'Filtrlər' }))
-    expect(within(screen.getByRole('dialog', { name: 'Filtrlər' })).getByRole('button', { name: 'Ağaclar' })).toHaveAttribute('aria-pressed', 'false')
+    expect(within(screen.getByRole('dialog', { name: 'Filtrlər' })).getByRole('button', { name: /^Ağaclar/ })).toHaveAttribute('aria-pressed', 'false')
     expect(push).not.toHaveBeenCalled()
   })
 
