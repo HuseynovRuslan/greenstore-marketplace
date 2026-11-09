@@ -18,15 +18,19 @@ purpose. Kept up to date as steps land; remove an item when it is done.
 
 ## Backend (Ruslan) — see [categories.md](categories.md)
 
-- Proposed params for the pending filters: `kok`, `movcudluq`, `ekin`, and `catdirilma` on services.
+- Proposed params for the pending filters: `movcudluq`, `ekin`, and `catdirilma` on services (`kok` is live since
+  the November 2026 categories).
 - **«Hamısı» searches only `/elanlar`**, so services are left out of its results. A combined results page (or API
   support for one search across products and services) is needed; discuss with Ruslan.
-- Real sub-categories for `kollar` and `otaq-bitkileri` (the current lists are placeholders).
-- Redirects for the removed category URLs `/kateqoriyalar/dekorativ-bitkiler` and `/kateqoriyalar/dibcekler-dekorasiya`.
+- **November 2026 categories** (preliminary, from management): confirm the demo example plants per sub-category,
+  decide what happens to real listings in the six removed categories, and whether listings get a sub-category id
+  ([categories.md](categories.md)). The older removed URLs `/kateqoriyalar/dekorativ-bitkiler` and
+  `/kateqoriyalar/dibcekler-dekorasiya` still answer 404.
 - Category and city counts from the API instead of `src/data` (contract change). The catalogue's counts sit behind
   `getFacetCounts` (`src/features/search/facets.ts`), and the sheet's count behind `countCatalog`; see
   [elanlar.md](elanlar.md).
-- Species (`nov`) and sub-category (`alt`) filters need API fields; today they are derived from the sample data.
+- Species (`nov`) and sub-category (`alt`) filters need API fields; today they are derived from the sample data
+  (`alt` already takes the sub-category ids of `src/data/categories.ts`).
 - **Price 0 — «Razılaşma ilə»?** `Listing.price` is a plain number, so a listing without a fixed price would show
   «0 ₼» on cards and rows (`formatPrice`, `src/lib/format.ts`). Does the API send 0 for "price on request"? If so,
   the UI should show «Razılaşma ilə» instead, and the contract needs a way to say it (a nullable `price` or a

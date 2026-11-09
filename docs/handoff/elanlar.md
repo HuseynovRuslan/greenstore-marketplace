@@ -116,11 +116,13 @@ The names did not change; they are listed in `PARAM` in `src/features/search/fil
 2. **Count for the sheet.** «N elanı göstər» calls `countCatalog` (`src/features/search/countAction.ts`, a Server
    Function). Today it runs a search with one result per page and reads the total. A count field or endpoint would be
    cheaper; the facet response from item 1 would also do.
-3. **Filters still waiting:** `kok`, `movcudluq`, `ekin` and `catdirilma` on services ([categories.md](categories.md)).
+3. **Filters still waiting:** `movcudluq`, `ekin` and `catdirilma` on services ([categories.md](categories.md)).
+   `kok` («Kök sistemi», Ağaclar and Kollar) became a catalogue filter in November 2026.
 4. **«Hamısı» search** still opens `/elanlar` only; services need a combined results page or one API search.
 5. **Species and sub-categories.**
-   - «Növ» (`nov`) is derived from the listing titles and «alt» from sub-category names in the sample data.
-   - The API needs a species field and sub-category ids that the filter can use.
+   - «Növ» (`nov`) is derived from the listing titles. «alt» takes a sub-category id (`src/data/categories.ts`,
+     unique across categories); listings still carry the sub-category name, which the frontend maps to the id.
+   - The API needs a species field and a sub-category id on listings that the filter can use.
 6. **City.** The search card sends one `seher` id. Please confirm that the API takes one id and tolerates an older
    comma list, or tell us to drop the list.
 
