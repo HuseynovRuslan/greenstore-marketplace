@@ -111,6 +111,9 @@ describe('HomePage', () => {
     ])
     expect(screen.getByRole('link', { name: 'Ağaclar 16 elan' })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Yer örtücü bitkilər 12 elan' })).toBeInTheDocument()
+    // A centred group of equal items, not a stretched grid
+    expect(list).toHaveClass('justify-center-safe')
+    expect(list.className).not.toMatch(/grid-cols/)
   })
 
   it('marks the category chosen in the Kateqoriya filter', async () => {
