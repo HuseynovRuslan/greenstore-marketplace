@@ -8,37 +8,40 @@ import { ButtonLink } from '@/components/ui/Button'
 import { Reveal } from '@/components/ui/Reveal'
 import type { HeroCounts } from '@/features/home/heroCounts'
 import { HeroSearchCard } from '@/features/home/HeroSearchCard'
+import { HeroStage } from '@/features/home/HeroStage'
 import { cn } from '@/lib/format'
 import type { HomeContent } from '@/services/repository'
 
 /**
- * Variant 2 hero (docs/design/variant-2): heading on mint, then the search island (card, phone filter row,
- * categories row). The heading is never faded in (it was the LCP element). Compact since November 2026, so that
- * «Önə çıxan elanlar» and the top of its cards show without scrolling from 1280 × 720 up: 28 / 24 px above and below
- * from md, 20 px between heading, card and categories, and a one-line categories row.
+ * Variant 2 hero (docs/design/variant-2) on the nursery photos (HeroStage): white heading, mint subtitle, then the
+ * search island (white card, phone filter row, categories row). The heading is never faded in. Compact since
+ * November 2026, so that «Önə çıxan elanlar» and the top of its cards show without scrolling from 1280 × 720 up:
+ * 28 / 24 px above and below from md, 20 px between heading, card and categories, and a one-line categories row.
+ * HeroStage centres its pause button on that row from the bottom padding (16 / 24 px): keep the two in step.
+ * The text's contrast over the photos is measured at their lightest pixels: see --color-hero-overlay in index.css.
  */
 function Hero({ counts }: { counts: HeroCounts }) {
   return (
-    <section aria-labelledby="hero-title" className="w-full bg-mint">
+    <HeroStage>
       <div className="page-x mx-auto flex w-full max-w-[1440px] flex-col items-center gap-3 pt-4 pb-4 md:gap-5 md:pt-7 md:pb-6">
         {/* Rises 8 px on first paint but never fades. */}
         <div className="flex w-full animate-rise flex-col gap-1.5 motion-reduce:animate-none md:items-center md:gap-2 md:text-center">
           {/* Tracking follows Inter's size table: ≈ −0.020em at 25 px, −0.022em at 40 px. */}
           <h1
             id="hero-title"
-            className="text-[25px] leading-[1.15] font-semibold tracking-[-0.02em] text-balance text-forest md:text-[40px] md:leading-[1.1]"
+            className="text-[25px] leading-[1.15] font-semibold tracking-[-0.02em] text-balance text-white md:text-[40px] md:leading-[1.1]"
           >
             Azərbaycanda bitki və bağ elanları
           </h1>
           {/* Phones get the short line of the 390 mockup. */}
-          <p className="text-[15px] leading-[1.45] text-ink-soft md:hidden">Satıcı ilə birbaşa əlaqə saxlayın.</p>
-          <p className="text-lg leading-[1.5] text-ink-soft max-md:hidden">
+          <p className="text-[15px] leading-[1.45] text-mint md:hidden">Satıcı ilə birbaşa əlaqə saxlayın.</p>
+          <p className="text-lg leading-[1.5] text-mint max-md:hidden">
             Ağac, gül, tinglər və bağçılıq xidmətləri — satıcı ilə birbaşa əlaqə saxlayın.
           </p>
         </div>
         <HeroSearchCard counts={counts} />
       </div>
-    </section>
+    </HeroStage>
   )
 }
 

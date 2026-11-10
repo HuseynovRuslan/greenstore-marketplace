@@ -34,7 +34,7 @@ interface MobileFilterRowProps {
 
 /**
  * Phones (< md): a horizontally scrolling row. «Filtrlər» (with the number of active filters) opens the sheet;
- * the other menu chips open it at their own group, toggles switch in place.
+ * the other menu chips open it at their own group, toggles switch in place. The row sits on the hero photo.
  */
 export function MobileFilterRow({ tab, filters, onChange, onOpenSheet, sheetOpen, className }: MobileFilterRowProps) {
   const visible = visibleFilters(tab).filter((f) => ROW_FILTERS.includes(f.id))
@@ -46,7 +46,7 @@ export function MobileFilterRow({ tab, filters, onChange, onOpenSheet, sheetOpen
         if (def.kind === 'toggle') {
           const id = def.id as 'delivery' | 'planting'
           return (
-            <button key={id} type="button" aria-pressed={on} onClick={() => onChange({ ...filters, [id]: !on })} className={chipClass({ on, touch: true })}>
+            <button key={id} type="button" aria-pressed={on} onClick={() => onChange({ ...filters, [id]: !on })} className={chipClass({ on, touch: true, onPhoto: true })}>
               {on && <ToggleCheck />}
               {def.label}
             </button>
@@ -60,7 +60,7 @@ export function MobileFilterRow({ tab, filters, onChange, onOpenSheet, sheetOpen
             aria-haspopup="dialog"
             aria-expanded={false}
             onClick={() => onOpenSheet(def.id)}
-            className={chipClass({ on, touch: true })}
+            className={chipClass({ on, touch: true, onPhoto: true })}
           >
             {value ? `${def.label}: ${value}` : def.label}
             <ChevronDown aria-hidden size={14} strokeWidth={2.2} className="shrink-0" />

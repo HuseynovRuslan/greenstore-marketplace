@@ -78,10 +78,10 @@ export default async function Page({ searchParams }: Props) {
         <WorstCaseChips key={mode} chips={activeChips(searchFor[mode])} />
       </div>
 
-      {/* The categories row on the hero's mint, with the hero's own bleed. */}
-      <div className="w-full bg-mint pt-2 pb-32 md:pb-24">
+      {/* The categories row on the hero's forest (the photo's stand-in), with the hero's own bleed. */}
+      <div className="w-full bg-forest pt-2 pb-32 md:pb-24">
         <div className="page-x mx-auto flex w-full max-w-[1440px] flex-col">
-          <HeroCategories items={categoryItems} className="-mx-5 border-t border-line pt-3 md:-mx-7 lg:mx-0 lg:pt-4" />
+          <HeroCategories items={categoryItems} className="-mx-5 border-t border-mint/20 pt-3 md:-mx-7 lg:mx-0 lg:pt-4" />
         </div>
       </div>
 

@@ -31,9 +31,20 @@
   --color-danger: #b6443f;
   --color-danger-soft: #faece9;
   --color-footer-text: #d6dfd2;
+  /*
+   * Home hero photo overlay (HeroStage): forest over the whole photo, 74 % at the top to 84 % at the bottom, where the
+   * small category counts are. Measured at the lightest photo pixel under every line of text, for all three photos,
+   * zoom 1 and 1.06, from 360 to 2560 px wide (Nov 2026): heading (white) ≥ 5.4:1, subtitle (mint) ≥ 4.9:1, category
+   * names (white) ≥ 7.2:1, counts (mint) ≥ 6.1:1. On the section's forest while the first photo loads: white 11.7:1,
+   * mint 10:1.
+   */
+  --color-hero-overlay: #173f32;
+  --color-hero-overlay-top: color-mix(in oklab, var(--color-hero-overlay) 74%, transparent);
+  --color-hero-overlay-bottom: color-mix(in oklab, var(--color-hero-overlay) 84%, transparent);
 
   --shadow-card-hover: 0px 8px 24px 0px rgba(23, 63, 50, 0.1);
-  --shadow-search: 0px 10px 30px 0px rgba(23, 63, 50, 0.08); /* hero search card */
+  --shadow-search: 0px 10px 30px 0px rgba(23, 63, 50, 0.08); /* catalogue and 404 search, skip link */
+  --shadow-search-hero: 0px 14px 36px 0px rgba(9, 28, 22, 0.32); /* hero search card on the photo */
   --shadow-popover: 0px 16px 40px 0px rgba(23, 63, 50, 0.18); /* listbox and filter popovers */
   --shadow-header: 0px 6px 20px 0px rgba(23, 63, 50, 0.06); /* header once the page is scrolled */
 
@@ -54,6 +65,11 @@
   --dur-reveal: 320ms; /* hero entrance, card reveal */
   --dur-panel-in: 160ms; /* listbox / popover open */
   --dur-panel-out: 110ms; /* listbox / popover close */
+  --dur-hero-photo: 7s; /* home hero: how long each background photo shows before the next fades in */
+  --dur-hero-fade: 1.2s; /* home hero: cross-fade between two background photos */
+
+  /* Home hero photos on wide or high-density screens, where the 1672 px photos are enlarged (see .gs-hero-photo). */
+  --blur-hero: 1.5px;
 
   /* Check mark of an active toggle chip (animate-pop-in; off under reduced motion): from .85, never from nothing */
   --animate-pop-in: gs-pop-in var(--dur-fast) var(--ease-out);
@@ -421,6 +437,64 @@
 @layer utilities {
   html[data-hero-seen] :is(.animate-rise, .animate-fade-up) {
     animation: none;
+  }
+}
+
+/*
+ * Home hero background photos (HeroStage). Each photo layer is idle (hidden), active (on top, fading in) or leaving
+ * (under the active one until its fade is over). Active and leaving share one animation list, so a photo keeps
+ * zooming while the next one fades in over it; idle drops it, so the zoom starts again from 1 next time.
+ * - gs-ken-burns: 1 → 1.06 over the photo's whole time on screen (shown + the fade that covers it), transform only.
+ * - gs-hero-clock: changes nothing visible; its animationend tells HeroStage to bring in the next photo. Being a CSS
+ *   animation, it pauses together with the zoom.
+ * The cross-fade eases in and out: a slow start and end hide where one photo gives way to the other.
+ * [data-paused] (the «Fonu dayandır» button, a hidden tab) holds both. On wide or high-density screens the photos are
+ * enlarged past their 1672 px, so a slight blur makes the softness look intended. Reduced motion: no zoom, no
+ * clock (HeroStage shows the first photo only).
+ */
+@layer components {
+  .gs-hero-photo {
+    opacity: 0;
+  }
+  .gs-hero-photo:is([data-state='active'], [data-state='leaving']) {
+    opacity: 1;
+    animation:
+      gs-ken-burns calc(var(--dur-hero-photo) + var(--dur-hero-fade)) linear forwards,
+      gs-hero-clock var(--dur-hero-photo) linear forwards;
+  }
+  .gs-hero-photo[data-state='active'] {
+    z-index: 2;
+    transition: opacity var(--dur-hero-fade) ease-in-out;
+  }
+  .gs-hero-photo[data-state='leaving'] {
+    z-index: 1;
+  }
+  [data-paused] .gs-hero-photo {
+    animation-play-state: paused;
+  }
+  @media (width >= 64rem) and (resolution >= 1.5dppx), (width >= 100rem) {
+    .gs-hero-photo {
+      filter: blur(var(--blur-hero));
+    }
+  }
+  @keyframes gs-ken-burns {
+    from {
+      transform: scale(1);
+    }
+    to {
+      transform: scale(1.06);
+    }
+  }
+  @keyframes gs-hero-clock {
+    to {
+      --gs-hero-clock: 1;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .gs-hero-photo:is([data-state]) {
+      animation: none;
+      transition: none;
+    }
   }
 }
 

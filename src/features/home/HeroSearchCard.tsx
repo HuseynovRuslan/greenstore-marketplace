@@ -20,9 +20,10 @@ const HERO_ENTRANCE_MS = 1000
 /**
  * Home hero search (docs/design/variant-2): the card with Hamısı / Məhsullar / Xidmətlər, the search row
  * (text · city · «Axtar») and the filter chips (≥ md); on phones the scrolling chip row and the «Filtrlər» sheet;
- * then the categories row, whose selected item follows the Kateqoriya filter. Submitting opens the catalogue with
- * its own URL params (heroSearch.ts); without JavaScript the form is a plain GET to /elanlar. The counts (tabs,
- * cities, categories) are counted on the server (heroCounts.ts).
+ * then the categories row, whose selected item follows the Kateqoriya filter. Everything but the card sits on the
+ * hero photo (HeroStage), so focus outlines there are white. Submitting opens the catalogue with its own URL params
+ * (heroSearch.ts); without JavaScript the form is a plain GET to /elanlar. The counts (tabs, cities, categories) are
+ * counted on the server (heroCounts.ts).
  */
 export function HeroSearchCard({ counts }: { counts: HeroCounts }) {
   const router = useRouter()
@@ -72,7 +73,7 @@ export function HeroSearchCard({ counts }: { counts: HeroCounts }) {
       <div
         id={HERO_SEARCH_ID}
         // relative z-10: its popovers paint above the categories row, which also animates in.
-        className="relative z-10 w-full max-w-[1080px] animate-fade-up scroll-mt-28 rounded-2xl border border-line-strong bg-surface shadow-search motion-reduce:animate-none md:rounded-search"
+        className="relative z-10 w-full max-w-[1080px] animate-fade-up scroll-mt-28 rounded-2xl border border-line-strong bg-surface shadow-search-hero motion-reduce:animate-none md:rounded-search"
       >
         <TypeTabs value={tab} counts={counts.tabs} onChange={changeTab} />
 
@@ -125,7 +126,7 @@ export function HeroSearchCard({ counts }: { counts: HeroCounts }) {
         onChange={setFilters}
         sheetOpen={sheet.open}
         onOpenSheet={(focus) => setSheet({ open: true, focus })}
-        className="-mx-5 animate-fade-up self-stretch px-5 [animation-delay:60ms] motion-reduce:animate-none md:hidden"
+        className="-mx-5 animate-fade-up self-stretch px-5 [animation-delay:60ms] *:focus-visible:outline-white motion-reduce:animate-none md:hidden"
       />
       <HeroFilterSheet
         open={sheet.open}
@@ -137,7 +138,7 @@ export function HeroSearchCard({ counts }: { counts: HeroCounts }) {
         onSearch={search}
       />
 
-      <HeroCategories items={counts.categories} selected={filters.category} className="-mx-5 self-stretch border-t border-line pt-3 md:-mx-7 lg:mx-0 lg:pt-4" />
+      <HeroCategories items={counts.categories} selected={filters.category} className="-mx-5 self-stretch border-t border-mint/20 pt-3 md:-mx-7 lg:mx-0 lg:pt-4" />
     </>
   )
 }
