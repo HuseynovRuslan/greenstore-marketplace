@@ -38,8 +38,9 @@
    * Home hero photo overlay (HeroStage): forest over the whole photo, the transparent header's strip included, 74 % at
    * the top to 84 % at the bottom, where the small category counts are. Measured at the lightest photo pixel under
    * every line of text, for all three photos, zoom 1 and 1.06, from 360 to 2560 px wide (Nov 2026): header text
-   * (white) ≥ 5.4:1 and its icons ≥ 5.2:1, heading (white) ≥ 5.6:1, subtitle (mint) ≥ 5.4:1, category names (white)
-   * ≥ 7.2:1, counts (mint) ≥ 6.2:1. On the section's forest while the first photo loads: white 11.7:1, mint 10:1.
+   * (white) ≥ 5.4:1 and its icons ≥ 5.2:1, heading (white) ≥ 5.6:1, subtitle (mint) ≥ 5.4:1, category names (white,
+   * on their 12 % white pills) ≥ 5.3:1; the counts sit on mint badges (10:1). On the section's forest while the first
+   * photo loads: white 11.7:1, mint 10:1.
    */
   --color-hero-overlay: #173f32;
   --color-hero-overlay-top: color-mix(in oklab, var(--color-hero-overlay) 74%, transparent);

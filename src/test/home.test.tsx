@@ -109,21 +109,25 @@ describe('HomePage', () => {
       '/kateqoriyalar/sarmasiqlar',
       '/kateqoriyalar/yer-ortucu-bitkiler',
     ])
-    expect(screen.getByRole('link', { name: 'Ağaclar 16 elan' })).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: 'Yer örtücü bitkilər 12 elan' })).toBeInTheDocument()
-    // A centred group of equal items, not a stretched grid
-    expect(list).toHaveClass('justify-center-safe')
+    // One pill per category, named in full; the count badge is visual only.
+    const trees = screen.getByRole('link', { name: 'Ağaclar, 16 elan' })
+    expect(within(trees).getByText('16')).toHaveAttribute('aria-hidden')
+    expect(within(trees).getByText('Ağaclar')).toHaveClass('truncate', 'text-white')
+    expect(trees).toHaveClass('h-12', 'rounded-full', 'bg-surface/12', 'border-surface/22', 'backdrop-blur-sm')
+    expect(screen.getByRole('link', { name: 'Yer örtücü bitkilər, 12 elan' })).toBeInTheDocument()
+    // Phones: one line that scrolls and snaps; from 640 px a centred group that wraps. Not a stretched grid.
+    expect(list).toHaveClass('overflow-x-auto', 'snap-x', 'sm:flex-wrap', 'sm:justify-center', 'gap-3')
     expect(list.className).not.toMatch(/grid-cols/)
   })
 
   it('marks the category chosen in the Kateqoriya filter', async () => {
     await renderHome()
-    const circle = () => screen.getByRole('link', { name: 'Kollar 7 elan' }).querySelector('span')!
-    expect(circle()).not.toHaveClass('bg-forest')
+    const pill = () => screen.getByRole('link', { name: 'Kollar, 7 elan' })
+    expect(pill()).not.toHaveClass('border-mint')
     const form = screen.getByRole('search', { name: 'Elan axtarışı' })
     await userEvent.click(within(form).getByRole('button', { name: 'Kateqoriya' }))
     await userEvent.click(within(form).getByRole('button', { name: 'Kollar' }))
-    expect(circle()).toHaveClass('bg-forest')
+    expect(pill()).toHaveClass('border-mint')
   })
 
   it('toggles a favorite from a listing card', async () => {

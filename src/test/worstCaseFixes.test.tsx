@@ -78,12 +78,14 @@ describe('worst-case fixes', () => {
     expect(container.querySelector('[aria-hidden].text-muted')?.textContent).not.toBe('–')
   })
 
-  it('lets a long category word break inside its item and names clamped ones in full', () => {
+  it('keeps a long category name on one line, cut with an ellipsis only past the row width, and named in full', () => {
     render(<HeroCategories items={worstCaseCategories(heroCounts.categories)} />)
     const name = screen.getByText('Dekorativ iynəyarpaqlılar')
-    expect(name).toHaveClass('wrap-anywhere', 'line-clamp-2')
-    expect(name.parentElement).toHaveClass('max-w-40', 'min-w-0')
+    expect(name).toHaveClass('truncate', 'min-w-0')
     expect(name).toHaveAttribute('title', 'Dekorativ iynəyarpaqlılar')
+    const link = name.closest('a')!
+    expect(link).toHaveClass('max-w-full')
+    expect(link.getAttribute('aria-label')).toMatch(/^Dekorativ iynəyarpaqlılar, .+ elan$/)
   })
 
   it('re-measures the tab underline when a tab label changes size', () => {
