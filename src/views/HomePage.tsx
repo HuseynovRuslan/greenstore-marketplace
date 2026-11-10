@@ -17,13 +17,14 @@ import type { HomeContent } from '@/services/repository'
  * search island (white card, phone filter row, categories row). The heading is never faded in. Compact since
  * November 2026, so that «Önə çıxan elanlar» and the top of its cards show without scrolling from 1280 × 720 up:
  * 28 / 24 px above and below from md, 20 px between heading, card and categories, and a one-line categories row.
- * HeroStage centres its pause button on that row from the bottom padding (16 / 24 px): keep the two in step.
- * The text's contrast over the photos is measured at their lightest pixels: see --color-hero-overlay in index.css.
+ * The photo also runs under the transparent header (58 / 76 px, SiteHeader `hero`), so the top padding adds its
+ * height. The text's contrast over the photos is measured at their lightest pixels: see --color-hero-overlay in
+ * index.css.
  */
 function Hero({ counts }: { counts: HeroCounts }) {
   return (
     <HeroStage>
-      <div className="page-x mx-auto flex w-full max-w-[1440px] flex-col items-center gap-3 pt-4 pb-4 md:gap-5 md:pt-7 md:pb-6">
+      <div className="page-x mx-auto flex w-full max-w-[1440px] flex-col items-center gap-3 pt-[calc(58px+16px)] pb-4 md:gap-5 md:pt-[calc(76px+28px)] md:pb-6">
         {/* Rises 8 px on first paint but never fades. */}
         <div className="flex w-full animate-rise flex-col gap-1.5 motion-reduce:animate-none md:items-center md:gap-2 md:text-center">
           {/* Tracking follows Inter's size table: ≈ −0.020em at 25 px, −0.022em at 40 px. */}

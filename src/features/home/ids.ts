@@ -4,3 +4,6 @@
  */
 export const HERO_SEARCH_ID = 'hero-search'
 export const HERO_QUERY_ID = 'hero-q'
+
+/** The home hero (HeroStage). The header is transparent over it and turns solid once it has scrolled past. */
+export const HERO_ID = 'hero'

@@ -2,8 +2,8 @@
 
 import { useEffect, useReducer, useRef, useState, type AnimationEvent, type CSSProperties, type ReactNode, type TransitionEvent } from 'react'
 import Image from 'next/image'
-import { Pause, Play } from 'lucide-react'
 import { heroPhotos } from './heroPhotos'
+import { HERO_ID } from './ids'
 
 const REDUCED_MOTION = '(prefers-reduced-motion: reduce)'
 /** The CSS animation whose end means "the active photo's time is up" (index.css, .gs-hero-photo). */
@@ -14,7 +14,7 @@ export interface Rotation {
   /** The photo the active one is fading in over; idle again once the fade is over. */
   leaving: number | null
   loaded: boolean[]
-  /** The active photo's time is up, but no other photo had loaded yet or the rotation was paused. */
+  /** The active photo's time is up, but no other photo had loaded yet or the tab was hidden. */
   due: boolean
 }
 
@@ -81,22 +81,21 @@ function afterLoadIdle(run: () => void) {
  * each shown for --dur-hero-photo with a slow zoom, then cross-faded into the next (index.css, .gs-hero-photo). The
  * first photo is the LCP image, rendered on the server and preloaded; the other two load only once the page is
  * idle, and the rotation only moves on to a photo that has loaded. The section's forest background stands in while
- * the first photo loads, so the white text is never on white.
+ * the first photo loads, so the white text is never on white. It starts under the transparent site header (#hero,
+ * SiteHeader `hero`), which turns solid once the section has scrolled past it.
  *
- * Moving content needs a way to stop it (WCAG 2.2.2): «Fonu dayandır» / «Fonu davam etdir» at the bottom right,
- * after the hero's content in the tab order. A hidden tab pauses too. With reduced motion only the first photo shows,
- * still, and the button is gone. Content: `children` (server-rendered); the photos are decorative.
+ * A hidden tab pauses the rotation; with reduced motion only the first photo shows, still. There is no pause control
+ * (WCAG 2.2.2): the team decides on one (docs/handoff/follow-ups.md). Content: `children` (server-rendered); the
+ * photos are decorative.
  */
 export function HeroStage({ children }: { children: ReactNode }) {
   const [rotation, dispatch] = useReducer(rotate, heroPhotos.length, initialRotation)
-  const [userPaused, setUserPaused] = useState(false)
-  const [tabHidden, setTabHidden] = useState(false)
+  const [paused, setPaused] = useState(false)
   const [loadRest, setLoadRest] = useState(false)
   const firstLayer = useRef<HTMLDivElement>(null)
-  const paused = userPaused || tabHidden
 
   useEffect(() => {
-    const onVisibility = () => setTabHidden(document.visibilityState === 'hidden')
+    const onVisibility = () => setPaused(document.visibilityState === 'hidden')
     // A page opened in a background tab starts paused.
     onVisibility()
     document.addEventListener('visibilitychange', onVisibility)
@@ -130,7 +129,7 @@ export function HeroStage({ children }: { children: ReactNode }) {
     if (clock?.playState === 'finished') dispatch({ type: 'clock', paused: document.visibilityState === 'hidden' })
   }, [])
 
-  // A photo whose time came up during the pause comes in on resume.
+  // A photo whose time came up while the tab was hidden comes in when it is shown again.
   useEffect(() => {
     if (!paused) dispatch({ type: 'resume' })
   }, [paused])
@@ -145,7 +144,7 @@ export function HeroStage({ children }: { children: ReactNode }) {
   return (
     // Stacking: the photos are a z-0 layer of their own and the content a positioned layer after them; the section
     // itself is no stacking context, so the search card (z-10) and its popovers still paint over the sections below.
-    <section aria-labelledby="hero-title" data-paused={paused || undefined} className="relative w-full bg-forest">
+    <section id={HERO_ID} aria-labelledby="hero-title" data-paused={paused || undefined} className="relative w-full bg-forest">
       {/* Clipped here, not on the section: the search card's popovers reach below the hero. */}
       <div aria-hidden className="absolute inset-0 z-0 overflow-hidden">
         {heroPhotos.map((photo, i) => (
@@ -181,28 +180,6 @@ export function HeroStage({ children }: { children: ReactNode }) {
       </div>
 
       <div className="relative">{children}</div>
-
-      {/* Centred on the categories row: the hero's bottom padding (16 / 24 px) + (48 − 44) / 2. On phones and tablets
-          the row's scroller stops short of it (HeroCategories). */}
-      <div className="pointer-events-none absolute inset-x-0 bottom-[18px] motion-reduce:hidden md:bottom-[26px]">
-        <div className="page-x mx-auto flex w-full max-w-[1440px] justify-end">
-          <button
-            type="button"
-            aria-label={userPaused ? 'Fonu davam etdir' : 'Fonu dayandır'}
-            onClick={() => setUserPaused((on) => !on)}
-            // 44 px target around a 32 px circle; −6 px so the circle lines up with the content's right edge.
-            className="group pointer-events-auto -mr-1.5 flex size-11 items-center justify-center rounded-full focus-visible:outline-white"
-          >
-            <span className="flex size-8 items-center justify-center rounded-full bg-forest/70 text-white ring-1 ring-white/45 transition-[background-color,scale] duration-(--dur-fast) ease-out group-hover:bg-forest group-active:scale-[0.94] motion-reduce:group-active:scale-100">
-              {userPaused ? (
-                <Play aria-hidden size={14} strokeWidth={0} fill="currentColor" className="translate-x-px" />
-              ) : (
-                <Pause aria-hidden size={14} strokeWidth={0} fill="currentColor" />
-              )}
-            </span>
-          </button>
-        </div>
-      </div>
     </section>
   )
 }

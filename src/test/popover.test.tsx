@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { useState } from 'react'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { isPanelOpen, Popover } from '@/components/ui/Popover'
+import { Popover } from '@/components/ui/Popover'
 
 function PriceChip() {
   const [open, setOpen] = useState(false)
@@ -38,7 +38,6 @@ describe('Popover', () => {
     expect(chip()).toHaveAttribute('aria-expanded', 'true')
     expect(chip()).toHaveAttribute('aria-controls', dialog.id)
     expect(screen.getByRole('textbox', { name: 'Minimum qiymət' })).toHaveFocus()
-    expect(isPanelOpen()).toBe(true)
   })
 
   it('closes on Esc and returns focus to the chip', async () => {
@@ -48,7 +47,6 @@ describe('Popover', () => {
     await user.keyboard('{Escape}')
     expect(chip()).toHaveAttribute('aria-expanded', 'false')
     expect(chip()).toHaveFocus()
-    expect(isPanelOpen()).toBe(false)
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
   })
 

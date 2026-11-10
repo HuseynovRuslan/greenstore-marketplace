@@ -10,8 +10,8 @@ import { useSession } from '@/state/store'
 import { preHydrationClass } from '@/state/bootstrap'
 import { useHydrated } from './ClientGate'
 import { cn } from '@/lib/format'
-import { useScrolledPast, useScrollHeader } from '@/hooks/useScrollHeader'
-import { HERO_QUERY_ID, HERO_SEARCH_ID } from '@/features/home/ids'
+import { useOverHero, usePageScrolled, useScrolledPast } from '@/hooks/useHeaderState'
+import { HERO_ID, HERO_QUERY_ID, HERO_SEARCH_ID } from '@/features/home/ids'
 
 const sectionLinks = [
   { label: 'Kateqoriyalar', to: '/#kateqoriyalar' },
@@ -29,20 +29,26 @@ const homeNav = [
   { label: 'Satıcılar', to: '/saticilar', section: (path: string) => path === '/saticilar' || path.startsWith('/saticilar/') },
 ]
 
+/* `over-hero:` (index.css) styles the transparent state over the home hero photo: white text and icons. */
 const iconButton =
-  'flex size-11 shrink-0 items-center justify-center rounded-option text-ink transition-[color,background-color,scale] duration-(--dur-fast) ease-out hover:bg-mint hover:text-forest active:scale-[0.95] motion-reduce:active:scale-100'
+  'flex size-11 shrink-0 items-center justify-center rounded-option text-ink transition-[color,background-color,scale] duration-(--dur-fast) ease-out hover:bg-mint hover:text-forest active:scale-[0.95] motion-reduce:active:scale-100 over-hero:text-white over-hero:hover:bg-surface/15 over-hero:hover:text-white'
 
 /**
  * Variant 2 header (docs/design/variant-2), on every public page since Nov 2026 (the first-Figma header with a
  * search bar is gone): one row, logo · nav (Məhsullar, Xidmətlər, Satıcılar, Önə çıxanlar; the current section is
- * marked) · favourites ·
- *    account · «Elan yerləşdir». The nav needs 1024 px; 768–1023 px get the menu button, < 768 px logo · ♡ · menu.
- *    The hero search replaces the header search there. On scroll (useScrollHeader) the header turns translucent with a
- *    shadow, hides while you scroll down past 320 px and comes back on any upward scroll; once the hero search has
- *    scrolled away, a compact search pill takes the nav's place (an icon button below 1024 px) and leads back to it.
- *    Keyboard users can still Tab to the nav links then: focusing one brings the nav back, Tab goes on to the pill.
+ * marked) · favourites · account · «Elan yerləşdir». The nav needs 1024 px; 768–1023 px get the menu button,
+ * < 768 px logo · ♡ · menu. The page's search card replaces a header search field.
+ *
+ * Solid white and sticky everywhere, and it never hides (since Nov 2026); a shadow once the page is scrolled. With
+ * `hero` (the home page) it starts transparent over the hero photo, with white logo, nav and icons and a light
+ * «Elan yerləşdir», and overlaps the hero by its own height, so no state change moves anything. Once the hero has
+ * scrolled past the header's bottom edge (useOverHero), the solid header slides in from the top and stays; back over
+ * the hero it fades to transparent (index.css, .gs-header). Once the page's search card has scrolled away, and on the
+ * home page only in the solid state, a compact search pill takes the nav's place (an icon button below 1024 px) and
+ * leads back to it. Keyboard users can still Tab to the nav links then: focusing one brings the nav back, Tab goes
+ * on to the pill.
  */
-export function SiteHeader() {
+export function SiteHeader({ hero = false }: { hero?: boolean }) {
   const { user, signOut } = useSession()
   const router = useRouter()
   const pathname = usePathname()
@@ -62,14 +68,17 @@ export function SiteHeader() {
   const preClass = (variant: 'user' | 'guest') => (hydrated ? undefined : preHydrationClass(variant))
 
   const headerRef = useRef<HTMLElement>(null)
-  const { scrolled, hidden } = useScrollHeader(headerRef, { enabled: true, paused: menuOpen })
+  const scrolled = usePageScrolled()
+  const overHero = useOverHero(HERO_ID, headerRef, hero)
   // Re-watch on every route: each catalogue page renders its own search card.
   const heroSearchGone = useScrolledPast(HERO_SEARCH_ID, headerRef, true, pathname)
+  // Over the hero its search card is still in view, so the pill waits for the solid header.
+  const searchGone = heroSearchGone && !overHero
   // Whichever of nav / pill holds keyboard focus is the one shown. The nav links are always in the Tab order (a link
-  // that gets focus cross-fades the nav back); the pill is reachable once the hero search is gone, or while focused.
+  // that gets focus cross-fades the nav back); the pill is reachable once the search card is gone, or while focused.
   const [focusIn, setFocusIn] = useState<'nav' | 'pill' | null>(null)
-  const pill = focusIn ? focusIn === 'pill' : heroSearchGone
-  const pillReachable = heroSearchGone || focusIn === 'pill'
+  const pill = focusIn ? focusIn === 'pill' : searchGone
+  const pillReachable = searchGone || focusIn === 'pill'
   const trackFocus = (zone: 'nav' | 'pill') => ({
     onFocus: () => setFocusIn(zone),
     onBlur: (e: ReactFocusEvent<HTMLElement>) => {
@@ -116,10 +125,13 @@ export function SiteHeader() {
       )}
       {showUser && (
         <span className={cn('hidden shrink-0 items-center gap-3 text-sm leading-[normal] whitespace-nowrap xl:inline-flex px-2', preClass('user'))}>
-          <Link href="/kabinet" className={cn('text-forest hover:text-olive-text', !hydrated && 'auth-user-name')}>
+          <Link
+            href="/kabinet"
+            className={cn('text-forest hover:text-olive-text over-hero:text-white over-hero:hover:text-mint', !hydrated && 'auth-user-name')}
+          >
             {hydrated ? user?.fullName : null}
           </Link>
-          <button type="button" onClick={handleSignOut} className="text-muted hover:text-forest">
+          <button type="button" onClick={handleSignOut} className="text-muted hover:text-forest over-hero:text-mint over-hero:hover:text-white">
             Çıxış
           </button>
         </span>
@@ -128,7 +140,7 @@ export function SiteHeader() {
         <Link
           href="/daxil-ol"
           className={cn(
-            'hidden h-11 shrink-0 items-center px-3.5 text-[15px] leading-[normal] font-medium whitespace-nowrap text-ink transition-colors duration-(--dur-fast) hover:text-forest xl:flex',
+            'hidden h-11 shrink-0 items-center px-3.5 text-[15px] leading-[normal] font-medium whitespace-nowrap text-ink transition-colors duration-(--dur-fast) hover:text-forest xl:flex over-hero:text-white over-hero:hover:text-mint',
             preClass('guest'),
           )}
         >
@@ -138,7 +150,12 @@ export function SiteHeader() {
     </>
   )
   const postAd = (
-    <ButtonLink href="/elan-yerlesdir" icon={<Plus aria-hidden size={18} strokeWidth={1.8} absoluteStrokeWidth />}>
+    // Over the photo: white with forest text, the inverse of the solid header's forest button.
+    <ButtonLink
+      href="/elan-yerlesdir"
+      icon={<Plus aria-hidden size={18} strokeWidth={1.8} absoluteStrokeWidth />}
+      className="over-hero:bg-surface over-hero:text-forest over-hero:hover:bg-mint"
+    >
       Elan yerləşdir
     </ButtonLink>
   )
@@ -157,13 +174,15 @@ export function SiteHeader() {
     <>
       <header
         ref={headerRef}
+        data-hero={hero || undefined}
+        data-over-hero={overHero || undefined}
         data-scrolled={scrolled || undefined}
-        data-hidden={hidden || undefined}
-        className="gs-header sticky top-0 z-40 w-full"
+        // On the home page the hero starts under the header: −58 / −76 px, the header's own height.
+        className={cn('gs-header sticky top-0 z-40 w-full', hero && '-mb-[58px] md:-mb-[76px]')}
       >
         {/* ≥ 768 px: one row (76 px) */}
             <div className="page-x mx-auto hidden w-full max-w-[1440px] items-center gap-2 py-[15px] md:flex">
-              <Logo className="mr-auto lg:mr-6 xl:mr-10" />
+              <Logo className="mr-auto lg:mr-6 xl:mr-10 over-hero:text-white" />
               {/* The nav and the search pill share one grid cell and cross-fade, so the row never changes size. */}
               <div className="hidden min-w-0 flex-1 lg:grid">
                 <nav
@@ -176,16 +195,16 @@ export function SiteHeader() {
                       key={l.to}
                       href={l.to}
                       aria-current={l.section(pathname) ? 'page' : undefined}
-                      className="relative flex h-11 items-center rounded-option px-3.5 text-[15px] leading-[normal] font-medium whitespace-nowrap text-ink transition-colors duration-(--dur-fast) hover:text-forest aria-[current=page]:font-semibold aria-[current=page]:text-forest aria-[current=page]:after:absolute aria-[current=page]:after:inset-x-3.5 aria-[current=page]:after:bottom-1 aria-[current=page]:after:h-0.5 aria-[current=page]:after:rounded-full aria-[current=page]:after:bg-forest aria-[current=page]:after:content-['']"
+                      className="relative flex h-11 items-center rounded-option px-3.5 text-[15px] leading-[normal] font-medium whitespace-nowrap text-ink transition-colors duration-(--dur-fast) hover:text-forest aria-[current=page]:font-semibold aria-[current=page]:text-forest aria-[current=page]:after:absolute aria-[current=page]:after:inset-x-3.5 aria-[current=page]:after:bottom-1 aria-[current=page]:after:h-0.5 aria-[current=page]:after:rounded-full aria-[current=page]:after:bg-forest aria-[current=page]:after:content-[''] over-hero:text-white over-hero:hover:text-mint over-hero:aria-[current=page]:text-white over-hero:aria-[current=page]:after:bg-white"
                     >
                       {l.label}
                     </Link>
                   ))}
                   <Link
                     href="/elanlar?vip=1"
-                    className="flex h-11 items-center gap-2 rounded-option px-3.5 text-[15px] leading-[normal] font-medium whitespace-nowrap text-olive-text transition-colors duration-(--dur-fast) hover:text-forest"
+                    className="flex h-11 items-center gap-2 rounded-option px-3.5 text-[15px] leading-[normal] font-medium whitespace-nowrap text-olive-text transition-colors duration-(--dur-fast) hover:text-forest over-hero:text-white over-hero:hover:text-mint"
                   >
-                    <Rocket aria-hidden size={16} strokeWidth={2} className="shrink-0 text-olive" />
+                    <Rocket aria-hidden size={16} strokeWidth={2} className="shrink-0 text-olive over-hero:text-mint" />
                     Önə çıxanlar
                   </Link>
                 </nav>
@@ -209,7 +228,7 @@ export function SiteHeader() {
 
             {/* < 768 px: logo · (search, once the hero search is gone) · favourites · menu (58 px) */}
             <div className="flex h-[58px] items-center justify-between pr-1 pl-5 md:hidden">
-              <Logo />
+              <Logo className="over-hero:text-white" />
               <div className="flex">
                 {pillIcon()}
                 {favorites}

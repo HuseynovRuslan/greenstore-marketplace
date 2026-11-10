@@ -6,10 +6,12 @@ purpose. Kept up to date as steps land; remove an item when it is done.
 ## Design
 
 - **Page links** do not dim the results while the next page loads; filter changes do.
-- **Filter column gap:** when the sidebar is shorter than the window and the header hides, a 76 px gap shows above it.
 
 ## Accessibility
 
+- Hero background rotation has no pause control (WCAG 2.2.2). The team will decide; the proposed fix is a pause
+  button that appears on keyboard focus. (Today: the rotation stops in a hidden tab, and with reduced motion only
+  the first photo shows, still.)
 - **Targets under 44 px** (audit of 5 Nov, item 6). All of them meet the WCAG 2.5.8 minimum of 24 px, but not the
   44 px the project aims for. The favourite button is done (44 px since the card step). Still under 44 px:
   - section links («Bütün elanlara bax», «Bütün xidmətlər», «Biznes satıcıların elanları») 20 px tall;

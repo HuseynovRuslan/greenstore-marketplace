@@ -3,7 +3,7 @@
 import { useEffect, useId, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type ReactNode } from 'react'
 import { Check, ChevronDown } from 'lucide-react'
 import { cn, lowerAz } from '@/lib/format'
-import { panelAlignClass, panelClass, useOpenPanelCount, useOutsidePress, usePanelAlign, usePresence, type PanelAlign } from './Popover'
+import { panelAlignClass, panelClass, useOutsidePress, usePanelAlign, usePresence, type PanelAlign } from './Popover'
 
 export interface ListboxOption {
   value: string
@@ -73,7 +73,6 @@ export function Listbox({ label, value, onChange, options, icon, name, align, cl
   const [instant, setInstant] = useState(false)
   const { present, state, onTransitionEnd } = usePresence(open)
   usePanelAlign(present, listRef, align)
-  useOpenPanelCount(open)
   useOutsidePress(open, rootRef, () => {
     setInstant(false)
     setOpen(false)

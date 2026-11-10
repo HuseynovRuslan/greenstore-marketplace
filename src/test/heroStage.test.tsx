@@ -1,6 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { act, fireEvent, render, screen } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
 import nextConfig from '../../next.config'
 import { heroPhotos } from '@/features/home/heroPhotos'
 import { HeroStage, initialRotation, rotate, type Rotation } from '@/features/home/HeroStage'
@@ -77,15 +76,16 @@ describe('HeroStage', () => {
     expect(all[1]).not.toHaveAttribute('loading', 'lazy')
   })
 
-  it('pauses and resumes the background from its button (WCAG 2.2.2), and while the tab is hidden', async () => {
-    const user = userEvent.setup()
+  it('is the #hero the header watches, with no pause control of its own', () => {
+    const { container } = renderStage()
+    expect(container.querySelector('section')).toHaveAttribute('id', 'hero')
+    // No pause button for now (docs/handoff/follow-ups.md, WCAG 2.2.2).
+    expect(screen.queryByRole('button')).not.toBeInTheDocument()
+  })
+
+  it('pauses the rotation while the tab is hidden', () => {
     const { container } = renderStage()
     const section = container.querySelector('section')!
-    expect(section).not.toHaveAttribute('data-paused')
-
-    await user.click(screen.getByRole('button', { name: 'Fonu dayandır' }))
-    expect(section).toHaveAttribute('data-paused')
-    await user.click(screen.getByRole('button', { name: 'Fonu davam etdir' }))
     expect(section).not.toHaveAttribute('data-paused')
 
     const visibility = vi.spyOn(document, 'visibilityState', 'get').mockReturnValue('hidden')
@@ -141,8 +141,7 @@ describe('HeroStage', () => {
     const { container } = renderStage()
     act(() => vi.advanceTimersByTime(2000))
     expect(photoImages(container)).toHaveLength(1)
-    // CSS hides the button (motion-reduce:hidden): nothing moves, so there is nothing to pause.
-    expect(screen.getByRole('button', { name: 'Fonu dayandır' }).parentElement?.parentElement).toHaveClass('motion-reduce:hidden')
+    expect(container.querySelector('.gs-hero-photo')).toHaveAttribute('data-state', 'active')
   })
 })
 

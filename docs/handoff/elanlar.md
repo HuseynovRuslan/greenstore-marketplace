@@ -22,7 +22,7 @@ For: management and Ruslan (backend). Branch `nextjs-migration`. Before/after sc
 
 - **Header:** the home header on the catalogue pages and on `/xidmetler`.
   - «Məhsullar» (or «Xidmətlər») is marked as the current section.
-  - The header hides while you scroll down, as on home.
+  - The header hides while you scroll down, as on home. (Changed 10 Nov 2026: the header never hides now.)
   - The header has no search field there, so each page has one search only.
 - **Search card:** the home search card without its tabs: search word · city · «Axtar».
   - It replaces «Elanlarda axtarış».
@@ -39,7 +39,8 @@ For: management and Ruslan (backend). Branch `nextjs-migration`. Before/after sc
     jump.
   - The column stays in view while you scroll.
 - **Phones and tablets:**
-  - A bar with «Filtrlər (n)», sort and view sticks under the header and takes its place when the header hides.
+  - A bar with «Filtrlər (n)», sort and view sticks under the header (since 10 Nov 2026 it no longer moves up: the
+    header never hides).
   - «Filtrlər» opens the home sheet. Changes there wait for «N elanı göstər», and the number updates as you pick.
   - At 0 the button says «Uyğun elan yoxdur».
 - **Active filters:** one removable chip per filter, including delivery and the search word, then «Sıfırla».
@@ -151,6 +152,4 @@ The full list is in [follow-ups.md](follow-ups.md).
   - Still to do in their own step: its search form, selects, category buttons, sort, cards, no-results state, and the
     old title «Landşaft və bağçılıq xidmətləri».
 - **Page links** do not dim the results while the next page loads (the filters do).
-- **Gap above a short filter column.** When the filter column is shorter than the window and the header hides, a
-  76 px gap shows above it.
 - **Screen reader pass** (NVDA / VoiceOver) is still to do.

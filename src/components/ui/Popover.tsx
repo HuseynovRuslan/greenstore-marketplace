@@ -27,24 +27,6 @@ export const panelClass = 'gs-panel absolute top-[calc(100%+6px)] z-30 rounded-p
 /** --dur-panel-out; the fallback timer below waits a little longer than the exit transition. */
 const EXIT_MS = 110
 
-/* ---------- Open panels (the header reads this so it never slides away from an open panel) ---------- */
-
-let openPanels = 0
-
-export function isPanelOpen(): boolean {
-  return openPanels > 0
-}
-
-export function useOpenPanelCount(open: boolean) {
-  useEffect(() => {
-    if (!open) return
-    openPanels += 1
-    return () => {
-      openPanels -= 1
-    }
-  }, [open])
-}
-
 /* ---------- Presence: keep the panel mounted while it animates out ---------- */
 
 /**
@@ -151,7 +133,6 @@ export function Popover({ open, onOpenChange, label, trigger, children, align: p
   const [instant, setInstant] = useState(false)
   const { present, state, onTransitionEnd } = usePresence(open)
   usePanelAlign(present, panelRef, preferredAlign)
-  useOpenPanelCount(open)
   useOutsidePress(open, rootRef, () => {
     setInstant(false)
     onOpenChange(false)
