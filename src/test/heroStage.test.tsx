@@ -79,6 +79,10 @@ describe('HeroStage', () => {
   it('is the #hero the header watches, with no pause control of its own', () => {
     const { container } = renderStage()
     expect(container.querySelector('section')).toHaveAttribute('id', 'hero')
+    // The solid header's sentinel: the last thing in the hero, at its bottom edge.
+    const sentinel = container.querySelector('#hero-end')
+    expect(sentinel).toHaveClass('absolute', 'bottom-0')
+    expect(sentinel?.parentElement).toBe(container.querySelector('section'))
     // No pause button for now (docs/handoff/follow-ups.md, WCAG 2.2.2).
     expect(screen.queryByRole('button')).not.toBeInTheDocument()
   })

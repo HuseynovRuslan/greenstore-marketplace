@@ -10,8 +10,8 @@ import { useSession } from '@/state/store'
 import { preHydrationClass } from '@/state/bootstrap'
 import { useHydrated } from './ClientGate'
 import { cn } from '@/lib/format'
-import { useOverHero, usePageScrolled, useScrolledPast } from '@/hooks/useHeaderState'
-import { HERO_ID, HERO_QUERY_ID, HERO_SEARCH_ID } from '@/features/home/ids'
+import { usePageScrolled, useScrolledPast } from '@/hooks/useHeaderState'
+import { HERO_QUERY_ID, HERO_SEARCH_ID } from '@/features/home/ids'
 
 const sectionLinks = [
   { label: 'Kateqoriyalar', to: '/#kateqoriyalar' },
@@ -39,16 +39,26 @@ const iconButton =
  * marked) · favourites · account · «Elan yerləşdir». The nav needs 1024 px; 768–1023 px get the menu button,
  * < 768 px logo · ♡ · menu. The page's search card replaces a header search field.
  *
- * Solid white and sticky everywhere, and it never hides (since Nov 2026); a shadow once the page is scrolled. With
- * `hero` (the home page) it starts transparent over the hero photo, with white logo, nav and icons and a light
- * «Elan yerləşdir», and overlaps the hero by its own height, so no state change moves anything. Once the hero has
- * scrolled past the header's bottom edge (useOverHero), the solid header slides in from the top and stays; back over
- * the hero it fades to transparent (index.css, .gs-header). Once the page's search card has scrolled away, and on the
- * home page only in the solid state, a compact search pill takes the nav's place (an icon button below 1024 px) and
- * leads back to it. Keyboard users can still Tab to the nav links then: focusing one brings the nav back, Tab goes
- * on to the pill.
+ * `placement`:
+ * - sticky (every page but home): solid white, sticky, never hides; a shadow once the page is scrolled.
+ * - hero (home): transparent, absolutely positioned at the top of the hero, so it scrolls away with it. White logo,
+ *   nav and icons, a light «Elan yerləşdir», white focus outlines (the over-hero: variant in index.css).
+ * - fixed (home): the solid header, fixed above the screen until the hero has scrolled out of the window, then it
+ *   slides in.
+ * HomeHeader renders the two home ones and passes `active`: the one not in use is inert and hidden from assistive
+ * tech, so there is only ever one banner. Once the page's search card has scrolled away, a compact search pill takes
+ * the nav's place (an icon button below 1024 px) and leads back to it; the transparent header has none, its search
+ * card is right below it. Keyboard users can still Tab to the nav links then: focusing one brings the nav back, Tab
+ * goes on to the pill.
  */
-export function SiteHeader({ hero = false }: { hero?: boolean }) {
+export function SiteHeader({
+  placement = 'sticky',
+  active = true,
+}: {
+  placement?: 'sticky' | 'hero' | 'fixed'
+  /** hero / fixed: whether this is the home header in use. */
+  active?: boolean
+}) {
   const { user, signOut } = useSession()
   const router = useRouter()
   const pathname = usePathname()
@@ -67,13 +77,12 @@ export function SiteHeader({ hero = false }: { hero?: boolean }) {
   const showGuest = !hydrated || !user
   const preClass = (variant: 'user' | 'guest') => (hydrated ? undefined : preHydrationClass(variant))
 
-  const headerRef = useRef<HTMLElement>(null)
-  const scrolled = usePageScrolled()
-  const overHero = useOverHero(HERO_ID, headerRef, hero)
+  const ref = useRef<HTMLElement>(null)
+  const transparent = placement === 'hero'
+  // The fixed home header only shows below the hero, where the page is always scrolled.
+  const scrolled = usePageScrolled(placement === 'sticky') || placement === 'fixed'
   // Re-watch on every route: each catalogue page renders its own search card.
-  const heroSearchGone = useScrolledPast(HERO_SEARCH_ID, headerRef, true, pathname)
-  // Over the hero its search card is still in view, so the pill waits for the solid header.
-  const searchGone = heroSearchGone && !overHero
+  const searchGone = useScrolledPast(HERO_SEARCH_ID, ref, !transparent, pathname)
   // Whichever of nav / pill holds keyboard focus is the one shown. The nav links are always in the Tab order (a link
   // that gets focus cross-fades the nav back); the pill is reachable once the search card is gone, or while focused.
   const [focusIn, setFocusIn] = useState<'nav' | 'pill' | null>(null)
@@ -173,12 +182,19 @@ export function SiteHeader({ hero = false }: { hero?: boolean }) {
   return (
     <>
       <header
-        ref={headerRef}
-        data-hero={hero || undefined}
-        data-over-hero={overHero || undefined}
+        ref={ref}
+        data-placement={placement}
+        data-over-hero={transparent || undefined}
+        data-shown={(placement === 'fixed' && active) || undefined}
         data-scrolled={scrolled || undefined}
-        // On the home page the hero starts under the header: −58 / −76 px, the header's own height.
-        className={cn('gs-header sticky top-0 z-40 w-full', hero && '-mb-[58px] md:-mb-[76px]')}
+        inert={!active}
+        aria-hidden={!active || undefined}
+        className={cn(
+          'gs-header z-40 w-full',
+          placement === 'sticky' && 'sticky top-0',
+          placement === 'hero' && 'absolute inset-x-0 top-0',
+          placement === 'fixed' && 'fixed inset-x-0 top-0',
+        )}
       >
         {/* ≥ 768 px: one row (76 px) */}
             <div className="page-x mx-auto hidden w-full max-w-[1440px] items-center gap-2 py-[15px] md:flex">

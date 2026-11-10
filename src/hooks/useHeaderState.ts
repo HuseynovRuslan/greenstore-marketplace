@@ -6,9 +6,10 @@ import { useEffect, useState, type RefObject } from 'react'
 const SCROLLED_AT = 8
 
 /** True once the page is scrolled past 8 px (passive, requestAnimationFrame-throttled scroll listener). */
-export function usePageScrolled() {
+export function usePageScrolled(enabled = true) {
   const [scrolled, setScrolled] = useState(false)
   useEffect(() => {
+    if (!enabled) return
     let frame = 0
     const update = () => {
       frame = 0
@@ -23,47 +24,30 @@ export function usePageScrolled() {
       window.removeEventListener('scroll', onScroll)
       if (frame) cancelAnimationFrame(frame)
     }
-  }, [])
-  return scrolled
+  }, [enabled])
+  return enabled && scrolled
 }
 
 /**
- * True while the header is over the element with `id` (the home hero): some of it is still below the header's bottom
- * edge (IntersectionObserver, root shrunk by the header's height; rebuilt when the header changes height, 58 → 76 px
- * at 768 px). Starts true, as the server renders it, so the home page paints with the transparent header; always
- * false without `enabled`, and from the first frame on without the element or IntersectionObserver.
+ * True once the sentinel with `id` (a 1 px line at the bottom of the home hero) has scrolled up out of the window, i.e.
+ * no part of the hero is left under the header's strip at the top. An IntersectionObserver on the window (rootMargin
+ * 0: a root shrunk by the header's height let the solid header come in over the last 58 / 76 px of the hero, the
+ * categories row); no scroll listener. False on the server and without the sentinel or IntersectionObserver.
  */
-export function useOverHero(id: string, header: RefObject<HTMLElement | null>, enabled: boolean) {
-  const [over, setOver] = useState(enabled)
+export function usePastHero(id: string) {
+  const [past, setPast] = useState(false)
   useEffect(() => {
-    const el = document.getElementById(id)
-    const head = header.current
-    if (!enabled) return
-    if (!el || !head || typeof IntersectionObserver === 'undefined') {
-      // Nothing to watch: solid from the next frame on.
-      const frame = requestAnimationFrame(() => setOver(false))
-      return () => cancelAnimationFrame(frame)
-    }
-    let observer: IntersectionObserver | undefined
-    let height = -1
-    const watch = () => {
-      if (head.offsetHeight === height) return
-      height = head.offsetHeight
-      observer?.disconnect()
-      observer = new IntersectionObserver((entries) => setOver(entries[entries.length - 1].isIntersecting), {
-        rootMargin: `-${height}px 0px 0px 0px`,
-      })
-      observer.observe(el)
-    }
-    watch()
-    const resize = typeof ResizeObserver === 'undefined' ? undefined : new ResizeObserver(watch)
-    resize?.observe(head)
-    return () => {
-      observer?.disconnect()
-      resize?.disconnect()
-    }
-  }, [id, header, enabled])
-  return over
+    const sentinel = document.getElementById(id)
+    if (!sentinel || typeof IntersectionObserver === 'undefined') return
+    const observer = new IntersectionObserver((entries) => {
+      const entry = entries[entries.length - 1]
+      // Out of the window above its top = scrolled past; out of it below the bottom = not reached yet.
+      setPast(!entry.isIntersecting && entry.boundingClientRect.top < (entry.rootBounds?.top ?? 0))
+    })
+    observer.observe(sentinel)
+    return () => observer.disconnect()
+  }, [id])
+  return past
 }
 
 /**

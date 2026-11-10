@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { act, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { HomeHeader } from '@/components/layout/HomeHeader'
 import { SiteHeader } from '@/components/layout/SiteHeader'
 import { AppStoreProvider } from '@/state/store'
 
@@ -47,99 +48,121 @@ afterEach(() => vi.unstubAllGlobals())
 const report = (id: string, past: boolean) =>
   act(() =>
     watchers.get(id)?.(
-      [{ isIntersecting: !past, boundingClientRect: { top: past ? -600 : 300 } } as IntersectionObserverEntry],
+      [{ isIntersecting: !past, boundingClientRect: { top: past ? -600 : 300 }, rootBounds: { top: 0 } } as IntersectionObserverEntry],
       {} as IntersectionObserver,
     ),
   )
 
 function renderPage({ hero }: { hero: boolean }) {
-  render(
+  return render(
     <AppStoreProvider>
-      <SiteHeader hero={hero} />
-      {/* The page's search card; on the home page it sits inside the hero. */}
+      {/* The page's search card; on the home page it sits inside the hero, with the sentinel at the hero's bottom. */}
       {hero ? (
-        <section id="hero">
+        <div className="relative">
+          <HomeHeader />
+          <section id="hero">
+            <div id="hero-search">
+              <input id="hero-q" aria-label="Axtarış sözü" />
+            </div>
+            <div id="hero-end" />
+          </section>
+        </div>
+      ) : (
+        <>
+          <SiteHeader />
           <div id="hero-search">
             <input id="hero-q" aria-label="Axtarış sözü" />
           </div>
-        </section>
-      ) : (
-        <div id="hero-search">
-          <input id="hero-q" aria-label="Axtarış sözü" />
-        </div>
+        </>
       )}
     </AppStoreProvider>,
   )
 }
+/** The header in use: the other home header is aria-hidden, so it is not a banner landmark. */
 const header = () => screen.getByRole('banner')
+const homeHeaders = (container: HTMLElement) => ({
+  transparent: container.querySelector<HTMLElement>('header[data-placement="hero"]')!,
+  solid: container.querySelector<HTMLElement>('header[data-placement="fixed"]')!,
+})
 const pillButtons = () => screen.getAllByRole('button', { name: 'Bitki, ağac və ya xidmət axtar' })
 const nav = () => screen.getByRole('navigation', { name: 'Əsas bölmələr' })
 /** The ≥ lg pill's wrapper, which shares the nav's grid cell and fades with it. */
 const pillCell = () => pillButtons()[0].parentElement!
 
-describe('header over the home hero', () => {
-  it('starts transparent over the hero photo, overlapping it by its own height', () => {
-    renderPage({ hero: true })
-    expect(header()).toHaveAttribute('data-hero')
-    expect(header()).toHaveAttribute('data-over-hero')
-    expect(header()).toHaveClass('sticky', 'top-0', '-mb-[58px]', 'md:-mb-[76px]')
-    // White logo, nav and icons, and the light «Elan yerləşdir», from the over-hero: variant (index.css).
-    expect(screen.getAllByRole('link', { name: 'GreenStore — ana səhifə' })[0]).toHaveClass('over-hero:text-white')
-    expect(within(nav()).getByRole('link', { name: 'Məhsullar' })).toHaveClass('over-hero:text-white')
-    expect(screen.getAllByRole('link', { name: 'Seçilmişlər' })[0]).toHaveClass('over-hero:text-white')
-    expect(screen.getAllByRole('link', { name: 'Elan yerləşdir' })[0]).toHaveClass('over-hero:bg-surface', 'over-hero:text-forest')
-  })
-
-  it('turns solid once the hero has scrolled past its bottom edge, and stays solid while scrolling on', async () => {
-    renderPage({ hero: true })
-    report('hero', true)
-    expect(header()).not.toHaveAttribute('data-over-hero')
-    // data-hero without data-over-hero is what slides the solid header in (index.css, .gs-header).
-    expect(header()).toHaveAttribute('data-hero')
-    for (const y of [900, 1600, 1500, 3000]) {
-      await scrollTo(y)
-      expect(header()).not.toHaveAttribute('data-over-hero')
-      expect(header()).not.toHaveAttribute('data-hidden')
+describe('home headers', () => {
+  it('starts with the transparent header, absolutely positioned at the top of the hero, and the solid one hidden', () => {
+    const { container } = renderPage({ hero: true })
+    const { transparent, solid } = homeHeaders(container)
+    expect(header()).toBe(transparent)
+    expect(transparent).toHaveAttribute('data-over-hero')
+    expect(transparent).toHaveClass('absolute', 'inset-x-0', 'top-0')
+    // It scrolls away with the hero: nothing on it or its wrapper keeps it on screen.
+    for (let el: HTMLElement | null = transparent; el && el !== container; el = el.parentElement) {
+      expect(el.className).not.toMatch(/(fixed|sticky)/)
     }
-    expect(header()).toHaveAttribute('data-scrolled')
+    expect(transparent).not.toHaveAttribute('inert')
+    // White logo, nav and icons, and the light «Elan yerləşdir», from the over-hero: variant (index.css).
+    expect(within(transparent).getByRole('link', { name: 'Məhsullar' })).toHaveClass('over-hero:text-white')
+    expect(within(transparent).getAllByRole('link', { name: 'Elan yerləşdir' })[0]).toHaveClass('over-hero:bg-surface', 'over-hero:text-forest')
+
+    expect(solid).toHaveClass('fixed', 'inset-x-0', 'top-0')
+    expect(solid).not.toHaveAttribute('data-shown')
+    expect(solid).toHaveAttribute('inert')
+    expect(solid).toHaveAttribute('aria-hidden', 'true')
   })
 
-  it('goes back to transparent when the hero comes back under it', () => {
-    renderPage({ hero: true })
-    report('hero', true)
-    report('hero', false)
-    expect(header()).toHaveAttribute('data-over-hero')
+  it('shows the solid header once the hero has scrolled past, and hides it again back in the hero', () => {
+    const { container } = renderPage({ hero: true })
+    const { transparent, solid } = homeHeaders(container)
+    report('hero-end', true)
+    expect(header()).toBe(solid)
+    expect(solid).toHaveAttribute('data-shown')
+    expect(solid).not.toHaveAttribute('inert')
+    expect(solid).toHaveAttribute('data-scrolled')
+    expect(transparent).toHaveAttribute('inert')
+    expect(transparent).toHaveAttribute('aria-hidden', 'true')
+
+    report('hero-end', false)
+    expect(header()).toBe(transparent)
+    expect(solid).not.toHaveAttribute('data-shown')
+    expect(solid).toHaveAttribute('inert')
   })
 
-  it('shows the search pill only in the solid state', () => {
-    renderPage({ hero: true })
-    // The hero search card has scrolled under the header, but the header is still over the hero.
+  it('never has both headers in use', () => {
+    const { container } = renderPage({ hero: true })
+    const inUse = () => Object.values(homeHeaders(container)).filter((h) => !h.hasAttribute('inert'))
+    for (const past of [false, true, true, false, true, false]) {
+      report('hero-end', past)
+      expect(inUse()).toHaveLength(1)
+      expect(screen.getAllByRole('banner')).toHaveLength(1)
+    }
+  })
+
+  it('has the search pill only on the solid header', () => {
+    const { container } = renderPage({ hero: true })
+    const { transparent, solid } = homeHeaders(container)
     report('hero-search', true)
-    expect(pillCell()).toHaveClass('opacity-0')
-    for (const b of pillButtons()) expect(b.closest('[inert]')).not.toBeNull()
-    expect(nav()).not.toHaveClass('opacity-0')
-
-    report('hero', true)
-    expect(pillCell()).not.toHaveClass('opacity-0')
-    for (const b of pillButtons()) expect(b.closest('[inert]')).toBeNull()
-    expect(nav()).toHaveClass('opacity-0')
-
-    report('hero', false)
-    expect(pillCell()).toHaveClass('opacity-0')
-    expect(nav()).not.toHaveClass('opacity-0')
+    for (const b of within(transparent).getAllByRole('button', { name: 'Bitki, ağac və ya xidmət axtar', hidden: true })) {
+      expect(b.closest('[inert]')).not.toBeNull()
+    }
+    report('hero-end', true)
+    const solidPills = within(solid).getAllByRole('button', { name: 'Bitki, ağac və ya xidmət axtar' })
+    for (const b of solidPills) expect(b.closest('[inert]')).toBeNull()
+    expect(solidPills[0].parentElement).not.toHaveClass('opacity-0')
   })
 })
 
 describe('header on pages without a hero', () => {
   it('is solid from the start and never hides, whichever way the page scrolls', async () => {
     renderPage({ hero: false })
-    expect(header()).not.toHaveAttribute('data-hero')
+    expect(screen.getAllByRole('banner')).toHaveLength(1)
+    expect(header()).toHaveAttribute('data-placement', 'sticky')
     expect(header()).not.toHaveAttribute('data-over-hero')
     expect(header()).toHaveClass('sticky', 'top-0')
-    expect(header()).not.toHaveClass('-mb-[58px]')
     for (const y of [400, 700, 1400, 1390, 2600, 100]) {
       await scrollTo(y)
-      expect(header()).not.toHaveAttribute('data-hidden')
+      expect(header()).not.toHaveAttribute('inert')
+      expect(header()).not.toHaveAttribute('aria-hidden')
       expect(header()).not.toHaveAttribute('data-over-hero')
     }
   })

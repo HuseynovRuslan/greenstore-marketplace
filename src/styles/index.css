@@ -63,7 +63,7 @@
    */
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1); /* enter and exit: decelerate */
   --dur-fast: 120ms; /* chips, press feedback, the leaving side of a cross-fade */
-  --dur-base: 180ms; /* header shadow and its fade back over the home hero, tab indicator, card hover */
+  --dur-base: 180ms; /* header shadow, the home solid header sliding out, tab indicator, card hover */
   --dur-slow: 280ms; /* the solid header sliding in below the home hero, footer accordions */
   --dur-reveal: 320ms; /* hero entrance, card reveal */
   --dur-panel-in: 160ms; /* listbox / popover open */
@@ -290,14 +290,14 @@
 }
 
 /*
- * Site header (SiteHeader). Solid white and sticky on every page; it never hides. Its box never changes, so no state
- * moves the page: only its background, shadow and colours change, and the slide is a transform.
- * - data-scrolled: the shadow once the page is scrolled.
- * - Home page (data-hero): it overlaps the hero by its own height and starts transparent over the photo
- *   (data-over-hero, with white text and icons from the over-hero: variant and white focus outlines). Once the hero
- *   has scrolled past its bottom edge, the solid header slides in from the top (--dur-slow, --ease-out) and stays.
- *   Its white comes at once, while it is still above the screen; back over the hero it fades to transparent.
- * Reduced motion: no slide; both changes are a short fade.
+ * Site header (SiteHeader). Its box never changes and it takes no room on the home page, so no state moves the page.
+ * - Every page but home (data-placement="sticky"): solid white, sticky, never hides; data-scrolled adds the shadow.
+ * - Home, transparent (data-placement="hero", data-over-hero): absolutely positioned at the top of the hero, it
+ *   scrolls away with it. White text and icons come from the over-hero: variant; focus outlines are white.
+ * - Home, solid (data-placement="fixed"): waits above the screen, hidden, while any part of the hero is in the window.
+ *   Once the hero has scrolled out (HomeHeader), it slides in (--dur-slow, --ease-out) and stays; back in the hero it
+ *   slides out faster (--dur-base) and is hidden again, so it can't be focused or clicked there.
+ * Reduced motion: no slide; the solid header fades in and out (--dur-fast).
  */
 @layer components {
   .gs-header {
@@ -313,25 +313,37 @@
   .gs-header[data-over-hero] {
     background-color: transparent;
     box-shadow: none;
-    transition-property: background-color, box-shadow;
   }
   .gs-header[data-over-hero] :focus-visible {
     outline-color: var(--color-surface);
   }
-  .gs-header[data-hero]:not([data-over-hero]) {
-    animation: gs-header-in var(--dur-slow) var(--ease-out);
+  .gs-header[data-placement='fixed'] {
+    visibility: hidden;
+    transform: translateY(-100%);
+    transition:
+      transform var(--dur-base) var(--ease-out),
+      visibility 0s linear var(--dur-base);
   }
-  @keyframes gs-header-in {
-    from {
-      transform: translateY(-100%);
-    }
+  .gs-header[data-placement='fixed'][data-shown] {
+    visibility: visible;
+    transform: none;
+    transition:
+      transform var(--dur-slow) var(--ease-out),
+      visibility 0s;
   }
   @media (prefers-reduced-motion: reduce) {
-    .gs-header[data-hero]:not([data-over-hero]) {
-      animation: gs-fade-in var(--dur-fast) var(--ease-out);
+    .gs-header[data-placement='fixed'] {
+      transform: none;
+      opacity: 0;
+      transition:
+        opacity var(--dur-fast) var(--ease-out),
+        visibility 0s linear var(--dur-fast);
     }
-    .gs-header[data-over-hero] {
-      transition-duration: var(--dur-fast);
+    .gs-header[data-placement='fixed'][data-shown] {
+      opacity: 1;
+      transition:
+        opacity var(--dur-fast) var(--ease-out),
+        visibility 0s;
     }
   }
 }

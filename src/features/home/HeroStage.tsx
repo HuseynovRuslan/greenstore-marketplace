@@ -3,7 +3,7 @@
 import { useEffect, useReducer, useRef, useState, type AnimationEvent, type CSSProperties, type ReactNode, type TransitionEvent } from 'react'
 import Image from 'next/image'
 import { heroPhotos } from './heroPhotos'
-import { HERO_ID } from './ids'
+import { HERO_END_ID, HERO_ID } from './ids'
 
 const REDUCED_MOTION = '(prefers-reduced-motion: reduce)'
 /** The CSS animation whose end means "the active photo's time is up" (index.css, .gs-hero-photo). */
@@ -81,8 +81,8 @@ function afterLoadIdle(run: () => void) {
  * each shown for --dur-hero-photo with a slow zoom, then cross-faded into the next (index.css, .gs-hero-photo). The
  * first photo is the LCP image, rendered on the server and preloaded; the other two load only once the page is
  * idle, and the rotation only moves on to a photo that has loaded. The section's forest background stands in while
- * the first photo loads, so the white text is never on white. It starts under the transparent site header (#hero,
- * SiteHeader `hero`), which turns solid once the section has scrolled past it.
+ * the first photo loads, so the white text is never on white. The transparent site header sits on its top part
+ * (HomeHeader); the sentinel at its bottom (#hero-end) tells the solid header when the hero has scrolled past.
  *
  * A hidden tab pauses the rotation; with reduced motion only the first photo shows, still. There is no pause control
  * (WCAG 2.2.2): the team decides on one (docs/handoff/follow-ups.md). Content: `children` (server-rendered); the
@@ -180,6 +180,7 @@ export function HeroStage({ children }: { children: ReactNode }) {
       </div>
 
       <div className="relative">{children}</div>
+      <div id={HERO_END_ID} aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-px" />
     </section>
   )
 }

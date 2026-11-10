@@ -17,7 +17,7 @@ import type { HomeContent } from '@/services/repository'
  * search island (white card, phone filter row, categories row). The heading is never faded in. Compact since
  * November 2026, so that «Önə çıxan elanlar» and the top of its cards show without scrolling from 1280 × 720 up:
  * 28 / 24 px above and below from md, 20 px between heading, card and categories, and a one-line categories row.
- * The photo also runs under the transparent header (58 / 76 px, SiteHeader `hero`), so the top padding adds its
+ * The transparent header (58 / 76 px, HomeHeader) sits on the top of the photo, so the top padding adds its
  * height. The text's contrast over the photos is measured at their lightest pixels: see --color-hero-overlay in
  * index.css.
  */
