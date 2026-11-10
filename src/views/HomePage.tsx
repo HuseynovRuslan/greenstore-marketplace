@@ -13,18 +13,20 @@ import type { HomeContent } from '@/services/repository'
 
 /**
  * Variant 2 hero (docs/design/variant-2): heading on mint, then the search island (card, phone filter row,
- * categories row). The heading is the LCP element, so it is never faded in.
+ * categories row). The heading is never faded in (it was the LCP element). Compact since November 2026, so that
+ * «Önə çıxan elanlar» and the top of its cards show without scrolling from 1280 × 720 up: 28 / 24 px above and below
+ * from md, 20 px between heading, card and categories, and a one-line categories row.
  */
 function Hero({ counts }: { counts: HeroCounts }) {
   return (
     <section aria-labelledby="hero-title" className="w-full bg-mint">
-      <div className="page-x mx-auto flex w-full max-w-[1440px] flex-col items-center gap-3.5 pt-[18px] pb-3.5 md:gap-[26px] md:pt-11 lg:pb-[30px]">
-        {/* Rises 8 px on first paint but never fades: the heading is the LCP element. */}
-        <div className="flex w-full animate-rise flex-col gap-1.5 motion-reduce:animate-none md:items-center md:gap-2.5 md:text-center">
-          {/* Tracking follows Inter's size table: ≈ −0.020em at 25 px, −0.022em at 44 px. */}
+      <div className="page-x mx-auto flex w-full max-w-[1440px] flex-col items-center gap-3 pt-4 pb-4 md:gap-5 md:pt-7 md:pb-6">
+        {/* Rises 8 px on first paint but never fades. */}
+        <div className="flex w-full animate-rise flex-col gap-1.5 motion-reduce:animate-none md:items-center md:gap-2 md:text-center">
+          {/* Tracking follows Inter's size table: ≈ −0.020em at 25 px, −0.022em at 40 px. */}
           <h1
             id="hero-title"
-            className="text-[25px] leading-[1.15] font-semibold tracking-[-0.02em] text-balance text-forest md:text-[44px] md:leading-[1.12]"
+            className="text-[25px] leading-[1.15] font-semibold tracking-[-0.02em] text-balance text-forest md:text-[40px] md:leading-[1.1]"
           >
             Azərbaycanda bitki və bağ elanları
           </h1>
@@ -42,7 +44,7 @@ function Hero({ counts }: { counts: HeroCounts }) {
 
 /**
  * One rhythm for the home sections: 32 px above and below (64 px between two sections), 16 px (24 px from md) from
- * the heading row to the content. The first section sits closer to the hero on phones.
+ * the heading row to the content. The first section sits closer to the hero (14 px on phones, 24 px from md).
  */
 function Section({ id, labelledBy, children, className }: { id?: string; labelledBy?: string; children: ReactNode; className?: string }) {
   return (
@@ -192,7 +194,7 @@ export default function HomePage({ content, hero }: { content: HomeContent; hero
     <>
       <Hero counts={hero} />
 
-      <Section id="one-cixan-elanlar" labelledBy="one-cixan-elanlar-title" className="max-md:pt-3.5">
+      <Section id="one-cixan-elanlar" labelledBy="one-cixan-elanlar-title" className="pt-3.5 md:pt-6">
         <HomeHeading
           id="one-cixan-elanlar-title"
           // Same mark as the header link: these are listings sellers paid to push forward.

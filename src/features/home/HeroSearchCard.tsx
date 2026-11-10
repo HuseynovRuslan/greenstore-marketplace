@@ -137,7 +137,7 @@ export function HeroSearchCard({ counts }: { counts: HeroCounts }) {
         onSearch={search}
       />
 
-      <HeroCategories items={counts.categories} selected={filters.category} className="-mx-5 self-stretch border-t border-line pt-4 md:-mx-7 lg:mx-0 lg:pt-[22px]" />
+      <HeroCategories items={counts.categories} selected={filters.category} className="-mx-5 self-stretch border-t border-line pt-3 md:-mx-7 lg:mx-0 lg:pt-4" />
     </>
   )
 }

@@ -81,7 +81,8 @@ describe('worst-case fixes', () => {
   it('lets a long category word break inside its item and names clamped ones in full', () => {
     render(<HeroCategories items={worstCaseCategories(heroCounts.categories)} />)
     const name = screen.getByText('Dekorativ iynəyarpaqlılar')
-    expect(name).toHaveClass('w-full', 'wrap-anywhere', 'line-clamp-2')
+    expect(name).toHaveClass('wrap-anywhere', 'line-clamp-2')
+    expect(name.parentElement).toHaveClass('max-w-40', 'min-w-0')
     expect(name).toHaveAttribute('title', 'Dekorativ iynəyarpaqlılar')
   })
 
