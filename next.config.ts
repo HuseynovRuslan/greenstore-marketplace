@@ -1,4 +1,5 @@
 import type { NextConfig } from 'next'
+import { retiredCategoryIds } from './src/data/categories'
 import { isIndexable, PRIVATE_PATHS } from './src/seo/env'
 
 const securityHeaders = [
@@ -30,6 +31,19 @@ const noindex = [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }]
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  // next/image (the home hero photos): AVIF where the browser takes it, WebP otherwise. Quality stays at the default 75.
+  images: { formats: ['image/avif', 'image/webp'] },
+  /*
+   * Category pages of the product categories taken off the site (src/data/categories.ts) lead to the catalogue
+   * instead of a 404; a city page keeps its city. Temporary (307): the category list is preliminary, and a
+   * permanent redirect would stay cached in browsers if a category came back.
+   */
+  async redirects() {
+    return retiredCategoryIds.flatMap((id) => [
+      { source: `/kateqoriyalar/${id}`, destination: '/elanlar', permanent: false },
+      { source: `/kateqoriyalar/${id}/:seher`, destination: '/elanlar?seher=:seher', permanent: false },
+    ])
+  },
   async headers() {
     const isProd = process.env.NODE_ENV === 'production'
     return [

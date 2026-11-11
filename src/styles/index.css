@@ -1,5 +1,8 @@
 @import 'tailwindcss';
 
+/* The site header's transparent state over the home hero photo (SiteHeader, .gs-header below): over-hero:text-white. */
+@custom-variant over-hero (&:where(.gs-header[data-over-hero] *));
+
 /*
  * GreenStore design tokens — values taken 1:1 from the Figma frame
  * "Vizual komponentlər və vəziyyətlər" (Rəng və tipoqrafiya) and the page frames.
@@ -20,19 +23,22 @@
   --color-ink-soft: #4f5a51; /* secondary text on mint: hero subtitle, inactive tabs (6.2:1 on mint) */
   --color-muted: #646d64; /* Köməkçi mətn — Figma #727c72 darkened to reach 4.5:1 on mint (4.6:1) */
   --color-mint: #eaf0e9; /* search band, chips, secondary button */
-  --color-sand: #f0eee4; /* "Daha rahat və təhlükəsiz seçim" band */
+  --color-sand: #f0eee4; /* quiet panels: help aside, safety tips on listing and service pages */
   --color-disabled: #e8ebe5; /* disabled button / field, skeleton */
   --color-vip: #f1f2e6; /* VIP badge background */
   --color-success: #287247;
   --color-success-soft: #eaf5ec;
   --color-warning: #8a5f17; /* darkened from #96691e (Nov 2026): 12 px badge text reaches 5.0:1 on warning-soft */
   --color-warning-soft: #fbf2dc;
+  --color-warning-line: #ecdcb6; /* warning panel border (home «Bitkini almadan əvvəl»); at 50 % its icon square */
   --color-danger: #b6443f;
   --color-danger-soft: #faece9;
   --color-footer-text: #d6dfd2;
+  /* The home hero's photo treatment (shade, vignette, photo filter) is set on the hero itself: .gs-hero below. */
 
   --shadow-card-hover: 0px 8px 24px 0px rgba(23, 63, 50, 0.1);
-  --shadow-search: 0px 10px 30px 0px rgba(23, 63, 50, 0.08); /* hero search card */
+  --shadow-search: 0px 10px 30px 0px rgba(23, 63, 50, 0.08); /* catalogue and 404 search, skip link */
+  --shadow-search-hero: 0px 14px 36px 0px rgba(9, 28, 22, 0.32); /* hero search card on the photo */
   --shadow-popover: 0px 16px 40px 0px rgba(23, 63, 50, 0.18); /* listbox and filter popovers */
   --shadow-header: 0px 6px 20px 0px rgba(23, 63, 50, 0.06); /* header once the page is scrolled */
 
@@ -48,11 +54,13 @@
    */
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1); /* enter and exit: decelerate */
   --dur-fast: 120ms; /* chips, press feedback, the leaving side of a cross-fade */
-  --dur-base: 180ms; /* header state, tab indicator, hiding the header, card hover */
-  --dur-slow: 280ms; /* showing the header */
+  --dur-base: 180ms; /* header shadow, the home solid header sliding out, tab indicator, card hover */
+  --dur-slow: 280ms; /* the solid header sliding in below the home hero, footer accordions */
   --dur-reveal: 320ms; /* hero entrance, card reveal */
   --dur-panel-in: 160ms; /* listbox / popover open */
   --dur-panel-out: 110ms; /* listbox / popover close */
+  --dur-hero-photo: 7s; /* home hero: how long each background photo shows before the next fades in */
+  --dur-hero-fade: 1.2s; /* home hero: cross-fade between two background photos */
 
   /* Check mark of an active toggle chip (animate-pop-in; off under reduced motion): from .85, never from nothing */
   --animate-pop-in: gs-pop-in var(--dur-fast) var(--ease-out);
@@ -270,71 +278,78 @@
 }
 
 /*
- * Home header on scroll (SiteHeader variant="home", useScrollHeader). Its height never changes; it only turns
- * translucent with a shadow (data-scrolled) and slides out of view (data-hidden): back in over --dur-slow, away
- * over --dur-base, both decelerating. Reduced motion: no slide, it fades out and in over --dur-fast.
+ * Site header (SiteHeader). Its box never changes and it takes no room on the home page, so no state moves the page.
+ * - Every page but home (data-placement="sticky"): solid white, sticky, never hides; data-scrolled adds the shadow.
+ * - Home, transparent (data-placement="hero", data-over-hero): absolutely positioned at the top of the hero, it
+ *   scrolls away with it. White text and icons come from the over-hero: variant; focus outlines are white.
+ * - Home, solid (data-placement="fixed"): waits above the screen, hidden, while any part of the hero is in the window.
+ *   Once the hero has scrolled out (HomeHeader), it slides in (--dur-slow, --ease-out) and stays; back in the hero it
+ *   slides out faster (--dur-base) and is hidden again, so it can't be focused or clicked there.
+ * Reduced motion: no slide; the solid header fades in and out (--dur-fast).
  */
 @layer components {
   .gs-header {
     background-color: var(--color-surface);
     box-shadow: inset 0 -1px 0 var(--color-line);
-    transition-property: transform, background-color, box-shadow;
-    transition-duration: var(--dur-slow), var(--dur-base), var(--dur-base);
-    transition-timing-function: var(--ease-out);
+    transition: box-shadow var(--dur-base) var(--ease-out);
   }
   .gs-header[data-scrolled] {
-    background-color: color-mix(in oklab, var(--color-surface) 95%, transparent);
-    backdrop-filter: blur(12px);
     box-shadow:
       inset 0 -1px 0 var(--color-line),
       var(--shadow-header);
   }
-  .gs-header[data-hidden] {
+  .gs-header[data-over-hero] {
+    background-color: transparent;
+    box-shadow: none;
+  }
+  .gs-header[data-over-hero] :focus-visible {
+    outline-color: var(--color-surface);
+  }
+  .gs-header[data-placement='fixed'] {
+    visibility: hidden;
     transform: translateY(-100%);
-    transition-duration: var(--dur-base);
+    transition:
+      transform var(--dur-base) var(--ease-out),
+      visibility 0s linear var(--dur-base);
+  }
+  .gs-header[data-placement='fixed'][data-shown] {
+    visibility: visible;
+    transform: none;
+    transition:
+      transform var(--dur-slow) var(--ease-out),
+      visibility 0s;
   }
   @media (prefers-reduced-motion: reduce) {
-    .gs-header {
-      transition-property: opacity, background-color, box-shadow;
-      transition-duration: var(--dur-fast);
-    }
-    .gs-header[data-hidden] {
+    .gs-header[data-placement='fixed'] {
       transform: none;
       opacity: 0;
-      pointer-events: none;
+      transition:
+        opacity var(--dur-fast) var(--ease-out),
+        visibility 0s linear var(--dur-fast);
+    }
+    .gs-header[data-placement='fixed'][data-shown] {
+      opacity: 1;
+      transition:
+        opacity var(--dur-fast) var(--ease-out),
+        visibility 0s;
     }
   }
 }
 
 /*
- * Catalogue bar below 1280 px («Filtrlər (n)», sort, view): sticks under the header (58 px, 76 px from md) and
- * slides up into its place while the header is hidden, with the header's timing. A transform, so nothing shifts.
- * Reduced motion: the header only fades and keeps its place, so the bar stays put.
+ * Catalogue bar below 1280 px («Filtrlər (n)», sort, view): sticks under the header (58 px, 76 px from md). z-20:
+ * above the result cards it slides over, under the popovers (z-30) of the search card above it, whose city list opens
+ * down over the bar.
  */
 @layer components {
   .gs-catalog-bar {
     position: sticky;
     top: 58px;
-    z-index: 30;
-    transition: transform var(--dur-slow) var(--ease-out);
-  }
-  :root:has(.gs-header[data-hidden]) .gs-catalog-bar {
-    transform: translateY(-58px);
-    transition-duration: var(--dur-base);
+    z-index: 20;
   }
   @media (width >= 48rem) {
     .gs-catalog-bar {
       top: 76px;
-    }
-    :root:has(.gs-header[data-hidden]) .gs-catalog-bar {
-      transform: translateY(-76px);
-    }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .gs-catalog-bar,
-    :root:has(.gs-header[data-hidden]) .gs-catalog-bar {
-      transform: none;
-      transition: none;
     }
   }
 }
@@ -420,6 +435,85 @@
 @layer utilities {
   html[data-hero-seen] :is(.animate-rise, .animate-fade-up) {
     animation: none;
+  }
+}
+
+/*
+ * Home hero background photos (HeroStage). Each photo layer is idle (hidden), active (on top, fading in) or leaving
+ * (under the active one until its fade is over). Active and leaving share one animation list, so a photo keeps
+ * zooming while the next one fades in over it; idle drops it, so the zoom starts again from 1 next time.
+ * - gs-ken-burns: 1 → 1.06 over the photo's whole time on screen (shown + the fade that covers it), transform only.
+ * - gs-hero-clock: changes nothing visible; its animationend tells HeroStage to bring in the next photo. Being a CSS
+ *   animation, it pauses together with the zoom.
+ * The cross-fade eases in and out: a slow start and end hide where one photo gives way to the other.
+ * [data-paused] (a hidden tab) holds both. Reduced motion: no zoom, no clock (HeroStage shows the first photo only).
+ *
+ * The calm treatment over the photos, all set here on the hero section (.gs-hero), so it can be tuned in DevTools:
+ * - --hero-saturate, --hero-brightness: a filter on every photo (the still reduced-motion photo too), no blur.
+ * - --hero-shade-top, --hero-shade-mid (at 45 %), --hero-shade-bottom: forest over the photo, top to bottom, the
+ *   transparent header's strip included. Lightest in the middle, where the white search card sits. The middle was
+ *   briefed at 42 %; 64 % is the least that keeps the mint subtitle at 4.5:1 on phones (1440 px alone needs 47 %).
+ * - --hero-vignette: forest at the left and right edges, fading out before the middle.
+ * Contrast, measured at the lightest pixel of the filtered photo under every line of text, all three photos, zoom 1
+ * and 1.06, 360 to 2560 px wide (Nov 2026): header text (white) ≥ 5.5:1 and its icons ≥ 5.1:1, heading (white)
+ * ≥ 5.1:1, subtitle (mint) ≥ 4.5:1, category names (white, on their 12 % white pills) ≥ 4.6:1; the counts sit on mint
+ * badges (10:1). A hovered or selected pill (20 % white) drops to 3.9:1: docs/handoff/follow-ups.md. On the
+ * section's forest while the first photo loads: white 11.7:1, mint 10:1.
+ */
+@layer components {
+  .gs-hero {
+    --hero-saturate: 0.55;
+    --hero-brightness: 0.92;
+    --hero-shade-top: color-mix(in oklab, var(--color-forest) 72%, transparent);
+    --hero-shade-mid: color-mix(in oklab, var(--color-forest) 64%, transparent);
+    --hero-shade-bottom: color-mix(in oklab, var(--color-forest) 78%, transparent);
+    --hero-vignette: color-mix(in oklab, var(--color-forest) 20%, transparent);
+  }
+  .gs-hero-shade {
+    background-image:
+      radial-gradient(50% 100% at 50% 50%, transparent 40%, var(--hero-vignette)),
+      linear-gradient(var(--hero-shade-top), var(--hero-shade-mid) 45%, var(--hero-shade-bottom));
+  }
+  .gs-hero-photo {
+    opacity: 0;
+  }
+  .gs-hero-photo img {
+    filter: saturate(var(--hero-saturate)) brightness(var(--hero-brightness));
+  }
+  .gs-hero-photo:is([data-state='active'], [data-state='leaving']) {
+    opacity: 1;
+    animation:
+      gs-ken-burns calc(var(--dur-hero-photo) + var(--dur-hero-fade)) linear forwards,
+      gs-hero-clock var(--dur-hero-photo) linear forwards;
+  }
+  .gs-hero-photo[data-state='active'] {
+    z-index: 2;
+    transition: opacity var(--dur-hero-fade) ease-in-out;
+  }
+  .gs-hero-photo[data-state='leaving'] {
+    z-index: 1;
+  }
+  [data-paused] .gs-hero-photo {
+    animation-play-state: paused;
+  }
+  @keyframes gs-ken-burns {
+    from {
+      transform: scale(1);
+    }
+    to {
+      transform: scale(1.06);
+    }
+  }
+  @keyframes gs-hero-clock {
+    to {
+      --gs-hero-clock: 1;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .gs-hero-photo:is([data-state]) {
+      animation: none;
+      transition: none;
+    }
   }
 }
 

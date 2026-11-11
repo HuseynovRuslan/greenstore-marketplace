@@ -1,4 +1,5 @@
 import type { Listing } from '@/types'
+import { demoListings } from './demoListings'
 import { listingExtras } from './listingExtras'
 
 const img = (file: string) => `/images/listings/${file}.webp`
@@ -15,10 +16,13 @@ const img = (file: string) => `/images/listings/${file}.webp`
  * (ListingCard serves them responsively); `images` keeps every photo the design attaches to the listing,
  * in frame order (detail-page gallery first where one exists). See FIGMA_AUDIT.md → "Asset inventory".
  *
- * `categoryId` is not written on the cards; it follows the search page (filter "Ağaclar" → its 6 results)
- * and the product type for the rest — documented as inferred in FIGMA_AUDIT.md. `subcategory: 'Dekorativ ağaclar'`
- * follows the Figma filter state ("Ağaclar / Dekorativ ağaclar" → the same 6 results, mobile filter panel).
- * `publishedAt` times only preserve the Figma ordering of "Son elanlar" (all cards say "12 oktyabr").
+ * `categoryId` / `subcategory` follow the November 2026 category structure (src/data/categories.ts): the plant
+ * decides it (Zeytun → «Meyvə ağacları», Mavi küknar → «İynəyarpaqlı ağaclar», Qızılgül → «Çoxillik güllər»).
+ * Monstera, the terracotta pot, the soil mix and the compost fit none of the new categories and were removed
+ * (docs/handoff/categories.md). `publishedAt` times only preserve the Figma ordering of "Son elanlar" (all cards
+ * say "12 oktyabr").
+ *
+ * The demo listings that fill every sub-category are in demoListings.ts.
  */
 const figmaListings: Listing[] = [
   {
@@ -33,7 +37,7 @@ const figmaListings: Listing[] = [
     publishedAt: '2026-10-12T09:00:00',
     vip: true,
     categoryId: 'agaclar',
-    subcategory: 'Dekorativ ağaclar',
+    subcategory: 'Meyvə ağacları',
     sellerId: 'abseron-tingcilik',
     cover: img('zeytun-agaci-1'),
     coverTablet: img('zeytun-agaci-2'),
@@ -55,7 +59,7 @@ const figmaListings: Listing[] = [
     status: 'active',
     views: 248,
     specs: [
-      { label: 'Kateqoriya', value: 'Ağaclar / Dekorativ ağaclar' },
+      { label: 'Kateqoriya', value: 'Ağaclar / Meyvə ağacları' },
       { label: 'Növ', value: 'Olea europaea' },
       { label: 'Hündürlük', value: '180–200 sm' },
       { label: 'Yaş', value: '5 yaş' },
@@ -79,7 +83,7 @@ const figmaListings: Listing[] = [
     publishedAt: '2026-10-12T08:55:00',
     vip: true,
     categoryId: 'agaclar',
-    subcategory: 'Dekorativ ağaclar',
+    subcategory: 'İynəyarpaqlı ağaclar',
     cover: img('mavi-kuknar-1'),
     coverTablet: img('mavi-kuknar-2'),
     coverMobile: img('mavi-kuknar-3'),
@@ -97,6 +101,7 @@ const figmaListings: Listing[] = [
     publishedAt: '2026-10-12T08:50:00',
     vip: true,
     categoryId: 'agaclar',
+    subcategory: 'Enliyarpaqlı yarpaqtökən ağaclar',
     cover: img('yapon-agcaqayini-1'),
     coverTablet: img('yapon-agcaqayini-2'),
     coverMobile: img('yapon-agcaqayini-3'),
@@ -113,6 +118,7 @@ const figmaListings: Listing[] = [
     publishedAt: '2026-10-12T12:00:00',
     vip: true,
     categoryId: 'agaclar',
+    subcategory: 'Meyvə ağacları',
     cover: img('limon-agaci-1'),
     coverTablet: img('limon-agaci-2'),
     coverMobile: img('limon-agaci-3'),
@@ -129,6 +135,7 @@ const figmaListings: Listing[] = [
     publishedAt: '2026-10-12T11:55:00',
     vip: false,
     categoryId: 'agaclar',
+    subcategory: 'İynəyarpaqlı ağaclar',
     cover: img('leyland-servi-1'),
     coverTablet: img('leyland-servi-2'),
     coverMobile: img('leyland-servi-3'),
@@ -145,26 +152,11 @@ const figmaListings: Listing[] = [
     publishedAt: '2026-10-12T11:50:00',
     vip: false,
     categoryId: 'guller',
+    subcategory: 'Çoxillik güllər',
     cover: img('qizilgul-fidani-1'),
     coverTablet: img('qizilgul-fidani-2'),
     coverMobile: img('qizilgul-fidani-3'),
     images: [img('qizilgul-fidani-1'), img('qizilgul-fidani-2'), img('qizilgul-fidani-3')],
-    status: 'active',
-  },
-  {
-    id: 'monstera-deliciosa',
-    slug: 'monstera-deliciosa',
-    title: 'Monstera deliciosa',
-    price: 45,
-    attributes: ['60–80 sm', 'otaq bitkisi'],
-    cityId: 'baki',
-    publishedAt: '2026-10-12T11:45:00',
-    vip: false,
-    categoryId: 'otaq-bitkileri',
-    cover: img('monstera-deliciosa-1'),
-    coverTablet: img('monstera-deliciosa-2'),
-    coverMobile: img('monstera-deliciosa-3'),
-    images: [img('monstera-deliciosa-1'), img('monstera-deliciosa-2'), img('monstera-deliciosa-3')],
     status: 'active',
   },
   {
@@ -176,44 +168,12 @@ const figmaListings: Listing[] = [
     cityId: 'seki',
     publishedAt: '2026-10-12T11:40:00',
     vip: false,
-    categoryId: 'tingler-fidanlar',
+    categoryId: 'agaclar',
+    subcategory: 'Meyvə ağacları',
     cover: img('alma-fidani-1'),
     coverTablet: img('alma-fidani-2'),
     coverMobile: img('alma-fidani-3'),
     images: [img('alma-fidani-1'), img('alma-fidani-2'), img('alma-fidani-3')],
-    status: 'active',
-  },
-  {
-    id: 'terrakota-dibcek',
-    slug: 'terrakota-dibcek',
-    title: 'Terrakota dibçək',
-    price: 28,
-    attributes: ['Ø 35 sm', 'təbii gil'],
-    cityId: 'baki',
-    publishedAt: '2026-10-12T11:35:00',
-    vip: false,
-    categoryId: 'bag-avadanliqlari',
-    cover: img('terrakota-dibcek-1'),
-    coverTablet: img('terrakota-dibcek-2'),
-    coverMobile: img('terrakota-dibcek-3'),
-    images: [img('terrakota-dibcek-1'), img('terrakota-dibcek-2'), img('terrakota-dibcek-3')],
-    status: 'active',
-  },
-  {
-    id: 'torpaq-qarisigi',
-    slug: 'bag-ucun-torpaq-qarisigi',
-    title: 'Bağ üçün torpaq qarışığı',
-    price: 8,
-    attributes: ['20 litr', 'üzvi qarışıq'],
-    cityId: 'abseron',
-    publishedAt: '2026-10-12T11:30:00',
-    vip: false,
-    categoryId: 'torpaq-gubreler',
-    sellerId: 'abseron-tingcilik',
-    cover: img('torpaq-qarisigi-1'),
-    coverTablet: img('torpaq-qarisigi-2'),
-    coverMobile: img('torpaq-qarisigi-3'),
-    images: [img('torpaq-qarisigi-1'), img('torpaq-qarisigi-4'), img('torpaq-qarisigi-2'), img('torpaq-qarisigi-3')],
     status: 'active',
   },
   {
@@ -227,7 +187,7 @@ const figmaListings: Listing[] = [
     publishedAt: '2026-10-12T08:47:00',
     vip: false,
     categoryId: 'agaclar',
-    subcategory: 'Dekorativ ağaclar',
+    subcategory: 'İynəyarpaqlı ağaclar',
     sellerId: 'abseron-tingcilik',
     cover: img('tuya-smaragd-1'),
     thumbnail: '/images/dashboard/my-listing-2.webp',
@@ -246,7 +206,7 @@ const figmaListings: Listing[] = [
     publishedAt: '2026-10-12T08:35:00',
     vip: false,
     categoryId: 'agaclar',
-    subcategory: 'Dekorativ ağaclar',
+    subcategory: 'Enliyarpaqlı həmişəyaşıl ağaclar',
     sellerId: 'abseron-tingcilik',
     cover: img('defne-agaci-1'),
     images: [img('defne-agaci-1'), img('defne-agaci-2')],
@@ -262,25 +222,11 @@ const figmaListings: Listing[] = [
     cityId: 'abseron',
     publishedAt: '2026-10-12T08:30:00',
     vip: false,
-    categoryId: 'tingler-fidanlar',
+    categoryId: 'agaclar',
+    subcategory: 'Meyvə ağacları',
     sellerId: 'abseron-tingcilik',
     cover: img('nar-fidani-1'),
     images: [img('nar-fidani-1')],
-    status: 'active',
-  },
-  {
-    id: 'uzvi-kompost',
-    slug: 'uzvi-kompost',
-    title: 'Üzvi kompost',
-    price: 10,
-    attributes: ['25 litr', 'ələnmiş'],
-    cityId: 'abseron',
-    publishedAt: '2026-10-12T08:25:00',
-    vip: false,
-    categoryId: 'torpaq-gubreler',
-    sellerId: 'abseron-tingcilik',
-    cover: img('uzvi-kompost-1'),
-    images: [img('uzvi-kompost-1')],
     status: 'active',
   },
   {
@@ -293,7 +239,7 @@ const figmaListings: Listing[] = [
     publishedAt: '2026-10-12T08:45:00',
     vip: false,
     categoryId: 'agaclar',
-    subcategory: 'Dekorativ ağaclar',
+    subcategory: 'İynəyarpaqlı ağaclar',
     cover: img('italyan-sami-1'),
     images: [img('italyan-sami-1')],
     deliveryAvailable: true,
@@ -309,7 +255,7 @@ const figmaListings: Listing[] = [
     publishedAt: '2026-10-12T08:48:00',
     vip: false,
     categoryId: 'agaclar',
-    subcategory: 'Dekorativ ağaclar',
+    subcategory: 'İynəyarpaqlı ağaclar',
     cover: img('qaracohre-1'),
     images: [img('qaracohre-1')],
     deliveryAvailable: true,
@@ -327,6 +273,7 @@ const figmaListings: Listing[] = [
     publishedAt: '2026-10-12T13:00:00',
     vip: false,
     categoryId: 'agaclar',
+    subcategory: 'İynəyarpaqlı ağaclar',
     sellerId: 'abseron-tingcilik',
     cover: '/images/post-ad/upload-1.webp',
     thumbnail: '/images/dashboard/my-listing-3.webp',
@@ -351,7 +298,8 @@ const figmaListings: Listing[] = [
     cityId: 'abseron',
     publishedAt: '2026-09-12T10:00:00',
     vip: false,
-    categoryId: 'tingler-fidanlar',
+    categoryId: 'kollar',
+    subcategory: 'Həmişəyaşıl kollar',
     sellerId: 'abseron-tingcilik',
     cover: '/images/dashboard/my-listing-4.webp',
     thumbnail: '/images/dashboard/my-listing-4.webp',
@@ -371,7 +319,7 @@ const figmaListings: Listing[] = [
     publishedAt: '2026-11-03T16:20:00',
     vip: false,
     categoryId: 'agaclar',
-    subcategory: 'İynəyarpaqlılar',
+    subcategory: 'İynəyarpaqlı ağaclar',
     sellerId: 'abseron-tingcilik',
     cover: '/images/listings/leyland-servi-1.webp',
     images: ['/images/listings/leyland-servi-1.webp'],
@@ -388,7 +336,7 @@ const figmaListings: Listing[] = [
     publishedAt: '2026-10-02T11:00:00',
     vip: false,
     categoryId: 'agaclar',
-    subcategory: 'İynəyarpaqlılar',
+    subcategory: 'İynəyarpaqlı ağaclar',
     sellerId: 'abseron-tingcilik',
     cover: '/images/listings/tuya-smaragd-1.webp',
     images: ['/images/listings/tuya-smaragd-1.webp'],
@@ -397,8 +345,8 @@ const figmaListings: Listing[] = [
   },
 ]
 
-/** The Figma listings with their plant-world fields (listingExtras.ts). */
-export const listings: Listing[] = figmaListings.map((l) => ({ ...l, ...listingExtras[l.id] }))
+/** The Figma listings with their plant-world fields (listingExtras.ts), then the demo listings (demoListings.ts). */
+export const listings: Listing[] = [...figmaListings.map((l) => ({ ...l, ...listingExtras[l.id] })), ...demoListings]
 
 /** Listings visible to buyers (search, home, seller page). */
 export const publicListings = listings.filter((l) => l.status === 'active')
@@ -407,18 +355,18 @@ export const publicListings = listings.filter((l) => l.status === 'active')
 export const vipListingIds = ['zeytun-agaci', 'mavi-kuknar', 'yapon-agcaqayini', 'limon-agaci']
 
 /**
- * Home "Son elanlar" order: the Figma cards newest first, without Limon ağacı (now in "Önə çıxan elanlar"),
- * plus Tuya — Smaragd and Dəfnə ağacı so the four-column grid ends on a full row (8 cards).
+ * Home "Son elanlar" order: the photographed listings that are not in "Önə çıxan elanlar", newest first (8 cards, so
+ * the four-column grid ends on a full row). Monstera, the pot and the soil mix left with their categories (Nov 2026).
  */
 export const latestListingIds = [
   'leyland-servi',
   'qizilgul-fidani',
-  'monstera-deliciosa',
   'alma-fidani',
-  'terrakota-dibcek',
-  'torpaq-qarisigi',
+  'qaracohre',
   'tuya-smaragd',
+  'italyan-sami',
   'defne-agaci',
+  'nar-fidani',
 ]
 
 const byId = new Map(listings.map((l) => [l.id, l]))

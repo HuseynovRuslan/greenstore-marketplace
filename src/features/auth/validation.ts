@@ -70,3 +70,14 @@ export function safeNext(next: string | null | undefined, fallback = '/kabinet')
   // Same-origin paths only: "//host" and "/\\host" are protocol-relative URLs in browsers.
   return next && next.startsWith('/') && !next.startsWith('//') && !next.startsWith('/\\') ? next : fallback
 }
+
+/** `?hesab=` of /qeydiyyat: a link can open registration on an account type (the footer's «Biznes hesabları»). */
+const accountParam = { business: 'biznes', individual: 'ferdi' } as const
+
+export function signUpHref(type?: 'business' | 'individual'): string {
+  return type ? `/qeydiyyat?hesab=${accountParam[type]}` : '/qeydiyyat'
+}
+
+export function accountTypeFromParam(value: string | null | undefined): 'business' | 'individual' | undefined {
+  return value === accountParam.business ? 'business' : value === accountParam.individual ? 'individual' : undefined
+}

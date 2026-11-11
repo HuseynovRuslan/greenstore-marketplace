@@ -28,7 +28,8 @@ For: management and Ruslan (backend). Branch `nextjs-migration`. Mockups: `docs/
   çəkdiyi elanlar». **Son elanlar:** 8 listings.
 - **Header (home page only):** one row: logo · Məhsullar · Xidmətlər · Satıcılar · Önə çıxanlar (with the rocket) · ♡ · Daxil ol ·
   «Elan yerləşdir».
-  - It hides while you scroll down and comes back when you scroll up.
+  - It hides while you scroll down and comes back when you scroll up. (Replaced 10 Nov 2026: transparent over the
+    hero photo, then solid and always in view.)
   - Once the hero search is out of view, a short search field takes the place of the menu and leads back to it.
 - **Motion:** the hero fades in, cards appear as you scroll, photos zoom slightly on hover and the heart "pops".
   None of it runs for visitors who ask their device for reduced motion.

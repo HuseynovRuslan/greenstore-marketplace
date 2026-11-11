@@ -4,8 +4,7 @@
  *             · siralama (newest|price-asc|price-desc) · sehife · min/max (sent by the home hero, filter `priceFrom`).
  */
 import { cities, cityName } from '@/data/cities'
-import { categoryById } from '@/data/categories'
-import { providerById, serviceCategories, services } from '@/data/services'
+import { providerById, serviceCategories, serviceListingTotal, services } from '@/data/services'
 import { listingSortOptions, type ListingSort } from '@/services/marketplace'
 import { normalizeSearch } from '@/lib/format'
 import type { Service } from '@/types'
@@ -22,11 +21,8 @@ export const providerTabs: Array<{ value: ProviderTab; label: string }> = [
   { value: 'ustalar', label: 'Fərdi ustalar' },
 ]
 
-/** Umbrella category on the home page ("Bağ xidmətləri · 95"; Figma: "Landşaft və bağçılıq xidmətləri · 252 elan"). */
-const UMBRELLA_CATEGORY = 'landsaft-xidmetleri'
-
-/** Platform-wide number of service listings ("95 xidmət elanı"): the umbrella category's count. */
-export const platformServiceTotal = categoryById(UMBRELLA_CATEGORY)?.listingCount ?? services.length
+/** Platform-wide number of service listings ("95 xidmət elanı"; Figma: "Landşaft və bağçılıq xidmətləri · 252 elan"). */
+export const platformServiceTotal = Math.max(serviceListingTotal, services.length)
 
 export const SERVICES_PAGE_SIZE = 6
 

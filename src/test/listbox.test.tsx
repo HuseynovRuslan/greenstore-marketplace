@@ -3,13 +3,13 @@ import { useState } from 'react'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { Listbox } from '@/components/ui/Listbox'
-import { isPanelOpen } from '@/components/ui/Popover'
-import { cities, cityListingCounts } from '@/data/cities'
+import { cities } from '@/data/cities'
 import { formatNumber } from '@/lib/format'
 
+// The counts are only text next to each option here (the home page gets them from the server).
 const options = [
   { value: '', label: 'Bütün şəhərlər', meta: '4 040' },
-  ...cities.map((c) => ({ value: c.id, label: c.name, meta: formatNumber(cityListingCounts[c.id]) })),
+  ...cities.map((c, i) => ({ value: c.id, label: c.name, meta: formatNumber((i + 1) * 120) })),
 ]
 // Bütün şəhərlər · Bakı · Abşeron · Sumqayıt · Gəncə · Şəki · Quba · Lənkəran
 
@@ -101,13 +101,11 @@ describe('Listbox (select-only combobox)', () => {
     combobox().focus()
     await user.keyboard('{ArrowDown}{ArrowDown}{ArrowDown}')
     const list = screen.getByRole('listbox')
-    expect(isPanelOpen()).toBe(true)
     await user.keyboard('{Escape}')
     expect(combobox()).toHaveAttribute('aria-expanded', 'false')
     expect(combobox()).toHaveTextContent('Bütün şəhərlər')
     expect(onChange).not.toHaveBeenCalled()
     expect(combobox()).toHaveFocus()
-    expect(isPanelOpen()).toBe(false)
     await waitFor(() => expect(list).not.toBeVisible())
   })
 

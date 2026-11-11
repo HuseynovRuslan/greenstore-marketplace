@@ -7,6 +7,7 @@
  * filterDefs.ts, which also holds the options and labels shared with the home search):
  *   q · kateqoriya · alt (sub-category slug) · seher (city id; old comma lists still parse) · min · max
  *   nov (species slug) · hundurluk ("100-200", "-100", "300-"; older ranges still work) · yas ("2-5")
+ *   kok (dibcek | torpaq-kuresi | aciq-kok)
  *   vip=1 · catdirilma=1 · saticiNovu=biznes|ferdi · siralama=ucuz|baha (default "Ən yenilər")
  *   gorunus=siyahi (default grid)
  */
@@ -14,11 +15,12 @@ import { categoryById, productCategories } from '@/data/categories'
 import { cities, cityName } from '@/data/cities'
 import { formatNumber, locativeAz, lowerAz } from '@/lib/format'
 import { searchListings, type ListingFilters, type ListingSort } from '@/services/marketplace'
+import { subcategoryIdOf } from '@/data/categories'
 import type { Listing } from '@/types'
-import { ageLabel, heightLabel, isRange, PARAM, parseRange, priceValueLabel, sellerChipLabel, toggleLabels } from './filterDefs'
+import { ageLabel, heightLabel, isRange, PARAM, parseRange, priceValueLabel, rootLabel, rootSystemOf, sellerChipLabel, toggleLabels } from './filterDefs'
 import type { FilterChip, SearchState } from './searchUrl'
 import { speciesLabel, speciesSlug } from './species'
-import { subcategoryName, slugify } from './taxonomy'
+import { subcategoryName } from './taxonomy'
 
 export type { SellerTypeParam } from './filterDefs'
 export {
@@ -26,6 +28,7 @@ export {
   chipActive,
   emptySearchState,
   parseSort,
+  selectCategory,
   withoutFilters,
   withSort,
   withView,
@@ -55,6 +58,7 @@ export function parseSearchState(params: URLSearchParams): SearchState {
   }
   const seller = params.get(PARAM.seller)
   const species = params.get(PARAM.species) ?? ''
+  const root = params.get(PARAM.root) ?? ''
   return {
     q: (params.get(PARAM.q) ?? '').trim(),
     categoryId: category ? category.id : '',
@@ -66,6 +70,7 @@ export function parseSearchState(params: URLSearchParams): SearchState {
     species: speciesLabel(species) ? species : '',
     height: range(PARAM.height),
     age: range(PARAM.age),
+    root: rootLabel(root) ? root : '',
     vip: params.get(PARAM.vip) === '1',
     delivery: params.get(PARAM.delivery) === '1',
     sellerType: seller === 'biznes' || seller === 'ferdi' ? seller : '',
@@ -91,13 +96,14 @@ export function toListingFilters(state: SearchState): ListingFilters {
     heightMax,
     ageMin,
     ageMax,
+    rootSystem: state.root ? rootSystemOf[state.root] : undefined,
   }
 }
 
 /** `searchListings()` plus the two filters the shared query layer does not know (sub-category, species). */
 export function runSearch(state: SearchState, sort: ListingSort = 'newest'): Listing[] {
   let results = searchListings(toListingFilters(state), sort)
-  if (state.subcategory) results = results.filter((l) => l.subcategory != null && slugify(l.subcategory) === state.subcategory)
+  if (state.subcategory) results = results.filter((l) => subcategoryIdOf(l.categoryId, l.subcategory) === state.subcategory)
   if (state.species) results = results.filter((l) => speciesSlug(l) === state.species)
   return results
 }
@@ -139,11 +145,12 @@ export function activeChips(state: SearchState): FilterChip[] {
 
   push('q', state.q && `«${state.q}»`, { q: '' })
   push('city', state.cityIds.map(cityName).join(', '), { cityIds: [] })
-  push('category', categoryById(state.categoryId)?.name, { categoryId: '', subcategory: '', species: '' })
+  push('category', categoryById(state.categoryId)?.name, { categoryId: '', subcategory: '', species: '', root: '' })
   push('subcategory', state.subcategory && subcategoryName(state.categoryId, state.subcategory), { subcategory: '' })
   push('price', priceValueLabel(state.min, state.max), { min: '', max: '' })
   push('height', state.height && heightLabel(state.height), { height: '' })
   push('age', state.age && ageLabel(state.age), { age: '' })
+  push('root', state.root && rootLabel(state.root), { root: '' })
   push('species', state.species && speciesLabel(state.species), { species: '' })
   push('seller', sellerChipLabel(state.sellerType), { sellerType: '' })
   push('delivery', state.delivery ? toggleLabels.delivery : undefined, { delivery: false })

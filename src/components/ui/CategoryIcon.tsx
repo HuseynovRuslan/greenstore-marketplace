@@ -1,4 +1,4 @@
-import { Amphora, Droplets, Fence, Flower, Flower2, Scissors, Shovel, Shrub, Sprout, Trees, Wheat, type LucideProps } from 'lucide-react'
+import { Amphora, Clover, Droplets, Fence, Flower, Flower2, Grape, Scissors, Shovel, Shrub, Sprout, Trees, Wheat, type LucideProps } from 'lucide-react'
 import type { IconName } from '@/types'
 
 const icons = {
@@ -6,6 +6,8 @@ const icons = {
   shrub: Shrub,
   'flower-2': Flower2,
   flower: Flower,
+  grape: Grape,
+  clover: Clover,
   sprout: Sprout,
   wheat: Wheat,
   shovel: Shovel,

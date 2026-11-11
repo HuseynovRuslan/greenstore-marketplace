@@ -3,6 +3,7 @@
  * the sample listings never reach the browser bundle. Parsing (which validates against the data), the query and
  * the chips live in searchState.ts, which re-exports everything here.
  */
+import { hasRootSystemFilter } from '@/data/categories'
 import type { ListingSort } from '@/services/listingSort'
 import { PARAM, type SellerTypeParam } from './filterDefs'
 
@@ -19,6 +20,8 @@ export interface SearchState {
   species: string
   height: string
   age: string
+  /** «Kök sistemi» (`kok`): dibcek | torpaq-kuresi | aciq-kok, '' = any */
+  root: string
   vip: boolean
   delivery: boolean
   sellerType: SellerTypeParam
@@ -34,6 +37,7 @@ export const emptySearchState: SearchState = {
   species: '',
   height: '',
   age: '',
+  root: '',
   vip: false,
   delivery: false,
   sellerType: '',
@@ -42,6 +46,21 @@ export const emptySearchState: SearchState = {
 /** Every filter cleared; the search word stays (it has its own chip and is not a filter). */
 export function withoutFilters(state: SearchState): SearchState {
   return { ...emptySearchState, q: state.q }
+}
+
+/**
+ * The filters after choosing a category ('' = «Hamısı») and a sub-category in the sidebar or the «Filtrlər» sheet.
+ * Species belong to one category, and «Kök sistemi» stays only where it is a filter (src/data/categories.ts). The
+ * facet counts use the same step, so a row's count is what its link opens.
+ */
+export function selectCategory(state: SearchState, categoryId: string, subcategory = ''): SearchState {
+  return {
+    ...state,
+    categoryId,
+    subcategory: categoryId ? subcategory : '',
+    species: categoryId && categoryId === state.categoryId ? state.species : '',
+    root: categoryId && hasRootSystemFilter(categoryId) ? state.root : '',
+  }
 }
 
 /* ---------- Sort ---------- */
@@ -69,6 +88,7 @@ export function writeSearchState(state: SearchState, current: URLSearchParams): 
   set(PARAM.species, state.species)
   set(PARAM.height, state.height)
   set(PARAM.age, state.age)
+  set(PARAM.root, state.root)
   set(PARAM.vip, state.vip && '1')
   set(PARAM.delivery, state.delivery && '1')
   set(PARAM.seller, state.sellerType)
@@ -123,6 +143,8 @@ export function chipActive(key: string, state: SearchState): boolean {
       return state.height !== ''
     case 'age':
       return state.age !== ''
+    case 'root':
+      return state.root !== ''
     case 'species':
       return state.species !== ''
     case 'seller':

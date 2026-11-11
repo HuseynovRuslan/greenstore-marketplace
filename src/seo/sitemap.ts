@@ -45,7 +45,7 @@ export async function buildSitemap(repo: MarketplaceRepository): Promise<Metadat
     { url: absoluteUrl('/elanlar') },
     { url: absoluteUrl('/xidmetler') },
     { url: absoluteUrl('/saticilar') },
-    ...['/reklam', '/komek', '/qaydalar', '/tehlukesiz-alis', '/elaqe', '/istifade-sertleri', '/mexfilik'].map((path) => ({ url: absoluteUrl(path) })),
+    ...['/reklam', '/komek', '/qaydalar', '/tehlukesiz-alis', '/elaqe', '/istifade-sertleri', '/mexfilik', '/sayt-xeritesi'].map((path) => ({ url: absoluteUrl(path) })),
     ...categoryUrls.map((path) => ({ url: absoluteUrl(path) })),
     ...listings.map((l) => ({ url: absoluteUrl(`/elanlar/${l.slug}`), lastModified: new Date(l.publishedAt) })),
     ...sellers.map((s) => ({ url: absoluteUrl(`/saticilar/${s.slug}`) })),

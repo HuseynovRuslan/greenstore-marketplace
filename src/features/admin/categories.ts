@@ -1,5 +1,5 @@
-import { categories } from '@/data/categories'
-import { categoryAdminFields, type CategoryFilter } from '@/data/admin'
+import { categories, type CategoryDef } from '@/data/categories'
+import { adminFilters, categoryAdminFields, type CategoryFilter } from '@/data/admin'
 import { normalizeSearch } from '@/lib/format'
 import type { IconName } from '@/types'
 
@@ -15,6 +15,17 @@ export interface AdminCategory {
   formOrder?: string[]
 }
 
+/**
+ * The filters a category has on /elanlar («Filtrlər: Növ · Hündürlük · Yaş · Kök sistemi»): plants get species,
+ * height and age, and «Kök sistemi» where the category's rule makes it a filter (src/data/categories.ts).
+ */
+export function catalogueFilters(category: CategoryDef, formLabels: Record<string, string> = {}): CategoryFilter[] {
+  if (category.form !== 'plant') return []
+  const list = adminFilters(['nov', 'Növ', formLabels.nov], ['hundurluk', 'Hündürlük', formLabels.hundurluk], ['yas', 'Yaş', formLabels.yas])
+  return category.attributes?.rootSystem?.filter ? [...list, ...adminFilters(['kok', 'Kök sistemi', formLabels.kok])] : list
+}
+
+/** The rows of "Kateqoriya idarəetməsi": `@/data/categories` with its sub-categories and filters, plus overrides. */
 export function initialAdminCategories(): AdminCategory[] {
   return categories.map((c, i) => {
     const admin = categoryAdminFields[c.id]
@@ -22,8 +33,8 @@ export function initialAdminCategories(): AdminCategory[] {
       id: c.id,
       name: c.name,
       icon: c.icon,
-      subcategories: admin?.subcategories ?? [],
-      filters: admin?.filters ?? [],
+      subcategories: admin?.subcategories ?? c.subcategories.map((sub) => sub.name),
+      filters: admin?.filters ?? catalogueFilters(c, admin?.formLabels),
       order: admin?.order ?? i + 1,
       active: admin?.active ?? true,
       formOrder: admin?.formOrder,
@@ -55,7 +66,7 @@ export function formFilters(row: Pick<AdminCategory, 'filters' | 'formOrder'>): 
   return [...row.filters].sort((a, b) => rank(a) - rank(b))
 }
 
-/** "Dekorativ ağaclar · Meyvə ağacları · İynəyarpaqlılar" ⇄ list (also accepts commas and new lines). */
+/** "Meyvə ağacları · İynəyarpaqlı ağaclar" ⇄ list (also accepts commas and new lines). */
 export const joinSubcategories = (list: string[]) => list.join(' · ')
 export const splitSubcategories = (text: string) =>
   text

@@ -13,7 +13,8 @@ const idle = () =>
     else window.setTimeout(resolve, 200)
   })
 
-const loadDomAnimation: LazyFeatureBundle = () => import('./features').then((bundle) => bundle.default)
+/** domAnimation, the app-wide bundle: a leaf that must know when it has arrived (useFeaturesReady) loads it again here. */
+export const loadDomAnimation: LazyFeatureBundle = () => import('./features').then((bundle) => bundle.default)
 
 /** drag + layout (≈ 14 KB gzip over domAnimation), fetched on idle so it never competes with the first load. */
 export const loadDomMax: LazyFeatureBundle = () => idle().then(() => import('./featuresMax').then((bundle) => bundle.default))

@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { attributeLine, attributesFor, parseNumberValue, plantFacts, unitsFor, visibleAttributes } from '@/features/posting/attributes'
+import { attributeLine, attributesFor, formAttributes, formUnits, parseNumberValue, plantFacts, unitsFor, visibleAttributes } from '@/features/posting/attributes'
 import { createDraft, restoreDraft, toListing, toListingInput, withCategory, type PostingDraft } from '@/features/posting/draft'
 import { fileError, fitCount, makeCover, movePhoto, sizeError } from '@/features/posting/photos'
 import { firstInvalidStep, validateStep } from '@/features/posting/validation'
@@ -25,7 +25,7 @@ function completeDraft(): PostingDraft {
   const d = withCategory(createDraft({ name: 'Elvin', phone: '+994505551234' }), 'product', 'agaclar')
   return {
     ...d,
-    subcategory: 'İynəyarpaqlılar',
+    subcategory: 'İynəyarpaqlı ağaclar',
     title: 'Tuya Smaragd — 140 sm',
     description: 'Sağlam, sıx formalı tinglər, dibçəkdə yetişdirilib.',
     attrs: { heightMin: '140', rootSystem: 'container', potLitres: '15', availability: 'satisda', frost: '−35', plantingMonths: '3,4,10', age: '3' },
@@ -42,10 +42,24 @@ function completeDraft(): PostingDraft {
 }
 
 describe('posting attributes', () => {
-  it('asks plant facts for plant categories and a pack size for soil', () => {
-    expect(attributesFor('agaclar').map((a) => a.id)).toContain('rootSystem')
-    expect(attributesFor('torpaq-gubreler').map((a) => a.id)).toEqual(['pack', 'composition', 'availability'])
+  it('asks plant facts for every plant category; «Kök sistemi» is required for Ağaclar and Kollar only', () => {
+    const root = (id: string) => attributesFor(id).find((a) => a.id === 'rootSystem')
+    for (const id of ['agaclar', 'kollar']) expect(root(id)?.required, id).toBe(true)
+    for (const id of ['guller', 'sarmasiqlar', 'yer-ortucu-bitkiler']) expect(root(id)?.required, id).toBe(false)
+    expect(root('agaclar')?.options?.map((o) => o.label)).toEqual(['Dibçəkdə', 'Torpaq kürəsi ilə', 'Açıq kök'])
+    expect(attributesFor('guller').some((a) => a.id === 'foliage')).toBe(false)
+    expect(attributesFor('sarmasiqlar').some((a) => a.id === 'foliage')).toBe(true)
     expect(attributesFor('landsaft-xidmetleri')[0].kind).toBe('cities')
+    // Forms without a category today, kept for a category the data may bring back
+    expect(formAttributes('pack').map((a) => a.id)).toEqual(['pack', 'composition', 'availability'])
+    expect(attributesFor('otaq-bitkileri').map((a) => a.id)).toEqual(['availability'])
+  })
+
+  it('requires «Kök sistemi» for a tree before step 2 can continue', () => {
+    const d = { ...completeDraft(), attrs: { ...completeDraft().attrs, rootSystem: '' } }
+    expect(validateStep(2, d)['attr.rootSystem']).toBe('Kök sistemi: birini seçin.')
+    const rose = { ...withCategory(d, 'product', 'guller'), subcategory: 'Çoxillik güllər', attrs: { heightMin: '40', availability: 'satisda' } }
+    expect(validateStep(2, rose)['attr.rootSystem']).toBeUndefined()
   })
 
   it('asks the pot size only for container plants', () => {
@@ -64,13 +78,14 @@ describe('posting attributes', () => {
       plantingMonths: [3, 4, 10],
     })
     expect(attributeLine('agaclar', d.attrs)).toEqual(['140 sm', '3 yaş', 'dibçəkdə'])
-    expect(attributeLine('bag-avadanliqlari', { condition: 'new', brand: 'Gardena' })).toEqual(['Yeni', 'Gardena'])
+    expect(attributeLine('aletler', { condition: 'new', brand: 'Gardena' })).toEqual(['Yeni', 'Gardena'])
     expect(parseNumberValue('7,5')).toBe(7.5)
     expect(parseNumberValue('abc')).toBeUndefined()
   })
 
   it('offers units that fit the category', () => {
-    expect(unitsFor('torpaq-gubreler')[0]).toBe('bag')
+    expect(unitsFor('kollar')[0]).toBe('piece')
+    expect(formUnits('pack')[0]).toBe('bag')
     expect(unitsFor('landsaft-xidmetleri')).toContain('hour')
   })
 })
@@ -85,10 +100,19 @@ describe('posting draft', () => {
   })
 
   it('resets the category-dependent fields when the category changes', () => {
-    const changed = withCategory(completeDraft(), 'product', 'torpaq-gubreler')
+    const changed = withCategory({ ...completeDraft(), priceUnit: 'set' }, 'product', 'guller')
     expect(changed.attrs).toEqual({})
     expect(changed.subcategory).toBe('')
-    expect(changed.priceUnit).toBe('bag')
+    expect(changed.priceUnit).toBe('piece')
+  })
+
+  it('sends a draft saved under a category taken off the site back to step 1', () => {
+    const old = restoreDraft({ ...completeDraft(), categoryId: 'otaq-bitkileri', subcategory: 'Sukkulentlər', reachedStep: 4 })
+    expect(old).toMatchObject({ kind: 'product', categoryId: '', subcategory: '', attrs: {}, reachedStep: 1 })
+    expect(old.title).toBe('Tuya Smaragd — 140 sm')
+    const renamed = restoreDraft({ ...completeDraft(), subcategory: 'Dekorativ ağaclar', reachedStep: 4 })
+    expect(renamed).toMatchObject({ categoryId: 'agaclar', subcategory: '', reachedStep: 1 })
+    expect(restoreDraft({ ...completeDraft(), reachedStep: 4 })).toMatchObject({ subcategory: 'İynəyarpaqlı ağaclar', reachedStep: 4 })
   })
 
   it('builds the ListingInput the API receives', () => {
@@ -198,12 +222,16 @@ describe('posting wizard', () => {
     expect(push).not.toHaveBeenCalled()
 
     await user.click(screen.getByRole('radio', { name: /Məhsul satıram/ }))
+    // The five plant categories of November 2026, each with its own sub-categories
+    expect(screen.getAllByRole('radio', { name: /^(Ağaclar|Kollar|Güllər|Sarmaşıqlar|Yer örtücü bitkilər)$/ })).toHaveLength(5)
+    await user.click(screen.getByRole('radio', { name: 'Kollar' }))
+    expect(screen.getAllByRole('radio', { name: /kollar$/ }).map((r) => r.getAttribute('value'))).toEqual(['Yarpaqtökən kollar', 'Həmişəyaşıl kollar'])
     await user.click(screen.getByRole('radio', { name: 'Ağaclar' }))
-    await user.click(screen.getByRole('radio', { name: 'Dekorativ ağaclar' }))
+    await user.click(screen.getByRole('radio', { name: 'İynəyarpaqlı ağaclar' }))
     await user.click(screen.getByRole('button', { name: /Davam et/ }))
     expect(push).toHaveBeenCalledWith('/elan-yerlesdir/2')
     const saved = JSON.parse(localStorage.getItem('greenstore:posting:draft') ?? '{}')
-    expect(saved).toMatchObject({ kind: 'product', categoryId: 'agaclar', subcategory: 'Dekorativ ağaclar', reachedStep: 2 })
+    expect(saved).toMatchObject({ kind: 'product', categoryId: 'agaclar', subcategory: 'İynəyarpaqlı ağaclar', reachedStep: 2 })
   })
 
   it('sends a deep link past the furthest step back there', () => {

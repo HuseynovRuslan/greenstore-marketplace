@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import nextConfig from '../../next.config'
+import { retiredCategoryIds } from '@/data/categories'
 
 type Rule = { source: string; headers: Array<{ key: string; value: string }> }
 
@@ -44,5 +45,19 @@ describe('next.config headers', () => {
     const keys = headersFor(await headerRules(), '/:path*').map((h) => h.key)
     expect(keys).not.toContain('Content-Security-Policy')
     expect(keys).toContain('X-Content-Type-Options')
+  })
+})
+
+/** Category pages of the product categories taken off the site (Nov 2026) lead to the catalogue, not a 404. */
+describe('next.config redirects', () => {
+  it('sends every retired category page, with or without a city, to /elanlar for now (307)', async () => {
+    const rules = await nextConfig.redirects!()
+    for (const id of retiredCategoryIds) {
+      expect(rules).toContainEqual({ source: `/kateqoriyalar/${id}`, destination: '/elanlar', permanent: false })
+      expect(rules).toContainEqual({ source: `/kateqoriyalar/${id}/:seher`, destination: '/elanlar?seher=:seher', permanent: false })
+    }
+    expect(retiredCategoryIds).toEqual(['otaq-bitkileri', 'tingler-fidanlar', 'cim-toxumlar', 'torpaq-gubreler', 'bag-avadanliqlari', 'suvarma-sistemleri'])
+    // The live categories keep their pages.
+    expect(rules.some((r) => /\/kateqoriyalar\/(agaclar|kollar|guller|sarmasiqlar|yer-ortucu-bitkiler)(\/|$)/.test(r.source))).toBe(false)
   })
 })

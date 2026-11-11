@@ -3,16 +3,19 @@ import { fireEvent, render, screen, within } from '@testing-library/react'
 import { CardImage } from '@/components/cards/CardImage'
 import { ListingCard } from '@/components/cards/ListingCard'
 import { listings } from '@/data/listings'
-import { categories } from '@/data/categories'
 import { LONG_QUERY, worstCaseCategories, worstCaseSearch } from '@/dev/worstCase'
 import { HeroCategories } from '@/features/home/HeroCategories'
+import { loadHeroCounts } from '@/features/home/heroCounts'
 import { HeroSearchCard } from '@/features/home/HeroSearchCard'
+import { mockRepository } from '@/services/mockRepository'
 import { CatalogSearchCard } from '@/features/search/CatalogSearchCard'
 import { PriceFields } from '@/features/search/FilterControls'
 import { QUERY_MAX } from '@/features/search/filterDefs'
 import { ActiveFilterRow } from '@/features/search/SearchControls'
 import { activeChips } from '@/features/search/searchState'
 import { AppStoreProvider } from '@/state/store'
+
+const heroCounts = await loadHeroCounts(mockRepository)
 
 vi.mock('next/navigation', () => ({
   useRouter: () => ({ push: vi.fn(), replace: vi.fn(), back: vi.fn(), prefetch: vi.fn(), refresh: vi.fn() }),
@@ -34,7 +37,7 @@ describe('worst-case fixes', () => {
   it(`stops the search fields at ${QUERY_MAX} characters`, () => {
     const { unmount } = render(
       <AppStoreProvider>
-        <HeroSearchCard />
+        <HeroSearchCard counts={heroCounts} />
       </AppStoreProvider>,
     )
     expect(screen.getByRole('searchbox', { name: 'Axtarış sözü' })).toHaveAttribute('maxLength', String(QUERY_MAX))
@@ -75,11 +78,14 @@ describe('worst-case fixes', () => {
     expect(container.querySelector('[aria-hidden].text-muted')?.textContent).not.toBe('–')
   })
 
-  it('lets a long category word break inside its item and names clamped ones in full', () => {
-    render(<HeroCategories items={worstCaseCategories(categories)} />)
+  it('keeps a long category name on one line, cut with an ellipsis only past the row width, and named in full', () => {
+    render(<HeroCategories items={worstCaseCategories(heroCounts.categories)} />)
     const name = screen.getByText('Dekorativ iynəyarpaqlılar')
-    expect(name).toHaveClass('w-full', 'wrap-anywhere', 'line-clamp-2')
+    expect(name).toHaveClass('truncate', 'min-w-0')
     expect(name).toHaveAttribute('title', 'Dekorativ iynəyarpaqlılar')
+    const link = name.closest('a')!
+    expect(link).toHaveClass('max-w-full')
+    expect(link.getAttribute('aria-label')).toMatch(/^Dekorativ iynəyarpaqlılar, .+ elan$/)
   })
 
   it('re-measures the tab underline when a tab label changes size', () => {
@@ -95,7 +101,7 @@ describe('worst-case fixes', () => {
     )
     render(
       <AppStoreProvider>
-        <HeroSearchCard />
+        <HeroSearchCard counts={heroCounts} />
       </AppStoreProvider>,
     )
     const labels = within(screen.getByRole('group', { name: 'Elan növü' })).getAllByRole('radio').map((r) => r.closest('label'))

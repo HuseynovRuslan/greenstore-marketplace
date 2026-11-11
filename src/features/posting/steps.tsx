@@ -6,8 +6,7 @@ import { CharCount, TextAreaField, TextField } from '@/components/ui/Field'
 import { ChoiceCard, FieldGroup, PhoneField, Switch } from '@/components/ui/FormControls'
 import { Listbox } from '@/components/ui/Listbox'
 import { cities } from '@/data/cities'
-import { productCategories } from '@/data/categories'
-import { subcategoriesByCategory } from '@/features/search/taxonomy'
+import { productCategories, subcategoriesOf } from '@/data/categories'
 import { monthName, cn } from '@/lib/format'
 import { isCompletePhone } from '@/lib/phone'
 import type { UserProfile } from '@/types'
@@ -31,7 +30,8 @@ const id = fieldDomId
 /* ---------- 1 · Kateqoriya ---------- */
 
 export function CategoryStep({ draft, update, error }: StepProps) {
-  const subs = draft.kind === 'service' ? serviceTypes : (subcategoriesByCategory[draft.categoryId] ?? [])
+  // Products send the sub-category name (`ListingInput.subcategory`); its id is in src/data/categories.ts.
+  const subs = draft.kind === 'service' ? serviceTypes : subcategoriesOf(draft.categoryId).map((s) => s.name)
   if (draft.editing) {
     // Editing a published listing: the category can't change (a different plant is a new listing).
     const name = productCategories.find((c) => c.id === draft.categoryId)?.name ?? 'Bağ xidmətləri'
@@ -58,7 +58,7 @@ export function CategoryStep({ draft, update, error }: StepProps) {
             onChange={() => update((d) => (d.kind === 'product' ? d : { ...d, kind: 'product', categoryId: '', subcategory: '', attrs: {} }))}
             icon={<Sprout size={22} strokeWidth={1.8} />}
             title="Məhsul satıram"
-            description="Ağac, fidan, gül, otaq bitkisi, toxum, gübrə, alət"
+            description="Ağac, kol, gül, sarmaşıq, yer örtücü bitki"
           />
           <ChoiceCard
             name="kind"

@@ -13,9 +13,16 @@ describe('catalogue headings', () => {
   it('names the page in the words of the link that led there', () => {
     expect(searchHeading(state(''))).toBe('Məhsullar')
     expect(searchHeading(state('kateqoriya=agaclar'))).toBe('Ağaclar')
-    expect(searchHeading(state('kateqoriya=agaclar&alt=meyve-agaclari'))).toBe('Meyvə ağacları')
+    expect(searchHeading(state('kateqoriya=agaclar&alt=agaclar-meyve'))).toBe('Meyvə ağacları')
+    expect(searchHeading(state('kateqoriya=kollar&alt=kollar-hemiseyasil'))).toBe('Həmişəyaşıl kollar')
+    // Old sub-category slugs and another category's sub-category are ignored.
+    expect(searchHeading(state('kateqoriya=agaclar&alt=meyve-agaclari'))).toBe('Ağaclar')
+    expect(searchHeading(state('kateqoriya=agaclar&alt=kollar-hemiseyasil'))).toBe('Ağaclar')
     expect(searchHeading(state('kateqoriya=agaclar&seher=baki'))).toBe('Bakıda ağaclar')
-    expect(searchHeading(state('kateqoriya=guller&seher=gence'))).toBe('Gəncədə güllər və çiçəklər')
+    expect(searchHeading(state('kateqoriya=guller&seher=gence'))).toBe('Gəncədə güllər')
+    expect(searchHeading(state('kateqoriya=yer-ortucu-bitkiler&seher=baki'))).toBe('Bakıda yer örtücü bitkilər')
+    // A category taken off the site falls back to all products.
+    expect(searchHeading(state('kateqoriya=otaq-bitkileri'))).toBe('Məhsullar')
     expect(searchHeading(state('seher=quba'))).toBe('Qubada məhsullar')
     expect(searchHeading(state('vip=1'))).toBe('Önə çıxan elanlar')
     expect(searchHeading(state('q=zeytun&kateqoriya=agaclar'))).toBe('«zeytun» üzrə elanlar')

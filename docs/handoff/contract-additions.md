@@ -140,7 +140,7 @@ Example `ListingInput` (`POST /api/listings`):
 {
   "kind": "product",
   "categoryId": "agaclar",
-  "subcategory": "İynəyarpaqlılar",
+  "subcategory": "İynəyarpaqlı ağaclar",
   "title": "Tuya Smaragd — 140 sm, dibçəkdə",
   "description": "Sağlam, sıx formalı tinglər…",
   "attributes": { "rootSystem": "container", "potLitres": "15", "heightMin": "140", "ageYears": "3" },

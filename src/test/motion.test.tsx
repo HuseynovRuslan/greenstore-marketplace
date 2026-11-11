@@ -5,6 +5,7 @@ import { Reveal } from '@/components/ui/Reveal'
 import { FavoriteButton } from '@/components/cards/FavoriteButton'
 import { MotionProvider } from '@/components/motion/MotionProvider'
 import { AppStoreProvider } from '@/state/store'
+import { loadHeroCounts } from '@/features/home/heroCounts'
 import { mockRepository } from '@/services/mockRepository'
 import HomePage from '@/views/HomePage'
 
@@ -65,6 +66,21 @@ describe('Reveal (scroll reveal once)', () => {
     expect(disconnect).toHaveBeenCalled()
   })
 
+  it('keeps list semantics: as="ol" wraps each child in an li', () => {
+    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue({ top: 2000 } as DOMRect)
+    render(
+      <Reveal as="ol">
+        <span>A</span>
+        <span>B</span>
+      </Reveal>,
+    )
+    const list = screen.getByRole('list')
+    expect(list.tagName).toBe('OL')
+    expect(list).toHaveAttribute('data-reveal', 'pending')
+    expect([...list.children].map((c) => c.tagName)).toEqual(['LI', 'LI'])
+    expect(list.children[1]).toHaveClass('gs-reveal-item')
+  })
+
   it('leaves a grid that is already on screen alone', () => {
     vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue({ top: 100 } as DOMRect)
     renderGrid()
@@ -83,7 +99,7 @@ describe('hero entrance', () => {
   it('rises the heading without fading it and fades up the card and the categories in turn', async () => {
     render(
       <AppStoreProvider>
-        <HomePage content={await mockRepository.getHomeContent()} />
+        <HomePage content={await mockRepository.getHomeContent()} hero={await loadHeroCounts(mockRepository)} />
       </AppStoreProvider>,
     )
     const heading = screen.getByRole('heading', { level: 1 }).parentElement!
@@ -91,16 +107,16 @@ describe('hero entrance', () => {
     expect(heading.className).not.toMatch(/fade/)
     expect(document.getElementById('hero-search')).toHaveClass('animate-fade-up', 'motion-reduce:animate-none')
     const items = [...document.querySelectorAll<HTMLElement>('#kateqoriyalar li')]
-    expect(items.map((li) => li.style.animationDelay)).toEqual(['120ms', '150ms', '180ms', '210ms', '240ms', '270ms', '300ms', '330ms', '360ms', '390ms'])
+    expect(items.map((li) => li.style.animationDelay)).toEqual(['120ms', '150ms', '180ms', '210ms', '240ms'])
   })
 
   it('plays once per page load: marks the hero seen once the entrance is over', async () => {
     vi.useFakeTimers()
     document.documentElement.removeAttribute('data-hero-seen')
-    const content = await mockRepository.getHomeContent()
+    const [content, hero] = await Promise.all([mockRepository.getHomeContent(), loadHeroCounts(mockRepository)])
     render(
       <AppStoreProvider>
-        <HomePage content={content} />
+        <HomePage content={content} hero={hero} />
       </AppStoreProvider>,
     )
     act(() => vi.advanceTimersByTime(900))

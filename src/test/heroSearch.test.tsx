@@ -1,7 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { loadHeroCounts } from '@/features/home/heroCounts'
 import { HeroSearchCard } from '@/features/home/HeroSearchCard'
+import { mockRepository } from '@/services/mockRepository'
 import {
   activeFilterCount,
   emptyHeroFilters,
@@ -11,6 +13,8 @@ import {
   visibleFilters,
   type HeroFilters,
 } from '@/features/home/heroSearch'
+
+const counts = await loadHeroCounts(mockRepository)
 
 const push = vi.fn()
 vi.mock('next/navigation', () => ({
@@ -85,12 +89,12 @@ describe('HeroSearchCard', () => {
 
   it('offers the three listing types as one radio group with their counts', async () => {
     const user = userEvent.setup()
-    render(<HeroSearchCard />)
+    render(<HeroSearchCard counts={counts} />)
     const group = screen.getByRole('group', { name: 'Elan növü' })
     const radios = within(group).getAllByRole('radio')
     expect(radios.map((r) => r.closest('label')?.textContent?.replace(/\s+/g, ' ').trim())).toEqual([
-      'Hamısı 4 040 elan',
-      'Məhsullar 3 945 elan',
+      'Hamısı 144 elan',
+      'Məhsullar 49 elan',
       'Xidmətlər 95 elan',
     ])
     expect(within(group).getByRole('radio', { name: /Hamısı/ })).toBeChecked()
@@ -105,7 +109,7 @@ describe('HeroSearchCard', () => {
 
   it('shows the chosen value in the chip label and returns focus to the chip', async () => {
     const user = userEvent.setup()
-    render(<HeroSearchCard />)
+    render(<HeroSearchCard counts={counts} />)
     await user.click(chip('Qiymət'))
     const dialog = screen.getByRole('dialog', { name: 'Qiymət, ₼' })
     expect(within(dialog).getByRole('textbox', { name: 'min. qiymət, ₼' })).toHaveFocus()
@@ -127,7 +131,7 @@ describe('HeroSearchCard', () => {
 
   it('shows «Sıfırla» once a filter is set and clears every filter with it', async () => {
     const user = userEvent.setup()
-    render(<HeroSearchCard />)
+    render(<HeroSearchCard counts={counts} />)
     expect(within(form()).queryByRole('button', { name: 'Sıfırla' })).not.toBeInTheDocument()
 
     await user.click(chip('Çatdırılma'))
@@ -144,7 +148,7 @@ describe('HeroSearchCard', () => {
 
   it('opens the catalogue with the search, city and supported filters', async () => {
     const user = userEvent.setup()
-    render(<HeroSearchCard />)
+    render(<HeroSearchCard counts={counts} />)
     await user.type(screen.getByRole('searchbox', { name: 'Axtarış sözü' }), 'zeytun')
     await user.click(cityListbox())
     await user.click(within(screen.getByRole('listbox', { name: 'Şəhər' })).getByRole('option', { name: /Bakı/ }))
@@ -158,7 +162,7 @@ describe('HeroSearchCard', () => {
 
   it('blocks a search whose minimum price is above the maximum', async () => {
     const user = userEvent.setup()
-    render(<HeroSearchCard />)
+    render(<HeroSearchCard counts={counts} />)
     await user.click(chip('Qiymət'))
     await user.type(within(form()).getByRole('textbox', { name: 'min. qiymət, ₼' }), '200')
     await user.type(within(form()).getByRole('textbox', { name: 'maks. qiymət, ₼' }), '1a00')
@@ -181,7 +185,7 @@ describe('HeroSearchCard on phones', () => {
 
   it('opens the «Filtrlər» sheet with every filter of the tab and shows the active count', async () => {
     const user = userEvent.setup()
-    render(<HeroSearchCard />)
+    render(<HeroSearchCard counts={counts} />)
     const filtersButton = within(row()).getByRole('button', { name: 'Filtrlər' })
     expect(filtersButton).toHaveAttribute('aria-haspopup', 'dialog')
     // Toggles switch in place
@@ -203,7 +207,7 @@ describe('HeroSearchCard on phones', () => {
 
   it('opens the sheet at the group of the chip that was tapped', async () => {
     const user = userEvent.setup()
-    render(<HeroSearchCard />)
+    render(<HeroSearchCard counts={counts} />)
     await user.click(within(row()).getByRole('button', { name: 'Qiymət' }))
     expect(within(sheet()).getByRole('textbox', { name: 'min. qiymət, ₼' })).toHaveFocus()
     await user.keyboard('{Escape}')
@@ -213,7 +217,7 @@ describe('HeroSearchCard on phones', () => {
 
   it('keeps Tab inside the sheet', async () => {
     const user = userEvent.setup()
-    render(<HeroSearchCard />)
+    render(<HeroSearchCard counts={counts} />)
     await user.click(within(row()).getByRole('button', { name: 'Filtrlər' }))
     const search = within(sheet()).getByRole('button', { name: 'Axtar' })
     search.focus()
@@ -225,7 +229,7 @@ describe('HeroSearchCard on phones', () => {
 
   it('searches from the sheet with the chosen filters', async () => {
     const user = userEvent.setup()
-    render(<HeroSearchCard />)
+    render(<HeroSearchCard counts={counts} />)
     await user.click(within(row()).getByRole('button', { name: 'Filtrlər' }))
     await user.click(within(sheet()).getByRole('button', { name: '150–300 ₼' }))
     await user.click(within(sheet()).getByRole('button', { name: '2–3 m' }))

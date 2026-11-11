@@ -32,12 +32,12 @@ const STEPS = ['Hesab növü', 'Məlumatlar', 'Telefonun təsdiqi'] as const
  * Back keeps everything. On success the account is signed in and the visitor goes on to `next` (default: cabinet).
  * DEMO: the SMS is not sent (the code is on screen) and nothing is stored on a server.
  */
-export default function RegisterPage({ next }: { next?: string }) {
+export default function RegisterPage({ next, accountType }: { next?: string; accountType?: SellerType }) {
   const router = useRouter()
   const { signIn } = useSession()
   const { toast } = useToast()
   const [step, setStep] = useState(0)
-  const [type, setType] = useState<SellerType | ''>('')
+  const [type, setType] = useState<SellerType | ''>(accountType ?? '')
   const [kind, setKind] = useState<BusinessKind | ''>('')
   const [company, setCompany] = useState('')
   const [name, setName] = useState('')

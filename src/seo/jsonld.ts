@@ -41,7 +41,7 @@ export function websiteJsonLd(): Thing {
 const place = (locality: string) => ({ '@type': 'Place', address: { '@type': 'PostalAddress', addressLocality: locality, addressCountry: 'AZ' } })
 
 /** Product + Offer for a public listing: name, photos, description, category, price in AZN, seller and location. */
-export function listingJsonLd(listing: Listing, opts: { images: string[]; category?: Category; seller?: Seller }): Thing {
+export function listingJsonLd(listing: Listing, opts: { images: string[]; category?: Pick<Category, 'name'>; seller?: Seller }): Thing {
   const url = absoluteUrl(`/elanlar/${listing.slug}`)
   // Individual sellers are private persons: their names stay out of structured data.
   const business = opts.seller?.type === 'business' ? opts.seller : undefined

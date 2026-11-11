@@ -6,9 +6,10 @@ import { formatNumber } from '@/lib/format'
 import type { ListingSort } from '@/services/listingSort'
 import { CatalogEmptyState } from './CatalogEmptyState'
 import { CatalogFilterSheet } from './CatalogFilterSheet'
-import { CatalogSearchCard, type CityCounts } from './CatalogSearchCard'
+import { CatalogSearchCard } from './CatalogSearchCard'
+import type { FacetCounts } from './facets'
 import { FiltersButton } from './FilterControls'
-import { FilterSidebar, type SidebarFacets } from './FilterSidebar'
+import { FilterSidebar } from './FilterSidebar'
 import type { FilterOption } from './filterDefs'
 import { ActiveFilterRow, SortSelect, ViewToggle } from './SearchControls'
 import { catalogHref, chipActive, emptySearchState, withoutFilters, withSort, withView, type FilterChip, type SearchState, type SearchView } from './searchUrl'
@@ -34,7 +35,7 @@ interface CatalogResultsProps {
   chips: FilterChip[]
   /** With 0 results: listings left after removing each chip (the empty state's suggestions). */
   removalCounts?: Record<string, number>
-  facets: SidebarFacets & { cities: CityCounts }
+  facets: FacetCounts
   speciesOptions: FilterOption[]
   /** Categories whose listings are plants (height and age apply). */
   plantCategoryIds: string[]
@@ -116,7 +117,8 @@ export function CatalogResults(props: CatalogResultsProps) {
       <CatalogSearchCard q={shown.q} cityIds={shown.cityIds} query={stateQuery} cityCounts={facets.cities} onSearch={(q, cityIds) => apply({ ...shown, q, cityIds })} />
 
       <div className="mt-1 flex w-full items-start gap-8 md:mt-2">
-        <aside ref={sideRef} aria-label="Filtrlər" className="hidden w-[256px] shrink-0 self-start pb-4 xl:sticky-side xl:block">
+        {/* 300 px: the category card (docs/design/elanlar/kateqoriya-sidebar.png); the groups below keep 256 px of text. */}
+        <aside ref={sideRef} aria-label="Filtrlər" className="hidden w-[300px] shrink-0 self-start pb-4 xl:sticky-side xl:block">
           <FilterSidebar
             state={shown}
             current={current}
@@ -181,7 +183,11 @@ export function CatalogResults(props: CatalogResultsProps) {
                 onShowAll={() => apply(emptySearchState)}
               />
             ) : (
-              props.results
+              <>
+                {/* The cards' titles are h3: a heading level between them and the h1 (axe heading-order). */}
+                <h2 className="sr-only">Elanlar</h2>
+                {props.results}
+              </>
             )}
             {total > 0 && props.pagination}
           </div>
@@ -194,6 +200,7 @@ export function CatalogResults(props: CatalogResultsProps) {
         onClose={() => setSheetOpen(false)}
         state={shown}
         total={total}
+        counts={facets}
         speciesOptions={speciesOptions}
         plantCategoryIds={plantCategoryIds}
         onApply={apply}

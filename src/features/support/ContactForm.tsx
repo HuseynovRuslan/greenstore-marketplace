@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, type FormEvent } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { CircleCheck } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { CharCount, SelectField, TextAreaField, TextField } from '@/components/ui/Field'
@@ -10,20 +11,17 @@ import { phoneFieldError } from '@/lib/phone'
 import { useSession } from '@/state/store'
 import type { SupportMessageInput } from '@/types'
 import { sendSupportMessage } from './actions'
+import { contactTopics, topicFromParam, type ContactTopic } from './contactTopics'
 
-const topics: Array<{ value: SupportMessageInput['topic'] | ''; label: string }> = [
-  { value: '', label: 'Seçin' },
-  { value: 'listing', label: 'Elanım haqqında' },
-  { value: 'account', label: 'Hesab və giriş' },
-  { value: 'payment', label: 'Ödəniş və paketlər' },
-  { value: 'complaint', label: 'Satıcı və ya alıcıdan şikayət' },
-  { value: 'other', label: 'Digər' },
-]
+const topics: Array<{ value: ContactTopic | ''; label: string }> = [{ value: '', label: 'Seçin' }, ...contactTopics]
 
-/** «Bizimlə əlaqə»: topic, name, phone or e-mail, optional listing number, message → ticket number. */
-export function ContactForm() {
+/**
+ * «Bizimlə əlaqə»: topic, name, phone or e-mail, optional listing number, message → ticket number. `initialTopic`
+ * comes from a link that names the subject (?movzu=, see ContactFormFromUrl).
+ */
+export function ContactForm({ initialTopic }: { initialTopic?: ContactTopic }) {
   const { user } = useSession()
-  const [form, setForm] = useState({ topic: '', name: user?.fullName ?? '', contact: user?.phone ?? '', listing: '', message: '' })
+  const [form, setForm] = useState({ topic: initialTopic ?? '', name: user?.fullName ?? '', contact: user?.phone ?? '', listing: '', message: '' })
   const [errors, setErrors] = useState<Record<string, string | undefined>>({})
   const [busy, setBusy] = useState(false)
   const [failure, setFailure] = useState<string>()
@@ -107,4 +105,14 @@ export function ContactForm() {
       </Button>
     </form>
   )
+}
+
+/**
+ * The form on the topic a link chose (/elaqe?movzu=sikayet — the footer's «Problem bildir»). The page keeps its
+ * static HTML: wrapped in <Suspense fallback={<ContactForm />}>, this part renders in the browser, where the query
+ * is known. `key`: a client-side link to another topic starts the form again on that topic.
+ */
+export function ContactFormFromUrl() {
+  const topic = topicFromParam(useSearchParams().get('movzu'))
+  return <ContactForm key={topic ?? ''} initialTopic={topic} />
 }

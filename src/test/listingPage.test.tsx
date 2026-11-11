@@ -48,7 +48,7 @@ describe('listing facts', () => {
 
   it('builds the attributes table and the care block from the plant facts', () => {
     const rows = factRows(zeytun)
-    expect(rows[0]).toEqual({ label: 'Kateqoriya', value: 'Ağaclar / Dekorativ ağaclar' })
+    expect(rows[0]).toEqual({ label: 'Kateqoriya', value: 'Ağaclar / Meyvə ağacları' })
     expect(rows.find((r) => r.label === 'Növ')).toMatchObject({ value: 'Olea europaea', latin: true })
     expect(rows.find((r) => r.label === 'Kök sistemi')?.value).toBe('Dibçəkdə')
     expect(careItems(zeytun.plant).map((c) => c.label)).toEqual(['İşıq', 'Suvarma', 'Şaxtaya davamlılıq', 'Əkin vaxtı'])

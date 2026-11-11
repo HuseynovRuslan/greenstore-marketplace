@@ -14,10 +14,10 @@ export interface SellerTabStat {
 
 export interface SellerStats {
   sellerId: string
-  /** "24 elan · yalnız hazırda satışda olan təkliflər" */
-  total: number
-  /** Category tabs after "Hamısı", in Figma order */
-  tabs: SellerTabStat[]
+  /** "24 elan · yalnız hazırda satışda olan təkliflər"; without it, counted from the listings */
+  total?: number
+  /** Category tabs after "Hamısı", in Figma order; without them, one tab per category of the listings */
+  tabs?: SellerTabStat[]
   /**
    * The seller's listings in the order the Figma grid shows them under "Ən yenilər"
    * (also reused for "Satıcının digər elanları" on the listing page). Listings not in the list follow, newest first.
@@ -27,14 +27,10 @@ export interface SellerStats {
 
 export const sellerStats: SellerStats[] = [
   {
+    // Figma also stated "24 elan" with tabs Ağaclar 14 · Fidan və toxum 6 · Gübrə və torpaq 4. Two of those
+    // categories left the site in November 2026, so the tabs and totals are now counted from the listings.
     sellerId: 'abseron-tingcilik',
-    total: 24,
-    tabs: [
-      { categoryId: 'agaclar', label: 'Ağaclar', count: 14 },
-      { categoryId: 'tingler-fidanlar', label: 'Fidan və toxum', count: 6 },
-      { categoryId: 'torpaq-gubreler', label: 'Gübrə və torpaq', count: 4 },
-    ],
-    listingOrder: ['zeytun-agaci', 'tuya-smaragd', 'defne-agaci', 'torpaq-qarisigi', 'nar-fidani', 'uzvi-kompost'],
+    listingOrder: ['zeytun-agaci', 'tuya-smaragd', 'defne-agaci', 'nar-fidani'],
   },
 ]
 

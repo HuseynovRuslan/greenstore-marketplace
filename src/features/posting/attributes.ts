@@ -1,15 +1,16 @@
-import { categoryById } from '@/data/categories'
+import { categories, categoryById, requiresRootSystem, type CategoryForm } from '@/data/categories'
 import { cities } from '@/data/cities'
-import { availabilityOptions, rootOptions } from '@/features/home/heroSearch'
-import { filterTitles, type FilterOption } from '@/features/search/filterDefs'
+import { availabilityOptions } from '@/features/home/heroSearch'
+import { filterTitles, rootOptions, rootSystemOf, type FilterOption } from '@/features/search/filterDefs'
 import { foliageLabels, priceUnitLabels, rootSystemLabels, sunLabels, waterLabels } from '@/features/listing/facts'
 import { lowerAz } from '@/lib/format'
 import type { PlantFacts, PriceUnit, RootSystem } from '@/types'
 
 /*
- * Category attributes of «Elan yerləşdir» (step 2). One definition list per kind of category, built on the
- * catalogue's filter vocabulary (filterDefs titles, the pending «Kök sistemi» / «Mövcudluq» options of the hero
- * search) so a value a seller picks here is the value a buyer filters by. Values are kept as strings in the draft;
+ * Category attributes of «Elan yerləşdir» (step 2). One definition list per kind of category (`form` in
+ * src/data/categories.ts, so a category added there gets its form without code), built on the catalogue's filter
+ * vocabulary (filterDefs titles and the «Kök sistemi» options, the pending «Mövcudluq» options of the hero search)
+ * so a value a seller picks here is the value a buyer filters by. Values are kept as strings in the draft;
  * `plantFacts` turns them into the contract's PlantFacts.
  */
 
@@ -36,19 +37,20 @@ export interface AttrDef {
   group?: 'plant' | 'care'
 }
 
-/** Living-plant categories: the plant facts, care and availability apply. */
-export const PLANT_CATEGORIES = ['agaclar', 'kollar', 'guller', 'otaq-bitkileri', 'tingler-fidanlar']
-export const SERVICE_CATEGORY = 'landsaft-xidmetleri'
+/** Living-plant categories (`form: 'plant'`): the plant facts, care and availability apply. */
+export const PLANT_CATEGORIES = categories.filter((c) => c.form === 'plant').map((c) => c.id)
+export const SERVICE_CATEGORY = categories.find((c) => c.kind === 'service')?.id ?? 'landsaft-xidmetleri'
+
 
 const options = <K extends string>(labels: Record<K, string>): FilterOption[] => Object.entries(labels).map(([value, label]) => ({ value, label: label as string }))
 
-/** Root system, worded like the hero search's pending «Kök sistemi» filter (its `kok` values map to the contract). */
-const rootParam: Record<string, RootSystem> = { dibcek: 'container', 'torpaq-kuresi': 'rootball', 'aciq-kok': 'bare-root' }
-export const rootSystemOptions: FilterOption[] = rootOptions.map((o) => ({ value: rootParam[o.value], label: o.label }))
+/** Root system, worded like the catalogue's «Kök sistemi» filter (its `kok` values map to the contract). */
+export const rootSystemOptions: FilterOption[] = rootOptions.map((o) => ({ value: rootSystemOf[o.value], label: o.label }))
 
 const availability: AttrDef = { id: 'availability', label: 'Mövcudluq', kind: 'choice', required: true, options: availabilityOptions }
 
-const plantAttrs = (opts: { foliage: boolean }): AttrDef[] => [
+/** `rootSystem`: required where the category's «Kök sistemi» rule says so (Ağaclar, Kollar), optional elsewhere. */
+const plantAttrs = (opts: { foliage: boolean; rootSystem: boolean }): AttrDef[] => [
   {
     id: 'species',
     label: 'Növün adı',
@@ -60,7 +62,7 @@ const plantAttrs = (opts: { foliage: boolean }): AttrDef[] => [
   },
   { id: 'height', label: filterTitles.height, kind: 'range', unit: 'sm', required: true, min: 1, max: 3000, hint: 'Dibçəklə birlikdə. Tinglər müxtəlif boydadırsa, ən hündürünü yanındakı xanaya yazın.', group: 'plant' },
   { id: 'age', label: filterTitles.age, kind: 'number', unit: 'yaş', min: 0, max: 200, group: 'plant' },
-  { id: 'rootSystem', label: 'Kök sistemi', kind: 'choice', required: true, options: rootSystemOptions, group: 'plant' },
+  { id: 'rootSystem', label: filterTitles.root, kind: 'choice', required: opts.rootSystem, options: rootSystemOptions, group: 'plant' },
   { id: 'potLitres', label: 'Dibçəyin həcmi', kind: 'number', unit: 'litr', min: 0.5, max: 2000, when: { id: 'rootSystem', value: 'container' }, group: 'plant' },
   { ...availability, group: 'plant' },
   ...(opts.foliage ? [{ id: 'foliage', label: 'Yarpaq', kind: 'choice' as const, options: options(foliageLabels), group: 'care' as const }] : []),
@@ -111,14 +113,31 @@ const serviceAttrs: AttrDef[] = [
   { id: 'warranty', label: 'Zəmanət', kind: 'text', placeholder: 'Məsələn: əkilən bitkilərə 1 il', maxLength: 60 },
 ]
 
-/** Attributes asked for a category (and the service category). */
+/** Attributes asked for a category (and the service category), by its form in src/data/categories.ts. */
 export function attributesFor(categoryId: string): AttrDef[] {
-  if (categoryId === SERVICE_CATEGORY) return serviceAttrs
-  if (PLANT_CATEGORIES.includes(categoryId)) return plantAttrs({ foliage: categoryId !== 'otaq-bitkileri' && categoryId !== 'guller' })
-  if (categoryId === 'torpaq-gubreler') return packAttrs
-  if (categoryId === 'cim-toxumlar') return grassAttrs
-  if (categoryId === 'bag-avadanliqlari' || categoryId === 'suvarma-sistemleri') return goodsAttrs
-  return [availability]
+  const category = categoryById(categoryId)
+  return formAttributes(category?.form, { foliage: Boolean(category?.foliage), rootSystem: requiresRootSystem(categoryId) })
+}
+
+/**
+ * The attribute set of a form. «pack», «grass» and «goods» (soil, lawn, tools) have no category since November 2026;
+ * they stay so that bringing such a category back is a change in the data only.
+ */
+export function formAttributes(form: CategoryForm | undefined, plant = { foliage: false, rootSystem: false }): AttrDef[] {
+  switch (form) {
+    case 'service':
+      return serviceAttrs
+    case 'plant':
+      return plantAttrs(plant)
+    case 'pack':
+      return packAttrs
+    case 'grass':
+      return grassAttrs
+    case 'goods':
+      return goodsAttrs
+    default:
+      return [availability]
+  }
 }
 
 /** Attributes in play right now (a conditional one only while its condition holds). */
@@ -127,12 +146,21 @@ export function visibleAttributes(categoryId: string, values: Record<string, str
 }
 
 /** Price units a category offers, the first being the default. */
-export function unitsFor(categoryId: string): PriceUnit[] {
-  if (categoryId === SERVICE_CATEGORY) return ['job', 'sqm', 'hour', 'piece']
-  if (PLANT_CATEGORIES.includes(categoryId)) return ['piece', 'set']
-  if (categoryId === 'cim-toxumlar') return ['sqm', 'kg', 'bag']
-  if (categoryId === 'torpaq-gubreler') return ['bag', 'kg', 'litre']
-  return ['piece', 'set', 'metre']
+export const unitsFor = (categoryId: string): PriceUnit[] => formUnits(categoryById(categoryId)?.form)
+
+export function formUnits(form: CategoryForm | undefined): PriceUnit[] {
+  switch (form) {
+    case 'service':
+      return ['job', 'sqm', 'hour', 'piece']
+    case 'plant':
+      return ['piece', 'set']
+    case 'grass':
+      return ['sqm', 'kg', 'bag']
+    case 'pack':
+      return ['bag', 'kg', 'litre']
+    default:
+      return ['piece', 'set', 'metre']
+  }
 }
 
 export const unitOptions = (categoryId: string): FilterOption[] => unitsFor(categoryId).map((u) => ({ value: u, label: priceUnitLabels[u] }))

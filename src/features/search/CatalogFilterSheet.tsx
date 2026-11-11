@@ -3,9 +3,11 @@
 import { useEffect, useId, useState } from 'react'
 import { ChevronDown } from 'lucide-react'
 import { listboxChevronClass } from '@/components/ui/Listbox'
-import { productCategories } from '@/data/categories'
+import { hasRootSystemFilter } from '@/data/categories'
 import { cn, formatNumber } from '@/lib/format'
-import { countCatalog } from './countAction'
+import { CategoryAccordion } from './CategoryAccordion'
+import { countCatalog, type SheetCounts } from './countAction'
+import type { CategoryFacets } from './facets'
 import { ChoiceOptions, optionClass, PriceFields, ToggleCheck } from './FilterControls'
 import {
   ageLabel,
@@ -14,13 +16,13 @@ import {
   heightLabel,
   heightOptions,
   priceError,
+  rootOptions,
   sellerOptions,
   toggleLabels,
   type FilterOption,
 } from './filterDefs'
 import { FilterSheetSection, FilterSheetShell } from './FilterSheetShell'
-import { withoutFilters, writeSearchState, type SearchState } from './searchUrl'
-import { subcategoryOptions } from './taxonomy'
+import { selectCategory, withoutFilters, writeSearchState, type SearchState } from './searchUrl'
 
 interface CatalogFilterSheetProps {
   open: boolean
@@ -29,33 +31,34 @@ interface CatalogFilterSheetProps {
   state: SearchState
   /** Results for the applied filters (the first count, before anything changes). */
   total: number
+  /** The category accordion's counts for the applied filters (then the server recounts the draft). */
+  counts: CategoryFacets
   /** Species of the applied category, from the server. */
   speciesOptions: FilterOption[]
   plantCategoryIds: string[]
   onApply: (next: SearchState) => void
 }
 
-const categoryOptions = productCategories.map((c) => ({ value: c.id, label: c.name }))
 const queryOf = (state: SearchState) => writeSearchState(state, new URLSearchParams()).toString()
 const withCustom = (options: FilterOption[], value: string, label: (v: string) => string) =>
   !value || options.some((o) => o.value === value) ? options : [...options, { value, label: label(value) }]
 
 /**
  * «Filtrlər» below 1280 px: the home sheet (FilterSheetShell, a bottom sheet on phones) with every catalogue
- * filter. Changes stay in a draft until «N elanı göstər», whose count comes from the server as you go (a Server
- * Function, 200 ms after the last change); closing the sheet drops the draft. «Sıfırla» clears the draft's
- * filters and keeps the search word.
+ * filter; Kateqoriya is the sidebar's accordion, as toggle buttons. Changes stay in a draft until «N elanı göstər»;
+ * that count and the accordion's numbers come from the server as you go (a Server Function, 200 ms after the last
+ * change); closing the sheet drops the draft. «Sıfırla» clears the draft's filters and keeps the search word.
  */
-export function CatalogFilterSheet({ open, onClose, state, total, speciesOptions, plantCategoryIds, onApply }: CatalogFilterSheetProps) {
+export function CatalogFilterSheet({ open, onClose, state, total, counts, speciesOptions, plantCategoryIds, onApply }: CatalogFilterSheetProps) {
   const errorId = useId()
   const [draft, setDraft] = useState(state)
-  const [counted, setCounted] = useState({ query: queryOf(state), total })
+  const [counted, setCounted] = useState<SheetCounts & { query: string }>({ query: queryOf(state), total, ...counts })
   const [wasOpen, setWasOpen] = useState(open)
   if (open !== wasOpen) {
     setWasOpen(open)
     if (open) {
       setDraft(state)
-      setCounted({ query: queryOf(state), total })
+      setCounted({ query: queryOf(state), total, ...counts })
     }
   }
   const set = (patch: Partial<SearchState>) => setDraft((d) => ({ ...d, ...patch }))
@@ -66,7 +69,7 @@ export function CatalogFilterSheet({ open, onClose, state, total, speciesOptions
     let stale = false
     const timer = setTimeout(async () => {
       const next = await countCatalog(draftQuery)
-      if (!stale) setCounted({ query: draftQuery, total: next })
+      if (!stale) setCounted({ query: draftQuery, ...next })
     }, 200)
     return () => {
       stale = true
@@ -80,7 +83,6 @@ export function CatalogFilterSheet({ open, onClose, state, total, speciesOptions
   // The count belongs to an edited draft (not the filters the sheet opened with): a new number fades in.
   const recounted = counted.query !== queryOf(state)
   const plant = !draft.categoryId || plantCategoryIds.includes(draft.categoryId)
-  const subcategories = draft.categoryId ? subcategoryOptions(draft.categoryId) : []
   const species = draft.categoryId === state.categoryId ? speciesOptions : []
   const unchanged = queryOf(withoutFilters(draft)) === draftQuery
 
@@ -118,13 +120,16 @@ export function CatalogFilterSheet({ open, onClose, state, total, speciesOptions
       }}
     >
       <FilterSheetSection group="category" title={filterTitles.category}>
-        <ChoiceOptions options={categoryOptions} value={draft.categoryId} onPick={(categoryId) => set({ categoryId, subcategory: '', species: '' })} touch />
+        {/* While a recount runs the numbers dim (after 150 ms), like «N elanı göstər». */}
+        <div className={cn('-mx-2.5 transition-opacity duration-(--dur-base) ease-out', !current && 'opacity-60 delay-150')}>
+          <CategoryAccordion
+            value={draft}
+            counts={counted}
+            onSelect={(choice) => setDraft((d) => selectCategory(d, choice.categoryId, choice.subcategory))}
+            touch
+          />
+        </div>
       </FilterSheetSection>
-      {subcategories.length > 0 && (
-        <FilterSheetSection group="subcategory" title="Alt kateqoriya">
-          <ChoiceOptions options={subcategories} value={draft.subcategory} onPick={(subcategory) => set({ subcategory })} touch />
-        </FilterSheetSection>
-      )}
       <FilterSheetSection group="price" title={filterTitles.price}>
         <PriceFields value={{ min: draft.min, max: draft.max }} onChange={(range) => set(range)} error={error} errorId={errorId} touch />
       </FilterSheetSection>
@@ -136,6 +141,11 @@ export function CatalogFilterSheet({ open, onClose, state, total, speciesOptions
       {(plant || draft.age) && (
         <FilterSheetSection group="age" title={filterTitles.age}>
           <ChoiceOptions options={withCustom(ageOptions, draft.age, ageLabel)} value={draft.age} onPick={(age) => set({ age })} touch />
+        </FilterSheetSection>
+      )}
+      {(hasRootSystemFilter(draft.categoryId) || draft.root) && (
+        <FilterSheetSection group="root" title={filterTitles.root}>
+          <ChoiceOptions options={rootOptions} value={draft.root} onPick={(root) => set({ root })} touch />
         </FilterSheetSection>
       )}
       {species.length > 0 && (

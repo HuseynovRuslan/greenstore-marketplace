@@ -12,6 +12,7 @@
  * become soft-404 doorway pages. These rules only matter once the site-wide switch in env.ts allows indexing.
  */
 import type { SearchState } from '@/features/search/searchState'
+import type { Category } from '@/types'
 
 /** Results per catalogue page (/elanlar and the category pages). */
 export const CATALOG_PAGE_SIZE = 24
@@ -28,6 +29,14 @@ export interface IndexRule {
 
 export function categoryPath(categoryId: string, cityId?: string): string {
   return cityId ? `/kateqoriyalar/${categoryId}/${cityId}` : `/kateqoriyalar/${categoryId}`
+}
+
+/**
+ * Where a category opens (home categories row, footer): product categories their own page, the services umbrella
+ * the services catalogue (/kateqoriyalar/… only knows product categories).
+ */
+export function categoryHref(category: Pick<Category, 'id' | 'kind'>): string {
+  return category.kind === 'service' ? '/xidmetler' : categoryPath(category.id)
 }
 
 export function withPage(path: string, page: number): string {
@@ -61,6 +70,7 @@ export function catalogRule(state: SearchState, count: number, page: number): In
     species: state.species !== '',
     height: state.height !== '',
     age: state.age !== '',
+    root: state.root !== '',
     vip: state.vip,
     delivery: state.delivery,
     seller: state.sellerType !== '',
@@ -72,6 +82,7 @@ export function catalogRule(state: SearchState, count: number, page: number): In
     filters.species ||
     filters.height ||
     filters.age ||
+    filters.root ||
     filters.vip ||
     filters.delivery ||
     filters.seller

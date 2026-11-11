@@ -6,28 +6,38 @@ purpose. Kept up to date as steps land; remove an item when it is done.
 ## Design
 
 - **Page links** do not dim the results while the next page loads; filter changes do.
-- **Filter column gap:** when the sidebar is shorter than the window and the header hides, a 76 px gap shows above it.
 
 ## Accessibility
 
+- Hero background rotation has no pause control (WCAG 2.2.2). The team will decide; the proposed fix is a pause
+  button that appears on keyboard focus. (Today: the rotation stops in a hidden tab, and with reduced motion only
+  the first photo shows, still.)
+- **Hero category pills, hovered or selected:** the pill fill goes from 12 % to 20 % white, and since the calmer hero
+  background (11 Nov 2026) the white name drops to 3.9:1 at the lightest photo pixel (at rest ≥ 4.6:1; before the
+  change, hovered ≥ 4.4:1). Two ways out: keep the 12 % fill and show hover / selection with the border alone (then
+  ≥ 4.6:1 as at rest), or raise `--hero-shade-bottom` (index.css, .gs-hero) from 78 % to 85 % (enough from 1024 px
+  up and on phones) or 91 % (also the two-row tablet layout at 768 px).
 - **Targets under 44 px** (audit of 5 Nov, item 6). All of them meet the WCAG 2.5.8 minimum of 24 px, but not the
   44 px the project aims for. The favourite button is done (44 px since the card step). Still under 44 px:
   - section links («Bütün elanlara bax», «Bütün xidmətlər», «Biznes satıcıların elanları») 20 px tall;
-  - footer links 17 px tall;
   - bottom-nav items 40 px.
 - **Screen reader pass:** nothing has been checked with NVDA or VoiceOver yet; so far only axe-core and keyboard checks.
 
 ## Backend (Ruslan) — see [categories.md](categories.md)
 
-- Proposed params for the pending filters: `kok`, `movcudluq`, `ekin`, and `catdirilma` on services.
+- Proposed params for the pending filters: `movcudluq`, `ekin`, and `catdirilma` on services (`kok` is live since
+  the November 2026 categories).
 - **«Hamısı» searches only `/elanlar`**, so services are left out of its results. A combined results page (or API
   support for one search across products and services) is needed; discuss with Ruslan.
-- Real sub-categories for `kollar` and `otaq-bitkileri` (the current lists are placeholders).
-- Redirects for the removed category URLs `/kateqoriyalar/dekorativ-bitkiler` and `/kateqoriyalar/dibcekler-dekorasiya`.
+- **November 2026 categories** (preliminary, from management): confirm the demo example plants per sub-category,
+  decide what happens to real listings in the six removed categories, and whether listings get a sub-category id
+  ([categories.md](categories.md)). The older removed URLs `/kateqoriyalar/dekorativ-bitkiler` and
+  `/kateqoriyalar/dibcekler-dekorasiya` still answer 404.
 - Category and city counts from the API instead of `src/data` (contract change). The catalogue's counts sit behind
   `getFacetCounts` (`src/features/search/facets.ts`), and the sheet's count behind `countCatalog`; see
   [elanlar.md](elanlar.md).
-- Species (`nov`) and sub-category (`alt`) filters need API fields; today they are derived from the sample data.
+- Species (`nov`) and sub-category (`alt`) filters need API fields; today they are derived from the sample data
+  (`alt` already takes the sub-category ids of `src/data/categories.ts`).
 - **Price 0 — «Razılaşma ilə»?** `Listing.price` is a plain number, so a listing without a fixed price would show
   «0 ₼» on cards and rows (`formatPrice`, `src/lib/format.ts`). Does the API send 0 for "price on request"? If so,
   the UI should show «Razılaşma ilə» instead, and the contract needs a way to say it (a nullable `price` or a

@@ -1,35 +1,24 @@
 import type { ReactNode } from 'react'
 import { SiteHeader } from './SiteHeader'
-import { CompactFooter, SiteFooter } from './SiteFooter'
+import { CompactFooter } from './CompactFooter'
 import { MobileNav } from './MobileNav'
 import { WorkflowHeader } from './WorkflowHeader'
 import { DemoBanner } from './DemoBanner'
 import { MAIN_ID } from './ids'
 
 /*
- * The four header/footer variants of the Figma file, used by the route-group layouts in src/app.
+ * The header/footer variants of the Figma file, used by the route-group layouts in src/app. The home frame lives in
+ * HomeFrame.tsx: its full footer brings a client island (the phone accordions, with Motion) that a module imported
+ * by every layout would put into every page's first load.
  * (Formerly src/layouts/Layouts.tsx; Next.js restores scroll and follows "#hash" links itself.)
  */
 
 /** Target of the skip link (SkipLink.tsx). scroll-mt-24 keeps its top clear of the sticky header (58–82 px). */
-function Main({ children }: { children: ReactNode }) {
+export function Main({ children }: { children: ReactNode }) {
   return (
     <main id={MAIN_ID} className="flex-1 scroll-mt-24 outline-none">
       {children}
     </main>
-  )
-}
-
-/** Home page: the one-row home header (Variant 2) + full footer (Figma "Ana səhifə"). */
-export function HomeFrame({ children }: { children: ReactNode }) {
-  return (
-    <div className="flex min-h-dvh flex-col pb-[calc(86px+env(safe-area-inset-bottom,0px))] md:pb-0">
-      <DemoBanner />
-      <SiteHeader />
-      <Main>{children}</Main>
-      <SiteFooter />
-      <MobileNav />
-    </div>
   )
 }
 

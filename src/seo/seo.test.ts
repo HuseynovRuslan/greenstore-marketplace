@@ -117,10 +117,11 @@ describe('robots.txt and sitemap', () => {
     for (const l of hidden) expect(urls).not.toContain(`/elanlar/${l.slug}`)
     for (const s of services) expect(urls).toContain(`/xidmetler/${s.slug}`)
     expect(urls).toEqual(expect.arrayContaining(['/', '/elanlar', '/xidmetler', '/saticilar/abseron-tingcilik', '/kateqoriyalar/agaclar']))
-    // Categories without listings and thin category × city pages are left out.
+    // Every plant category has listings; categories taken off the site and thin category × city pages are left out.
+    for (const id of ['agaclar', 'kollar', 'guller', 'sarmasiqlar', 'yer-ortucu-bitkiler']) expect(urls).toContain(`/kateqoriyalar/${id}`)
     expect(urls).not.toContain('/kateqoriyalar/cim-toxumlar')
-    expect(urls).toContain('/kateqoriyalar/agaclar/baki') // 3 listings
-    expect(urls).not.toContain('/kateqoriyalar/agaclar/quba') // 1 listing
+    expect(urls).toContain('/kateqoriyalar/agaclar/baki') // 4 listings
+    expect(urls).not.toContain('/kateqoriyalar/agaclar/sumqayit') // 1 listing
     expect(urls.some((u) => /^\/(kabinet|secilmisler|elan-yerlesdir|idareetme|daxil-ol|qeydiyyat)/.test(u))).toBe(false)
     expect(urls.some((u) => u.includes('?'))).toBe(false)
     expect(new Set(urls).size).toBe(urls.length)

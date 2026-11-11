@@ -6,13 +6,14 @@
  *   /xidmetler q · kateqoriya (service category) · seher · min · max
  * Filters without a backend param are never sent (docs/handoff/categories.md, "Filters waiting for backend").
  */
-import { listingTotals, productCategories } from '@/data/categories'
+import { productCategories } from '@/data/categories'
 import { serviceCategories } from '@/data/services'
-import { filterTitles, heightOptions, PARAM, priceValueLabel, toggleLabels, type FilterOption } from '@/features/search/filterDefs'
+import { filterTitles, heightOptions, PARAM, priceValueLabel, rootOptions, toggleLabels, type FilterOption } from '@/features/search/filterDefs'
 
 /**
- * Kök sistemi, Mövcudluq, Əkin daxil and Çatdırılma on services have no param yet, and the catalogue cannot show
- * them, so they are hidden until the backend confirms the params (the code stays). `true` shows them again.
+ * Mövcudluq, Əkin daxil and Çatdırılma on services have no param yet, and the catalogue cannot show them, so they
+ * are hidden until the backend confirms the params (the code stays). `true` shows them again. Kök sistemi became a
+ * catalogue filter in November 2026 (`kok`, Ağaclar and Kollar); the home chip is still hidden with the others.
  */
 export const SHOW_PENDING_FILTERS = false
 
@@ -20,11 +21,14 @@ export const SHOW_PENDING_FILTERS = false
 
 export type HeroTab = 'all' | 'products' | 'services'
 
-/** The placeholder is an example only; the field keeps its visually hidden label «Axtarış sözü». */
-export const heroTabs: Array<{ value: HeroTab; label: string; count: number; placeholder: string }> = [
-  { value: 'all', label: 'Hamısı', count: listingTotals.all, placeholder: 'Məsələn, zeytun ağacı' },
-  { value: 'products', label: 'Məhsullar', count: listingTotals.products, placeholder: 'Məsələn, zeytun ağacı' },
-  { value: 'services', label: 'Xidmətlər', count: listingTotals.services, placeholder: 'Məsələn, çim salınması' },
+/**
+ * The placeholder is an example only; the field keeps its visually hidden label «Axtarış sözü». The counts come from
+ * the server (heroCounts.ts).
+ */
+export const heroTabs: Array<{ value: HeroTab; label: string; placeholder: string }> = [
+  { value: 'all', label: 'Hamısı', placeholder: 'Məsələn, zeytun ağacı' },
+  { value: 'products', label: 'Məhsullar', placeholder: 'Məsələn, zeytun ağacı' },
+  { value: 'services', label: 'Xidmətlər', placeholder: 'Məsələn, çim salınması' },
 ]
 
 /* ---------- Filters ---------- */
@@ -84,13 +88,6 @@ export const heroFilterDefs: FilterDef[] = [
 export function visibleFilters(tab: HeroTab, showPending = SHOW_PENDING_FILTERS): FilterDef[] {
   return heroFilterDefs.filter((f) => !(f.productsOnly && tab === 'services') && (showPending || !f.pendingOn?.includes(tab)))
 }
-
-/** Pending: values proposed for the `kok` param. */
-export const rootOptions: FilterOption[] = [
-  { value: 'dibcek', label: 'Dibçəkdə' },
-  { value: 'torpaq-kuresi', label: 'Torpaq kürəsi ilə' },
-  { value: 'aciq-kok', label: 'Açıq kök' },
-]
 
 /** Pending: values proposed for the `movcudluq` param. */
 export const availabilityOptions: FilterOption[] = [
