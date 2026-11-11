@@ -24,6 +24,8 @@ export const cardFocusClass = 'has-[a:focus-visible]:outline-2 has-[a:focus-visi
  * bottom. Hover: olive border, soft shadow and the photo zooms to 1.03 (not under reduced motion). A photo that
  * fails to load leaves the box and a placeholder (CardImage).
  * Borders are inside the mockup box, so paddings and offsets are 1 px smaller here.
+ * The card is its own stacking context (isolate): the favourite button's z-10 only lifts it above the card's link,
+ * never above a popover from outside the card (the hero search card's lists open over the first row of cards).
  */
 export function ListingCard({ listing, className }: { listing: Listing; className?: string }) {
   const details = listing.attributes.join(' · ')
@@ -35,7 +37,7 @@ export function ListingCard({ listing, className }: { listing: Listing; classNam
     <article
       className={cn(
         // Press (the title link covers the card): the card dips to .98; not when the favourite button is pressed.
-        'group/card relative flex h-full w-full min-w-0 flex-col gap-2 rounded-xl border border-line bg-surface p-[7px] transition-[border-color,box-shadow,scale] duration-(--dur-base) ease-out hover:border-olive hover:shadow-card-hover has-[a:active]:scale-[0.98] has-[a:active]:duration-(--dur-fast) motion-reduce:has-[a:active]:scale-100 md:gap-3 md:p-[11px]',
+        'group/card relative isolate flex h-full w-full min-w-0 flex-col gap-2 rounded-xl border border-line bg-surface p-[7px] transition-[border-color,box-shadow,scale] duration-(--dur-base) ease-out hover:border-olive hover:shadow-card-hover has-[a:active]:scale-[0.98] has-[a:active]:duration-(--dur-fast) motion-reduce:has-[a:active]:scale-100 md:gap-3 md:p-[11px]',
         cardFocusClass,
         className,
       )}
