@@ -77,8 +77,9 @@ function afterLoadIdle(run: () => void) {
 }
 
 /**
- * The home hero's section with its photo background: three nursery photos (heroPhotos.ts) under the forest overlay,
- * each shown for --dur-hero-photo with a slow zoom, then cross-faded into the next (index.css, .gs-hero-photo). The
+ * The home hero's section with its photo background: three nursery photos (heroPhotos.ts), muted and under a forest
+ * shade (index.css, .gs-hero: one place for every value), each shown for --dur-hero-photo with a slow zoom, then
+ * cross-faded into the next (.gs-hero-photo). The
  * first photo is the LCP image, rendered on the server and preloaded; the other two load only once the page is
  * idle, and the rotation only moves on to a photo that has loaded. The section's forest background stands in while
  * the first photo loads, so the white text is never on white. The transparent site header sits on its top part
@@ -144,11 +145,11 @@ export function HeroStage({ children }: { children: ReactNode }) {
   return (
     // Stacking: the photos are a z-0 layer of their own and the content a positioned layer after them; the section
     // itself is no stacking context, so the search card (z-10) and its popovers still paint over the sections below.
-    <section id={HERO_ID} aria-labelledby="hero-title" data-paused={paused || undefined} className="relative w-full bg-forest">
+    <section id={HERO_ID} aria-labelledby="hero-title" data-paused={paused || undefined} className="gs-hero relative w-full bg-forest">
       {/* Clipped here, not on the section: the search card's popovers reach below the hero. */}
       <div aria-hidden className="absolute inset-0 z-0 overflow-hidden">
         {heroPhotos.map((photo, i) => (
-          // 8 px past the edges: the zoom and the blur never show an edge.
+          // 8 px past the edges: the framing the photo positions (heroPhotos.ts) were chosen for.
           <div
             key={photo.src}
             ref={i === 0 ? firstLayer : undefined}
@@ -176,7 +177,7 @@ export function HeroStage({ children }: { children: ReactNode }) {
             )}
           </div>
         ))}
-        <div className="absolute inset-0 z-10 bg-linear-to-b from-hero-overlay-top to-hero-overlay-bottom" />
+        <div className="gs-hero-shade absolute inset-0 z-10" />
       </div>
 
       <div className="relative">{children}</div>

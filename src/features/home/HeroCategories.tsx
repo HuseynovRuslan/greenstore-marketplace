@@ -14,8 +14,9 @@ import type { Category } from '@/types'
  * search card (a mint edge). `#kateqoriyalar` is the target of the menu link "Kateqoriyalar". `items` are the
  * product categories with their counts (heroCounts.ts; the dev worst-case page passes its own).
  *
- * Contrast: name (white) on the pill over the photos ≥ 5.3:1 (lightest photo pixel, see --color-hero-overlay), count
- * forest on mint 10:1, the mint focus outline ≥ 3:1 on the photo.
+ * Contrast: name (white) on the pill over the photos ≥ 4.6:1 (lightest photo pixel, see .gs-hero in index.css; on a
+ * hovered or selected pill 3.9:1, a known gap in docs/handoff/follow-ups.md), count forest on mint 10:1, the mint
+ * focus outline ≥ 3:1 on the photo.
  */
 export function HeroCategories({ items, selected, className }: { items: Category[]; selected?: string; className?: string }) {
   return (

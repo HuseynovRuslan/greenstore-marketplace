@@ -12,6 +12,11 @@ purpose. Kept up to date as steps land; remove an item when it is done.
 - Hero background rotation has no pause control (WCAG 2.2.2). The team will decide; the proposed fix is a pause
   button that appears on keyboard focus. (Today: the rotation stops in a hidden tab, and with reduced motion only
   the first photo shows, still.)
+- **Hero category pills, hovered or selected:** the pill fill goes from 12 % to 20 % white, and since the calmer hero
+  background (11 Nov 2026) the white name drops to 3.9:1 at the lightest photo pixel (at rest ≥ 4.6:1; before the
+  change, hovered ≥ 4.4:1). Two ways out: keep the 12 % fill and show hover / selection with the border alone (then
+  ≥ 4.6:1 as at rest), or raise `--hero-shade-bottom` (index.css, .gs-hero) from 78 % to 85 % (enough from 1024 px
+  up and on phones) or 91 % (also the two-row tablet layout at 768 px).
 - **Targets under 44 px** (audit of 5 Nov, item 6). All of them meet the WCAG 2.5.8 minimum of 24 px, but not the
   44 px the project aims for. The favourite button is done (44 px since the card step). Still under 44 px:
   - section links («Bütün elanlara bax», «Bütün xidmətlər», «Biznes satıcıların elanları») 20 px tall;

@@ -18,8 +18,7 @@ import type { HomeContent } from '@/services/repository'
  * November 2026, so that «Önə çıxan elanlar» and the top of its cards show without scrolling from 1280 × 720 up:
  * 28 / 24 px above and below from md, 20 px between heading, card and categories, and a one-line categories row.
  * The transparent header (58 / 76 px, HomeHeader) sits on the top of the photo, so the top padding adds its
- * height. The text's contrast over the photos is measured at their lightest pixels: see --color-hero-overlay in
- * index.css.
+ * height. The text's contrast over the photos is measured at their lightest pixels: see .gs-hero in index.css.
  */
 function Hero({ counts }: { counts: HeroCounts }) {
   return (
