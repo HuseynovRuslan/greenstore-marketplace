@@ -336,12 +336,16 @@
   }
 }
 
-/* Catalogue bar below 1280 px («Filtrlər (n)», sort, view): sticks under the header (58 px, 76 px from md). */
+/*
+ * Catalogue bar below 1280 px («Filtrlər (n)», sort, view): sticks under the header (58 px, 76 px from md). z-20:
+ * above the result cards it slides over, under the popovers (z-30) of the search card above it, whose city list opens
+ * down over the bar.
+ */
 @layer components {
   .gs-catalog-bar {
     position: sticky;
     top: 58px;
-    z-index: 30;
+    z-index: 20;
   }
   @media (width >= 48rem) {
     .gs-catalog-bar {
