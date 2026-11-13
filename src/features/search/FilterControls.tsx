@@ -57,26 +57,26 @@ interface PriceFieldsProps {
   error?: string
   errorId: string
   touch?: boolean
-  /** One field per row (the 256 px sidebar): side by side, a 6–7 digit price did not fit after «maks.». */
-  stacked?: boolean
+  /**
+   * «min.» and «maks.» above the fields instead of inside them (the 256 px sidebar): the fields stay side by side
+   * and a 7-digit price still fits (inside, the word left room for about five digits).
+   */
+  captions?: boolean
 }
 
+const fieldBox =
+  'flex h-11 min-w-0 items-center gap-1.5 rounded-option border border-line-strong px-3 text-[13px] leading-[normal] text-muted md:h-[42px] has-[input:focus-visible]:border-olive has-[input:focus-visible]:outline-1 has-[input:focus-visible]:outline-olive has-aria-invalid:border-danger'
+
 /** «min.» – «maks.» fields (digits only) and the four presets; picking the chosen preset again clears the price. */
-export function PriceFields({ value, onChange, onSubmit, error, errorId, touch, stacked }: PriceFieldsProps) {
+export function PriceFields({ value, onChange, onSubmit, error, errorId, touch, captions }: PriceFieldsProps) {
   // Enter finishes the typed range instead of submitting the surrounding form.
   const onKeyDown = (e: ReactKeyboardEvent<HTMLInputElement>) => {
     if (e.key !== 'Enter' || !onSubmit) return
     e.preventDefault()
     onSubmit(value)
   }
-  const field = (key: 'min' | 'max', prefix: string, label: string) => (
-    <label
-      className={cn(
-        'flex h-11 min-w-0 items-center gap-1.5 rounded-option border border-line-strong px-3 text-[13px] leading-[normal] text-muted md:h-[42px] has-[input:focus-visible]:border-olive has-[input:focus-visible]:outline-1 has-[input:focus-visible]:outline-olive has-aria-invalid:border-danger',
-        stacked ? 'w-full' : 'flex-1',
-      )}
-    >
-      {prefix}
+  const field = (key: 'min' | 'max', prefix: string, label: string) => {
+    const input = (
       <input
         type="text"
         inputMode="numeric"
@@ -90,18 +90,28 @@ export function PriceFields({ value, onChange, onSubmit, error, errorId, touch, 
         onKeyDown={onKeyDown}
         className="w-full min-w-0 flex-1 bg-transparent text-[15px] text-ink tabular-nums outline-none pointer-coarse:text-base"
       />
-    </label>
-  )
+    )
+    return captions ? (
+      <label className="flex min-w-0 flex-1 flex-col gap-1.5">
+        <span className="text-[13px] leading-4 text-muted">{prefix}</span>
+        <span className={fieldBox}>{input}</span>
+      </label>
+    ) : (
+      <label className={cn(fieldBox, 'flex-1')}>
+        {prefix}
+        {input}
+      </label>
+    )
+  }
   return (
     <>
-      <div className={stacked ? 'flex flex-col gap-2' : 'flex items-center gap-2'}>
-        {/* Each name starts with the field's visible prefix (label in name, WCAG 2.5.3). */}
+      <div className={cn('flex gap-2', captions ? 'items-end' : 'items-center')}>
+        {/* Each name starts with the field's visible word (label in name, WCAG 2.5.3). */}
         {field('min', 'min.', 'min. qiymət, ₼')}
-        {!stacked && (
-          <span aria-hidden className="text-muted">
-            –
-          </span>
-        )}
+        {/* With captions the dash centres on the boxes, not on the caption + box column. */}
+        <span aria-hidden className={cn('text-muted', captions && 'flex h-11 items-center md:h-[42px]')}>
+          –
+        </span>
         {field('max', 'maks.', 'maks. qiymət, ₼')}
       </div>
       {error && (

@@ -44,10 +44,11 @@ const withCustom = (options: FilterOption[], value: string, label: (v: string) =
 /**
  * Catalogue filters, ≥ 1280 px (Variant 2 controls): every change applies at once. Kateqoriya is a white card with
  * the category accordion (links with counts; docs/design/elanlar/kateqoriya-sidebar.png); the other groups follow
- * on the page, lined up with the card's text. Qiymət has the home presets and min/max fields applied with Enter or
- * «Tətbiq et»; Hündürlük and Yaş use the home pills (plants only); Kök sistemi only where the category has it
- * (src/data/categories.ts); Növ is a Listbox; Satıcı and Əlavə are pills. Yaş, Növ and Satıcı fold away while they
- * are not set, so the column stays short.
+ * on the page, lined up with the card's text. Qiymət has the home presets and min/max fields side by side (their
+ * words above them), applied with Enter or «Tətbiq et»; Hündürlük and Yaş use the home pills (plants only); Kök
+ * sistemi only where the category has it (src/data/categories.ts); Növ is a Listbox (hidden for now:
+ * SHOW_SPECIES_FILTER); Satıcı and Əlavə are pills. Yaş, Növ and Satıcı fold away while they are not set, so the
+ * column stays short.
  */
 export function FilterSidebar({ state, current, facets, speciesOptions, showPlantFilters, onChange }: FilterSidebarProps) {
   const titleId = useId()
@@ -188,7 +189,7 @@ function PriceGroup({ state, onApply }: { state: SearchState; onApply: (range: P
   }
   return (
     <div className="flex flex-col gap-3">
-      <PriceFields value={draft} onChange={setDraft} onSubmit={apply} error={error} errorId={errorId} stacked />
+      <PriceFields value={draft} onChange={setDraft} onSubmit={apply} error={error} errorId={errorId} captions />
       {changed && (
         <button
           type="button"

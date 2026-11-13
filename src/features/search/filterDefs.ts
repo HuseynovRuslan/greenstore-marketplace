@@ -167,6 +167,13 @@ export function sellerChipLabel(value: SellerTypeParam): string | undefined {
 
 /* ---------- Group titles and toggles ---------- */
 
+/**
+ * «Növ» is hidden on /elanlar for now (13 Nov 2026, the user's call; the code stays): the page sends no species
+ * options, so the sidebar and the sheet leave the group out. A species in an older link still filters and shows
+ * its chip. `true` brings the group back.
+ */
+export const SHOW_SPECIES_FILTER = false
+
 /** Popover / sheet / sidebar group titles (the home chips use the same words as chip labels). */
 export const filterTitles = {
   category: 'Kateqoriya',

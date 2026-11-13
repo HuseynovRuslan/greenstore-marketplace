@@ -6,6 +6,7 @@ import { cityName } from '@/data/cities'
 import { PLANT_CATEGORY_IDS } from '@/data/postAd'
 import { CatalogResults, RESULTS_ID } from '@/features/search/CatalogResults'
 import { getFacetCounts, getRemovalCounts } from '@/features/search/facets'
+import { SHOW_SPECIES_FILTER } from '@/features/search/filterDefs'
 import { ListingRow } from '@/features/search/ListingRow'
 import { speciesOptions } from '@/features/search/species'
 import { subcategoryName } from '@/features/search/taxonomy'
@@ -121,7 +122,7 @@ export default async function SearchPage({ state, sort, view, result, stateQuery
       chips={chips}
       removalCounts={removalCounts}
       facets={facets}
-      speciesOptions={speciesOptions(state.categoryId)}
+      speciesOptions={SHOW_SPECIES_FILTER ? speciesOptions(state.categoryId) : []}
       plantCategoryIds={PLANT_CATEGORY_IDS}
       breadcrumb={<SearchBreadcrumb crumbs={crumbs} />}
       results={results}
