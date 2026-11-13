@@ -8,6 +8,7 @@ import { CatalogResults, RESULTS_ID } from '@/features/search/CatalogResults'
 import { getFacetCounts, getRemovalCounts } from '@/features/search/facets'
 import { SHOW_SPECIES_FILTER } from '@/features/search/filterDefs'
 import { ListingRow } from '@/features/search/ListingRow'
+import { getServiceMatches } from '@/features/search/serviceMatches'
 import { speciesOptions } from '@/features/search/species'
 import { subcategoryName } from '@/features/search/taxonomy'
 import { withSearchCover } from '@/features/search/searchCovers'
@@ -83,7 +84,11 @@ interface SearchPageProps {
 export default async function SearchPage({ state, sort, view, result, stateQuery, basePath, urlQuery, crumbs }: SearchPageProps) {
   const items = result.items.map(withSearchCover)
   const chips = activeChips(state)
-  const [facets, removalCounts] = await Promise.all([getFacetCounts(state), result.total === 0 ? getRemovalCounts(chips) : undefined])
+  const [facets, removalCounts, serviceMatches] = await Promise.all([
+    getFacetCounts(state),
+    result.total === 0 ? getRemovalCounts(chips) : undefined,
+    getServiceMatches(state),
+  ])
 
   const results =
     view === 'grid' ? (
@@ -121,6 +126,7 @@ export default async function SearchPage({ state, sort, view, result, stateQuery
       heading={searchHeading(state)}
       chips={chips}
       removalCounts={removalCounts}
+      serviceMatches={serviceMatches}
       facets={facets}
       speciesOptions={SHOW_SPECIES_FILTER ? speciesOptions(state.categoryId) : []}
       plantCategoryIds={PLANT_CATEGORY_IDS}

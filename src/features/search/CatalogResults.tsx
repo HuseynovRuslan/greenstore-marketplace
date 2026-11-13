@@ -12,6 +12,8 @@ import { FiltersButton } from './FilterControls'
 import { FilterSidebar } from './FilterSidebar'
 import type { FilterOption } from './filterDefs'
 import { ActiveFilterRow, SortSelect, ViewToggle } from './SearchControls'
+import type { ServiceMatches } from './serviceMatches'
+import { ServiceMatchesLink } from './ServiceMatchesLink'
 import { catalogHref, chipActive, emptySearchState, withoutFilters, withSort, withView, type FilterChip, type SearchState, type SearchView } from './searchUrl'
 import { useStickySide } from './useStickySide'
 import { SaveSearchButton } from '@/features/saved-searches/SaveSearchButton'
@@ -35,6 +37,8 @@ interface CatalogResultsProps {
   chips: FilterChip[]
   /** With 0 results: listings left after removing each chip (the empty state's suggestions). */
   removalCounts?: Record<string, number>
+  /** Services that match the search word: a link above the results, or the way out of an empty result. */
+  serviceMatches?: ServiceMatches
   facets: FacetCounts
   speciesOptions: FilterOption[]
   /** Categories whose listings are plants (height and age apply). */
@@ -177,17 +181,19 @@ export function CatalogResults(props: CatalogResultsProps) {
               <CatalogEmptyState
                 chips={shownChips}
                 removalCounts={props.removalCounts ?? {}}
+                services={props.serviceMatches}
                 filterCount={filterCount}
                 onRemove={(chip) => apply(chip.without)}
                 onReset={reset}
                 onShowAll={() => apply(emptySearchState)}
               />
             ) : (
-              <>
+              <div className="flex flex-col gap-4">
+                {props.serviceMatches && <ServiceMatchesLink matches={props.serviceMatches} />}
                 {/* The cards' titles are h3: a heading level between them and the h1 (axe heading-order). */}
                 <h2 className="sr-only">Elanlar</h2>
                 {props.results}
-              </>
+              </div>
             )}
             {total > 0 && props.pagination}
           </div>

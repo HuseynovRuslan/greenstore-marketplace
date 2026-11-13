@@ -149,8 +149,17 @@ export interface HeroSearchInput {
 }
 
 /**
- * The catalogue URL for a search. «Hamısı» has no combined results page yet, so it opens /elanlar like «Məhsullar».
- * Pending filters are never sent.
+ * A search URL with a word and nothing but a city. From «Hamısı» such a search may be for a service, so the hero
+ * asks the server where to go (allTabSearch.ts); any other search opens heroSearchUrl as it is.
+ */
+export function wordOnlySearch(url: string): boolean {
+  const params = new URLSearchParams(url.split('?')[1] ?? '')
+  return Boolean(params.get(PARAM.q)) && [...params.keys()].every((key) => key === PARAM.q || key === PARAM.city)
+}
+
+/**
+ * The catalogue URL for a search. «Hamısı» has no combined results page yet, so it opens /elanlar like «Məhsullar»
+ * (a word that only services have goes to /xidmetler: allTabSearch.ts). Pending filters are never sent.
  */
 export function heroSearchUrl({ tab, q, city, filters }: HeroSearchInput): string {
   const services = tab === 'services'

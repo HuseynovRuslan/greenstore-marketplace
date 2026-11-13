@@ -12,7 +12,8 @@ import { HeroCategories } from './HeroCategories'
 import type { HeroCounts } from './heroCounts'
 import { HeroFilterSheet, MobileFilterRow } from './HeroFilterSheet'
 import { HERO_QUERY_ID, HERO_SEARCH_ID } from './ids'
-import { emptyHeroFilters, filtersForTab, heroSearchUrl, heroTabs, type FilterId, type HeroFilters, type HeroTab } from './heroSearch'
+import { allTabSearchUrl } from './allTabSearch'
+import { emptyHeroFilters, filtersForTab, heroSearchUrl, heroTabs, wordOnlySearch, type FilterId, type HeroFilters, type HeroTab } from './heroSearch'
 
 /** The hero entrance is over by then (card 320 ms; last category 390 ms delay + 320 ms). */
 const HERO_ENTRANCE_MS = 1000
@@ -59,7 +60,15 @@ export function HeroSearchCard({ counts }: { counts: HeroCounts }) {
       return false
     }
     setShowError(false)
-    router.push(heroSearchUrl({ tab, q, city, filters }))
+    const url = heroSearchUrl({ tab, q, city, filters })
+    // «Hamısı» with only a word: the server says whether it is a product or a service search («qazon»).
+    if (tab === 'all' && wordOnlySearch(url)) {
+      void allTabSearchUrl(url)
+        .catch(() => url)
+        .then((target) => router.push(target))
+    } else {
+      router.push(url)
+    }
     return true
   }
 
