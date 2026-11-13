@@ -83,6 +83,7 @@ function searchText(service: Service): string {
       service.homeTitle ?? '',
       provider?.name ?? '',
       category?.name ?? '',
+      ...(category?.searchWords ?? []),
       ...service.areas,
       ...(service.description ?? []),
       ...(service.includes ?? []),

@@ -28,7 +28,7 @@ export type HeroTab = 'all' | 'products' | 'services'
 export const heroTabs: Array<{ value: HeroTab; label: string; placeholder: string }> = [
   { value: 'all', label: 'Hamısı', placeholder: 'Məsələn, zeytun ağacı' },
   { value: 'products', label: 'Məhsullar', placeholder: 'Məsələn, zeytun ağacı' },
-  { value: 'services', label: 'Xidmətlər', placeholder: 'Məsələn, çim salınması' },
+  { value: 'services', label: 'Xidmətlər', placeholder: 'Məsələn, qazon salınması' },
 ]
 
 /* ---------- Filters ---------- */

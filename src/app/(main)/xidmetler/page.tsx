@@ -27,7 +27,7 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
   const filtered = hasActiveFilters(parsed)
   const page = parsePage(query.get('sehife'))
   return pageMetadata({
-    title: page > 1 ? `Bağ xidmətləri — səhifə ${page}` : 'Bağ xidmətləri: landşaft, əkin, çim, suvarma',
+    title: page > 1 ? `Bağ xidmətləri — səhifə ${page}` : 'Bağ xidmətləri: landşaft, əkin, qazon, suvarma',
     description: `Bağınızın işini peşəkara həvalə edin: dizayndan gündəlik qulluğa — Azərbaycanda ${formatNumber(platformServiceTotal)} xidmət elanı.`,
     canonical: filtered ? undefined : withPage('/xidmetler', page),
     index: !filtered,

@@ -53,7 +53,7 @@ export const services: Service[] = [
       'Sahəyə baxış və ölçülərin götürülməsi',
       'Əkin planı və bitki seçimi',
       '3D landşaft konsepsiyası',
-      'Yaşıllaşdırma və çim salınması',
+      'Yaşıllaşdırma və qazon salınması',
       'Suvarma sisteminin planlaşdırılması',
       'Mövsümi qulluq üzrə tövsiyələr',
     ],
@@ -76,7 +76,7 @@ export const services: Service[] = [
   {
     id: 'cim-salinmasi',
     slug: 'cim-salinmasi-ve-qulluq',
-    title: 'Çim salınması və qulluq',
+    title: 'Qazon salınması və qulluq',
     priceLabel: '8 ₼/m²-dən',
     priceFrom: 8,
     providerId: 'yasil-mekan-landsaft',
@@ -132,13 +132,16 @@ export const services: Service[] = [
  */
 export const serviceListingTotal = 95
 
-/** Service categories (tiles on "Xidmətlər · 1440", in Figma order). */
-export const serviceCategories = [
+/**
+ * Service categories (tiles on "Xidmətlər · 1440", in Figma order). `searchWords`: other words people search the
+ * category by (not shown). «Qazon salınması» was «Çim salınması» until 13 Nov 2026; «çim» still finds it.
+ */
+export const serviceCategories: Array<{ id: string; name: string; searchWords?: string[] }> = [
   { id: 'landsaft-dizayni', name: 'Landşaft dizaynı' },
   { id: 'heyetyani-yasillasdirma', name: 'Həyətyanı sahələrin yaşıllaşdırılması' },
   { id: 'agac-ekilmesi', name: 'Ağac əkilməsi' },
   { id: 'avtomatik-suvarma', name: 'Avtomatik suvarma sistemləri' },
-  { id: 'cim-salinmasi', name: 'Çim salınması' },
+  { id: 'cim-salinmasi', name: 'Qazon salınması', searchWords: ['çim'] },
   { id: 'bag-baximi', name: 'Bağ baxımı' },
 ]
 
@@ -146,7 +149,7 @@ export const serviceCategories = [
 export const portfolio: Record<string, Array<{ title: string; description: string; image: string }>> = {
   'landsaft-dizayni': [
     { title: 'Mərdəkan · 420 m² həyət', description: 'Landşaft dizaynı, əkin və avtomatik suvarma', image: img('portfolio-merdekan') },
-    { title: 'Novxanı · 280 m² bağ', description: 'Çim salınması, istirahət zonası və bitki kompozisiyaları', image: img('portfolio-novxani') },
+    { title: 'Novxanı · 280 m² bağ', description: 'Qazon salınması, istirahət zonası və bitki kompozisiyaları', image: img('portfolio-novxani') },
   ],
 }
 

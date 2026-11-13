@@ -16,7 +16,7 @@ export function ServiceSearchCard({ query, q, cityId }: { query: string; q: stri
       query={query}
       action="/xidmetler"
       label="Xidmət axtarışı"
-      placeholder="Məsələn, çim salınması"
+      placeholder="Məsələn, qazon salınması"
       onSearch={(word, cities) => router.push(serviceHref(query, { q: word || undefined, erazi: cities[0] }))}
     />
   )
