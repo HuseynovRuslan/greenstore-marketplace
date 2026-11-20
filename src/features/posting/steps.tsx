@@ -67,7 +67,7 @@ export function CategoryStep({ draft, update, error }: StepProps) {
             onChange={() => update((d) => withCategory(d, 'service', SERVICE_CATEGORY))}
             icon={<Shovel size={22} strokeWidth={1.8} />}
             title="Xidmət göstərirəm"
-            description="Landşaft dizaynı, əkin, çim, suvarma, bağ baxımı"
+            description="Landşaft dizaynı, əkin, qazon, suvarma, bağ baxımı"
           />
         </div>
       </FieldGroup>
@@ -218,7 +218,7 @@ export function DetailsStep(props: StepProps) {
       <TextField
         id={id('title')}
         label="Başlıq"
-        placeholder={plant ? 'Məsələn: Tuya Smaragd — 140 sm, dibçəkdə' : draft.kind === 'service' ? 'Məsələn: Həyətə çim salınması' : 'Məsələn: Universal torpaq qarışığı, 20 litr'}
+        placeholder={plant ? 'Məsələn: Tuya Smaragd — 140 sm, dibçəkdə' : draft.kind === 'service' ? 'Məsələn: Həyətə qazon salınması' : 'Məsələn: Universal torpaq qarışığı, 20 litr'}
         hint={plant ? 'Növü və ölçünü yazın: alıcılar belə axtarır.' : 'Nə olduğunu qısa və dəqiq yazın.'}
         maxLength={TITLE_MAX + 20}
         autoComplete="off"

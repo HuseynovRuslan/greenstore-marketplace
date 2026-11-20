@@ -1,5 +1,5 @@
 import { describe, expect, it, beforeEach, vi } from 'vitest'
-import { render, screen, within } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { AppStoreProvider } from '@/state/store'
 import { loadHeroCounts } from '@/features/home/heroCounts'
@@ -144,6 +144,15 @@ describe('HomePage', () => {
     expect(screen.getByText('Ağac, gül, tinglər və bağçılıq xidmətləri — satıcı ilə birbaşa əlaqə saxlayın.')).toBeInTheDocument()
     await userEvent.type(within(form).getByRole('searchbox', { name: 'Axtarış sözü' }), 'zeytun')
     await userEvent.click(within(form).getByRole('button', { name: 'Axtar' }))
-    expect(push).toHaveBeenCalledWith('/elanlar?q=zeytun')
+    // «Hamısı» asks the server first whether the word is a product or a service search.
+    await waitFor(() => expect(push).toHaveBeenCalledWith('/elanlar?q=zeytun'))
+  })
+
+  it('opens the services from «Hamısı» for a word only they have', async () => {
+    await renderHome()
+    const form = screen.getByRole('search', { name: 'Elan axtarışı' })
+    await userEvent.type(within(form).getByRole('searchbox', { name: 'Axtarış sözü' }), 'Qazon')
+    await userEvent.click(within(form).getByRole('button', { name: 'Axtar' }))
+    await waitFor(() => expect(push).toHaveBeenCalledWith('/xidmetler?q=Qazon'))
   })
 })

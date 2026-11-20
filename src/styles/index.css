@@ -41,6 +41,8 @@
   --shadow-search-hero: 0px 14px 36px 0px rgba(9, 28, 22, 0.32); /* hero search card on the photo */
   --shadow-popover: 0px 16px 40px 0px rgba(23, 63, 50, 0.18); /* listbox and filter popovers */
   --shadow-header: 0px 6px 20px 0px rgba(23, 63, 50, 0.06); /* header once the page is scrolled */
+  /* header profile menu: a soft drop plus a tight contact shadow, lighter than the popovers' */
+  --shadow-menu: 0px 12px 28px -6px rgba(23, 63, 50, 0.14), 0px 2px 6px 0px rgba(23, 63, 50, 0.05);
 
   /* Radii added for Variant 2 (rounded-option / rounded-panel / rounded-search) */
   --radius-option: 10px; /* listbox options, header icon buttons */
@@ -528,6 +530,7 @@ html[data-favorites='none'] .favorites-some,
 html:not([data-favorites='none']) .favorites-none {
   display: none !important;
 }
-.auth-user-name::before {
-  content: var(--gs-user-name, '');
+/* The header avatar's letters before hydration (ProfileMenu); the script computes them from the stored name. */
+.auth-user-initials::before {
+  content: var(--gs-user-initials, '');
 }

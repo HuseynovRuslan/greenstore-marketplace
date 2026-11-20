@@ -7,6 +7,7 @@ import { cityName } from '@/data/cities'
 import { serviceCategories, services } from '@/data/services'
 import { Breadcrumb } from '@/features/seller/ui'
 import { optionClass } from '@/features/search/filterStyles'
+import type { ProductMatches } from '@/features/services/productMatches'
 import { RequestButton } from '@/features/services/RequestDialog'
 import { ServiceSearchCard, ServiceSort } from '@/features/services/ServiceCatalogControls'
 import { ServiceTile } from '@/features/services/ServiceTile'
@@ -37,7 +38,15 @@ const pricePresets = [
  * the card language of /elanlar, sort, pagination, empty state, and «Usta çağır» for a request to every provider of
  * a category. Phones get the categories as a chip row and the other filters under them.
  */
-export default function ServicesPage({ query, parsed, result }: { query: string; parsed: ServiceQuery; result: ServiceSearchResult }) {
+interface ServicesPageProps {
+  query: string
+  parsed: ServiceQuery
+  result: ServiceSearchResult
+  /** With no service found: product listings for the same word (the empty state points there). */
+  productMatches?: ProductMatches
+}
+
+export default function ServicesPage({ query, parsed, result, productMatches }: ServicesPageProps) {
   const countFor = (categoryId?: string) => filterServices(services, { ...parsed, categoryId }).length
   const heading = parsed.categoryId ? (serviceCategories.find((c) => c.id === parsed.categoryId)?.name ?? 'Bağ xidmətləri') : 'Bağ xidmətləri'
   const presetOn = (p: (typeof pricePresets)[number]) => String(parsed.minPrice ?? '') === (p.min ?? '') && String(parsed.maxPrice ?? '') === (p.max ?? '')
@@ -157,16 +166,34 @@ export default function ServicesPage({ query, parsed, result }: { query: string;
             </ul>
           ) : (
             <div className="flex justify-center py-4">
-              <EmptyState
-                icon={<Search aria-hidden size={30} strokeWidth={1.8} absoluteStrokeWidth />}
-                title="Bu seçimlə xidmət tapılmadı"
-                description="Filtrləri azaldın və ya «Usta çağır» ilə sorğu göndərin: uyğun ustalar özləri zəng edəcək."
-                action={
-                  <ButtonLink href="/xidmetler" fullWidth>
-                    Filtrləri təmizlə
-                  </ButtonLink>
-                }
-              />
+              {productMatches ? (
+                <EmptyState
+                  icon={<Search aria-hidden size={30} strokeWidth={1.8} absoluteStrokeWidth />}
+                  title="Bu seçimlə xidmət tapılmadı"
+                  description={`«${productMatches.q}» məhsullarda var: ${formatNumber(productMatches.total)} elan.`}
+                  action={
+                    <div className="flex w-full flex-col gap-3">
+                      <ButtonLink href={productMatches.href} fullWidth>
+                        Elanlara bax
+                      </ButtonLink>
+                      <ButtonLink href="/xidmetler" variant="secondary" fullWidth>
+                        Filtrləri təmizlə
+                      </ButtonLink>
+                    </div>
+                  }
+                />
+              ) : (
+                <EmptyState
+                  icon={<Search aria-hidden size={30} strokeWidth={1.8} absoluteStrokeWidth />}
+                  title="Bu seçimlə xidmət tapılmadı"
+                  description="Filtrləri azaldın və ya «Usta çağır» ilə sorğu göndərin: uyğun ustalar özləri zəng edəcək."
+                  action={
+                    <ButtonLink href="/xidmetler" fullWidth>
+                      Filtrləri təmizlə
+                    </ButtonLink>
+                  }
+                />
+              )}
             </div>
           )}
 

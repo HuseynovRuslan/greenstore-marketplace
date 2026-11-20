@@ -30,7 +30,7 @@ export const rulesPage: HelpPage = {
       list: [
         'Canlı bitkilər: ağac, kol, gül, otaq bitkisi, fidan, ting, toxum, rulon çəmən',
         'Bağ məhsulları: torpaq, gübrə, dibçək, alət, suvarma avadanlığı',
-        'Bağ xidmətləri: landşaft dizaynı, əkin, çim salınması, suvarma, bağ baxımı',
+        'Bağ xidmətləri: landşaft dizaynı, əkin, qazon salınması, suvarma, bağ baxımı',
       ],
     },
     {

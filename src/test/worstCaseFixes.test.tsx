@@ -67,15 +67,20 @@ describe('worst-case fixes', () => {
     expect(screen.getByRole('heading', { level: 3 }).className).not.toMatch(/line-clamp-1/)
   })
 
-  it('puts the sidebar price fields on two rows, without the dash', () => {
-    const { container, rerender } = render(<PriceFields value={{ min: '1000000', max: '9999999' }} onChange={() => {}} errorId="e" />)
-    expect(container.textContent).toContain('–')
-    rerender(<PriceFields value={{ min: '1000000', max: '9999999' }} onChange={() => {}} errorId="e" stacked />)
+  it('keeps the sidebar price fields side by side, with «min.» and «maks.» above them so 7 digits fit', () => {
+    render(<PriceFields value={{ min: '1000000', max: '9999999' }} onChange={() => {}} errorId="e" captions />)
     const fields = screen.getAllByRole('textbox')
     expect(fields).toHaveLength(2)
-    expect(fields[0].closest('label')).toHaveClass('w-full')
-    expect(fields[0].closest('label')?.parentElement).toHaveClass('flex-col')
-    expect(container.querySelector('[aria-hidden].text-muted')?.textContent).not.toBe('–')
+    const [min, max] = fields.map((f) => f.closest('label')!)
+    expect(min.parentElement).toBe(max.parentElement)
+    expect(min.parentElement).not.toHaveClass('flex-col')
+    expect(min.parentElement?.textContent).toContain('–')
+    // The word sits above the box, not inside it, so the box is all digits.
+    expect(min).toHaveClass('flex-col', 'flex-1')
+    expect(min.firstElementChild).toHaveTextContent('min.')
+    expect(fields[0].parentElement?.textContent).toBe('')
+    expect(fields[0]).toHaveAccessibleName('min. qiymət, ₼')
+    expect(fields[1]).toHaveAccessibleName('maks. qiymət, ₼')
   })
 
   it('keeps a long category name on one line, cut with an ellipsis only past the row width, and named in full', () => {

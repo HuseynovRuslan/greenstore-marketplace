@@ -101,7 +101,7 @@ export const sellers: Seller[] = [
     address: 'Bakı, Nərimanov rayonu, Təbriz küçəsi 18',
     contactPerson: 'Rauf Həsənli',
     about:
-      'Həyətlər, villalar və kommersiya məkanları üçün landşaft layihələri hazırlayırıq: ölçü, 3D konsepsiya, bitki seçimi, əkin, çim və avtomatik suvarma bir komandadan.',
+      'Həyətlər, villalar və kommersiya məkanları üçün landşaft layihələri hazırlayırıq: ölçü, 3D konsepsiya, bitki seçimi, əkin, qazon və avtomatik suvarma bir komandadan.',
     terms: 'İlk baxış Bakı daxilində pulsuzdur. Layihənin qiyməti sahəyə və materiallara görə razılaşdırılır.',
     businessKind: 'landscaping',
     hours: [...weekdays('09:00', '18:00'), { day: 6, open: '09:00', close: '18:00' }, { day: 7, closed: true }],

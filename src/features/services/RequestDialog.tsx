@@ -141,7 +141,7 @@ function RequestForm({ provider, serviceId, categoryId, onClose }: RequestProps 
         id="sorgu-description"
         label="Nə etmək lazımdır"
         rows={4}
-        placeholder="Məsələn: həyətə çim salmaq, 10 tuya əkmək, damcı suvarma qurmaq."
+        placeholder="Məsələn: həyətə qazon salmaq, 10 tuya əkmək, damcı suvarma qurmaq."
         value={form.description}
         maxLength={1000}
         error={errors.description}

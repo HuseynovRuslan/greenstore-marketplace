@@ -3,6 +3,7 @@ import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { loadHeroCounts } from '@/features/home/heroCounts'
 import { HeroSearchCard } from '@/features/home/HeroSearchCard'
+import { allTabSearchUrl } from '@/features/home/allTabSearch'
 import { mockRepository } from '@/services/mockRepository'
 import {
   activeFilterCount,
@@ -11,6 +12,7 @@ import {
   heroSearchUrl,
   SHOW_PENDING_FILTERS,
   visibleFilters,
+  wordOnlySearch,
   type HeroFilters,
 } from '@/features/home/heroSearch'
 
@@ -49,6 +51,25 @@ describe('hero search URL', () => {
   it('sends «Hamısı» to /elanlar and drops empty values', () => {
     expect(heroSearchUrl({ tab: 'all', q: 'qızılgül', city: '', filters: emptyHeroFilters })).toBe('/elanlar?q=q%C4%B1z%C4%B1lg%C3%BCl')
     expect(heroSearchUrl({ tab: 'all', q: '  ', city: '', filters: emptyHeroFilters })).toBe('/elanlar')
+  })
+})
+
+describe('«Hamısı» search', () => {
+  it('asks the server only about a word (and a city)', () => {
+    expect(wordOnlySearch('/elanlar?q=qazon')).toBe(true)
+    expect(wordOnlySearch('/elanlar?q=qazon&seher=baki')).toBe(true)
+    expect(wordOnlySearch('/elanlar?q=qazon&kateqoriya=agaclar')).toBe(false)
+    expect(wordOnlySearch('/elanlar?seher=baki')).toBe(false)
+    expect(wordOnlySearch('/elanlar')).toBe(false)
+  })
+
+  it('opens the services for a word only they have, and the catalogue otherwise', async () => {
+    expect(await allTabSearchUrl('/elanlar?q=Qazon')).toBe('/xidmetler?q=Qazon')
+    expect(await allTabSearchUrl('/elanlar?q=qazon&seher=baki')).toBe('/xidmetler?q=qazon&erazi=baki')
+    expect(await allTabSearchUrl('/elanlar?q=zeytun')).toBe('/elanlar?q=zeytun')
+    expect(await allTabSearchUrl('/elanlar?q=qazon&kateqoriya=agaclar')).toBe('/elanlar?q=qazon&kateqoriya=agaclar')
+    expect(await allTabSearchUrl('/elanlar?q=heçnəyoxdur')).toBe('/elanlar?q=heçnəyoxdur')
+    expect(await allTabSearchUrl('https://example.com/?q=qazon')).toBe('/elanlar')
   })
 })
 
@@ -101,7 +122,7 @@ describe('HeroSearchCard', () => {
     expect(screen.getByRole('searchbox', { name: 'Axtarış sözü' })).toHaveAttribute('placeholder', 'Məsələn, zeytun ağacı')
 
     await user.click(within(group).getByRole('radio', { name: /Xidmətlər/ }))
-    expect(screen.getByRole('searchbox', { name: 'Axtarış sözü' })).toHaveAttribute('placeholder', 'Məsələn, çim salınması')
+    expect(screen.getByRole('searchbox', { name: 'Axtarış sözü' })).toHaveAttribute('placeholder', 'Məsələn, qazon salınması')
     expect(within(form()).queryByRole('button', { name: /Hündürlük/ })).not.toBeInTheDocument()
     expect(within(form()).queryByRole('button', { name: /Kök sistemi/ })).not.toBeInTheDocument()
     expect(chip('Qiymət')).toBeInTheDocument()

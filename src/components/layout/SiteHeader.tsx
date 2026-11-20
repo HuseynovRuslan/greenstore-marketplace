@@ -9,6 +9,7 @@ import { ButtonLink } from '@/components/ui/Button'
 import { useSession } from '@/state/store'
 import { preHydrationClass } from '@/state/bootstrap'
 import { useHydrated } from './ClientGate'
+import { ProfileMenu } from './ProfileMenu'
 import { cn } from '@/lib/format'
 import { usePageScrolled, useScrolledPast } from '@/hooks/useHeaderState'
 import { HERO_QUERY_ID, HERO_SEARCH_ID } from '@/features/home/ids'
@@ -117,33 +118,20 @@ export function SiteHeader({
     </span>
   )
 
-  // 768–1279 px: the Figma 768 header has no "Daxil ol" text, so account access is a compact icon.
+  // Signed in: the avatar capsule with its menu (ProfileMenu), the same at every width from 768 px. Guests, 768–1279 px:
+  // the Figma 768 header has no "Daxil ol" text, so their account access is a compact icon.
   // Before hydration both session variants are rendered and CSS shows the one the browser knows (bootstrap.ts).
   const accountIcon = iconButton
   const account = (
     <>
       {showUser && (
-        <Link href="/kabinet" aria-label="Şəxsi kabinet" className={cn(accountIcon, 'xl:hidden', preClass('user'))}>
-          <UserRound aria-hidden size={20} strokeWidth={1.8} absoluteStrokeWidth />
-        </Link>
+        // Keyed by `active`: a menu left open in the home header that just went out of use doesn't come back open.
+        <ProfileMenu key={String(active)} fullName={user?.fullName} onSignOut={handleSignOut} className={preClass('user')} />
       )}
       {showGuest && (
         <Link href="/daxil-ol" aria-label="Daxil ol" className={cn(accountIcon, 'xl:hidden', preClass('guest'))}>
           <UserRound aria-hidden size={20} strokeWidth={1.8} absoluteStrokeWidth />
         </Link>
-      )}
-      {showUser && (
-        <span className={cn('hidden shrink-0 items-center gap-3 text-sm leading-[normal] whitespace-nowrap xl:inline-flex px-2', preClass('user'))}>
-          <Link
-            href="/kabinet"
-            className={cn('text-forest hover:text-olive-text over-hero:text-white over-hero:hover:text-mint', !hydrated && 'auth-user-name')}
-          >
-            {hydrated ? user?.fullName : null}
-          </Link>
-          <button type="button" onClick={handleSignOut} className="text-muted hover:text-forest over-hero:text-mint over-hero:hover:text-white">
-            Çıxış
-          </button>
-        </span>
       )}
       {showGuest && (
         <Link

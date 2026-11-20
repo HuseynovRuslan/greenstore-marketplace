@@ -1,9 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { act, render, screen, within } from '@testing-library/react'
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { HomeHeader } from '@/components/layout/HomeHeader'
 import { SiteHeader } from '@/components/layout/SiteHeader'
 import { AppStoreProvider } from '@/state/store'
+import { SESSION_KEY } from '@/state/bootstrap'
 
 vi.mock('next/navigation', () => ({
   useRouter: () => ({ push: vi.fn(), replace: vi.fn(), back: vi.fn(), prefetch: vi.fn(), refresh: vi.fn() }),
@@ -241,5 +242,141 @@ describe('header on pages without a hero', () => {
     await user.tab({ shift: true })
     expect(links[3]).toHaveFocus()
     expect(nav()).not.toHaveClass('opacity-0')
+  })
+})
+
+describe('profile menu (signed in)', () => {
+  beforeEach(() =>
+    localStorage.setItem(
+      SESSION_KEY,
+      JSON.stringify({ id: 'u-elvin', fullName: 'Elvin Əliyev', email: 'e@x.az', phone: '+994 50 555 12 34', accountType: 'business' }),
+    ),
+  )
+  afterEach(() => localStorage.clear())
+
+  const avatarLink = () => screen.getByRole('link', { name: 'Şəxsi kabinet' })
+  const chevron = () => screen.getByRole('button', { name: 'Hesab menyusu' })
+  const panel = () => screen.getByRole('group', { name: 'Elvin Əliyev' })
+  const capsuleArea = () => chevron().closest<HTMLElement>('.relative.shrink-0')!
+
+  it("shows the initials avatar in place of the name and «Çıxış», linking to the cabinet", () => {
+    renderPage({ hero: false })
+    expect(avatarLink()).toHaveAttribute('href', '/kabinet')
+    expect(avatarLink()).toHaveTextContent('EƏ')
+    expect(screen.queryByText('Elvin Əliyev')).toBeNull()
+    expect(screen.queryByRole('button', { name: 'Çıxış' })).toBeNull()
+    expect(chevron()).toHaveAttribute('aria-expanded', 'false')
+    // Two separate controls: the link holds no button and the button sits in no link.
+    expect(avatarLink().querySelector('button')).toBeNull()
+    expect(chevron().closest('a')).toBeNull()
+  })
+
+  it('opens from the chevron with the full name and «Çıxış», and closes on a second click or a press outside', async () => {
+    const user = userEvent.setup()
+    renderPage({ hero: false })
+    await user.click(chevron())
+    expect(chevron()).toHaveAttribute('aria-expanded', 'true')
+    expect(chevron()).toHaveAttribute('aria-controls', panel().id)
+    expect(within(panel()).getByText('Elvin Əliyev')).toBeInTheDocument()
+    expect(within(panel()).getByRole('button', { name: 'Çıxış' })).toBeInTheDocument()
+
+    await user.click(chevron())
+    expect(chevron()).toHaveAttribute('aria-expanded', 'false')
+    await user.click(chevron())
+    await user.click(document.body)
+    expect(chevron()).toHaveAttribute('aria-expanded', 'false')
+  })
+
+  it('works from the keyboard: Enter opens, Tab reaches the profile row and «Çıxış», Esc closes and returns focus to the chevron', async () => {
+    const user = userEvent.setup()
+    renderPage({ hero: false })
+    act(() => avatarLink().focus())
+    await user.tab()
+    expect(chevron()).toHaveFocus()
+    await user.keyboard('{Enter}')
+    expect(chevron()).toHaveAttribute('aria-expanded', 'true')
+    await user.tab()
+    expect(within(panel()).getByRole('link', { name: 'Elvin Əliyev' })).toHaveFocus()
+    await user.tab()
+    expect(within(panel()).getByRole('button', { name: 'Çıxış' })).toHaveFocus()
+    await user.keyboard('{Escape}')
+    expect(chevron()).toHaveAttribute('aria-expanded', 'false')
+    expect(chevron()).toHaveFocus()
+  })
+
+  it('closes when focus tabs out of it', async () => {
+    const user = userEvent.setup()
+    renderPage({ hero: false })
+    await user.click(chevron())
+    await user.tab() // the profile row
+    await user.tab() // «Çıxış»
+    await user.tab() // «Elan yerləşdir»
+    expect(chevron()).toHaveAttribute('aria-expanded', 'false')
+  })
+
+  it('opens on mouse hover, stays open over the panel, and closes once the pointer has left both', async () => {
+    const user = userEvent.setup()
+    renderPage({ hero: false })
+    await user.hover(avatarLink())
+    await waitFor(() => expect(chevron()).toHaveAttribute('aria-expanded', 'true'))
+    await user.hover(within(panel()).getByRole('button', { name: 'Çıxış' }))
+    await new Promise((resolve) => setTimeout(resolve, 250))
+    expect(chevron()).toHaveAttribute('aria-expanded', 'true')
+    await user.unhover(capsuleArea())
+    await waitFor(() => expect(chevron()).toHaveAttribute('aria-expanded', 'false'))
+  })
+
+  it('keeps a hover-opened menu open once the chevron is clicked', async () => {
+    const user = userEvent.setup()
+    renderPage({ hero: false })
+    await user.hover(chevron())
+    await waitFor(() => expect(chevron()).toHaveAttribute('aria-expanded', 'true'))
+    await user.click(chevron())
+    await user.unhover(capsuleArea())
+    await new Promise((resolve) => setTimeout(resolve, 250))
+    expect(chevron()).toHaveAttribute('aria-expanded', 'true')
+  })
+
+  it('leads to the cabinet from the whole profile row (avatar and full name), closing the menu', async () => {
+    const user = userEvent.setup()
+    renderPage({ hero: false })
+    await user.click(chevron())
+    const row = within(panel()).getByRole('link', { name: 'Elvin Əliyev' })
+    expect(row).toHaveAttribute('href', '/kabinet')
+    expect(row).toHaveTextContent('EƏElvin Əliyev') // the small avatar is inside the link
+    expect(row).toHaveClass('cursor-pointer', 'hover:bg-mint')
+    await user.click(row)
+    expect(chevron()).toHaveAttribute('aria-expanded', 'false')
+  })
+
+  it('does not open on a touch pointer passing over (a tap on the avatar just opens the cabinet)', async () => {
+    renderPage({ hero: false })
+    fireEvent.pointerOver(avatarLink(), { pointerType: 'touch' })
+    await new Promise((resolve) => setTimeout(resolve, 150))
+    expect(chevron()).toHaveAttribute('aria-expanded', 'false')
+  })
+
+  it('signs out with «Çıxış»: the guest header comes back', async () => {
+    const user = userEvent.setup()
+    renderPage({ hero: false })
+    await user.click(chevron())
+    await user.click(within(panel()).getByRole('button', { name: 'Çıxış' }))
+    expect(JSON.parse(localStorage.getItem(SESSION_KEY) ?? 'null')).toBeNull()
+    expect(screen.queryByRole('link', { name: 'Şəxsi kabinet' })).toBeNull()
+    expect(screen.getAllByRole('link', { name: 'Daxil ol' }).length).toBeGreaterThan(0)
+  })
+
+  it('turns glassy over the home hero with the same forest avatar; the panel stays plain', async () => {
+    const user = userEvent.setup()
+    const { container } = renderPage({ hero: true })
+    const { transparent } = homeHeaders(container)
+    const avatar = within(transparent).getByRole('link', { name: 'Şəxsi kabinet' }).firstElementChild!
+    expect(avatar).toHaveClass('bg-forest', 'text-white', 'inline-flex', 'items-center', 'justify-center', 'rounded-full', 'size-9')
+    expect(avatar.getAttribute('class')).not.toMatch(/over-hero:/)
+    expect(within(transparent).getByRole('button', { name: 'Hesab menyusu' })).toHaveClass('over-hero:text-white')
+    await user.click(within(transparent).getByRole('button', { name: 'Hesab menyusu' }))
+    for (const el of within(transparent).getByRole('group', { name: 'Elvin Əliyev' }).querySelectorAll('*')) {
+      expect(el.getAttribute('class') ?? '').not.toMatch(/over-hero:/)
+    }
   })
 })

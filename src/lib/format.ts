@@ -90,6 +90,21 @@ export function upperAz(value: string): string {
   return value.replace(/i/g, 'İ').replace(/ı/g, 'I').toUpperCase()
 }
 
+/**
+ * "AT" from "Abşeron Tingçilik"; one letter for one word. Only words that start with a letter count, so quotes and
+ * signs do not become initials («Yaşıl Ev» MMC → "YE", "4 Fəsil Bağ" → "FB"); whole characters, never half of one.
+ * Seller avatars and the header's profile avatar. The pre-hydration script (src/state/bootstrap.ts) repeats it for the
+ * header's first paint; bootstrap.test.ts keeps the two in step.
+ */
+export function initials(name: string): string {
+  const words = name
+    .split(/\s+/)
+    .map((w) => w.replace(/^[^\p{L}]+/u, ''))
+    .filter((w) => /^\p{L}/u.test(w))
+  const first = (w?: string) => (w ? Array.from(w)[0] : '')
+  return upperAz(words.length > 1 ? first(words[0]) + first(words[1]) : first(words[0]) || '?')
+}
+
 const AZ_ALPHABET = 'abcçdeəfgğhxıijkqlmnoöprsştuüvyz'
 const azRank = new Map([...AZ_ALPHABET].map((ch, i) => [ch, i]))
 

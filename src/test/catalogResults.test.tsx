@@ -3,6 +3,7 @@ import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { CatalogResults } from '@/features/search/CatalogResults'
 import { activeChips, parseSearchState } from '@/features/search/searchState'
+import type { ServiceMatches } from '@/features/search/serviceMatches'
 import { AppStoreProvider } from '@/state/store'
 
 const push = vi.fn()
@@ -21,7 +22,7 @@ const facets = {
   cities: { all: 16, byCity: { baki: 5 } },
 }
 
-function renderCatalog(query: string, total = 6, removalCounts?: Record<string, number>) {
+function renderCatalog(query: string, total = 6, removalCounts?: Record<string, number>, serviceMatches?: ServiceMatches) {
   const state = parseSearchState(new URLSearchParams(query))
   render(
     <AppStoreProvider>
@@ -36,6 +37,7 @@ function renderCatalog(query: string, total = 6, removalCounts?: Record<string, 
         heading="Ağaclar"
         chips={activeChips(state)}
         removalCounts={removalCounts}
+        serviceMatches={serviceMatches}
         facets={facets}
         speciesOptions={[{ value: 'zeytun-agaci', label: 'Zeytun ağacı' }]}
         plantCategoryIds={['agaclar', 'kollar']}
@@ -195,5 +197,19 @@ describe('CatalogResults', () => {
     renderCatalog('q=palma', 0, { q: 16 })
     await user.click(screen.getByRole('button', { name: 'Bütün elanlara bax' }))
     expect(push).toHaveBeenLastCalledWith('/elanlar', { scroll: false })
+  })
+
+  it('sends a word that only services have («qazon» from «Hamısı») to /xidmetler', () => {
+    renderCatalog('q=qazon', 0, { q: 16 }, { q: 'qazon', total: 2, href: '/xidmetler?q=qazon' })
+    expect(screen.getByText(/xidmətlərdə var/)).toHaveTextContent('«qazon» xidmətlərdə var: 2 xidmət.')
+    expect(screen.getByRole('link', { name: 'Xidmətlərə bax' })).toHaveAttribute('href', '/xidmetler?q=qazon')
+    // «Bütün elanlara bax» stays, so the chip that drops the word would only repeat it.
+    expect(screen.queryByRole('button', { name: /olmadan/ })).toBeNull()
+    expect(screen.getByRole('button', { name: 'Bütün elanlara bax' })).toBeInTheDocument()
+  })
+
+  it('points to the matching services above product results', () => {
+    renderCatalog('q=landşaft', 3, undefined, { q: 'landşaft', total: 1, href: '/xidmetler?q=lands%C5%9Faft' })
+    expect(screen.getByRole('link', { name: '«landşaft» xidmətlərdə də var: 1 xidmət' })).toHaveAttribute('href', '/xidmetler?q=lands%C5%9Faft')
   })
 })

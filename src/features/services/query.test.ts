@@ -25,7 +25,9 @@ describe('services query', () => {
 
   it('filters by text, category, area, provider type and price', () => {
     const ids = (s: string) => filterServices(services, q(s)).map((x) => x.id)
-    expect(ids('q=cim')).toEqual(['landsaft-dizayni', 'cim-salinmasi'])
+    expect(ids('q=qazon')).toEqual(['landsaft-dizayni', 'cim-salinmasi'])
+    // «Qazon salınması» was «Çim salınması»: the old word still finds it.
+    expect(ids('q=çim salınması')).toContain('cim-salinmasi')
     expect(ids('q=Yaşıl Məkan')).toEqual(['landsaft-dizayni', 'cim-salinmasi'])
     expect(ids('kateqoriya=bag-baximi')).toEqual(['movsumi-bag-baximi'])
     expect(ids('erazi=quba')).toEqual(['heyetyani-yasillasdirma'])
