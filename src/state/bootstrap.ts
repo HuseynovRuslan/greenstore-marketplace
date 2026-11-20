@@ -4,7 +4,8 @@
  * The demo session and the banner dismissal live in browser storage, which the server cannot read, so server HTML
  * is always the signed-out, banner-visible version. This script runs in <head> before the first paint and marks
  * <html> with what the browser knows:
- *   data-auth="user"         a demo session exists (plus --gs-user-name, the name shown in the header)
+ *   data-auth="user"         a demo session exists (plus --gs-user-initials, the letters in the header's avatar:
+ *                            initials() in src/lib/format.ts, repeated here; bootstrap.test.ts keeps the two in step)
  *   data-banner="dismissed"  the "Demo versiya" banner was closed in this browser session
  *   data-favorites="some|none"  whether the visitor's favourites list (account or guest) has items
  * Until React hydrates, components that depend on the session render both variants (classes `auth-user` /
@@ -17,7 +18,7 @@ export const GUEST_FAVORITES_KEY = 'greenstore:favorites:guest'
 /** Signed-in favourites; a missing key means the seeded Figma list (never empty). */
 export const ACCOUNT_FAVORITES_KEY = 'greenstore:favorites:account'
 
-export const PRE_HYDRATION_SCRIPT = `(function(){var d=document.documentElement,s=null;try{s=JSON.parse(localStorage.getItem(${JSON.stringify(SESSION_KEY)})||"null");if(s){d.setAttribute("data-auth","user");d.style.setProperty("--gs-user-name",JSON.stringify(String(s.fullName||"")))}}catch(e){}try{var f=s?JSON.parse(localStorage.getItem(${JSON.stringify(ACCOUNT_FAVORITES_KEY)})||"null"):JSON.parse(localStorage.getItem(${JSON.stringify(GUEST_FAVORITES_KEY)})||"[]");d.setAttribute("data-favorites",(s&&f===null)||(f&&f.length>0)?"some":"none")}catch(e){}try{if(JSON.parse(sessionStorage.getItem(${JSON.stringify(BANNER_DISMISSED_KEY)})||"false"))d.setAttribute("data-banner","dismissed")}catch(e){}})()`
+export const PRE_HYDRATION_SCRIPT = `(function(){var d=document.documentElement,s=null;try{s=JSON.parse(localStorage.getItem(${JSON.stringify(SESSION_KEY)})||"null");if(s){d.setAttribute("data-auth","user");var w=String(s.fullName||"").split(/\\s+/).map(function(x){return x.replace(/^[^\\p{L}]+/u,"")}).filter(function(x){return /^\\p{L}/u.test(x)}),c=function(x){return x?Array.from(x)[0]:""},t=w.length>1?c(w[0])+c(w[1]):c(w[0]);d.style.setProperty("--gs-user-initials",JSON.stringify(t.replace(/i/g,"İ").replace(/ı/g,"I").toUpperCase()))}}catch(e){}try{var f=s?JSON.parse(localStorage.getItem(${JSON.stringify(ACCOUNT_FAVORITES_KEY)})||"null"):JSON.parse(localStorage.getItem(${JSON.stringify(GUEST_FAVORITES_KEY)})||"[]");d.setAttribute("data-favorites",(s&&f===null)||(f&&f.length>0)?"some":"none")}catch(e){}try{if(JSON.parse(sessionStorage.getItem(${JSON.stringify(BANNER_DISMISSED_KEY)})||"false"))d.setAttribute("data-banner","dismissed")}catch(e){}})()`
 
 /** Class for an element that is only rendered before hydration, for one of the two session states. */
 export const preHydrationClass = (variant: 'user' | 'guest') => (variant === 'user' ? 'auth-user' : 'auth-guest')

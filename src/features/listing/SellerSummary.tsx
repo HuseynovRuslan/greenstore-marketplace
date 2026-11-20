@@ -1,23 +1,10 @@
 import Link from 'next/link'
 import { BadgeCheck, ChevronRight, Clock3, UserRound } from 'lucide-react'
 import { cityName } from '@/data/cities'
-import { cn, formatNumber, upperAz } from '@/lib/format'
+import { cn, formatNumber, initials } from '@/lib/format'
 import type { Listing, Seller } from '@/types'
 import { ordinal } from './detail'
 import { SellerLogo } from './SellerLogo'
-
-/**
- * "AT" from "Abşeron Tingçilik"; one letter for one word. Only words that start with a letter count, so quotes and
- * signs do not become initials («Yaşıl Ev» MMC → "YE", "4 Fəsil Bağ" → "FB"); whole characters, never half of one.
- */
-export function initials(name: string): string {
-  const words = name
-    .split(/\s+/)
-    .map((w) => w.replace(/^[^\p{L}]+/u, ''))
-    .filter((w) => /^\p{L}/u.test(w))
-  const first = (w?: string) => (w ? Array.from(w)[0] : '')
-  return upperAz(words.length > 1 ? first(words[0]) + first(words[1]) : first(words[0]) || '?')
-}
 
 /** 60 → «Adətən 1 saat ərzində cavab verir», 30 → «… 30 dəqiqə …», two days → «… 2 gün …» */
 export function responseLabel(minutes: number): string {

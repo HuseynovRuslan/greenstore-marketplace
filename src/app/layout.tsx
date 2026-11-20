@@ -42,7 +42,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    // suppressHydrationWarning: the pre-hydration script sets data-auth / data-banner / --gs-user-name on <html>.
+    // suppressHydrationWarning: the pre-hydration script sets data-auth / data-banner / --gs-user-initials on <html>.
     // data-scroll-behavior: Next.js 16 keeps CSS smooth scrolling during route changes unless asked to reset it,
     // so in-page jumps stay smooth while a new page opens at the top instantly.
     <html lang="az" data-scroll-behavior="smooth" suppressHydrationWarning>
