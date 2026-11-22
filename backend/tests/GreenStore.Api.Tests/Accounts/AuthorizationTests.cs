@@ -48,6 +48,8 @@ public sealed class AuthorizationTests(AccountsApi api)
         { "GET", "/api/v1/me/drafts/019a8b4e-0000-7000-8000-000000000001" },
         { "PUT", "/api/v1/me/drafts/019a8b4e-0000-7000-8000-000000000001" },
         { "DELETE", "/api/v1/me/drafts/019a8b4e-0000-7000-8000-000000000001" },
+        { "GET", "/api/v1/me/service-requests" },
+        { "POST", "/api/v1/me/service-requests/019a8b4e-0000-7000-8000-000000000001/seen" },
     };
 
     [Theory]
@@ -109,6 +111,24 @@ public sealed class AuthorizationTests(AccountsApi api)
         var refused = await api.Client(ip: ip, factory: limited).PostAsJsonAsync("/api/v1/auth/otp", new { phone = "+994551234567", purpose = "register" }, Ct);
         await ProblemAsync(refused, HttpStatusCode.TooManyRequests, "rate-limited");
         Assert.NotNull(refused.Headers.RetryAfter);
+    }
+
+    [Fact]
+    public async Task The_public_forms_are_rate_limited_per_ip()
+    {
+        await using var factory = api.Variant();
+        var forms = factory.Services.GetRequiredService<EndpointDataSource>().Endpoints.OfType<RouteEndpoint>()
+            .Where(e => e.RoutePattern.RawText is "/api/v1/reports" or "/api/v1/service-requests" or "/api/v1/support")
+            .ToList();
+
+        Assert.Equal(3, forms.Count);
+        Assert.All(forms, form => Assert.Equal(RateLimitPolicies.AnonymousWrites, form.Metadata.GetMetadata<EnableRateLimitingAttribute>()?.PolicyName));
+
+        await using var limited = api.Variant(new Dictionary<string, string?> { ["RateLimiting:AnonymousWrites:PermitLimit"] = "1" });
+        var ip = AccountsApi.NewIp();
+        var message = new { topic = "other", name = "Rauf", contact = "rauf@example.az", message = "Salam, sualım var." };
+        Assert.Equal(HttpStatusCode.Created, (await api.Client(ip: ip, factory: limited).PostAsJsonAsync("/api/v1/support", message, Ct)).StatusCode);
+        await ProblemAsync(await api.Client(ip: ip, factory: limited).PostAsJsonAsync("/api/v1/support", message, Ct), HttpStatusCode.TooManyRequests, "rate-limited");
     }
 
     [Fact]

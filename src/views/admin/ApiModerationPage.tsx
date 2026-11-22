@@ -1,15 +1,14 @@
 import Link from 'next/link'
-import { CircleAlert, Search, ShieldAlert } from 'lucide-react'
+import { CircleAlert, Search } from 'lucide-react'
 import { Badge } from '@/components/ui/Badge'
-import { ButtonLink } from '@/components/ui/Button'
-import { EmptyState } from '@/components/ui/EmptyState'
 import { InfoNotice, Notice } from '@/components/ui/Notice'
 import { PaginationLinks } from '@/components/ui/PaginationLinks'
 import { Panel } from '@/components/ui/Panel'
-import { SignInPrompt } from '@/features/account/SignInPrompt'
 import { AdminPage, PanelTitle } from '@/features/admin/AdminUi'
 import { chipClass, formatQueueTime, rowClass } from '@/features/admin/format'
 import { ModerationDecision } from '@/features/admin/ModerationDecision'
+import { AdminOverviewPanel } from '@/features/admin/AdminOverviewPanel'
+import { staffGate } from '@/features/admin/StaffGate'
 import {
   changeLine,
   itemBadge,
@@ -46,24 +45,6 @@ const sortChips = [
   { value: 'newest', label: 'Əvvəl ən yenilər' },
   { value: 'oldest', label: 'Əvvəl ən köhnələr' },
 ] as const
-
-/** The staff page for an account that is not staff (the API would answer 403 anyway). */
-function NotStaff() {
-  return (
-    <div className="page-x mx-auto flex w-full max-w-[1440px] justify-center py-16">
-      <EmptyState
-        icon={<ShieldAlert aria-hidden size={30} strokeWidth={1.8} absoluteStrokeWidth />}
-        title="Bu bölmə moderatorlar üçündür"
-        description="Hesabınızın moderasiyaya icazəsi yoxdur. Elanlarınızı şəxsi kabinetdə idarə edə bilərsiniz."
-        action={
-          <ButtonLink href="/kabinet" fullWidth>
-            Şəxsi kabinet
-          </ButtonLink>
-        }
-      />
-    </div>
-  )
-}
 
 /** What the moderator reviews: the listing's photo, price, facts, text, seller, the checklist and what changed. */
 function Review({ item }: { item: ModerationItem }) {
@@ -169,16 +150,24 @@ function Queue({ state, queue, selected }: { state: ModerationPageState; queue: 
 
 /**
  * /idareetme/moderasiya with DATA_SOURCE=api (backend-contract.md 3.5): the API's queue, rendered on the server for
- * the signed-in moderator or admin; anyone else is asked to sign in or told the page is for staff. Filters, the page
+ * the signed-in moderator or admin; anyone else is asked to sign in or told the page is for staff. On /idareetme the
+ * numbers of every section (`GET /admin/overview`) come first. Filters, the page
  * and the open listing are links (the address keeps them); the decision is the one client island.
  */
-export default async function ApiModerationPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
+export default async function ApiModerationPage({
+  searchParams,
+  withOverview = false,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>
+  /** /idareetme: the numbers of every section above the queue */
+  withOverview?: boolean
+}) {
   const state = readModerationParams(await searchParams)
   const me = await getRepository().getMe()
-  if (!me) return <SignInPrompt next={moderationHref(state)} />
-  if (me.role !== 'moderator' && me.role !== 'admin') return <NotStaff />
+  const gate = staffGate(me, withOverview ? '/idareetme' : moderationHref(state))
+  if (gate || !me) return gate
 
-  const queue = await adminRepository.moderationQueue(toModerationQuery(state))
+  const [queue, overview] = await Promise.all([adminRepository.moderationQueue(toModerationQuery(state)), withOverview ? adminRepository.overview() : undefined])
   const chosen = state.item ? (queue.items.find((i) => i.id === state.item) ?? (await adminRepository.moderationItem(state.item))) : queue.items[0]
   const done = state.done ? await adminRepository.moderationItem(state.done.listingId) : undefined
   const { totals } = queue
@@ -186,6 +175,7 @@ export default async function ApiModerationPage({ searchParams }: { searchParams
 
   return (
     <AdminPage title="Elan moderasiyası" subtitle={`${totals.pending} gözləyən elan · ${totals.recheck} təkrar yoxlama · Moderator: ${me.fullName}`}>
+      {overview && <AdminOverviewPanel overview={overview} admin={me.role === 'admin'} />}
       <nav aria-label="Elan vəziyyəti" className="flex w-full flex-wrap items-start gap-2">
         {statusChips.map((chip) => (
           <Link key={chip.value} href={moderationHref(state, { status: chip.value })} aria-current={state.status === chip.value ? 'page' : undefined} className={chipClass(state.status === chip.value)}>

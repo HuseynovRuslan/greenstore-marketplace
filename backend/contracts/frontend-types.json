@@ -1,5 +1,195 @@
 {
   "interfaces": {
+    "AdminCategory": {
+      "createdAt": {
+        "optional": false,
+        "type": "string"
+      },
+      "descriptions": {
+        "optional": true,
+        "type": "LocalizedText"
+      },
+      "filters": {
+        "optional": false,
+        "type": "CategoryFilterSetting[]"
+      },
+      "form": {
+        "optional": true,
+        "type": "CategoryForm"
+      },
+      "icon": {
+        "optional": true,
+        "type": "IconName"
+      },
+      "id": {
+        "optional": false,
+        "type": "string"
+      },
+      "isActive": {
+        "optional": false,
+        "type": "boolean"
+      },
+      "kind": {
+        "optional": false,
+        "type": "CategoryKind"
+      },
+      "listingCount": {
+        "optional": false,
+        "type": "number"
+      },
+      "names": {
+        "optional": false,
+        "type": "LocalizedText"
+      },
+      "parentId": {
+        "optional": true,
+        "type": "string"
+      },
+      "sortOrder": {
+        "optional": false,
+        "type": "number"
+      },
+      "subcategories": {
+        "optional": true,
+        "type": "AdminCategory[]"
+      },
+      "updatedAt": {
+        "optional": false,
+        "type": "string"
+      },
+      "version": {
+        "optional": false,
+        "type": "string"
+      }
+    },
+    "AdminCategoryInput": {
+      "descriptions": {
+        "optional": true,
+        "type": "LocalizedText"
+      },
+      "filters": {
+        "optional": true,
+        "type": "CategoryFilterSetting[]"
+      },
+      "form": {
+        "optional": true,
+        "type": "CategoryForm"
+      },
+      "icon": {
+        "optional": true,
+        "type": "IconName"
+      },
+      "id": {
+        "optional": true,
+        "type": "string"
+      },
+      "isActive": {
+        "optional": true,
+        "type": "boolean"
+      },
+      "kind": {
+        "optional": true,
+        "type": "CategoryKind"
+      },
+      "names": {
+        "optional": false,
+        "type": "LocalizedText"
+      },
+      "parentId": {
+        "optional": true,
+        "type": "string"
+      },
+      "sortOrder": {
+        "optional": true,
+        "type": "number"
+      }
+    },
+    "AdminCategoryPatch": {
+      "descriptions": {
+        "optional": true,
+        "type": "LocalizedText | null"
+      },
+      "filters": {
+        "optional": true,
+        "type": "CategoryFilterSetting[]"
+      },
+      "icon": {
+        "optional": true,
+        "type": "IconName"
+      },
+      "isActive": {
+        "optional": true,
+        "type": "boolean"
+      },
+      "names": {
+        "optional": true,
+        "type": "LocalizedText"
+      },
+      "sortOrder": {
+        "optional": true,
+        "type": "number"
+      },
+      "version": {
+        "optional": true,
+        "type": "string"
+      }
+    },
+    "AdminOverview": {
+      "categories": {
+        "optional": false,
+        "type": "{ total: number; active: number; subcategories: number }"
+      },
+      "listings": {
+        "optional": false,
+        "type": "{ active: number; pending: number; rejected: number; expired: number; inactive: number }"
+      },
+      "moderation": {
+        "optional": false,
+        "type": "{ pending: number; recheck: number; approved: number; rejected: number }"
+      },
+      "reports": {
+        "optional": false,
+        "type": "ReportTotals"
+      },
+      "sellers": {
+        "optional": false,
+        "type": "{ total: number; verified: number }"
+      },
+      "serviceRequests": {
+        "optional": false,
+        "type": "{ total: number; thisWeek: number; unrouted: number }"
+      },
+      "support": {
+        "optional": false,
+        "type": "{ new: number; answered: number; closed: number }"
+      },
+      "users": {
+        "optional": false,
+        "type": "{ total: number; individual: number; business: number; blocked: number; staff: number; newThisWeek: number }"
+      }
+    },
+    "BlockResult": {
+      "listingsHidden": {
+        "optional": false,
+        "type": "number"
+      },
+      "listingsRestored": {
+        "optional": false,
+        "type": "number"
+      },
+      "sessionsRevoked": {
+        "optional": false,
+        "type": "number"
+      },
+      "status": {
+        "optional": false,
+        "type": "AccountStatus"
+      },
+      "userId": {
+        "optional": false,
+        "type": "string"
+      }
+    },
     "Category": {
       "description": {
         "optional": true,
@@ -26,6 +216,16 @@
         "type": "string"
       },
       "slug": {
+        "optional": false,
+        "type": "string"
+      }
+    },
+    "CategoryFilterSetting": {
+      "enabled": {
+        "optional": false,
+        "type": "boolean"
+      },
+      "id": {
         "optional": false,
         "type": "string"
       }
@@ -90,6 +290,98 @@
       "vip": {
         "optional": false,
         "type": "Listing[]"
+      }
+    },
+    "IncomingServiceRequest": {
+      "area": {
+        "optional": true,
+        "type": "string"
+      },
+      "category": {
+        "optional": false,
+        "type": "string"
+      },
+      "categoryId": {
+        "optional": false,
+        "type": "string"
+      },
+      "city": {
+        "optional": false,
+        "type": "string"
+      },
+      "cityId": {
+        "optional": false,
+        "type": "string"
+      },
+      "createdAt": {
+        "optional": false,
+        "type": "string"
+      },
+      "customerName": {
+        "optional": false,
+        "type": "string"
+      },
+      "customerPhone": {
+        "optional": false,
+        "type": "string"
+      },
+      "description": {
+        "optional": false,
+        "type": "string"
+      },
+      "id": {
+        "optional": false,
+        "type": "string"
+      },
+      "notifiedAt": {
+        "optional": true,
+        "type": "string"
+      },
+      "number": {
+        "optional": false,
+        "type": "number"
+      },
+      "preferredDate": {
+        "optional": true,
+        "type": "string"
+      },
+      "recipientCount": {
+        "optional": false,
+        "type": "number"
+      },
+      "seenAt": {
+        "optional": true,
+        "type": "string"
+      },
+      "service": {
+        "optional": true,
+        "type": "{ id: string; slug: string; title: string }"
+      },
+      "size": {
+        "optional": true,
+        "type": "string"
+      }
+    },
+    "IncomingServiceRequestPage": {
+      "items": {
+        "optional": false,
+        "type": "IncomingServiceRequest[]"
+      },
+      "page": {
+        "optional": false,
+        "type": "number"
+      },
+      "pageCount": {
+        "optional": false,
+        "type": "number"
+      },
+      "total": {
+        "optional": false,
+        "type": "number"
+      },
+      "unseen": {
+        "optional": false,
+        "type": "number"
       }
     },
     "Listing": {
@@ -351,6 +643,10 @@
         "optional": true,
         "type": "string"
       },
+      "subcategoryId": {
+        "optional": true,
+        "type": "string"
+      },
       "title": {
         "optional": false,
         "type": "string"
@@ -430,6 +726,20 @@
       "status": {
         "optional": false,
         "type": "'pending'"
+      }
+    },
+    "LocalizedText": {
+      "az": {
+        "optional": false,
+        "type": "string"
+      },
+      "en": {
+        "optional": true,
+        "type": "string"
+      },
+      "ru": {
+        "optional": true,
+        "type": "string"
       }
     },
     "ModerationChange": {
@@ -948,6 +1258,28 @@
         "type": "string"
       }
     },
+    "ReportHistoryEntry": {
+      "at": {
+        "optional": false,
+        "type": "string"
+      },
+      "by": {
+        "optional": true,
+        "type": "StaffRef"
+      },
+      "note": {
+        "optional": true,
+        "type": "string"
+      },
+      "resolution": {
+        "optional": true,
+        "type": "ReportResolution"
+      },
+      "status": {
+        "optional": false,
+        "type": "ComplaintStatus"
+      }
+    },
     "ReportInput": {
       "comment": {
         "optional": true,
@@ -955,7 +1287,7 @@
       },
       "reason": {
         "optional": false,
-        "type": "string"
+        "type": "ReportReason"
       },
       "target": {
         "optional": false,
@@ -964,6 +1296,192 @@
       "targetId": {
         "optional": false,
         "type": "string"
+      }
+    },
+    "ReportItem": {
+      "comment": {
+        "optional": true,
+        "type": "string"
+      },
+      "createdAt": {
+        "optional": false,
+        "type": "string"
+      },
+      "handledAt": {
+        "optional": true,
+        "type": "string"
+      },
+      "handledBy": {
+        "optional": true,
+        "type": "StaffRef"
+      },
+      "history": {
+        "optional": false,
+        "type": "ReportHistoryEntry[]"
+      },
+      "id": {
+        "optional": false,
+        "type": "string"
+      },
+      "listing": {
+        "optional": true,
+        "type": "OwnListing"
+      },
+      "note": {
+        "optional": true,
+        "type": "string"
+      },
+      "openReportsOnTarget": {
+        "optional": false,
+        "type": "number"
+      },
+      "owner": {
+        "optional": true,
+        "type": "ReportOwner"
+      },
+      "reason": {
+        "optional": false,
+        "type": "ReportReason"
+      },
+      "reporter": {
+        "optional": true,
+        "type": "StaffRef"
+      },
+      "resolution": {
+        "optional": true,
+        "type": "ReportResolution"
+      },
+      "seller": {
+        "optional": true,
+        "type": "ReportSeller"
+      },
+      "status": {
+        "optional": false,
+        "type": "ComplaintStatus"
+      },
+      "target": {
+        "optional": false,
+        "type": "ReportTarget"
+      },
+      "targetDeleted": {
+        "optional": false,
+        "type": "boolean"
+      },
+      "targetId": {
+        "optional": false,
+        "type": "string"
+      }
+    },
+    "ReportOwner": {
+      "accountType": {
+        "optional": false,
+        "type": "SellerType"
+      },
+      "name": {
+        "optional": false,
+        "type": "string"
+      },
+      "status": {
+        "optional": false,
+        "type": "AccountStatus"
+      },
+      "userId": {
+        "optional": false,
+        "type": "string"
+      }
+    },
+    "ReportQuery": {
+      "page": {
+        "optional": false,
+        "type": "number"
+      },
+      "pageSize": {
+        "optional": true,
+        "type": "number"
+      },
+      "reason": {
+        "optional": true,
+        "type": "ReportReason"
+      },
+      "sort": {
+        "optional": true,
+        "type": "ModerationSort"
+      },
+      "status": {
+        "optional": true,
+        "type": "ComplaintStatus"
+      },
+      "target": {
+        "optional": true,
+        "type": "ReportTarget"
+      }
+    },
+    "ReportQueue": {
+      "items": {
+        "optional": false,
+        "type": "ReportItem[]"
+      },
+      "page": {
+        "optional": false,
+        "type": "number"
+      },
+      "pageCount": {
+        "optional": false,
+        "type": "number"
+      },
+      "total": {
+        "optional": false,
+        "type": "number"
+      },
+      "totals": {
+        "optional": false,
+        "type": "ReportTotals"
+      }
+    },
+    "ReportSeller": {
+      "id": {
+        "optional": false,
+        "type": "string"
+      },
+      "name": {
+        "optional": false,
+        "type": "string"
+      },
+      "slug": {
+        "optional": false,
+        "type": "string"
+      },
+      "verified": {
+        "optional": false,
+        "type": "boolean"
+      }
+    },
+    "ReportTotals": {
+      "investigating": {
+        "optional": false,
+        "type": "number"
+      },
+      "open": {
+        "optional": false,
+        "type": "number"
+      },
+      "resolved": {
+        "optional": false,
+        "type": "number"
+      }
+    },
+    "ReportUpdate": {
+      "note": {
+        "optional": true,
+        "type": "string"
+      },
+      "resolution": {
+        "optional": true,
+        "type": "ReportResolution"
+      },
+      "status": {
+        "optional": true,
+        "type": "ComplaintStatus"
       }
     },
     "SavedSearch": {
@@ -1212,6 +1730,20 @@
         "type": "number"
       }
     },
+    "SellerVerification": {
+      "sellerId": {
+        "optional": false,
+        "type": "string"
+      },
+      "verified": {
+        "optional": false,
+        "type": "boolean"
+      },
+      "verifiedAt": {
+        "optional": true,
+        "type": "string"
+      }
+    },
     "Service": {
       "areas": {
         "optional": false,
@@ -1408,6 +1940,16 @@
         "type": "string"
       }
     },
+    "StaffRef": {
+      "name": {
+        "optional": false,
+        "type": "string"
+      },
+      "userId": {
+        "optional": false,
+        "type": "string"
+      }
+    },
     "SupportMessageInput": {
       "contact": {
         "optional": false,
@@ -1498,14 +2040,31 @@
     }
   },
   "unions": {
+    "AccountStatus": [
+      "active",
+      "blocked",
+      "deleted"
+    ],
     "BusinessKind": [
       "nursery",
       "garden-centre",
       "landscaping"
     ],
+    "CategoryForm": [
+      "plant",
+      "pack",
+      "goods",
+      "grass",
+      "service"
+    ],
     "CategoryKind": [
       "product",
       "service"
+    ],
+    "ComplaintStatus": [
+      "open",
+      "investigating",
+      "resolved"
     ],
     "Foliage": [
       "evergreen",
@@ -1591,6 +2150,23 @@
       "bad-photos",
       "duplicate",
       "other"
+    ],
+    "ReportReason": [
+      "sold",
+      "wrong-price",
+      "wrong-photos",
+      "wrong-info",
+      "unreachable",
+      "duplicate",
+      "fraud",
+      "misconduct",
+      "not-provided",
+      "stolen-photos",
+      "other"
+    ],
+    "ReportResolution": [
+      "action-taken",
+      "no-violation"
     ],
     "ReportTarget": [
       "listing",

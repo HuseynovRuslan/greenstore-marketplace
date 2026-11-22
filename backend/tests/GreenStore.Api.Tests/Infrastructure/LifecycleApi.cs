@@ -5,6 +5,7 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using GreenStore.Api.Data.Seed;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.Extensions.DependencyInjection;
 using NetVips;
 using static GreenStore.Api.Tests.Infrastructure.HttpAssert;
 
@@ -96,6 +97,73 @@ public sealed class LifecycleApi(PostgresDatabase database) : AccountsApi(databa
 
     /// <summary>The dev moderator's session token.</summary>
     public async Task<string> ModeratorTokenAsync() => await SignInAsync(DevAccountsSeeder.Accounts[1]);
+
+    /// <summary>The dev admin's session token.</summary>
+    public async Task<string> AdminTokenAsync() => await SignInAsync(DevAccountsSeeder.Accounts[0]);
+
+    /// <summary>
+    /// A valid <c>ListingInput</c> of a service of the type <paramref name="subcategory"/> (its Azerbaijani name), in
+    /// <paramref name="cityId"/>, serving <paramref name="areas"/> (city ids, comma-separated).
+    /// </summary>
+    public static JsonObject ServiceInput(IEnumerable<string> photoIds, string phone, string subcategory, string cityId, string areas, Action<JsonObject>? edit = null)
+    {
+        var input = new JsonObject
+        {
+            ["kind"] = "service",
+            ["categoryId"] = "landsaft-xidmetleri",
+            ["subcategory"] = subcategory,
+            ["title"] = "Bağın baxımı və əkin işləri",
+            ["description"] = "Budama, gübrələmə, suvarma və əkin. Həftədə bir dəfə gəlirik.",
+            ["attributes"] = new JsonObject { ["areas"] = areas },
+            ["priceType"] = "fixed",
+            ["price"] = 40,
+            ["priceUnit"] = "hour",
+            ["cityId"] = cityId,
+            ["deliveryAvailable"] = false,
+            ["plantingAvailable"] = true,
+            ["contactName"] = "Usta Test",
+            ["contactPhone"] = phone,
+            ["whatsapp"] = false,
+            ["phoneHidden"] = false,
+            ["photoIds"] = new JsonArray(photoIds.Select(id => (JsonNode)JsonValue.Create(id)!).ToArray()),
+        };
+        edit?.Invoke(input);
+        return input;
+    }
+
+    /// <summary>Posts a service (see <see cref="ServiceInput"/>) and approves it; returns the <c>ListingSubmitResult</c>.</summary>
+    public async Task<JsonElement> PublishServiceAsync(Account account, string subcategory, string cityId, string areas)
+    {
+        var photo = await UploadPhotoAsync(account.Token);
+        var response = await Client(account.Token).PostAsJsonAsync("/api/v1/listings", ServiceInput([photo], account.Phone, subcategory, cityId, areas), Ct);
+        var body = await JsonAsync(response);
+        Assert.True(response.StatusCode == HttpStatusCode.Created, $"POST /listings (service): {(int)response.StatusCode} {body}");
+        await ApproveAsync(body.GetProperty("id").GetString()!);
+        return body;
+    }
+
+    /// <summary>Sends a tree listing and approves it: an active listing of <paramref name="account"/>.</summary>
+    public async Task<JsonElement> PublishAsync(Account account, Action<JsonObject>? edit = null)
+    {
+        var sent = await SubmitAsync(account, edit);
+        await ApproveAsync(sent.GetProperty("id").GetString()!);
+        return sent;
+    }
+
+    /// <summary>Runs the outbox job until nothing is due, as its timer would (SMS notices, refresh notices); returns how many it sent.</summary>
+    public async Task<int> DispatchOutboxAsync()
+    {
+        await using var factory = Variant();
+        using var scope = factory.Services.CreateScope();
+        var dispatcher = scope.ServiceProvider.GetRequiredService<GreenStore.Api.Jobs.OutboxDispatcher>();
+        var total = 0;
+        for (var sent = await dispatcher.DispatchAsync(Ct); sent > 0; sent = await dispatcher.DispatchAsync(Ct))
+        {
+            total += sent;
+        }
+
+        return total;
+    }
 
     public async Task<string> SignInAsync(DevAccount account)
     {

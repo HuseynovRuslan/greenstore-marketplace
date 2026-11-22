@@ -1,6 +1,6 @@
 # GreenStore backend: arxitektura
 
-**Status:** təsdiqlənib (22 noyabr 2026). Faza 0 (skelet) və faza 1 (kataloq cədvəlləri, seed, oxuma endpoint-ləri və saytın `DATA_SOURCE=api` rejimi, `src/services/apiRepository.ts`) yazılıb. Faza 2-nin API tərəfi də hazırdır: SMS kodu, qeydiyyat (biznes hesabı «mağaza»nı da açır), şifrə və SMS ilə giriş, sessiyalar və «Aktiv cihazlar», `/me`, `/me/seller`, seçilmişlər, yadda saxlanılan axtarışlar. Faza 3 həm API, həm sayt tərəfində yazılıb: şəkil yükləmə və emalı (brauzerdən birbaşa API-yə), elan yerləşdirmə (`Idempotency-Key` ilə), «Elanlarım» və qaralamalar, moderasiya (`/idareetme/moderasiya`, `AdminRepository`), müddət, statistika, baxış sayğacı, «Nömrəni göstər», keşin yenilənməsi (`POST /api/revalidate`) və fon işləri. İşə salmaq üçün: [README.md](README.md).
+**Status:** təsdiqlənib (22 noyabr 2026). Faza 0 (skelet) və faza 1 (kataloq cədvəlləri, seed, oxuma endpoint-ləri və saytın `DATA_SOURCE=api` rejimi, `src/services/apiRepository.ts`) yazılıb. Faza 2-nin API tərəfi də hazırdır: SMS kodu, qeydiyyat (biznes hesabı «mağaza»nı da açır), şifrə və SMS ilə giriş, sessiyalar və «Aktiv cihazlar», `/me`, `/me/seller`, seçilmişlər, yadda saxlanılan axtarışlar. Faza 3 həm API, həm sayt tərəfində yazılıb: şəkil yükləmə və emalı (brauzerdən birbaşa API-yə), elan yerləşdirmə (`Idempotency-Key` ilə), «Elanlarım» və qaralamalar, moderasiya (`/idareetme/moderasiya`, `AdminRepository`), müddət, statistika, baxış sayğacı, «Nömrəni göstər», keşin yenilənməsi (`POST /api/revalidate`) və fon işləri. Faza 4-ün API tərəfi hazırdır: şikayətlər (səbəb kodu ilə) və onların admin baxışı, «Usta çağır» (ustalara paylanma, SMS xəbəri outbox ilə, ustanın gələn sorğuları), dəstək, admin panelinin rəqəmləri, kateqoriyaların idarəsi (üç dildə), satıcı təsdiqi və bloklama; sayt tərəfi də yazılıb (şikayət dialoqunun kodları, «Usta çağır», dəstək, ustanın «Gələn sorğular» səhifəsi `/kabinet/sorgular`, `/idareetme` rəqəmləri, `/idareetme/sikayetler`, `/idareetme/kateqoriyalar`). İşə salmaq üçün: [README.md](README.md).
 **Müqavilə dəyişiklikləri:** [`docs/handoff/backend-contract.md`](../docs/handoff/backend-contract.md). `repository.ts` və `src/types` hər fazada ayrıca razılıqla dəyişir.
 
 ## 1. Tələblər
@@ -187,6 +187,7 @@ active ──redaktə──► pending            istənilən status ──sil�
 | | `GET /services/{slug}` | `getService` |
 | | `GET /providers/{id}`, `GET /providers/{id}/services` | `getServiceProvider`, `listProviderServices` |
 | | `POST /service-requests` | `submitServiceRequest` |
+| | `GET /me/service-requests`, `POST /me/service-requests/{id}/seen` | ★ ustanın gələn sorğuları («Gələn sorğular», UI sonra) |
 | Sellers | `GET /sellers?businessKind&cityId&page` | `listSellers` (★ səhifələnmiş) |
 | | `GET /sellers/{slug}`, `GET /sellers/by-id/{id}` | `getSeller`, `getSellerById` |
 | | `POST /sellers/{id}/phone-reveals` | ★ |
@@ -211,8 +212,8 @@ active ──redaktə──► pending            istənilən status ──sil�
 | Engagement | `POST /reports`, `POST /support` | `submitReport` (★ səbəb kodu), `submitSupportMessage` |
 | Admin | `GET /admin/overview` | ★ admin panelinin ana səhifəsi |
 | | `GET /admin/moderation`, `POST /admin/moderation/{listingId}/decision` | ★ |
-| | `GET /admin/reports`, `PATCH /admin/reports/{id}` | ★ |
-| | `GET`, `POST`, `PATCH /admin/categories` | ★ adlar üç dildə |
+| | `GET /admin/reports`, `GET`, `PATCH /admin/reports/{id}` | ★ |
+| | `GET`, `POST /admin/categories`, `GET`, `PATCH`, `DELETE /admin/categories/{id}` | ★ adlar üç dildə; silmək yalnız heç nəyin istifadə etmədiyi kateqoriyanı |
 | | `POST /admin/sellers/{id}/verify`, `POST /admin/users/{id}/block` | ★ «Təsdiqlənmiş satıcı», bloklama |
 
 ## 8. Çoxdillilik (az, ru, en)
@@ -304,7 +305,7 @@ Tətbiq 1 il ərzində gələcək. Onun üçün indi edilən və sonraya qalan i
 |---|---|---|
 | `ExpireListings` | 10 dəqiqədən bir | `active` elan `expires_at`-dan keçibsə, `expired` olur (bir dəfədə ən çox 500). Həmin anda sahibi və ya moderator dəyişdirən elan növbəti dəfəyə qalır, qalanları indi bitir |
 | `Promotions` | 10 dəqiqədən bir | müddəti bitən «Önə çıxar»ı söndürür; «İrəli çək» paketində növbəti qaldırmanı edir (`bumped_at = indi`) |
-| `Outbox` | 5 saniyədən bir | SMS, push, keş yeniləmə, e-poçt göndərir; uğursuz olanda getdikcə uzanan fasilə ilə təkrar edir. Faza 3-də yalnız keş yeniləmə var (`revalidate`, backend-contract.md 3.6) |
+| `Outbox` | 5 saniyədən bir | SMS, push, keş yeniləmə, e-poçt göndərir; uğursuz olanda getdikcə uzanan fasilə ilə təkrar edir. İndi iki növ var: keş yeniləmə (`revalidate`, backend-contract.md 3.6) və ustalara «Usta çağır» SMS xəbəri (`sms-notice`, faza 4; bloklanmış hesaba getmir) |
 | `PhotoProcessing` | yükləmə zamanı | şəkil variantlarını yaradır (320, 640, 1280 px WebP), EXIF-i silir. Faza 3-də ayrıca növbə yoxdur: emal `PUT` sorğusunun içində gedir (10 MB-lıq şəkil bir saniyədən az çəkir), ona görə cavab şəklin hazır olub-olmadığını dərhal deyir. Yük artsa, növbəyə köçürmək asandır (`PhotoService.ProcessAsync`) |
 | `Cleanup` | gündə bir | 24 saatda elana bağlanmayan şəkilləri (faylları ilə), köhnə sessiyaları, SMS kodlarını, `listing_seen`, `idempotency_keys`, göndərilmiş outbox, köhnə gündəlik statistika, `audit_log` və `moderation_decisions` sətirlərini DATABASE.md §5-in müddətləri ilə silir (`Jobs/Cleanup.cs`) |
 

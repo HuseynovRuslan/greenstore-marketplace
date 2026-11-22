@@ -11,8 +11,9 @@ import { searchServices } from '@/features/services/query'
 import { filterListings } from './marketplace'
 import { displayPhone, maskPhone, mockAccount, mockChallengePhone, mockListingStats, mockOtp, mockSequence } from './mockWrites'
 import { filterQuery, MAX_SAVED_SEARCHES } from '@/features/saved-searches/query'
+import { isReasonFor } from '@/features/seller/complaintReasons'
 import type { FacetCounts, MarketplaceRepository, PageResult, SitemapEntry } from './repository'
-import type { Category, ContactReveal, Listing, ListingInput, ListingSubmitResult, LoginResult, OwnListing, OwnSeller, SavedSearch, Seller, Service, ServiceProvider } from '@/types'
+import type { Category, ContactReveal, Listing, ListingInput, ListingSubmitResult, LoginResult, OwnListing, OwnSeller, SavedSearch, Seller, Service, ServiceProvider, ServiceRequestResult } from '@/types'
 import type { CategoryDef } from '@/data/categories'
 
 /** A category with its number of public listings (the sample data has no separate counts). */
@@ -57,6 +58,9 @@ function publicProvider(p: ServiceProvider): ServiceProvider {
 }
 
 const toPublic = (items: Listing[]) => items.map(publicListing)
+
+/** «Usta çağır» answers by `Idempotency-Key` (a retry after a lost answer gets the same number). */
+const mockServiceRequests = new Map<string, ServiceRequestResult>()
 
 /** «WhatsApp-a yaz»: https://wa.me/<digits>. */
 const whatsappUrl = (phone: string) => `https://wa.me/${phone.replace(/\D/g, '')}`
@@ -257,15 +261,28 @@ export const mockRepository: MarketplaceRepository = {
     if (!found || found.pkg.id !== packageId) throw new Error('unknown promotion option')
     return { id: `ord-${mockSequence('order', 5100)}`, listingId, packageId, optionId, amount: found.option.price, status: 'paid', createdAt: new Date().toISOString() }
   },
-  async submitReport() {
+  /** Like the API: only the target's own reason codes (backend-contract.md 4.1); nothing is stored. */
+  async submitReport({ target, reason, comment }) {
+    if (!isReasonFor(target, reason)) throw new Error('reason: not-for-target')
+    if (reason === 'other' && !comment?.trim()) throw new Error('comment: required')
     return { id: `rep-${mockSequence('report', 880)}` }
   },
   async submitSupportMessage() {
     return { ticket: mockSequence('support', 7210) }
   },
-  async submitServiceRequest() {
+  /** DEMO: requests are not stored, so no provider has any (the page is DATA_SOURCE=api only). */
+  async listIncomingServiceRequests() {
+    return { items: [], total: 0, page: 1, pageCount: 1, unseen: 0 }
+  },
+  async markServiceRequestSeen() {},
+  /** The same `idempotencyKey` again answers the same request, as the API does. */
+  async submitServiceRequest(_input, idempotencyKey) {
+    const known = idempotencyKey ? mockServiceRequests.get(idempotencyKey) : undefined
+    if (known) return known
     const number = mockSequence('service-request', 3021)
-    return { id: `req-${number}`, number }
+    const result = { id: `req-${number}`, number }
+    if (idempotencyKey) mockServiceRequests.set(idempotencyKey, result)
+    return result
   },
 
   async requestOtp({ phone }) {

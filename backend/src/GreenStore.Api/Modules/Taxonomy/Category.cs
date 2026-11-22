@@ -49,11 +49,42 @@ public sealed class Category : IHasUpdatedAt, IHasRowVersion
 /// <summary>One catalogue filter of a category: <c>{ "id": "rootSystem", "enabled": true }</c>.</summary>
 public sealed record CategoryFilter(string Id, bool Enabled);
 
-/// <summary>The filter ids a category can turn on (src/data/categories.ts <c>attributes</c>).</summary>
+/// <summary>
+/// The filter ids a category can turn on or off (src/data/categories.ts <c>attributes</c>; the admin's
+/// «Filtrlər»). The attributes themselves are in code, not in the database (DATABASE.md decision 2): the admin only
+/// chooses which of its form's filters the catalogue shows. Of these, the API itself reads <see cref="RootSystem"/>
+/// (the catalogue's «Kök sistemi»); the others are for the site.
+/// </summary>
 public static class CategoryFilters
 {
+    /// <summary>«Növ».</summary>
+    public const string Species = "species";
+
+    /// <summary>«Hündürlük».</summary>
+    public const string Height = "height";
+
+    /// <summary>«Yaş».</summary>
+    public const string Age = "age";
+
     /// <summary>«Kök sistemi».</summary>
     public const string RootSystem = "rootSystem";
+
+    /// <summary>«Xidmət növü».</summary>
+    public const string ServiceType = "serviceType";
+
+    /// <summary>«Ərazi».</summary>
+    public const string Area = "area";
+
+    /// <summary>«Qiymət forması».</summary>
+    public const string PriceType = "priceType";
+
+    /// <summary>The filters a category of <paramref name="form"/> can have, in the catalogue's order.</summary>
+    public static IReadOnlyList<string> For(CategoryForm? form) => form switch
+    {
+        CategoryForm.Plant => [Species, Height, Age, RootSystem],
+        CategoryForm.Service => [ServiceType, Area, PriceType],
+        _ => [],
+    };
 }
 
 /// <summary><c>CategoryKind</c> in src/types; also the kind of a listing.</summary>

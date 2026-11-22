@@ -419,7 +419,13 @@ export interface PromotionOrder {
 export interface ListingInput {
   kind: CategoryKind
   categoryId: string
+  /** The sub-category's (a service's type's) name, as the wizard keeps it */
   subcategory?: string
+  /**
+   * The sub-category's id (backend-contract.md 1.3): decides over `subcategory`, so a renamed sub-category still takes
+   * new listings.
+   */
+  subcategoryId?: string
   title: string
   description: string
   /** Category attributes from the posting form, keyed by attribute id (see features/posting/attributes.ts) */
@@ -600,6 +606,213 @@ export interface ModerationDecisionResult {
   version: string
 }
 
+/* ---------- Reports, the admin home and categories for the staff (backend-contract.md 3.5, 4.1) ---------- */
+
+/** A report's state: «Açıq», «Araşdırılır», «Həll olunub». */
+export type ComplaintStatus = 'open' | 'investigating' | 'resolved'
+
+/** How a resolved report ended: «Tədbir görüldü» or «Pozuntu yoxdur». */
+export type ReportResolution = 'action-taken' | 'no-violation'
+
+/** An account an admin answer names: the reporter, the staff member who handled it. */
+export interface StaffRef {
+  userId: string
+  name: string
+}
+
+/** An account's state; a blocked one cannot sign in and has no listings on the site. */
+export type AccountStatus = 'active' | 'blocked' | 'deleted'
+
+/** The account behind a reported listing, service or seller: what blocking it needs. */
+export interface ReportOwner {
+  userId: string
+  name: string
+  accountType: SellerType
+  status: AccountStatus
+}
+
+/** A reported seller. */
+export interface ReportSeller {
+  id: string
+  slug: string
+  name: string
+  verified: boolean
+}
+
+/** One staff change of a report («Qərar tarixçəsi»), oldest first. */
+export interface ReportHistoryEntry {
+  status: ComplaintStatus
+  resolution?: ReportResolution
+  /** «Moderator qeydi» */
+  note?: string
+  at: string
+  by?: StaffRef
+}
+
+/**
+ * A report as the staff see it (`GET /admin/reports`): codes, not ready texts (the UI words them). The target is a
+ * listing or a service as its owner sees it (the number included), or a seller.
+ */
+export interface ReportItem {
+  id: string
+  target: ReportTarget
+  /** The listing's, service's or seller's id */
+  targetId: string
+  reason: ReportReason
+  /** The reporter's own words */
+  comment?: string
+  status: ComplaintStatus
+  /** Only when `resolved` */
+  resolution?: ReportResolution
+  createdAt: string
+  handledAt?: string
+  handledBy?: StaffRef
+  /** A signed-in reporter; a guest has none */
+  reporter?: StaffRef
+  owner?: ReportOwner
+  listing?: OwnListing
+  seller?: ReportSeller
+  /** The listing was deleted after the report */
+  targetDeleted: boolean
+  /** The target's unresolved reports, this one included */
+  openReportsOnTarget: number
+  /** The latest note of the history */
+  note?: string
+  history: ReportHistoryEntry[]
+}
+
+/** Reports by status: the chips and the header («7 açıq şikayət · 2 araşdırılır · 18 həll olunub»). */
+export interface ReportTotals {
+  open: number
+  investigating: number
+  resolved: number
+}
+
+/** A page of reports with every report's totals. */
+export interface ReportQueue {
+  items: ReportItem[]
+  total: number
+  page: number
+  pageCount: number
+  totals: ReportTotals
+}
+
+export interface ReportQuery {
+  /** Every status when not given */
+  status?: ComplaintStatus
+  target?: ReportTarget
+  reason?: ReportReason
+  sort?: ModerationSort
+  page: number
+  pageSize?: number
+}
+
+/** A staff change of a report: resolving needs a `resolution`; the note goes into the history. */
+export interface ReportUpdate {
+  status?: ComplaintStatus
+  resolution?: ReportResolution
+  /** At most 500 characters */
+  note?: string
+}
+
+/** The admin home's numbers (`GET /admin/overview`). Deleted listings and accounts are not counted. */
+export interface AdminOverview {
+  /** The moderation queue's totals, as `ModerationQueue.totals` */
+  moderation: { pending: number; recheck: number; approved: number; rejected: number }
+  reports: ReportTotals
+  listings: { active: number; pending: number; rejected: number; expired: number; inactive: number }
+  /** `staff`: moderators and admins; `newThisWeek`: the last 7 days */
+  users: { total: number; individual: number; business: number; blocked: number; staff: number; newThisWeek: number }
+  sellers: { total: number; verified: number }
+  /** «Usta çağır»; `unrouted`: no provider got the request */
+  serviceRequests: { total: number; thisWeek: number; unrouted: number }
+  support: { new: number; answered: number; closed: number }
+  categories: { total: number; active: number; subcategories: number }
+}
+
+/** A text in the site's languages; `az` is the one every other falls back to (backend-contract.md, «dil»). */
+export interface LocalizedText {
+  az: string
+  ru?: string
+  en?: string
+}
+
+/** The «Elan yerləşdir» attribute set a category uses (features/posting/attributes.ts). */
+export type CategoryForm = 'plant' | 'pack' | 'goods' | 'grass' | 'service'
+
+/** One catalogue filter of a category, on or off (ids: `species`, `height`, `age`, `rootSystem`, `serviceType`, …). */
+export interface CategoryFilterSetting {
+  id: string
+  enabled: boolean
+}
+
+/**
+ * A category or sub-category as the admin edits it (`GET /admin/categories`): names in every language, inactive ones
+ * too. A category lists its sub-categories; a sub-category has `parentId` and no form, icon or filters.
+ */
+export interface AdminCategory {
+  id: string
+  parentId?: string
+  kind: CategoryKind
+  form?: CategoryForm
+  names: LocalizedText
+  descriptions?: LocalizedText
+  icon?: IconName
+  filters: CategoryFilterSetting[]
+  sortOrder: number
+  isActive: boolean
+  /** Active listings; a category's count includes its sub-categories' */
+  listingCount: number
+  /** Sent back with a change */
+  version: string
+  createdAt: string
+  updatedAt: string
+  subcategories?: AdminCategory[]
+}
+
+/** A new category, or with `parentId` a sub-category (which takes its parent's kind and has no form, icon or filters). */
+export interface AdminCategoryInput {
+  /** Made from the Azerbaijani name when not given */
+  id?: string
+  parentId?: string
+  kind?: CategoryKind
+  form?: CategoryForm
+  names: LocalizedText
+  descriptions?: LocalizedText
+  icon?: IconName
+  filters?: CategoryFilterSetting[]
+  sortOrder?: number
+  isActive?: boolean
+}
+
+/** A change of a category: what is sent changes; `descriptions: null` removes them. */
+export interface AdminCategoryPatch {
+  names?: LocalizedText
+  descriptions?: LocalizedText | null
+  icon?: IconName
+  filters?: CategoryFilterSetting[]
+  sortOrder?: number
+  isActive?: boolean
+  /** `AdminCategory.version` as read: a stale one is refused */
+  version?: string
+}
+
+/** «Təsdiqlənmiş satıcı» after `verifySeller`. */
+export interface SellerVerification {
+  sellerId: string
+  verified: boolean
+  verifiedAt?: string
+}
+
+/** An account after `blockUser`: the sessions it ended and the listings it took off (or put back on) the site. */
+export interface BlockResult {
+  userId: string
+  status: AccountStatus
+  sessionsRevoked: number
+  listingsHidden: number
+  listingsRestored: number
+}
+
 /* ---------- «Nömrəni göstər» ---------- */
 
 /**
@@ -652,10 +865,28 @@ export interface RegistrationInput {
 
 export type ReportTarget = 'listing' | 'seller' | 'service'
 
+/**
+ * Why something is reported (backend-contract.md 4.1): a code, the UI words it (features/seller/complaintReasons.ts).
+ * Each target offers its own codes; `other` needs a comment.
+ */
+export type ReportReason =
+  | 'sold'
+  | 'wrong-price'
+  | 'wrong-photos'
+  | 'wrong-info'
+  | 'unreachable'
+  | 'duplicate'
+  | 'fraud'
+  | 'misconduct'
+  | 'not-provided'
+  | 'stolen-photos'
+  | 'other'
+
 export interface ReportInput {
   target: ReportTarget
   targetId: string
-  reason: string
+  reason: ReportReason
+  /** Required for `other`; at most 500 characters */
   comment?: string
 }
 
@@ -679,6 +910,44 @@ export interface ServiceRequestResult {
   id: string
   /** "Sorğu № 3021" */
   number: number
+}
+
+/** A «Usta çağır» request that came to the signed-in provider («Gələn sorğular», backend-contract.md 4.2). */
+export interface IncomingServiceRequest {
+  id: string
+  number: number
+  /** The service type */
+  categoryId: string
+  /** Its name */
+  category: string
+  cityId: string
+  city: string
+  area?: string
+  /** `YYYY-MM-DD` */
+  preferredDate?: string
+  size?: string
+  description: string
+  customerName: string
+  /** The customer's number to call back ("+994 55 700 11 22"; the API's E.164 in the site's spacing) */
+  customerPhone: string
+  createdAt: string
+  /** Not sent while the provider has not opened it */
+  seenAt?: string
+  /** When the SMS notice went out */
+  notifiedAt?: string
+  /** How many providers got it: 1 when the customer chose this one */
+  recipientCount: number
+  /** The service whose page it came from */
+  service?: { id: string; slug: string; title: string }
+}
+
+/** A page of the provider's requests, newest first, with how many are not opened yet. */
+export interface IncomingServiceRequestPage {
+  items: IncomingServiceRequest[]
+  total: number
+  page: number
+  pageCount: number
+  unseen: number
 }
 
 /** «Axtarışı yadda saxla»: a named catalogue search with optional alerts about new matches. */

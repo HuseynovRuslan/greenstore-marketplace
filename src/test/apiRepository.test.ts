@@ -211,13 +211,10 @@ describe('apiRepository: answers', () => {
   })
 
   it('says which later phase brings a method that has no endpoint yet', async () => {
-    const error = await apiRepository.submitReport({} as never).catch((e: unknown) => e)
+    const error = await apiRepository.createPromotionOrder({} as never).catch((e: unknown) => e)
     expect(error).toBeInstanceOf(NotImplementedError)
     expect(isNotImplemented(error)).toBe(true)
-    expect((error as Error).message).toBe('DATA_SOURCE=api: submitReport is not implemented yet (phase 4).')
-    await expect(apiRepository.submitServiceRequest({} as never)).rejects.toThrow('(phase 4)')
-    await expect(apiRepository.submitSupportMessage({} as never)).rejects.toThrow('(phase 4)')
-    await expect(apiRepository.createPromotionOrder({} as never)).rejects.toThrow('(phase 5)')
+    expect((error as Error).message).toBe('DATA_SOURCE=api: createPromotionOrder is not implemented yet (phase 5).')
     await expect(apiRepository.listPromotionPackages()).rejects.toThrow('(phase 5)')
     expect(calls).toHaveLength(0)
   })

@@ -1,4 +1,4 @@
-import { categoryById, subcategoriesOf } from '@/data/categories'
+import { categoryById, subcategoriesOf, subcategoryIdOf } from '@/data/categories'
 import { serviceCategories } from '@/data/services'
 import { normalizeSearch } from '@/lib/format'
 import { phoneValue } from '@/lib/phone'
@@ -169,6 +169,16 @@ const paragraphs = (text: string) =>
 
 const amount = (value: string) => parseNumberValue(value)
 
+/**
+ * The sub-category's id for the name the wizard keeps (a service's type for a service): sent with the name, it is what
+ * the API goes by (backend-contract.md 1.3), so an admin's renaming of the sub-category does not refuse new listings.
+ */
+export function subcategoryIdOfDraft(d: Pick<PostingDraft, 'kind' | 'categoryId' | 'subcategory'>): string | undefined {
+  if (!d.subcategory) return undefined
+  if (d.kind === 'service' || d.categoryId === SERVICE_CATEGORY) return serviceCategories.find((c) => c.name === d.subcategory)?.id
+  return subcategoryIdOf(d.categoryId, d.subcategory)
+}
+
 /** What «Elan yerləşdir» sends (`photoIds` are the uploaded photo ids, cover first). */
 export function toListingInput(d: PostingDraft): ListingInput {
   const priced = d.priceType !== 'agreement'
@@ -177,6 +187,7 @@ export function toListingInput(d: PostingDraft): ListingInput {
     kind: d.kind || 'product',
     categoryId: d.categoryId,
     subcategory: d.subcategory || undefined,
+    subcategoryId: subcategoryIdOfDraft(d),
     title: d.title.trim(),
     description: d.description.trim(),
     attributes: Object.fromEntries(Object.entries(d.attrs).filter(([, v]) => v.trim() !== '')),

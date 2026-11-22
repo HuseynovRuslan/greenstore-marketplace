@@ -6,7 +6,7 @@ ASP.NET Core 10 Web API və PostgreSQL. Sayt (Next.js) onu `DATA_SOURCE=api` rej
 - Verilənlər bazası: [DATABASE.md](DATABASE.md)
 - Frontend müqaviləsi: [docs/handoff/backend-contract.md](../docs/handoff/backend-contract.md)
 
-**Vəziyyət: faza 3 (elan dövrü), API tərəfi.** Faza 0-ın skeleti, faza 1-in kataloqu (§6) və faza 2-nin hesabları (§7, API və sayt tərəfi) üstündə elan dövrünün API-si hazırdır (§12): şəkil yükləmə və emalı (libvips), elan yerləşdirmə (`Idempotency-Key` ilə), «Elanlarım» (redaktə, «Yenilə», deaktiv, aktiv, silmə, 14 günlük statistika), qaralamalar, moderasiya (`/admin/moderation`, versiya yoxlaması, `audit_log`), baxış sayğacı, «Nömrəni göstər», müddətin bitməsi, saytın keşini yeniləmə xəbərləri (outbox) və gündəlik təmizləmə. Sayt `DATA_SOURCE=api` rejimində kataloqu, girişi, kabineti, profili, «mağaza»nı, seçilmişləri, axtarışları və bütün elan dövrünü bu API ilə işlədir (`src/services/apiRepository.ts`, §11): şəkillər brauzerdən birbaşa API-yə yüklənir, elan göndərilir, «Elanlarım»ın əməliyyatları, «Nömrəni göstər», baxış sayğacı və `/idareetme/moderasiya` API-dədir, keş xəbərləri saytın `POST /api/revalidate`-inə gəlir.
+**Vəziyyət: faza 4 (şikayətlər, «Usta çağır», dəstək, admin), API və sayt tərəfi.** Faza 0-ın skeleti, faza 1-in kataloqu (§6), faza 2-nin hesabları (§7) və faza 3-ün elan dövrü (§12) üstündə faza 4-ün API-si hazırdır (§14): şikayətlər (`POST /reports`, səbəb kodu ilə) və onların admin baxışı, «Usta çağır» (`POST /service-requests`: seçilmiş ustaya və ya növ və şəhər üzrə 10 ustaya qədər, SMS xəbəri outbox ilə) və ustanın gələn sorğuları (`GET /me/service-requests`), dəstək (`POST /support`, bilet nömrəsi ilə), admin panelinin rəqəmləri (`GET /admin/overview`), kateqoriyaların idarəsi (üç dildə adlar, filtrlər, adı dəyişəndə elanların axtarış mətni yenidən yığılır), «Təsdiqlənmiş satıcı» və hesabın bloklanması. Sayt `DATA_SOURCE=api` rejimində kataloqu, girişi, kabineti, profili, «mağaza»nı, seçilmişləri, axtarışları və bütün elan dövrünü bu API ilə işlədir (`src/services/apiRepository.ts`, §11): şəkillər brauzerdən birbaşa API-yə yüklənir, elan göndərilir, «Elanlarım»ın əməliyyatları, «Nömrəni göstər», baxış sayğacı və `/idareetme/moderasiya` API-dədir, keş xəbərləri saytın `POST /api/revalidate`-inə gəlir. Faza 4-ün sayt tərəfi də hazırdır: şikayət dialoqu səbəb kodunu göndərir, «Usta çağır» və dəstək forması API-yə gedir, usta sorğularını `/kabinet/sorgular` («Gələn sorğular») səhifəsində görür, `/idareetme` (rəqəmlər), `/idareetme/sikayetler` və `/idareetme/kateqoriyalar` API ilə işləyir (docs/handoff/backend-contract.md 3.5, 4.1, 4.2).
 
 **Hələ real olmayanlar** (biznes qərarı gözləyir): SMS provayderi (kodlar indi loqa yazılır, §8), ödəniş, hostinq və deploy, şəkillər üçün S3 yaddaşı və CDN (kod hazırdır, §13).
 
@@ -96,6 +96,7 @@ dotnet test
   - heç bir public cavabda telefon nömrəsi yoxdur.
 - **Seeder testləri** öz bazalarında işləyir: təkrar seed heç nə əlavə etmir, adminin dəyişikliyi qalır, demo məlumat və dev işçi hesabları yalnız istənəndə yazılır.
 - **Hesab testləri** (`[Collection("accounts")]`) ayrıca bazada işləyir (`AccountsApi`: Development kimi seed edilmiş). API-nin saatı testin əlindədir (`ManualTimeProvider`), SMS-lər yaddaşa düşür (`CapturingSmsSender`). Orada: SMS kodunun hər limiti (60 saniyə, nömrə üzrə saatda 5 və gündə 10, IP üzrə, gündəlik ümumi limit), 5 cəhd, 5 dəqiqə, HMAC; qeydiyyat (biznes «mağaza»sı ilə), şifrə və SMS ilə giriş, hesabın bağlanması, IP üzrə səhv şifrə limiti, bloklanmış hesab; sessiyanın 30 günlük sürüşən müddəti, `last_seen_at`-ın 5 dəqiqədən bir yazılması, çıxış, cihazdan çıxış, şifrə dəyişəndə və bərpada sessiyaların ləğvi; `/me`, `/me/seller`, seçilmişlər (sayğac daxil), axtarışlar (`newCount`); hər `/me` endpoint-inin sessiya tələb etməsi, rollar, başqasının məlumatına 404, anonim POST-ların limiti; yeni cədvəllərin `CHECK`, `UNIQUE`, FK və indeksləri.
+- **Faza 4-ün testləri** də `lifecycle` kolleksiyasındadır (eyni baza): şikayət (qonaq və hesab, təkrar şikayətin eyni cavabı, hədəfin səbəb kodları, `other`-in izahı, moderatorun statusları, `resolution`, tarixçə və `audit_log`); «Usta çağır» (xidmət səhifəsindən, seçilmiş ustaya hesab və ya satıcı id-si ilə, növ və şəhər üzrə paylanma, ustaların sırası və limiti, heç kimə getməyən sorğu, `Idempotency-Key`, nömrə və IP limitləri, SMS xəbəri outbox ilə, gündəlik SMS limiti, bloklanmış ustaya SMS getməməsi, ustanın gələn sorğuları və `seen`); dəstək (bilet nömrəsi, nömrənin E.164-ə çevrilməsi); hər `/admin` yolunun rolu (sessiyasız 401, `user` 403, admin bölmələrində moderator 403) və siyahının tamlığı; admin panelinin rəqəmləri; kateqoriyalar (üç dildə adlar, alt kateqoriya, ad dəyişəndə axtarışın yeni adla tapması, köhnə `version` 409, istifadə olunan kateqoriyanın silinməməsi); satıcının təsdiqi; bloklama (sessiyalar, giriş, elanlar saytdan çıxır və geri qayıdır, gözləyən elan təsdiqlənmir); yeni cədvəllərin `CHECK`, FK, `UNIQUE`, ardıcıllıqları və indeksləri. Unit testlər: `ReportRules`, `ServiceRequestRules` (ustaların seçimi daxil), `SupportRules`, `CategoryAdminRules` (ikonlar frontend-in `IconName`-i ilə eynidir), formaların gövdəsi `src/types`-ın input tipləri ilə eynidir.
 - **Elan dövrü testləri** (`[Collection("lifecycle")]`) öz bazalarında işləyir (`LifecycleApi`: Development kimi seed edilmiş, test saatı, yaddaşa düşən SMS və keş xəbərləri, şəkillər testin müvəqqəti qovluğunda). Orada: fərdi və biznes hesabının tam yolu (şəkil → elan → «Yoxlamada» → moderator təsdiqi → kataloq, elanın səhifəsi, satıcı səhifəsi → «Nömrəni göstər» → statistika); şəkil yükləmənin hər qaydası (tip, ölçü, 600 px, piksel limiti, zədəli və yarımçıq fayl, birdəfəlik token, 10 dəqiqə, CORS, gözləyən şəkil limiti); `Idempotency-Key` (təkrar, başqa gövdə, eyni anda dörd sorğu); hər validasiya xətası; moderasiya (rollar, növbə, filtrlər, fərq, rədd səbəbi, köhnə versiya, iki moderator eyni anda, `audit_log`, outbox); «Elanlarım»ın hər əməliyyatı, kateqoriyanın kilidi; sayğacların gündə bir sayılması; fon işləri (müddət, outbox və təkrar, təmizləmə) və yeni cədvəllərin `CHECK`, FK, indeksləri və UNLOGGED `listing_seen`.
 - **Qaydaların unit testləri:** `ListingLifecycle`-ın hər status × əməliyyat cütü (icazəli və qadağan), `ListingInputRules`, `RevisionDiff`, şəkil qaydaları və libvips emalı (EXIF-in silinməsi, düz çevirmə, kiçik şəklin böyüdülməməsi), lokal yaddaş, outbox-un təkrar fasiləsi.
 - **Saxlanan axtarışın sorğusu** saytın `filterQuery`-si kimi normallaşdırılır: [`contracts/saved-search-query.json`](contracts/saved-search-query.json) nümunələri Node-un `URLSearchParams`-ı ilə yaradılıb, C# testi (`CatalogueQueryStringTests`) onlarla yoxlayır.
@@ -144,6 +145,9 @@ Konfiqurasiya `appsettings.json`-dadır, dev dəyərləri `appsettings.Developme
 | `Media__MaxBytes`, `Media__MinSide`, `Media__MaxPixels`, `Media__UploadMinutes`, `Media__MaxUnattachedPerUser` | şəkil limitləri: 10 MB, qısa tərəf 600 px, 50 meqapiksel, yükləmə ünvanı 10 dəqiqə, hesabda 24 saatda elana bağlanmamış 60 şəkil | standart |
 | `Media__S3__ServiceUrl`, `__Region`, `__Bucket`, `__AccessKey`, `__SecretKey`, `__ForcePathStyle` | S3-uyğun yaddaş (§13); açarlar yalnız mühit dəyişəni ilə | boş |
 | `Listings__MaxSubmissionsPerDay`, `Listings__MaxDraftsPerUser`, `Listings__MaxDraftBytes` | hesabın 24 saatda göndərdiyi yeni elan (30), qaralama sayı (20) və ölçüsü (64 KB) | standart |
+| `ServiceRequests__MaxRecipients` | usta seçilməyən «Usta çağır» sorğusunun ən çox neçə ustaya getdiyi | `10` |
+| `ServiceRequests__MaxPerPhonePerDay`, `ServiceRequests__MaxPerIpPerDay` | bir müştəri nömrəsindən və bir IP-dən 24 saatda sorğu (5, 20); aşılanda `429 service-request.phone-limit` / `ip-limit` | standart |
+| `ServiceRequests__DailyNoticeCap` | bütün saytda 24 saatda ustalara gedən SMS xəbəri (500). Aşılanda sorğu ustanın gələn sorğularına yenə düşür, SMS getmir, loqda xəbərdarlıq qalır; `0`: SMS xəbəri yoxdur | `500` |
 | `Jobs__Enabled`, `Jobs__FirstRunDelaySeconds`, `Jobs__ExpireListingsSeconds`, `Jobs__OutboxSeconds` | tez-tez işləyən fon işləri: müddəti bitən elanlar (10 dəqiqədən bir), outbox (5 saniyədən bir) | `true`, `10`, `600`, `5` |
 | `RateLimiting__Views__*`, `RateLimiting__PhoneReveals__*` | baxış (dəqiqədə 120) və «Nömrəni göstər» (10 dəqiqədə 30) limitləri, IP üzrə | standart |
 | `RateLimiting__AnonymousWrites__PermitLimit`, `RateLimiting__AnonymousWrites__WindowSeconds` | anonim POST-ların limiti, IP üzrə | `20`, `60` |
@@ -215,7 +219,7 @@ Adlar (kateqoriya, şəhər, biznes növü, kartın atribut sətri, xidmətin qi
 - **SMS kodu:** 4 rəqəm, bazada HMAC-SHA256 (`Otp:HmacKey`), 5 cəhd, 5 dəqiqə. Eyni nömrəyə 60 saniyədə bir, saatda 5, 24 saatda 10 kod; IP üzrə və bütün sayt üzrə limitlər (§5). Yalnız +994 mobil nömrələri (10, 50, 51, 55, 60, 70, 77, 99). Hesabı olmayan nömrəyə giriş və bərpa kodu getmir (404), hesabı olan nömrəyə qeydiyyat kodu getmir (409). SMS outbox-dan keçmir, birbaşa göndərilir.
 - **Şifrə:** 8–128 simvol, ən azı bir hərf və bir rəqəm; PBKDF2 (`PasswordHasher`). 5 səhv şifrədən sonra hesab 15 dəqiqə bağlanır (`423 auth.locked`, `Retry-After`); SMS ilə giriş bağlanmanı açır. Bir IP-dən 15 dəqiqədə 30 səhv şifrədən sonra həmin IP gözləyir (`429 auth.too-many-attempts`).
 - **İcazə:** hər `/me` resursu sessiyanın sahibinindir; başqasının id-si `404` verir (məsələn `session.not-found`). Bütün sahib yoxlamaları bir yerdən keçir: `Modules/Accounts/Auth/Access.cs` (`CanManage`). Rollar `user`, `moderator`, `admin`; işçi endpoint-ləri üçün siyasətlər hazırdır (`Access.StaffPolicy`, `Access.AdminPolicy`).
-- **Limit:** bütün anonim POST-lar (`/auth/*`, `/accounts*`) IP üzrə `anonymous-writes` limitindədir.
+- **Limit:** bütün anonim POST-lar (`/auth/*`, `/accounts*`, `/reports`, `/service-requests`, `/support`) IP üzrə `anonymous-writes` limitindədir.
 
 ## 8. SMS provayderi
 
@@ -230,6 +234,7 @@ Adlar (kateqoriya, şəhər, biznes növü, kartın atribut sətri, xidmətin qi
 4. **Ayarlar** (`Sms` bölməsi, `SmsOptions`): `Sms__Provider=acme`, `Sms__ApiUrl` (provayderin göndərmə ünvanı), `Sms__Login`, `Sms__Password` və ya `Sms__ApiKey` (gizli: yalnız hostinqin mühit dəyişənlərində), `Sms__Sender` (provayderdə qeydiyyatdan keçmiş göndərən adı, standart `GreenStore`), `Sms__TimeoutSeconds`. Provayderin başqa sahəsi lazımdırsa, `SmsOptions`-a əlavə edin.
 5. **Test:** `tests/…/Infrastructure/AccountsApi.cs` testlərdə `ISmsSender`-i `CapturingSmsSender` ilə əvəz edir, ona görə testlər real SMS göndərmir. Provayderin öz sinfi üçün unit test yazın (HTTP cavabını `HttpMessageHandler` ilə saxtalaşdırıb), real nömrəyə yoxlamanı Staging-də edin.
 6. **Production:** `Otp__ExposeDemoCode=false` (standartdır; `true` olsa API başlamır) və `Otp__HmacKey` ən azı 32 simvol. SMS mətnləri `Modules/Accounts/Sms/SmsTexts.cs`-dədir (rus və ingilis mətni qaralamadır).
+7. **Ustalara xəbər** («Usta çağır», §14) eyni `ISmsSender` ilə gedir, amma kod kimi birbaşa yox, outbox-dan (`sms-notice`): provayder xəbəri qəbul etməyəndə istisna atın, outbox onu getdikcə uzanan fasilə ilə təkrar göndərir. Bütün sayt üçün gündəlik xəbər limiti `ServiceRequests__DailyNoticeCap`-dır.
 
 ## 9. Dev hesabları
 
@@ -258,9 +263,10 @@ backend/
     Data/                     AppDbContext, interceptor, xmin, LocalizedText → jsonb, Migrations/, Seed/ (seeder)
     Modules/                  Taxonomy, Listings (elanlar və xidmətlər, yerləşdirmə, «Elanlarım», qaralamalar, sayğaclar,
                               ListingLifecycle, ListingInputRules, RevisionDiff), Sellers (+ /me/seller), Accounts (SMS
-                              kodu, qeydiyyat, giriş, sessiyalar, /me; Auth/, Sms/), Engagement (seçilmişlər, axtarışlar),
-                              Media (şəkil yükləmə, libvips emalı, IFileStorage: lokal disk və S3), Admin (moderasiya),
-                              Platform (outbox, audit_log, Idempotency-Key)
+                              kodu, qeydiyyat, giriş, sessiyalar, /me; Auth/, Sms/), Engagement (seçilmişlər, axtarışlar,
+                              şikayətlər, «Usta çağır», dəstək), Media (şəkil yükləmə, libvips emalı, IFileStorage: lokal
+                              disk və S3), Admin (moderasiya, panelin rəqəmləri, şikayətlərə baxış, kateqoriyalar, satıcı
+                              təsdiqi, bloklama), Platform (outbox, audit_log, Idempotency-Key)
     Jobs/                     fon işləri: ExpireListings, Outbox, Cleanup (advisory lock ilə)
   tests/GreenStore.Api.Tests/ unit və inteqrasiya testləri
 ```
@@ -279,7 +285,7 @@ DATA_SOURCE=api API_BASE_URL=http://localhost:5080 API_INTERNAL_KEY=dev-internal
 - Public oxumalar Next-in keşində 60 saniyə qalır (`revalidate: 60`, tag-larla). `X-Client-IP` keşlənən oxumalara qoyulmur (keş bütün ziyarətçilər üçün birdir), yalnız ziyarətçiyə aid sorğulara (sonrakı fazaların yazmaları).
 - `next build` API rejimində ana səhifəni API-dən oxuyur, ona görə əvvəl API işə salınır. Elan və xidmət səhifələri build zamanı yaranmır: ilk sorğuda yaranır və keşlənir.
 - API rejimində də sayt indekslənmir: seed nümunə məlumatdır, indeksləmə yalnız `SEO_INDEXABLE=true` ilə açılır (`src/seo/env.ts`).
-- Saytda hələ API-yə qoşulmayan metodlar (şikayət, usta sorğusu, dəstək, reklam: faza 4 və 5) API rejimində «not implemented yet (phase N)» xətası verir. `/reklam` «Reklam paketləri tezliklə» göstərir.
+- Saytda hələ API-yə qoşulmayan metodlar (reklam paketləri və sifarişi: faza 5) API rejimində «not implemented yet (phase N)» xətası verir. `/reklam` «Reklam paketləri tezliklə» göstərir.
 - **Şəkil yükləmə** brauzerdən birbaşa API-yə gedir (`PUT uploadUrl`). Saytın CSP-si (`connect-src`) API-nin ictimai ünvanını (`API_PUBLIC_URL`, boşdursa `API_BASE_URL`), `img-src` və `images.remotePatterns` isə şəkillərin ünvanını (`MEDIA_BASE_URL`, boşdursa `<API_PUBLIC_URL>/media`) özü buraxır (`src/seo/csp.ts`). Bu ünvanlar API-nin `Media__UploadBaseUrl` və `Media__BaseUrl`-i ilə eyni olmalıdır; API öz tərəfində CORS-u yalnız saytın mənbəyindən açır (`Frontend__BaseUrl`, `Media__UploadOrigins`).
 - **Keş xəbərləri:** saytın `REVALIDATE_SECRET`-i API-nin `Revalidation__Secret`-i ilə eyni olmalıdır (Development: `dev-revalidate-secret`). Saytı `localhost:3100`-də yoxlayanda API-ni `Frontend__BaseUrl=http://localhost:3100` ilə işə salın, yoxsa xəbərlər `localhost:3000`-ə gedir.
 
@@ -332,3 +338,43 @@ Development lokal diskdən işləyir. Production üçün (hostinq seçiləndə) 
 4. Sayt tərəfində `MEDIA_BASE_URL` CDN-in ünvanına (məsələn `https://cdn.greenstore.az`), `API_PUBLIC_URL` API-nin ictimai ünvanına qoyulur: CSP-nin `img-src`-i, `connect-src`-i və `images.remotePatterns` onlardan qurulur (`src/seo/csp.ts`; build-də və serverdə eyni dəyər).
 5. Kod: `Modules/Media/FileStorage.cs` (`S3FileStorage`). Lokal disk üçün olan testlər işləyir; S3 ilə real yoxlama Staging-də edilməlidir.
 
+## 14. Şikayətlər, «Usta çağır», dəstək və admin (faza 4)
+
+Ətraflı formalar və xəta kodları: [backend-contract.md 3.5 və 4.1](../docs/handoff/backend-contract.md#faza-4-şikayətlər). Cədvəllər: DATABASE.md §3.7, §3.8.
+
+| Endpoint | Kim | Nə edir |
+|---|---|---|
+| `POST /api/v1/reports` `{ target, targetId, reason, comment? }` | hamı (IP limiti) | şikayət → 201 `{ id }`; eyni ziyarətçinin eyni hədəf və səbəblə açıq şikayəti varsa 200 və onun id-si |
+| `POST /api/v1/service-requests` `ServiceRequestInput` | hamı (IP limiti, `Idempotency-Key`) | «Usta çağır» → 201 `{ id, number }` («Sorğu № 3001») |
+| `GET /api/v1/me/service-requests?page&pageSize`, `POST …/{id}/seen` | sessiya | ustanın gələn sorğuları (`unseen` ilə), müştərinin adı və nömrəsi ilə; «açdım» |
+| `POST /api/v1/support` `SupportMessageInput` | hamı (IP limiti) | dəstək mesajı → 201 `{ ticket }` |
+| `GET /api/v1/admin/overview` | moderator, admin | panelin rəqəmləri: moderasiya, şikayətlər, elanlar, hesablar, satıcılar, sorğular, dəstək, kateqoriyalar |
+| `GET /api/v1/admin/reports?status&target&reason&sort&page`, `GET …/{id}` | moderator, admin | şikayətlər `totals` ilə; hər biri hədəfi (elan sahibin gördüyü kimi, nömrə daxil, və ya satıcı), sahibi, şikayətçi, hədəfin açıq şikayətləri və tarixçə ilə |
+| `PATCH /api/v1/admin/reports/{id}` `{ status?, resolution?, note? }` | moderator, admin | `open` → `investigating` → `resolved` (`resolution`: `action-taken` və ya `no-violation`); qeyd tarixçəyə düşür |
+| `GET`, `POST /api/v1/admin/categories`, `GET`, `PATCH`, `DELETE …/{id}` | admin | kateqoriyalar və alt kateqoriyalar: `names` və `descriptions` üç dildə (`LocalizedText`), ikon, filtrlər, sıra, `isActive`, `version` |
+| `POST /api/v1/admin/sellers/{id}/verify` `{ verified }` | admin | «Təsdiqlənmiş satıcı» |
+| `POST /api/v1/admin/users/{id}/block` `{ blocked, reason? }` | admin | hesabı bloklayır və ya açır |
+
+**Qaydalar.**
+- **Şikayət səbəbləri** koddur (backend-contract.md 4.1): elan `sold`, `wrong-price`, `wrong-photos`, `wrong-info`, `unreachable`, `duplicate`, `fraud`, `other`; satıcı `unreachable`, `wrong-info`, `misconduct`, `fraud`, `other`; xidmət `not-provided`, `wrong-price`, `stolen-photos`, `unreachable`, `fraud`, `other`. `other` izah tələb edir (≤ 500). Hədəf saytda olmalıdır (aktiv elan və ya xidmət, aktiv hesabın satıcısı).
+- **«Usta çağır»:** `serviceId` varsa sorğu həmin xidmətin ustasına, `providerId` varsa (hesabın və ya biznesin satıcı id-si) həmin ustaya gedir; heç biri yoxdursa həmin növün (və ya bütün `landsaft-xidmetleri`-nin) aktiv xidmətlərinin sahiblərinə, şəhərdə olan və ya o şəhərə xidmət edən, ən çoxu 10 nəfərə: əvvəl «Önə çıxan», sonra təsdiqlənmiş biznes, sonra ən yeni. Müştəri özü siyahıya düşmür. Uyğun usta yoxdursa sorğu `new` qalır (admin panelində `unrouted`). Hər ustaya sorğu ilə eyni tranzaksiyada SMS xəbəri yazılır, `Outbox` işi onu ustanın dilində göndərir (nömrə, növ, şəhər, müştərinin adı və nömrəsi) və `notified_at` yazır; bloklanmış ustaya göndərmir.
+- **Limitlər:** IP üzrə `anonymous-writes`; bir müştəri nömrəsindən 24 saatda 5, bir IP-dən 20 sorğu; bütün saytda 24 saatda 500 SMS xəbəri (§5).
+- **Kateqoriyalar:** iki səviyyə. Kateqoriyanın `kind`, `form` (`plant`, `pack`, `goods`, `grass`; xidmətdə `service`) və ikonu (`IconName`) var; alt kateqoriya valideyninin növünü götürür, ikonu və filtri olmur. Filtrlər formaya görədir: bitkidə `species`, `height`, `age`, `rootSystem`, xidmətdə `serviceType`, `area`, `priceType` (API özü `rootSystem`-i oxuyur). Azərbaycanca ad məcburidir (≤ 60) və bir valideynin altında təkrarlanmır. Id verilməyibsə addan yaranır (`Bağ dekoru` → `bag-dekoru`). `kind`, `form`, valideyn və id sonra dəyişmir. Ad dəyişəndə həmin kateqoriyanın elanlarının `search_text`-i elə həmin sorğuda yenidən yığılır (500-lük hissələrlə). Kateqoriyanı istifadə edən elan, alt kateqoriya və ya sorğu varsa silinmir (`409 category.in-use`): `isActive: false` ilə saytdan çıxarılır. Hər dəyişiklik `audit_log`-a yazılır və saytın keşini (`taxonomy`, `listings`, `services`, `home`) yeniləyir.
+- **Diqqət (sayt):** sihirbaz alt kateqoriyanı hələ Azərbaycanca adı ilə göndərir (backend-contract.md 1.3). Alt kateqoriyanın Azərbaycanca adını dəyişsəniz və ya onu söndürsəniz, sayt `subcategoryId`-ni göndərənə qədər həmin alt kateqoriyada elan yerləşdirmək olmur (`400 subcategory: invalid`). Rus və ingilis adını dəyişmək təhlükəsizdir.
+- **Bloklama:** hesab `blocked` olur, bütün sessiyaları bağlanır (`revoked_at`), giriş `403 auth.blocked` verir, aktiv elanları saytdan çıxır (`inactive`) və keş yenilənir. Bloklanmış hesabın gözləyən elanı təsdiqlənmir (`409 listing.owner-blocked`). Açanda son bloklamanın çıxardığı elanlar geri qayıdır (arada sahib dəyişməyibsə; müddəti bitibsə `expired` olur), köhnə sessiyalar bağlı qalır. Admin özünü bloklaya bilməz. Satıcı səhifəsi açıq qalır (elansız), nömrəsi göstərilmir.
+- **İcazə:** moderasiya, şikayətlər və panel moderator və admin üçündür; kateqoriyalar, təsdiq və bloklama yalnız admin üçün. Hər admin əməliyyatı `audit_log`-dadır (`report.update`, `category.create|update|delete`, `seller.verify|unverify`, `user.block|unblock`).
+
+**Əl ilə yoxlama** (Development, API işləyir, dev hesabları §9):
+
+```bash
+A=http://localhost:5080/api/v1; J=(-H 'Content-Type: application/json')
+ADMIN=$(curl -s "${J[@]}" $A/auth/login -d '{"login":"+994500000001","password":"Admin-dev-2026"}' | python3 -c 'import sys,json;print(json.load(sys.stdin)["session"]["token"])')
+L=$(curl -s "$A/listings?pageSize=1" | python3 -c 'import sys,json;print(json.load(sys.stdin)["items"][0]["id"])')
+curl -s "${J[@]}" $A/reports -d "{\"target\":\"listing\",\"targetId\":\"$L\",\"reason\":\"wrong-price\"}"          # → 201 { id }
+curl -s "${J[@]}" $A/service-requests -d '{"categoryId":"landsaft-dizayni","cityId":"baki","description":"Həyətin dizaynı lazımdır","name":"Aygün","phone":"+994 55 123 45 67"}'  # → { id, number }
+curl -s "${J[@]}" $A/support -d '{"topic":"other","name":"Rauf","contact":"rauf@example.az","message":"Sualım var, zəng edin."}'  # → { ticket }
+curl -s -H "Authorization: Bearer $ADMIN" $A/admin/overview
+curl -s -H "Authorization: Bearer $ADMIN" "$A/admin/reports?status=open"
+```
+
+Ustalara gedən SMS Development-də API-nin konsoluna yazılır (`SMS not sent … yeni xidmət sorğusu № 3001 …`).

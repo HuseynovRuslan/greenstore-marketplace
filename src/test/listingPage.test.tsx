@@ -137,7 +137,8 @@ describe('listing page', () => {
     expect(within(dialog).getByText(/ən azı 10 simvol/)).toBeInTheDocument()
     await user.click(within(dialog).getByRole('radio', { name: 'Qiymət düzgün deyil' }))
     await user.click(within(dialog).getByRole('button', { name: 'Şikayəti göndər' }))
-    expect(sendReport).toHaveBeenCalledWith({ target: 'listing', targetId: 'zeytun-agaci', reason: 'Qiymət düzgün deyil', comment: '' })
+    // The dialog shows the words and sends the code (backend-contract.md 4.1).
+    expect(sendReport).toHaveBeenCalledWith({ target: 'listing', targetId: 'zeytun-agaci', reason: 'wrong-price', comment: '' })
     expect(await within(dialog).findByText('Şikayətiniz göndərildi')).toBeInTheDocument()
   })
 })

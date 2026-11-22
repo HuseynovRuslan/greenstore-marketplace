@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, type FormEvent } from 'react'
+import { useRef, useState, type FormEvent } from 'react'
 import { CircleCheck, Hammer } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Dialog } from '@/components/ui/Dialog'
@@ -11,7 +11,8 @@ import { cities } from '@/data/cities'
 import { serviceCategories } from '@/data/services'
 import { cn } from '@/lib/format'
 import { phoneFieldError } from '@/lib/phone'
-import { useSession } from '@/state/store'
+import { useDataSource, useSession } from '@/state/store'
+import type { ServiceRequestInput } from '@/types'
 import { sendServiceRequest } from './actions'
 
 interface RequestProps {
@@ -25,6 +26,12 @@ interface RequestProps {
 }
 
 const todayIso = () => new Date().toISOString().slice(0, 10)
+
+/** A new `Idempotency-Key` for one request (`sorgu-<uuid>`). */
+function newRequestKey(): string {
+  const id = typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 12)}`
+  return `sorgu-${id}`
+}
 
 /**
  * «Usta çağır»: a short request — what (service type), where (city, area), how big, when, a description and the
@@ -47,6 +54,9 @@ export function RequestButton({ provider, serviceId, categoryId, label = 'Usta �
 
 function RequestForm({ provider, serviceId, categoryId, onClose }: RequestProps & { onClose: () => void }) {
   const { user } = useSession()
+  const demo = useDataSource() === 'mock'
+  /** The key of what was sent last: sending the same request again (a lost answer) reuses it, a changed one gets a new one. */
+  const sentKey = useRef<{ body: string; key: string } | null>(null)
   const [form, setForm] = useState({
     categoryId: categoryId ?? '',
     cityId: '',
@@ -78,7 +88,7 @@ function RequestForm({ provider, serviceId, categoryId, onClose }: RequestProps 
     if (first) return document.getElementById(`sorgu-${first}`)?.focus()
     setBusy(true)
     setFailure(undefined)
-    const result = await sendServiceRequest({
+    const request: ServiceRequestInput = {
       serviceId,
       providerId: provider?.id,
       categoryId: form.categoryId,
@@ -89,7 +99,13 @@ function RequestForm({ provider, serviceId, categoryId, onClose }: RequestProps 
       description: form.description.trim(),
       name: form.name.trim(),
       phone: form.phone,
-    })
+    }
+    const body = JSON.stringify(request)
+    if (sentKey.current?.body !== body) sentKey.current = { body, key: newRequestKey() }
+    const result = await sendServiceRequest(request, sentKey.current.key).catch(() => ({
+      ok: false as const,
+      error: 'Sorğunu göndərmək alınmadı. İnternet bağlantısını yoxlayın.',
+    }))
     setBusy(false)
     if (!result.ok) return setFailure(result.error)
     setSent(result.number)
@@ -102,7 +118,8 @@ function RequestForm({ provider, serviceId, categoryId, onClose }: RequestProps 
         <div role="status" className="flex flex-col gap-1">
           <p className="text-lg font-semibold text-forest">Sorğu № {sent} göndərildi</p>
           <p className="text-sm leading-[1.5] text-ink-soft">
-            {provider ? `${provider.name} adətən 1 saat ərzində zəng edir.` : 'Uyğun ustalar 1–2 saat ərzində sizə zəng edəcək.'} Demo: sorğu heç kimə göndərilmir.
+            {provider ? `${provider.name} adətən 1 saat ərzində zəng edir.` : 'Uyğun ustalar 1–2 saat ərzində sizə zəng edəcək.'}
+            {demo && ' Demo: sorğu heç kimə göndərilmir.'}
           </p>
         </div>
         <Button variant="secondary" fullWidth onClick={onClose}>

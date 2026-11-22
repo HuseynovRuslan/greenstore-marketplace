@@ -1,4 +1,4 @@
-import type { IconName, ModerationKind, ModerationStatus } from '@/types'
+import type { ComplaintStatus, IconName, ModerationKind, ModerationStatus } from '@/types'
 
 /**
  * Moderation tools data ("İdarəetmə" frames: Moderasiya, Kateqoriyalar, Şikayətlər · 1440).
@@ -181,7 +181,8 @@ export const categoryIconLabels: Record<IconName, string> = {
 /* Şikayətlər                                                           */
 /* ------------------------------------------------------------------ */
 
-export type ComplaintStatus = 'open' | 'investigating' | 'resolved'
+/** A contract type now (backend-contract.md 3.5): the API's reports carry it. */
+export type { ComplaintStatus }
 
 export const complaintStatusLabels: Record<ComplaintStatus, string> = {
   open: 'Açıq',

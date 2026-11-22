@@ -27,6 +27,12 @@ namespace GreenStore.Api.Data.Migrations
             modelBuilder.HasSequence("listing_number_seq")
                 .StartsAt(10001L);
 
+            modelBuilder.HasSequence("service_request_number_seq")
+                .StartsAt(3001L);
+
+            modelBuilder.HasSequence("support_ticket_seq")
+                .StartsAt(1001L);
+
             modelBuilder.Entity("GreenStore.Api.Modules.Accounts.OtpChallenge", b =>
                 {
                     b.Property<Guid>("Id")
@@ -351,6 +357,100 @@ namespace GreenStore.Api.Data.Migrations
                     b.ToTable("favorites", (string)null);
                 });
 
+            modelBuilder.Entity("GreenStore.Api.Modules.Engagement.Report", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Comment")
+                        .HasColumnType("text")
+                        .HasColumnName("comment");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<DateTimeOffset?>("HandledAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("handled_at");
+
+                    b.Property<Guid?>("HandledBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("handled_by");
+
+                    b.Property<Guid?>("ListingId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("listing_id");
+
+                    b.Property<string>("ReasonCode")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("reason_code");
+
+                    b.Property<byte[]>("ReporterIpHash")
+                        .HasColumnType("bytea")
+                        .HasColumnName("reporter_ip_hash");
+
+                    b.Property<Guid?>("ReporterUserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("reporter_user_id");
+
+                    b.Property<string>("Resolution")
+                        .HasColumnType("text")
+                        .HasColumnName("resolution");
+
+                    b.Property<Guid?>("SellerId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("seller_id");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text")
+                        .HasColumnName("status")
+                        .HasDefaultValueSql("'open'");
+
+                    b.Property<string>("TargetKind")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("target_kind");
+
+                    b.HasKey("Id")
+                        .HasName("pk_reports");
+
+                    b.HasIndex("CreatedAt")
+                        .HasDatabaseName("ix_reports_open")
+                        .HasFilter("status <> 'resolved'");
+
+                    b.HasIndex("ListingId")
+                        .HasDatabaseName("ix_reports_listing")
+                        .HasFilter("listing_id IS NOT NULL");
+
+                    b.ToTable("reports", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_reports_comment", "char_length(comment) <= 500");
+
+                            t.HasCheckConstraint("ck_reports_one_target", "num_nonnulls(listing_id, seller_id) = 1");
+
+                            t.HasCheckConstraint("ck_reports_other_has_comment", "reason_code <> 'other' OR comment IS NOT NULL");
+
+                            t.HasCheckConstraint("ck_reports_reason_code", "reason_code IN ('sold', 'wrong-price', 'wrong-photos', 'wrong-info', 'unreachable', 'duplicate', 'fraud', 'misconduct', 'not-provided', 'stolen-photos', 'other')");
+
+                            t.HasCheckConstraint("ck_reports_resolution", "resolution IN ('action-taken', 'no-violation')");
+
+                            t.HasCheckConstraint("ck_reports_resolved_has_resolution", "status <> 'resolved' OR resolution IS NOT NULL");
+
+                            t.HasCheckConstraint("ck_reports_seller_target", "(target_kind = 'seller') = (seller_id IS NOT NULL)");
+
+                            t.HasCheckConstraint("ck_reports_status", "status IN ('open', 'investigating', 'resolved')");
+
+                            t.HasCheckConstraint("ck_reports_target_kind", "target_kind IN ('listing', 'seller', 'service')");
+                        });
+                });
+
             modelBuilder.Entity("GreenStore.Api.Modules.Engagement.SavedSearch", b =>
                 {
                     b.Property<Guid>("Id")
@@ -409,6 +509,205 @@ namespace GreenStore.Api.Data.Migrations
                             t.HasCheckConstraint("ck_saved_searches_name", "char_length(name) BETWEEN 1 AND 60");
 
                             t.HasCheckConstraint("ck_saved_searches_query", "char_length(query) <= 500");
+                        });
+                });
+
+            modelBuilder.Entity("GreenStore.Api.Modules.Engagement.ServiceRequest", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Area")
+                        .HasColumnType("text")
+                        .HasColumnName("area");
+
+                    b.Property<string>("CategoryId")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("category_id");
+
+                    b.Property<string>("CityId")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("city_id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<string>("CustomerName")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("customer_name");
+
+                    b.Property<string>("CustomerPhone")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("customer_phone");
+
+                    b.Property<Guid?>("CustomerUserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("customer_user_id");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("description");
+
+                    b.Property<byte[]>("IpHash")
+                        .HasColumnType("bytea")
+                        .HasColumnName("ip_hash");
+
+                    b.Property<Guid?>("ListingId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("listing_id");
+
+                    b.Property<long>("Number")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("number")
+                        .HasDefaultValueSql("nextval('service_request_number_seq')");
+
+                    b.Property<DateOnly?>("PreferredDate")
+                        .HasColumnType("date")
+                        .HasColumnName("preferred_date");
+
+                    b.Property<string>("Size")
+                        .HasColumnType("text")
+                        .HasColumnName("size");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text")
+                        .HasColumnName("status")
+                        .HasDefaultValueSql("'new'");
+
+                    b.HasKey("Id")
+                        .HasName("pk_service_requests");
+
+                    b.HasIndex("Number")
+                        .IsUnique()
+                        .HasDatabaseName("ux_service_requests_number");
+
+                    b.ToTable("service_requests", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_service_requests_area", "char_length(area) <= 80");
+
+                            t.HasCheckConstraint("ck_service_requests_customer_name", "char_length(customer_name) <= 60");
+
+                            t.HasCheckConstraint("ck_service_requests_customer_phone", "customer_phone ~ '^\\+994[0-9]{9}$'");
+
+                            t.HasCheckConstraint("ck_service_requests_description", "char_length(description) <= 1000");
+
+                            t.HasCheckConstraint("ck_service_requests_size", "char_length(size) <= 40");
+
+                            t.HasCheckConstraint("ck_service_requests_status", "status IN ('new', 'sent', 'closed', 'spam')");
+                        });
+                });
+
+            modelBuilder.Entity("GreenStore.Api.Modules.Engagement.ServiceRequestRecipient", b =>
+                {
+                    b.Property<Guid>("RequestId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("request_id");
+
+                    b.Property<Guid>("ProviderUserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("provider_user_id");
+
+                    b.Property<DateTimeOffset?>("NotifiedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("notified_at");
+
+                    b.Property<DateTimeOffset?>("SeenAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("seen_at");
+
+                    b.HasKey("RequestId", "ProviderUserId")
+                        .HasName("pk_service_request_recipients");
+
+                    b.ToTable("service_request_recipients", (string)null);
+                });
+
+            modelBuilder.Entity("GreenStore.Api.Modules.Engagement.SupportMessage", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Contact")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("contact");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<byte[]>("IpHash")
+                        .HasColumnType("bytea")
+                        .HasColumnName("ip_hash");
+
+                    b.Property<long?>("ListingNumber")
+                        .HasColumnType("bigint")
+                        .HasColumnName("listing_number");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("message");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("name");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text")
+                        .HasColumnName("status")
+                        .HasDefaultValueSql("'new'");
+
+                    b.Property<long>("Ticket")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("ticket")
+                        .HasDefaultValueSql("nextval('support_ticket_seq')");
+
+                    b.Property<string>("Topic")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("topic");
+
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_support_messages");
+
+                    b.HasIndex("Ticket")
+                        .IsUnique()
+                        .HasDatabaseName("ux_support_messages_ticket");
+
+                    b.ToTable("support_messages", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_support_messages_contact", "char_length(contact) <= 254");
+
+                            t.HasCheckConstraint("ck_support_messages_message", "char_length(message) <= 2000");
+
+                            t.HasCheckConstraint("ck_support_messages_name", "char_length(name) <= 60");
+
+                            t.HasCheckConstraint("ck_support_messages_status", "status IN ('new', 'answered', 'closed')");
+
+                            t.HasCheckConstraint("ck_support_messages_topic", "topic IN ('listing', 'account', 'payment', 'complaint', 'other')");
                         });
                 });
 
@@ -1512,6 +1811,41 @@ namespace GreenStore.Api.Data.Migrations
                     b.Navigation("Listing");
                 });
 
+            modelBuilder.Entity("GreenStore.Api.Modules.Engagement.Report", b =>
+                {
+                    b.HasOne("GreenStore.Api.Modules.Accounts.User", "Handler")
+                        .WithMany()
+                        .HasForeignKey("HandledBy")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .HasConstraintName("fk_reports_users_handled_by");
+
+                    b.HasOne("GreenStore.Api.Modules.Listings.Listing", "Listing")
+                        .WithMany()
+                        .HasForeignKey("ListingId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .HasConstraintName("fk_reports_listings_listing_id");
+
+                    b.HasOne("GreenStore.Api.Modules.Accounts.User", "Reporter")
+                        .WithMany()
+                        .HasForeignKey("ReporterUserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .HasConstraintName("fk_reports_users_reporter_user_id");
+
+                    b.HasOne("GreenStore.Api.Modules.Sellers.Seller", "Seller")
+                        .WithMany()
+                        .HasForeignKey("SellerId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .HasConstraintName("fk_reports_sellers_seller_id");
+
+                    b.Navigation("Handler");
+
+                    b.Navigation("Listing");
+
+                    b.Navigation("Reporter");
+
+                    b.Navigation("Seller");
+                });
+
             modelBuilder.Entity("GreenStore.Api.Modules.Engagement.SavedSearch", b =>
                 {
                     b.HasOne("GreenStore.Api.Modules.Accounts.User", null)
@@ -1520,6 +1854,71 @@ namespace GreenStore.Api.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_saved_searches_users_user_id");
+                });
+
+            modelBuilder.Entity("GreenStore.Api.Modules.Engagement.ServiceRequest", b =>
+                {
+                    b.HasOne("GreenStore.Api.Modules.Taxonomy.Category", "Category")
+                        .WithMany()
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("fk_service_requests_categories_category_id");
+
+                    b.HasOne("GreenStore.Api.Modules.Taxonomy.City", "City")
+                        .WithMany()
+                        .HasForeignKey("CityId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("fk_service_requests_cities_city_id");
+
+                    b.HasOne("GreenStore.Api.Modules.Accounts.User", null)
+                        .WithMany()
+                        .HasForeignKey("CustomerUserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .HasConstraintName("fk_service_requests_users_customer_user_id");
+
+                    b.HasOne("GreenStore.Api.Modules.Listings.Listing", "Listing")
+                        .WithMany()
+                        .HasForeignKey("ListingId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .HasConstraintName("fk_service_requests_listings_listing_id");
+
+                    b.Navigation("Category");
+
+                    b.Navigation("City");
+
+                    b.Navigation("Listing");
+                });
+
+            modelBuilder.Entity("GreenStore.Api.Modules.Engagement.ServiceRequestRecipient", b =>
+                {
+                    b.HasOne("GreenStore.Api.Modules.Accounts.User", "Provider")
+                        .WithMany()
+                        .HasForeignKey("ProviderUserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("fk_service_request_recipients_users_provider_user_id");
+
+                    b.HasOne("GreenStore.Api.Modules.Engagement.ServiceRequest", "Request")
+                        .WithMany("Recipients")
+                        .HasForeignKey("RequestId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_service_request_recipients_service_requests_request_id");
+
+                    b.Navigation("Provider");
+
+                    b.Navigation("Request");
+                });
+
+            modelBuilder.Entity("GreenStore.Api.Modules.Engagement.SupportMessage", b =>
+                {
+                    b.HasOne("GreenStore.Api.Modules.Accounts.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .HasConstraintName("fk_support_messages_users_user_id");
                 });
 
             modelBuilder.Entity("GreenStore.Api.Modules.Listings.Listing", b =>
@@ -1706,6 +2105,11 @@ namespace GreenStore.Api.Data.Migrations
                         .HasConstraintName("fk_categories_categories_parent_id");
 
                     b.Navigation("Parent");
+                });
+
+            modelBuilder.Entity("GreenStore.Api.Modules.Engagement.ServiceRequest", b =>
+                {
+                    b.Navigation("Recipients");
                 });
 
             modelBuilder.Entity("GreenStore.Api.Modules.Listings.Listing", b =>

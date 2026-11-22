@@ -85,3 +85,14 @@ export async function changeOwnListing(id: string, action: OwnListingAction): Pr
     return { ok: false, error: 'Əməliyyatı etmək alınmadı. Bir az sonra yenidən cəhd edin.' }
   }
 }
+
+/** «Baxıldı»: the provider opened a «Usta çağır» request (backend-contract.md 4.2); DATA_SOURCE=api only. */
+export async function markRequestSeen(requestId: string): Promise<{ ok: boolean }> {
+  if (dataSource() !== 'api' || typeof requestId !== 'string' || !/^[a-z0-9-]{1,80}$/.test(requestId)) return { ok: false }
+  try {
+    await getRepository().markServiceRequestSeen(requestId)
+    return { ok: true }
+  } catch {
+    return { ok: false }
+  }
+}

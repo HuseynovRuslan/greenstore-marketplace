@@ -36,6 +36,13 @@ public static class ApiRoutes
         api.MapOwnListings();
         api.MapListingCounters();
         api.MapModeration();
+        api.MapReports();
+        api.MapServiceRequests();
+        api.MapSupport();
+        api.MapAdminOverview();
+        api.MapAdminReports();
+        api.MapAdminCategories();
+        api.MapAdminAccounts();
 
         foreach (var extra in app.ServiceProvider.GetServices<IExtraApiEndpoints>())
         {

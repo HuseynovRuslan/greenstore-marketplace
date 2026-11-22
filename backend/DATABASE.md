@@ -1,6 +1,6 @@
 # GreenStore: verilənlər bazası
 
-**Status:** təsdiqlənib (22 noyabr 2026). Faza 1-in cədvəlləri yaradılıb (miqrasiya `AddCatalogueTables`): `categories`, `cities`, `users`, `photos`, `sellers`, `listings` (`pending_promotion_option_id` faza 5-də, `promotion_options` ilə birlikdə), `listing_photos`, `listing_counters` və `listing_number_seq`. Faza 2-də (miqrasiya `AddAccounts`, sonra `AddOtpCreatedIndex`) `sessions`, `otp_challenges`, `favorites` və `saved_searches` gəlib; `users` faza 1-dən tamdır. Faza 3-də (miqrasiya `AddListingLifecycle`) `listing_drafts`, `listing_revisions`, `moderation_decisions`, `listing_daily_stats`, `listing_seen` (UNLOGGED), `outbox`, `audit_log` və `idempotency_keys` gəlib. `devices` mobil tətbiqi gözləyir. Qalanları (şikayətlər, «Usta çağır», dəstək, reklam və ödəniş) öz fazalarında gəlir.
+**Status:** təsdiqlənib (22 noyabr 2026). Faza 1-in cədvəlləri yaradılıb (miqrasiya `AddCatalogueTables`): `categories`, `cities`, `users`, `photos`, `sellers`, `listings` (`pending_promotion_option_id` faza 5-də, `promotion_options` ilə birlikdə), `listing_photos`, `listing_counters` və `listing_number_seq`. Faza 2-də (miqrasiya `AddAccounts`, sonra `AddOtpCreatedIndex`) `sessions`, `otp_challenges`, `favorites` və `saved_searches` gəlib; `users` faza 1-dən tamdır. Faza 3-də (miqrasiya `AddListingLifecycle`) `listing_drafts`, `listing_revisions`, `moderation_decisions`, `listing_daily_stats`, `listing_seen` (UNLOGGED), `outbox`, `audit_log` və `idempotency_keys` gəlib. Faza 4-də (miqrasiya `AddReportsRequestsSupport`) `reports`, `service_requests`, `service_request_recipients`, `support_messages` və `service_request_number_seq`, `support_ticket_seq` ardıcıllıqları gəlib. `devices` mobil tətbiqi gözləyir. Reklam və ödəniş cədvəlləri faza 5-dədir.
 **Əlaqəli sənədlər:** [ARCHITECTURE.md](ARCHITECTURE.md) (ümumi arxitektura), [backend-contract.md](../docs/handoff/backend-contract.md) (frontend müqaviləsi).
 
 Aşağıdakı SQL hədəf sxemdir. Real cədvəllər EF Core miqrasiyaları ilə yaradılacaq, amma nəticə bu sxemlə eyni olmalıdır. Hər miqrasiyanın SQL-i bu sənədlə müqayisə olunur.
@@ -437,7 +437,8 @@ CREATE TABLE reports (
   target_kind      text NOT NULL CHECK (target_kind IN ('listing', 'seller', 'service')),
   listing_id       uuid REFERENCES listings (id),                 -- elan və ya xidmət
   seller_id        uuid REFERENCES sellers (id),
-  reason_code      text NOT NULL,                                 -- backend-contract.md 4.1
+  reason_code      text NOT NULL CHECK (reason_code IN ('sold', 'wrong-price', 'wrong-photos', 'wrong-info', 'unreachable',
+                     'duplicate', 'fraud', 'misconduct', 'not-provided', 'stolen-photos', 'other')),  -- backend-contract.md 4.1
   comment          text CHECK (char_length(comment) <= 500),
   reporter_user_id uuid REFERENCES users (id),                    -- qonaq da şikayət edə bilər
   reporter_ip_hash bytea,
@@ -457,7 +458,7 @@ CREATE INDEX ix_reports_listing ON reports (listing_id) WHERE listing_id IS NOT 
 
 **Şikayətin hədəfi iki ayrı FK sütunundadır:** `listing_id` və ya `seller_id`, həmişə yalnız biri dolu. Tək bir `target_id` sütunundan daha yaxşıdır, çünki silinmiş və ya mövcud olmayan hədəfə şikayət yazmaq olmur.
 
-`status` dəyərləri admin-in indiki `ComplaintStatus`-u ilə eynidir.
+`status` dəyərləri admin-in indiki `ComplaintStatus`-u ilə eynidir. Səbəb kodu da başqa enum-lar kimi `CHECK` ilə yoxlanır (§2); hansı hədəfin hansı kodu seçə bildiyini C# (`ReportRules`) yoxlayır. Moderatorun qeydi və şikayətin tarixçəsi ayrıca sütunda deyil, `audit_log`-dadır (`report.update`: yeni status, əvvəlki status, `resolution`, qeyd).
 
 ### 3.8 «Usta çağır» və dəstək
 
@@ -507,7 +508,11 @@ CREATE TABLE support_messages (
 - Sorğu konkret xidmətdən gəlibsə, `service_request_recipients`-də bir sətir olur.
 - Usta seçilməyibsə (bütün kateqoriyaya), həmin növ və şəhərdə ən çoxu 10 aktiv ustaya paylanır. Hər ustaya bir sətir yazılır.
 
-**Hələ olmayan UI.** Sorğular indi bazada qalacaq, amma ustanın onları görəcəyi səhifə («Gələn sorğular») frontend-də hələ yoxdur. Onu sonra əlavə etmək lazımdır.
+- Ustalar sırası: əvvəl «Önə çıxan» xidməti olanlar, sonra təsdiqlənmiş biznes, sonra ən yeni xidmət (`ServiceRequestRules.ChooseProviders`). Müştəri özü siyahıya düşmür. Heç kim tapılmasa sorğu `new` qalır.
+- Hər ustaya SMS xəbəri sorğu ilə eyni tranzaksiyada outbox-a yazılır (`sms-notice`), göndəriləndə `notified_at` dolur. Bütün sayt üzrə 24 saatda ən çox `ServiceRequests:DailyNoticeCap` xəbər gedir; ondan sonra sorğu yalnız ustanın gələn sorğularına düşür.
+- Spam qarşısında: IP üzrə limit, bir müştəri nömrəsindən 24 saatda 5, bir IP-dən 20 sorğu (`ip_hash` və `customer_phone` üzrə sayılır; 10 min elan ölçüsündə indeks lazım deyil, §3.4).
+
+**Hələ olmayan UI.** API-də ustanın gələn sorğuları var (`GET /me/service-requests`), amma saytda onun səhifəsi («Gələn sorğular») hələ yoxdur. Onu sonra əlavə etmək lazımdır.
 
 ### 3.9 Reklam və ödəniş
 
@@ -639,7 +644,7 @@ Frontend-in `normalizeSearch` funksiyası da eyni işi görür. Test nümunələ
 
 **Sorğu.** Axtarış sətri eyni üsulla normallaşdırılır və sözlərə bölünür. Hər söz üçün `search_text LIKE '%söz%'` şərti yazılır və şərtlər `AND` ilə birləşir. Bu, mock-dakı «hər söz tapılmalıdır» məntiqidir. `pg_trgm` GIN indeksi `LIKE '%…%'`-i sürətləndirir. 3 hərfdən qısa sözdə indeks kömək etmir, amma 10 min sətirdə bu fərq etmir.
 
-**Yenidən yığmaq.** Admin kateqoriya və ya şəhər adını dəyişəndə, həmin kateqoriya və ya şəhərin elanlarının `search_text`-i fon işi ilə yenidən yığılır.
+**Yenidən yığmaq.** Admin kateqoriya və ya alt kateqoriya adını dəyişəndə həmin kateqoriyanın elanlarının `search_text`-i yenidən yığılır. Faza 4-də bu fon işində yox, adminin sorğusunun içində, 500-lük hissələrlə bir SQL ifadəsi ilə gedir (`Modules/Admin/SearchTextRebuilder.cs`): bir kateqoriyada ən çoxu bir neçə min elan olur və admin nəticəni dərhal görür. Şəhər adlarını dəyişən admin səhifəsi hələ yoxdur.
 
 **Filtr sayları** (`getFacetCounts`) eyni filtrlə, `GROUP BY category_id` və `GROUP BY city_id` ilə hesablanır və 60 saniyə keşlənir.
 

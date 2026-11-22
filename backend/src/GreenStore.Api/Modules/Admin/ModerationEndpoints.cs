@@ -3,6 +3,7 @@ using GreenStore.Api.Common;
 using GreenStore.Api.Common.Errors;
 using GreenStore.Api.Common.Http;
 using GreenStore.Api.Data;
+using GreenStore.Api.Modules.Accounts;
 using GreenStore.Api.Modules.Accounts.Auth;
 using GreenStore.Api.Modules.Listings;
 using GreenStore.Api.Modules.Platform;
@@ -102,13 +103,18 @@ public static class ModerationEndpoints
         var read = await ReadContext.CreateAsync(http, db, ct);
         var items = await ModerationReads.ItemsAsync(db, rows, read, ct);
 
+        return TypedResults.Ok(new ModerationQueueDto(items, total, current, page.PageCount(total), await TotalsAsync(db, ct)));
+    }
+
+    /// <summary>The header's and the chips' numbers (also on the admin home, <c>GET /admin/overview</c>).</summary>
+    public static async Task<ModerationTotalsDto> TotalsAsync(AppDbContext db, CancellationToken ct)
+    {
         var pending = InStatus(db, ModerationStatus.Pending);
-        var totals = new ModerationTotalsDto(
+        return new ModerationTotalsDto(
             await pending.CountAsync(ct),
             await pending.CountAsync(l => (db.ListingRevisions.Where(r => r.ListingId == l.Id).Max(r => (int?)r.Revision) ?? 1) > 1, ct),
             await InStatus(db, ModerationStatus.Approved).CountAsync(ct),
             await InStatus(db, ModerationStatus.Rejected).CountAsync(ct));
-        return TypedResults.Ok(new ModerationQueueDto(items, total, current, page.PageCount(total), totals));
     }
 
     /// <summary><c>GET /admin/moderation/{listingId}</c> → one <c>ModerationItem</c> (any status but deleted).</summary>
@@ -128,7 +134,7 @@ public static class ModerationEndpoints
     /// version }</c> → <c>{ listingId, decision, status, version }</c>. Approving puts the listing on the site for 30
     /// days; rejecting needs a reason code (and a note for <c>other</c>). 400 <c>validation</c>, 404, 409
     /// <c>concurrency-conflict</c> (the listing changed since <c>version</c>), 409 <c>listing.wrong-status</c> (not
-    /// pending). Written to <c>audit_log</c>.
+    /// pending), 409 <c>listing.owner-blocked</c> (approving a blocked account's listing). Written to <c>audit_log</c>.
     /// </summary>
     private static async Task<Ok<ModerationDecisionResultDto>> Decide(
         Guid listingId,
@@ -172,6 +178,12 @@ public static class ModerationEndpoints
 
         db.SetExpectedVersion(listing, version);
         var approve = body.Decision == ModerationVerdict.Approve;
+        // A blocked account's listings stay off the site (POST /admin/users/{id}/block): nothing of it is published.
+        if (approve && await db.Users.Where(u => u.Id == listing.OwnerUserId).Select(u => u.Status).FirstAsync(ct) != UserStatus.Active)
+        {
+            throw ApiProblemException.Conflict(AdminErrors.OwnerBlocked);
+        }
+
         var next = ListingLifecycle.Apply(
             LifecycleState.Of(listing),
             approve ? ListingAction.Approve : ListingAction.Reject,

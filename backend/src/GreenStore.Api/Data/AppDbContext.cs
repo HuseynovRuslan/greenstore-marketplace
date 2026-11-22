@@ -69,6 +69,14 @@ public class AppDbContext : DbContext
 
     public DbSet<IdempotencyKey> IdempotencyKeys => Set<IdempotencyKey>();
 
+    public DbSet<Report> Reports => Set<Report>();
+
+    public DbSet<ServiceRequest> ServiceRequests => Set<ServiceRequest>();
+
+    public DbSet<ServiceRequestRecipient> ServiceRequestRecipients => Set<ServiceRequestRecipient>();
+
+    public DbSet<SupportMessage> SupportMessages => Set<SupportMessage>();
+
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {
         // EF would index every foreign key column. DATABASE.md lists each index on purpose (no city index yet, for
@@ -82,6 +90,9 @@ public class AppDbContext : DbContext
         modelBuilder.HasPostgresExtension("pg_trgm");
         // «Elan № 10001» is the first listing number (DATABASE.md §2).
         modelBuilder.HasSequence<long>(ListingConfiguration.NumberSequence).StartsAt(10001);
+        // «Sorğu № 3001» and the support ticket numbers.
+        modelBuilder.HasSequence<long>(ServiceRequestConfiguration.NumberSequence).StartsAt(3001);
+        modelBuilder.HasSequence<long>(SupportMessageConfiguration.TicketSequence).StartsAt(1001);
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
     }
 }
