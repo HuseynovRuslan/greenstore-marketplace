@@ -39,3 +39,6 @@ docs/**/*.gif
 /*.webm
 /*.mp4
 /*.gif
+
+# Claude Code local settings (per machine, not committed)
+.claude/settings.local.json
