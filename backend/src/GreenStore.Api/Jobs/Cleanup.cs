@@ -21,13 +21,19 @@ public static class Retention
 
     /// <summary><c>audit_log</c> and <c>moderation_decisions</c>.</summary>
     public static readonly TimeSpan Decisions = TimeSpan.FromDays(730);
+
+    /// <summary>
+    /// <c>payment_events</c> whose signature was wrong: anyone can post them, so they are kept for a while to look into
+    /// and then deleted. Signed events are payment records and stay (DATABASE.md §5).
+    /// </summary>
+    public static readonly TimeSpan UnsignedPaymentEvents = TimeSpan.FromDays(30);
 }
 
-public sealed record ListingsCleanupResult(int Photos, int Seen, int IdempotencyKeys, int Outbox, int DailyStats, int Audit, int Decisions);
+public sealed record ListingsCleanupResult(int Photos, int Seen, int IdempotencyKeys, int Outbox, int DailyStats, int Audit, int Decisions, int UnsignedPaymentEvents);
 
 /// <summary>
 /// The daily clean-up of the listing side: photos nobody attached within a day (files and rows), and the rows
-/// <see cref="Retention"/> no longer keeps.
+/// <see cref="Retention"/> no longer keeps (payment callbacks with a wrong signature included).
 /// </summary>
 public sealed class ListingsCleanup(AppDbContext db, PhotoService photos, TimeProvider clock)
 {
@@ -49,6 +55,7 @@ public sealed class ListingsCleanup(AppDbContext db, PhotoService photos, TimePr
         var keysBefore = now - Retention.IdempotencyKeys;
         var outboxBefore = now - Retention.SentOutbox;
         var decisionsBefore = now - Retention.Decisions;
+        var unsignedBefore = now - Retention.UnsignedPaymentEvents;
 
         var deletedPhotos = await photos.DeleteUnattachedAsync(ct);
         var seen = await db.ListingSeen.Where(s => s.Day < seenBefore).ExecuteDeleteAsync(ct);
@@ -57,8 +64,9 @@ public sealed class ListingsCleanup(AppDbContext db, PhotoService photos, TimePr
         var stats = await db.ListingDailyStats.Where(s => s.Day < statsBefore).ExecuteDeleteAsync(ct);
         var audit = await db.AuditLog.Where(a => a.CreatedAt < decisionsBefore).ExecuteDeleteAsync(ct);
         var decisions = await db.ModerationDecisions.Where(d => d.CreatedAt < decisionsBefore).ExecuteDeleteAsync(ct);
+        var unsigned = await db.PaymentEvents.Where(e => !e.SignatureOk && e.ReceivedAt < unsignedBefore).ExecuteDeleteAsync(ct);
         await transaction.CommitAsync(ct);
-        return new ListingsCleanupResult(deletedPhotos, seen, keys, outbox, stats, audit, decisions);
+        return new ListingsCleanupResult(deletedPhotos, seen, keys, outbox, stats, audit, decisions, unsigned);
     }
 }
 
@@ -76,7 +84,8 @@ public sealed class Cleanup(AccountsCleanup accounts, ListingsCleanup listings) 
 
         return $"deleted {a?.OtpChallenges ?? 0} SMS codes, {a?.Sessions ?? 0} ended sessions, {l?.Photos ?? 0} unattached photos, "
             + $"{l?.Seen ?? 0} seen rows, {l?.IdempotencyKeys ?? 0} idempotency keys, {l?.Outbox ?? 0} sent messages, "
-            + $"{l?.DailyStats ?? 0} old daily stats, {l?.Audit ?? 0} audit entries, {l?.Decisions ?? 0} decisions";
+            + $"{l?.DailyStats ?? 0} old daily stats, {l?.Audit ?? 0} audit entries, {l?.Decisions ?? 0} decisions, "
+            + $"{l?.UnsignedPaymentEvents ?? 0} unsigned payment callbacks";
     }
 }
 
@@ -86,7 +95,7 @@ public static class JobsSetup
     {
         services.AddOptions<JobsOptions>()
             .BindConfiguration(JobsOptions.Section)
-            .Validate(o => o.FirstRunDelaySeconds >= 0 && o.ExpireListingsSeconds > 0 && o.OutboxSeconds > 0, "Jobs: the intervals must be positive.")
+            .Validate(o => o.FirstRunDelaySeconds >= 0 && o.ExpireListingsSeconds > 0 && o.OutboxSeconds > 0 && o.PromotionsSeconds > 0, "Jobs: the intervals must be positive.")
             .ValidateOnStart();
         services.AddOptions<CleanupOptions>()
             .BindConfiguration(CleanupOptions.Section)
@@ -94,6 +103,7 @@ public static class JobsSetup
             .ValidateOnStart();
 
         services.AddScoped<ExpireListings>();
+        services.AddScoped<Promotions>();
         services.AddScoped<OutboxDispatcher>();
         services.AddScoped<ListingsCleanup>();
         services.AddScoped<Cleanup>();
@@ -104,6 +114,7 @@ public static class JobsSetup
             .RemoveAllLoggers();
 
         services.AddHostedService<ExpireListingsJob>();
+        services.AddHostedService<PromotionsJob>();
         services.AddHostedService<OutboxJob>();
         services.AddHostedService<CleanupJob>();
         return services;

@@ -18,6 +18,12 @@ public sealed class RateLimitingOptions
 
     /// <summary>«Nömrəni göstər», per client IP: low, so the numbers cannot be scraped (ARCHITECTURE.md §14).</summary>
     public FixedWindowLimit PhoneReveals { get; set; } = new() { PermitLimit = 30, WindowSeconds = 600 };
+
+    /// <summary>
+    /// <c>POST /payments/{provider}/callback</c> per IP: far above what a provider sends, low enough that junk posts
+    /// cannot fill <c>payment_events</c> (every callback is stored).
+    /// </summary>
+    public FixedWindowLimit PaymentCallbacks { get; set; } = new() { PermitLimit = 300, WindowSeconds = 60 };
 }
 
 public sealed class FixedWindowLimit
@@ -43,12 +49,15 @@ public static class RateLimitPolicies
     /// <summary>The phone-reveal endpoints, per client IP.</summary>
     public const string PhoneReveals = "phone-reveals";
 
+    /// <summary>A payment provider's callbacks (<see cref="RateLimitingOptions.PaymentCallbacks"/>).</summary>
+    public const string PaymentCallbacks = "payment-callbacks";
+
     public static IServiceCollection AddApiRateLimiting(this IServiceCollection services)
     {
         services.AddOptions<RateLimitingOptions>()
             .BindConfiguration(RateLimitingOptions.Section)
             .Validate(
-                o => new[] { o.AnonymousWrites, o.Views, o.PhoneReveals }.All(l => l.PermitLimit > 0 && l.WindowSeconds > 0),
+                o => new[] { o.AnonymousWrites, o.Views, o.PhoneReveals, o.PaymentCallbacks }.All(l => l.PermitLimit > 0 && l.WindowSeconds > 0),
                 "RateLimiting limits must be positive.")
             .ValidateOnStart();
 
@@ -59,6 +68,7 @@ public static class RateLimitPolicies
             limiter.AddPolicy(AnonymousWrites, AnonymousWritesPartition);
             limiter.AddPolicy(Views, context => PerIp(context, o => o.Views));
             limiter.AddPolicy(PhoneReveals, context => PerIp(context, o => o.PhoneReveals));
+            limiter.AddPolicy(PaymentCallbacks, context => PerIp(context, o => o.PaymentCallbacks));
         });
         return services;
     }

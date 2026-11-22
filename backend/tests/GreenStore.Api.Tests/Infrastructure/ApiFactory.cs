@@ -17,6 +17,9 @@ public sealed class ApiFactory(PostgresDatabase database) : WebApplicationFactor
     public const string OtpHmacKey = "test-otp-hmac-key-0123456789abcdef";
     public const int AnonymousWritesPermitLimit = 2;
 
+    /// <summary>The fake payment provider's signing key in the tests (every factory signs and checks with it).</summary>
+    public const string FakePaymentSecret = "test-fake-payment-secret";
+
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.UseEnvironment("Testing");
@@ -25,6 +28,7 @@ public sealed class ApiFactory(PostgresDatabase database) : WebApplicationFactor
             ["ConnectionStrings:Default"] = database.ConnectionString,
             ["Internal:ApiKey"] = InternalKey,
             ["Otp:HmacKey"] = OtpHmacKey,
+            ["Payments:Fake:Secret"] = FakePaymentSecret,
             ["RateLimiting:AnonymousWrites:PermitLimit"] = AnonymousWritesPermitLimit.ToString(System.Globalization.CultureInfo.InvariantCulture),
             ["RateLimiting:AnonymousWrites:WindowSeconds"] = "3600",
             // The test rows have made-up dates: the daily clean-up is tested on its own (AccountsCleanupTests).

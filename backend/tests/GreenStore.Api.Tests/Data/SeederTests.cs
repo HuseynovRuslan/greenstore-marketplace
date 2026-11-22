@@ -17,7 +17,7 @@ public sealed class SeederTests(PostgresDatabase database)
 {
     private static readonly DateTimeOffset Now = new(2026, 11, 22, 8, 0, 0, TimeSpan.Zero);
 
-    private const int ReferenceRows = 29 + 7; // categories with sub-categories, cities
+    private const int ReferenceRows = 29 + 7 + 3 + 8; // categories with sub-categories, cities, promotion packages and options
     private const int DemoRows = 23 + 4 + 59; // users, sellers, listings and services
 
     private static AppDbContext Db(ScratchDatabase scratch)
@@ -62,10 +62,22 @@ public sealed class SeederTests(PostgresDatabase database)
             var fruit = await db.Categories.SingleAsync(c => c.Id == "agaclar-meyve", Ct);
             Assert.Equal(("agaclar", (GreenStore.Api.Modules.Taxonomy.CategoryForm?)null), (fruit.ParentId, fruit.Form));
 
-            // The admin renames a category, hides a city and removes a sub-category.
+            // The promotion packages of src/data/promotions.ts, in three languages, with their options and prices.
+            var packages = await db.PromotionPackages.OrderBy(p => p.SortOrder).ToListAsync(Ct);
+            Assert.Equal(["ireli-cek", "one-cixar", "paket"], packages.Select(p => p.Id));
+            Assert.Equal(new LocalizedText("Önə çıxar", "Вывести в топ", "Feature"), packages[1].Name);
+            Assert.All(packages, p => Assert.Equal(3, p.Benefits.Count(b => b.Ru is not null && b.En is not null)));
+            var week = await db.PromotionOptions.SingleAsync(o => o.Id == "one-cixar-7", Ct);
+            Assert.Equal(("one-cixar", 9m, (short?)7, (short?)null), (week.PackageId, week.Price, week.Days, week.Bumps));
+            Assert.Equal(new LocalizedText("7 gün", "7 дней", "7 days"), week.Label);
+            var bundle = await db.PromotionOptions.SingleAsync(o => o.Id == "paket-15", Ct);
+            Assert.Equal((22m, (short?)15, (short?)15), (bundle.Price, bundle.Days, bundle.Bumps));
+
+            // The admin renames a category, hides a city, removes a sub-category and changes a price.
             trees.Name = new LocalizedText("Ağaclar və tinglər", "Деревья и саженцы");
             (await db.Cities.SingleAsync(c => c.Id == "quba", Ct)).IsActive = false;
             db.Categories.Remove(await db.Categories.SingleAsync(c => c.Id == "guller-movsumi", Ct));
+            week.Price = 11;
             await db.SaveChangesAsync(Ct);
         }
 
@@ -77,6 +89,7 @@ public sealed class SeederTests(PostgresDatabase database)
             Assert.Equal(new LocalizedText("Ağaclar və tinglər", "Деревья и саженцы"), (await db.Categories.SingleAsync(c => c.Id == "agaclar", Ct)).Name);
             Assert.False((await db.Cities.SingleAsync(c => c.Id == "quba", Ct)).IsActive);
             Assert.True(await db.Categories.AnyAsync(c => c.Id == "guller-movsumi", Ct));
+            Assert.Equal(11m, (await db.PromotionOptions.SingleAsync(o => o.Id == "one-cixar-7", Ct)).Price);
         }
     }
 

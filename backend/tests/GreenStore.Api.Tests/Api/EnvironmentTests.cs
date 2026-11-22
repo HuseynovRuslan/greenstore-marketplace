@@ -170,6 +170,21 @@ public sealed class EnvironmentTests(ApiFactory api) : IClassFixture<ApiFactory>
     }
 
     [Theory]
+    [InlineData("", true)]
+    [InlineData("https://api.greenstore.test", false)]
+    public async Task Outside_development_a_payment_provider_without_a_public_address_warns_at_startup(string publicBaseUrl, bool warns)
+    {
+        // The tests' environment may use the fake provider, as Staging does.
+        var log = new CapturingLoggerProvider();
+        await using var configured = api.With(settings: new Dictionary<string, string?> { ["Payments:PublicBaseUrl"] = publicBaseUrl });
+        await using var factory = configured.WithWebHostBuilder(builder => builder.ConfigureServices(s => s.AddSingleton<Microsoft.Extensions.Logging.ILoggerProvider>(log)));
+
+        Assert.Equal(HttpStatusCode.OK, (await factory.CreateClient().GetAsync("/health/live", Ct)).StatusCode);
+
+        Assert.Equal(warns, log.Messages.Any(m => m.Message.Contains("Payments:PublicBaseUrl is not set", StringComparison.Ordinal)));
+    }
+
+    [Theory]
     [InlineData("Development")]
     [InlineData("Testing")]
     public async Task Demo_codes_are_allowed_on_a_developer_machine_and_in_tests(string environment) =>

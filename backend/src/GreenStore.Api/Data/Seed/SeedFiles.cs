@@ -49,6 +49,17 @@ public sealed record SubcategorySeed(string Id, LocalizedText Name, int SortOrde
 
 public sealed record CitySeed(string Id, LocalizedText Name, int SortOrder);
 
+/// <summary>A promotion package with its options (seed/reference/promotions.json, from src/data/promotions.ts).</summary>
+public sealed record PromotionPackageSeed(
+    string Id,
+    LocalizedText Name,
+    LocalizedText Summary,
+    IReadOnlyList<LocalizedText> Benefits,
+    int SortOrder,
+    IReadOnlyList<PromotionOptionSeed> Options);
+
+public sealed record PromotionOptionSeed(string Id, LocalizedText Label, decimal Price, int SortOrder, short? Days = null, short? Bumps = null);
+
 public sealed record UserSeed(string Key, string FullName, string Phone, AccountType AccountType, DateTimeOffset CreatedAt, string? Email = null);
 
 public sealed record SellerSeed(

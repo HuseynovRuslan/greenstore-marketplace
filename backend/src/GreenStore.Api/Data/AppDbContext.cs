@@ -4,6 +4,7 @@ using GreenStore.Api.Modules.Engagement;
 using GreenStore.Api.Modules.Listings;
 using GreenStore.Api.Modules.Media;
 using GreenStore.Api.Modules.Platform;
+using GreenStore.Api.Modules.Promotion;
 using GreenStore.Api.Modules.Sellers;
 using GreenStore.Api.Modules.Taxonomy;
 using Microsoft.EntityFrameworkCore;
@@ -77,6 +78,16 @@ public class AppDbContext : DbContext
 
     public DbSet<SupportMessage> SupportMessages => Set<SupportMessage>();
 
+    public DbSet<PromotionPackage> PromotionPackages => Set<PromotionPackage>();
+
+    public DbSet<PromotionOption> PromotionOptions => Set<PromotionOption>();
+
+    public DbSet<PromotionOrder> PromotionOrders => Set<PromotionOrder>();
+
+    public DbSet<PaymentEvent> PaymentEvents => Set<PaymentEvent>();
+
+    public DbSet<ListingPromotion> ListingPromotions => Set<ListingPromotion>();
+
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {
         // EF would index every foreign key column. DATABASE.md lists each index on purpose (no city index yet, for
@@ -93,6 +104,8 @@ public class AppDbContext : DbContext
         // «Sorğu № 3001» and the support ticket numbers.
         modelBuilder.HasSequence<long>(ServiceRequestConfiguration.NumberSequence).StartsAt(3001);
         modelBuilder.HasSequence<long>(SupportMessageConfiguration.TicketSequence).StartsAt(1001);
+        // «Sifariş № 1001»: promotion orders.
+        modelBuilder.HasSequence<long>(PromotionOrderConfiguration.NumberSequence).StartsAt(1001);
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
     }
 }

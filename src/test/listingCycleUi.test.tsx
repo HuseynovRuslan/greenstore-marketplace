@@ -10,9 +10,10 @@ import { remotePhotos } from '@/features/posting/fromListing'
 import { photoStore } from '@/features/posting/photos'
 import { uploadDraftPhotos, uploadErrorText } from '@/features/posting/upload'
 import { PostingWizard } from '@/features/posting/PostingWizard'
+import { forgetPromotionPackages } from '@/features/promotion/usePromotionPackages'
 import { encodeSessionHint, SESSION_HINT_COOKIE } from '@/state/bootstrap'
 import { AppStoreProvider } from '@/state/store'
-import type { ModerationItem, OwnListing } from '@/types'
+import type { ModerationItem, OwnListing, PromotionPackage } from '@/types'
 import DashboardPage from '@/views/account/DashboardPage'
 
 /*
@@ -39,6 +40,9 @@ vi.mock('@/features/posting/actions', () => posting)
 const cabinet = vi.hoisted(() => ({ loadOwnListings: vi.fn(), changeOwnListing: vi.fn() }))
 vi.mock('@/features/cabinet/actions', () => cabinet)
 
+const promotion = vi.hoisted(() => ({ loadPromotionPackages: vi.fn() }))
+vi.mock('@/features/promotion/actions', () => promotion)
+
 const PHOTO = '01937a52-6c4e-7a1b-9f00-2d5c1e4b8a10'
 const ID = '01937a52-0000-7a1b-9f00-2d5c1e4b8a10'
 
@@ -62,6 +66,17 @@ const inApi = (ui: ReactNode) =>
       <ToastProvider>{ui}</ToastProvider>
     </AppStoreProvider>,
   )
+
+/** The API's packages: its own price and names, not src/data/promotions.ts's. */
+const apiPackages: PromotionPackage[] = [
+  {
+    id: 'one-cixar',
+    name: 'Önə çıxar',
+    summary: 'Ana səhifədə və axtarışın başında.',
+    benefits: [],
+    options: [{ id: 'one-cixar-7', label: '7 gün', price: 12, days: 7 }],
+  },
+]
 
 const jpeg = () => new Blob([new Uint8Array([0xff, 0xd8, 0xff, 0xe0])], { type: 'image/jpeg' })
 
@@ -108,7 +123,9 @@ beforeEach(() => {
   localStorage.clear()
   push.mockClear()
   replace.mockClear()
-  for (const fn of [...Object.values(account), ...Object.values(posting), ...Object.values(cabinet)]) fn.mockReset()
+  for (const fn of [...Object.values(account), ...Object.values(posting), ...Object.values(cabinet), ...Object.values(promotion)]) fn.mockReset()
+  forgetPromotionPackages()
+  promotion.loadPromotionPackages.mockResolvedValue(apiPackages)
   account.loadSession.mockResolvedValue({ account: business, favorites: [] })
   account.mergeFavorites.mockResolvedValue({ ok: true, favorites: [] })
   posting.previewSeller.mockResolvedValue(undefined)
@@ -214,6 +231,37 @@ describe('the posting wizard with DATA_SOURCE=api', () => {
     expect(await within(seller).findByRole('link', { name: 'Yaşıl Həyət' })).toHaveAttribute('href', '/saticilar/yasil-heyet')
     expect(within(seller).queryByText(/Fərdi satıcı/)).not.toBeInTheDocument()
     expect(posting.previewSeller).toHaveBeenCalledTimes(1)
+  })
+
+  it('offers the API’s packages on the last step, with the API’s prices', async () => {
+    setHint()
+    localStorage.setItem('greenstore:posting:draft', JSON.stringify(completeDraft()))
+
+    inApi(<PostingWizard step={6} />)
+
+    const offer = await screen.findByRole('radio', { name: /Önə çıxar · 7 gün/ })
+    expect(offer.closest('label')).toHaveTextContent('12 ₼')
+    // Only what the API has on sale: «İrəli çək» and the bundle are not offered here.
+    expect(screen.queryByRole('radio', { name: /İrəli çək/ })).not.toBeInTheDocument()
+    expect(screen.getByRole('radio', { name: /Pulsuz yerləşdir/ })).toBeChecked()
+  })
+
+  it('offers no paid choice while nothing can be bought, and a choice no longer on sale is not sent', async () => {
+    setHint()
+    promotion.loadPromotionPackages.mockResolvedValue([])
+    localStorage.setItem('greenstore:posting:draft', JSON.stringify({ ...completeDraft(), promotion: { packageId: 'one-cixar', optionId: 'one-cixar-7' }, photos: [{ id: 'ph_1', name: 'tuya.jpg', width: 1200, height: 900, remoteId: PHOTO }] }))
+    posting.submitPosting.mockResolvedValue({ ok: true, result: { id: ID, slug: 'tuya-smaragd-140-sm-20324', number: 20324, status: 'pending' } })
+
+    inApi(<PostingWizard step={6} />)
+    const send = await screen.findByRole('button', { name: /Elanı göndər/ })
+    await waitFor(() => expect(promotion.loadPromotionPackages).toHaveBeenCalled())
+    await waitFor(() => expect(send).toBeEnabled())
+    expect(screen.queryByText('Daha çox alıcı görsün')).not.toBeInTheDocument()
+    expect(screen.queryByRole('radio', { name: /Önə çıxar/ })).not.toBeInTheDocument()
+    await userEvent.click(send)
+
+    await waitFor(() => expect(posting.submitPosting).toHaveBeenCalled())
+    expect(posting.submitPosting.mock.calls[0][0].promotion).toBeFalsy()
   })
 
   it('keeps the draft and says why when the API refuses, with a way to the step', async () => {

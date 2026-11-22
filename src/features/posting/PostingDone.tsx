@@ -5,11 +5,12 @@ import Link from 'next/link'
 import { Check, Clock3, Plus, Rocket, Sprout } from 'lucide-react'
 import { ButtonLink } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
-import { promotionOption } from '@/data/promotions'
 import { listingPrice } from '@/features/listing/facts'
+import { findOption } from '@/features/promotion/checkout'
+import { usePromotionPackages } from '@/features/promotion/usePromotionPackages'
 import { readStored } from '@/hooks/useLocalStorage'
 import { cn, formatPrice } from '@/lib/format'
-import { useMyListings } from '@/state/store'
+import { useDataSource, useMyListings } from '@/state/store'
 import { LAST_SENT_KEY, type LastSent } from './useDraft'
 
 const timeline = [
@@ -20,15 +21,17 @@ const timeline = [
 
 /**
  * After «Elanı göndər»: the sent listing, what happens next (review ≤ 1 hour, 30 days live), the promotion chosen
- * (paid after approval; mocked), share, «Elanlarım» and «Yeni elan». Reads the last sent listing from storage, so a
- * reload keeps the page.
+ * (paid after approval) or a link to the packages while some are on sale, share, «Elanlarım» and «Yeni elan». Reads
+ * the last sent listing from storage, so a reload keeps the page.
  */
 export function PostingDone() {
   const { submitted } = useMyListings()
   const last = readStored<Partial<LastSent> | null>(LAST_SENT_KEY, null)
   // The API keeps the listing (its number is the API's); the demo keeps a copy in this browser's «Elanlarım».
   const listing = last?.listing ?? submitted.find((l) => l.id === last?.id) ?? submitted[0]
-  const promo = last?.promotion ? promotionOption(last.promotion.optionId) : undefined
+  const packages = usePromotionPackages()
+  const promo = last?.promotion && packages ? findOption(packages, last.promotion.optionId) : undefined
+  const api = useDataSource() === 'api'
   // Arriving from «Elanı göndər» the focus would be left on the page body: the result's heading takes it, so a
   // screen reader says what happened.
   const headingRef = useRef<HTMLHeadingElement>(null)
@@ -107,14 +110,24 @@ export function PostingDone() {
       {promo ? (
         <div className="flex gap-3 rounded-xl bg-vip p-4 text-sm leading-[1.5] text-ink">
           <Rocket aria-hidden size={18} strokeWidth={2} className="mt-0.5 shrink-0 text-olive" />
-          <p>
-            <span className="font-semibold">
-              {promo.pkg.name} · {promo.option.label}
-            </span>{' '}
-            elan təsdiqlənən kimi işə düşəcək. Ödəniş: {formatPrice(promo.option.price)} <span className="text-muted">(demo — ödəniş alınmır)</span>.
-          </p>
+          {api ? (
+            // The API keeps the choice (`OwnListing.pendingPromotion`); the owner pays it once the listing is approved.
+            <p>
+              <span className="font-semibold">
+                {promo.pkg.name} · {promo.option.label}
+              </span>{' '}
+              seçdiniz: elan yoxlamadan keçəndən sonra «Elanlarım»da ödəyib işə salın. Qiymət: {formatPrice(promo.option.price)}.
+            </p>
+          ) : (
+            <p>
+              <span className="font-semibold">
+                {promo.pkg.name} · {promo.option.label}
+              </span>{' '}
+              elan təsdiqlənən kimi işə düşəcək. Ödəniş: {formatPrice(promo.option.price)} <span className="text-muted">(demo — ödəniş alınmır)</span>.
+            </p>
+          )}
         </div>
-      ) : (
+      ) : packages?.length ? (
         <div className="flex flex-col gap-2 rounded-xl bg-mint p-4 text-sm leading-[1.5] text-ink sm:flex-row sm:items-center sm:justify-between">
           <p>Daha çox alıcı görsün? «Önə çıxar» elanı ana səhifəyə və axtarışın başına qaldırır.</p>
           <Link href={`/reklam?elan=${listing.id}`} className="inline-flex min-h-11 shrink-0 items-center gap-1.5 font-semibold text-forest hover:text-olive-text">
@@ -122,7 +135,7 @@ export function PostingDone() {
             Paketlərə bax
           </Link>
         </div>
-      )}
+      ) : null}
 
       <div className="flex flex-col gap-2.5 sm:flex-row">
         <ButtonLink href="/kabinet" className="sm:flex-1">

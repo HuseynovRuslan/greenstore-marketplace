@@ -100,7 +100,7 @@ public sealed class CatalogueSchemaTests(CatalogueApi api)
                 ["pk_listings"] = "USING btree (id)",
                 ["ux_listings_number"] = "USING btree (number)",
                 ["ux_listings_slug"] = "USING btree (slug)",
-                ["ix_listings_feed"] = $"USING btree (kind, is_promoted DESC, sort_at DESC) {Public}",
+                ["ix_listings_feed"] = $"USING btree (kind, is_promoted DESC, promoted_at DESC, sort_at DESC) {Public}",
                 ["ix_listings_category"] = $"USING btree (category_id, sort_at DESC) {Public}",
                 ["ix_listings_search"] = $"USING gin (search_text gin_trgm_ops) {Public}",
                 ["ix_listings_owner"] = "USING btree (owner_user_id, status) WHERE (deleted_at IS NULL)",

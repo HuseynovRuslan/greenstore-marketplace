@@ -158,6 +158,16 @@ public sealed class ListingLifecycleTests
     }
 
     [Fact]
+    public void An_approval_never_shortens_a_running_term()
+    {
+        // A paid «İrəli çək» lengthened the term to 38 days; an edit approved on day 5 keeps it.
+        var lengthened = StateOf(ListingStatus.Active) with { ExpiresAt = Now.AddDays(33) };
+        var edited = ListingLifecycle.Apply(lengthened, ListingAction.Edit, Now.AddHours(-1));
+
+        Assert.Equal(Now.AddDays(33), ListingLifecycle.Apply(edited, ListingAction.Approve, Now).ExpiresAt);
+    }
+
+    [Fact]
     public void Expiry_happens_only_once_the_term_is_over()
     {
         var active = StateOf(ListingStatus.Active) with { ExpiresAt = Now.AddMinutes(1) };

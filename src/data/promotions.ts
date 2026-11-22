@@ -3,7 +3,8 @@ import type { PromotionPackage, PromotionPackageId } from '@/types'
 /*
  * Paid promotion packages (mock prices, AZN). Names follow the management rule: «Önə çıxar» and «İrəli çək», never
  * "VIP". `?vip=1` and `Listing.vip` stay as internal names for «Önə çıxan». Real prices come from the API
- * (MarketplaceRepository.listPromotionPackages); checkout is mocked (docs/handoff/contract-additions.md).
+ * (MarketplaceRepository.listPromotionPackages). DATA_SOURCE=mock pays in the browser (DEMO); DATA_SOURCE=api sends the
+ * visitor to the payment provider's page (docs/handoff/backend-contract.md 5.1).
  */
 export const promotionPackages: PromotionPackage[] = [
   {

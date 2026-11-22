@@ -199,6 +199,8 @@ public static class DemoSeeder
             ServiceCityIds = seed.Areas.ToList(),
             Includes = seed.Includes.ToList(),
             IsPromoted = seed.Promoted,
+            // Promoted since publication: among themselves the demo's «Önə çıxan» keep the site's order (sort_at).
+            PromotedAt = seed.Promoted ? published ?? seed.SubmittedAt ?? now : null,
             SortAt = published,
             RejectionReasonCode = seed.RejectionReasonCode,
             RejectionNote = seed.RejectionNote,

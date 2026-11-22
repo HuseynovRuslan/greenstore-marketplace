@@ -32,9 +32,10 @@ import type {
   PhotoUpload,
   PhotoUploadRequest,
   ProfilePatch,
+  PromotionCheckout,
   PromotionOrder,
+  PromotionOrderInput,
   PromotionPackage,
-  PromotionPackageId,
   RegistrationInput,
   ReportInput,
   SavedSearch,
@@ -210,7 +211,15 @@ export interface MarketplaceRepository {
   revealPhone(listingId: string): Promise<ContactReveal>
   /** «Nömrəni göstər» on a seller page (backend-contract.md 3.1). */
   revealSellerPhone(sellerId: string): Promise<ContactReveal>
-  createPromotionOrder(input: { listingId: string; packageId: PromotionPackageId; optionId: string }): Promise<PromotionOrder>
+  /**
+   * «Ödə» on /reklam (backend-contract.md 5.1): an order for one of the owner's active listings, at the option's price
+   * now. DATA_SOURCE=api answers `pending` with the payment provider's page (`paymentUrl`) to send the visitor to; the
+   * promotion starts when the provider confirms the payment. The mock (DEMO) answers `paid` at once, without a page.
+   * `idempotencyKey` (≤ 80 printable ASCII): the same key again answers the same order and page.
+   */
+  createPromotionOrder(input: PromotionOrderInput, idempotencyKey?: string): Promise<PromotionCheckout>
+  /** One of the signed-in owner's orders (the page the provider brings them back to); `undefined` when not theirs. */
+  getPromotionOrder(id: string): Promise<PromotionOrder | undefined>
   /**
    * «Şikayət et» (backend-contract.md 4.1), signed in or not: the reason is a code of the target's. The same visitor's
    * unresolved report of the same target and reason answers again with its id instead of a second one.

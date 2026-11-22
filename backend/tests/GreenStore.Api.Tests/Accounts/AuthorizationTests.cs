@@ -50,6 +50,7 @@ public sealed class AuthorizationTests(AccountsApi api)
         { "DELETE", "/api/v1/me/drafts/019a8b4e-0000-7000-8000-000000000001" },
         { "GET", "/api/v1/me/service-requests" },
         { "POST", "/api/v1/me/service-requests/019a8b4e-0000-7000-8000-000000000001/seen" },
+        { "GET", "/api/v1/me/promotion-orders/019a8b4e-0000-7000-8000-000000000001" },
     };
 
     [Theory]

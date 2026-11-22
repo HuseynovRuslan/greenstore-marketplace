@@ -6,12 +6,12 @@ using Microsoft.Extensions.Options;
 namespace GreenStore.Api.Data.Seed;
 
 /// <summary>
-/// Writes the seed data (DATABASE.md §7) after the migrations: reference data (categories with sub-categories, cities)
-/// in every environment, demo data (users, sellers, listings, services) only when <c>Seed:Demo</c> is true
+/// Writes the seed data (DATABASE.md §7) after the migrations: reference data (categories with sub-categories, cities,
+/// promotion packages with their options) in every environment, demo data (users, sellers, listings, services) only when <c>Seed:Demo</c> is true
 /// (Development by default, Staging when configured). Insert-if-missing only: a row that exists is never changed,
 /// so an admin's edit survives the next deploy. <c>Seed:DevAccounts</c> adds a moderator and an admin with dev-only
 /// passwords (<see cref="DevAccountsSeeder"/>). Runs in one transaction under an advisory lock, so two processes
-/// seeding at once do not collide. Promotion packages wait for their tables (phase 5).
+/// seeding at once do not collide.
 /// </summary>
 public static class Seeder
 {

@@ -34,8 +34,9 @@ public static class ListingsEndpoints
     }
 
     /// <summary>
-    /// The home page (<c>HomeContent</c>): the newest «Önə çıxan» listings, the newest other listings, the verified
-    /// businesses with most listings and the newest services.
+    /// The home page (<c>HomeContent</c>): the «Önə çıxan» listings that paid last (<c>promoted_at</c>, so a new
+    /// «Önə çıxar» gets the block it is sold with), the newest other listings, the verified businesses with most
+    /// listings and the newest services.
     /// </summary>
     private static async Task<Ok<HomeContentDto>> GetHome(HttpContext http, AppDbContext db, CancellationToken ct)
     {

@@ -149,8 +149,12 @@ public class AccountsApi(PostgresDatabase database) : IAsyncLifetime
         return client;
     }
 
-    /// <summary>A client without the site's headers: what a browser or a script sends.</summary>
-    public HttpClient RawClient(WebApplicationFactory<Program>? factory = null) => (factory ?? api!).CreateClient();
+    /// <summary>
+    /// A client without the site's headers: what a browser or a script sends. It follows redirects unless told not to
+    /// (a redirect to the site would land on the test server).
+    /// </summary>
+    public HttpClient RawClient(WebApplicationFactory<Program>? factory = null, bool followRedirects = true) =>
+        (factory ?? api!).CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = followRedirects });
 
     /// <summary>Asks for a code; asserts 200 and returns the challenge.</summary>
     public async Task<JsonElement> RequestOtpAsync(HttpClient client, string phone, string purpose)

@@ -62,4 +62,17 @@ describe('backend seed and contract files', () => {
       expect(item.name.en, item.name.az).toBeTruthy()
     }
   })
+
+  it('writes ru and en texts for every promotion package and option', () => {
+    type Text = { az: string; ru?: string; en?: string }
+    type Package = { name: Text; summary: Text; benefits: Text[]; options: Array<{ label: Text }> }
+    const packages = (files['seed/reference/promotions.json'] as { items: Package[] }).items
+    const texts = packages.flatMap((p) => [p.name, p.summary, ...p.benefits, ...p.options.map((o) => o.label)])
+    expect(texts.length).toBeGreaterThan(10)
+    for (const text of texts) {
+      expect(text.ru, text.az).toBeTruthy()
+      expect(text.en, text.az).toBeTruthy()
+      expect(`${text.az} ${text.ru} ${text.en}`).not.toMatch(/vip/i)
+    }
+  })
 })

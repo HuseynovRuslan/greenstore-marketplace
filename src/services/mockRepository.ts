@@ -13,7 +13,7 @@ import { displayPhone, maskPhone, mockAccount, mockChallengePhone, mockListingSt
 import { filterQuery, MAX_SAVED_SEARCHES } from '@/features/saved-searches/query'
 import { isReasonFor } from '@/features/seller/complaintReasons'
 import type { FacetCounts, MarketplaceRepository, PageResult, SitemapEntry } from './repository'
-import type { Category, ContactReveal, Listing, ListingInput, ListingSubmitResult, LoginResult, OwnListing, OwnSeller, SavedSearch, Seller, Service, ServiceProvider, ServiceRequestResult } from '@/types'
+import type { Category, ContactReveal, Listing, ListingInput, ListingSubmitResult, LoginResult, OwnListing, OwnSeller, PromotionOrder, SavedSearch, Seller, Service, ServiceProvider, ServiceRequestResult } from '@/types'
 import type { CategoryDef } from '@/data/categories'
 
 /** A category with its number of public listings (the sample data has no separate counts). */
@@ -61,6 +61,16 @@ const toPublic = (items: Listing[]) => items.map(publicListing)
 
 /** «Usta çağır» answers by `Idempotency-Key` (a retry after a lost answer gets the same number). */
 const mockServiceRequests = new Map<string, ServiceRequestResult>()
+
+/** The demo's promotion orders of this server process, by id and by `Idempotency-Key`; the newest few hundred. */
+const mockOrders = new Map<string, PromotionOrder>()
+const mockOrderKeys = new Map<string, string>()
+const MOCK_ORDERS_KEPT = 500
+
+function remember<V>(map: Map<string, V>, key: string, value: V) {
+  map.set(key, value)
+  if (map.size > MOCK_ORDERS_KEPT) map.delete(map.keys().next().value!)
+}
 
 /** «WhatsApp-a yaz»: https://wa.me/<digits>. */
 const whatsappUrl = (phone: string) => `https://wa.me/${phone.replace(/\D/g, '')}`
@@ -256,10 +266,22 @@ export const mockRepository: MarketplaceRepository = {
     const seller = sellerById(sellerId)
     return seller ? reveal(seller.phone, { whatsapp: seller.whatsapp ?? false }) : {}
   },
-  async createPromotionOrder({ listingId, packageId, optionId }) {
+  /** DEMO: priced and paid at once, without a payment page (the API answers `pending` and the provider's page). */
+  async createPromotionOrder({ listingId, packageId, optionId }, idempotencyKey) {
     const found = promotionOption(optionId)
     if (!found || found.pkg.id !== packageId) throw new Error('unknown promotion option')
-    return { id: `ord-${mockSequence('order', 5100)}`, listingId, packageId, optionId, amount: found.option.price, status: 'paid', createdAt: new Date().toISOString() }
+    const replay = idempotencyKey ? mockOrderKeys.get(idempotencyKey) : undefined
+    const known = replay && mockOrders.get(replay)
+    if (known) return { order: known }
+    const number = mockSequence('order', 5100)
+    const now = new Date().toISOString()
+    const order: PromotionOrder = { id: `ord-${number}`, number, listingId, packageId, optionId, amount: found.option.price, status: 'paid', createdAt: now, paidAt: now }
+    remember(mockOrders, order.id, order)
+    if (idempotencyKey) remember(mockOrderKeys, idempotencyKey, order.id)
+    return { order }
+  },
+  async getPromotionOrder(id) {
+    return mockOrders.get(id)
   },
   /** Like the API: only the target's own reason codes (backend-contract.md 4.1); nothing is stored. */
   async submitReport({ target, reason, comment }) {

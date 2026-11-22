@@ -5,6 +5,7 @@ using GreenStore.Api.Modules.Accounts;
 using GreenStore.Api.Modules.Accounts.Auth;
 using GreenStore.Api.Modules.Media;
 using GreenStore.Api.Modules.Platform;
+using GreenStore.Api.Modules.Promotion;
 using GreenStore.Api.Modules.Taxonomy;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -29,6 +30,7 @@ public sealed class ListingWriteService(AppDbContext db, TimeProvider clock, IOp
         var taxonomy = await TaxonomySnapshot.LoadAsync(db, ct);
         var (content, errors) = ListingInputRules.Validate(input, taxonomy);
         errors.ThrowIfAny();
+        var pendingPromotion = await PendingPromotionAsync(content!.Promotion, ct);
 
         var since = now.AddDays(-1);
         var sent = await db.Listings.CountAsync(l => l.OwnerUserId == me.UserId && l.CreatedAt > since, ct);
@@ -38,7 +40,7 @@ public sealed class ListingWriteService(AppDbContext db, TimeProvider clock, IOp
         }
 
         await using var transaction = await db.BeginOrJoinTransactionAsync(ct);
-        var photos = await PhotosAsync(me.UserId, content!.PhotoIds, listingId: null, ct);
+        var photos = await PhotosAsync(me.UserId, content.PhotoIds, listingId: null, ct);
         var owner = await db.Users.FirstAsync(u => u.Id == me.UserId, ct);
         var seller = await db.Sellers.FirstOrDefaultAsync(s => s.OwnerUserId == me.UserId, ct);
         var number = await db.Database.SqlQuery<long>($"SELECT nextval('listing_number_seq') AS \"Value\"").SingleAsync(ct);
@@ -59,6 +61,7 @@ public sealed class ListingWriteService(AppDbContext db, TimeProvider clock, IOp
             Counter = new ListingCounter(),
         };
         content.ApplyTo(listing);
+        listing.PendingPromotionOptionId = pendingPromotion;
         ListingLifecycle.Submit(now).ApplyTo(listing);
         listing.ContactPhoneVerified = content.ContactPhone == owner.Phone;
         listing.SearchText = ListingSearchText.For(listing, taxonomy, seller?.Name ?? owner.FullName);
@@ -95,9 +98,10 @@ public sealed class ListingWriteService(AppDbContext db, TimeProvider clock, IOp
         var taxonomy = await TaxonomySnapshot.LoadAsync(db, ct);
         var (content, errors) = ListingInputRules.Validate(input, taxonomy, locked);
         errors.ThrowIfAny();
+        var pendingPromotion = await PendingPromotionAsync(content!.Promotion, ct);
         var next = ListingLifecycle.Apply(state, ListingAction.Edit, now);
 
-        var photos = await PhotosAsync(me.UserId, content!.PhotoIds, listing.Id, ct);
+        var photos = await PhotosAsync(me.UserId, content.PhotoIds, listing.Id, ct);
         var owner = await db.Users.FirstAsync(u => u.Id == me.UserId, ct);
         var seller = listing.SellerId is { } sellerId ? await db.Sellers.FirstOrDefaultAsync(s => s.Id == sellerId, ct) : null;
         var wasPublic = listing.Status == ListingStatus.Active;
@@ -112,6 +116,8 @@ public sealed class ListingWriteService(AppDbContext db, TimeProvider clock, IOp
         }
 
         content.ApplyTo(listing);
+        // The form says what is chosen now: «Pulsuz yerləşdir» clears an earlier choice (a paid one keeps running).
+        listing.PendingPromotionOptionId = pendingPromotion;
         next.ApplyTo(listing);
         listing.Slug = ListingSlug.Create(content.Title, listing.Number);
         listing.ContactPhoneVerified = content.ContactPhone == owner.Phone;
@@ -161,6 +167,21 @@ public sealed class ListingWriteService(AppDbContext db, TimeProvider clock, IOp
 
         await db.SaveChangesAsync(ct);
         return listing;
+    }
+
+    /// <summary>
+    /// The promotion chosen in the form (<c>ListingInput.promotion</c>), as the option to pay for after approval: one on
+    /// offer of the package named, or 400 <c>validation</c> (<c>promotion: invalid</c>).
+    /// </summary>
+    private async Task<string?> PendingPromotionAsync(PromotionChoice? choice, CancellationToken ct)
+    {
+        if (choice is null)
+        {
+            return null;
+        }
+
+        var catalogue = await PromotionCatalogue.LoadAsync(db, ct);
+        return catalogue.Offered(choice.PackageId, choice.OptionId)?.Id ?? throw ApiProblemException.Validation("promotion", FieldErrors.Invalid);
     }
 
     /// <summary>The caller's listing (tracked, with photos), not deleted; 404 <c>listing.not-found</c> otherwise.</summary>

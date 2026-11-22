@@ -21,7 +21,10 @@
  *   (`Idempotency-Key`), «Elanlarım» and its actions, the owner's statistics, «Nömrəni göstər» and the view beacon.
  *   The owner's and the revealed numbers come as E.164 and are returned in the site's spacing too.
  * - **Reports, «Usta çağır», support** (phase 4, backend-contract.md 4.1, 4.2): per-visitor writes, guests too.
- * - Methods whose endpoints come in a later phase throw `NotImplementedError` naming the phase.
+ * - **Promotion** (phase 5, backend-contract.md 5.1): the packages (a cached public read), an order for the owner's
+ *   listing with the payment provider's page (`Idempotency-Key`), and the owner's order after the provider brings
+ *   them back.
+ * - A method whose endpoint is not there yet throws `NotImplementedError` naming the phase (none since phase 5).
  */
 import 'server-only'
 import { headers } from 'next/headers'
@@ -43,6 +46,9 @@ import type {
   OwnListing,
   OwnSeller,
   PhotoUpload,
+  PromotionCheckout,
+  PromotionOrder,
+  PromotionPackage,
   SavedSearch,
   Seller,
   Service,
@@ -307,6 +313,7 @@ const TAG = {
   service: (key: string) => `service:${key}`,
   provider: (id: string) => `provider:${id}`,
   sitemap: (kind: SitemapKind) => `sitemap:${kind}`,
+  promotions: 'promotions',
 } as const
 
 /**
@@ -324,11 +331,13 @@ export function listingCacheTags(listing: Pick<Listing, 'id' | 'slug' | 'sellerI
   return tags
 }
 
-/* ---------- Repository ---------- */
-
-const later = (method: string, phase: number) => async (): Promise<never> => {
-  throw new NotImplementedError(method, phase)
+/** The listing's own pages only (its page by id and by slug): no shared list, so a caller cannot expire the site's. */
+export function listingPageTags(listing: Pick<Listing, 'id' | 'slug'> & { kind?: OwnListing['kind'] }): string[] {
+  const tag = listing.kind === 'service' ? TAG.service : TAG.listing
+  return [tag(listing.id), tag(listing.slug)]
 }
+
+/* ---------- Repository ---------- */
 
 export const apiRepository: MarketplaceRepository = {
   /* Taxonomy */
@@ -465,9 +474,16 @@ export const apiRepository: MarketplaceRepository = {
     await sendSigned<void>(`me/service-requests/${path([id, 'seen'])}`, { method: 'POST' })
   },
 
-  /* Later phases (backend/ARCHITECTURE.md §17) */
-  listPromotionPackages: later('listPromotionPackages', 5),
-  createPromotionOrder: later('createPromotionOrder', 5),
+  /* «Önə çıxar», «İrəli çək» and the bundle (phase 5, backend-contract.md 5.1) */
+  async listPromotionPackages() {
+    return read<PromotionPackage[]>('promotion-packages', [TAG.promotions])
+  },
+  async createPromotionOrder(input, idempotencyKey) {
+    return sendSigned<PromotionCheckout>('promotion-orders', { method: 'POST', body: input, headers: idempotencyKey ? { 'Idempotency-Key': idempotencyKey } : undefined })
+  },
+  async getPromotionOrder(id) {
+    return readOwn<PromotionOrder>(`me/promotion-orders/${path([id])}`)
+  },
 
   /* Accounts (phase 2, backend-contract.md 2.1) */
   async requestOtp(input) {

@@ -1,6 +1,6 @@
 # GreenStore: verilənlər bazası
 
-**Status:** təsdiqlənib (22 noyabr 2026). Faza 1-in cədvəlləri yaradılıb (miqrasiya `AddCatalogueTables`): `categories`, `cities`, `users`, `photos`, `sellers`, `listings` (`pending_promotion_option_id` faza 5-də, `promotion_options` ilə birlikdə), `listing_photos`, `listing_counters` və `listing_number_seq`. Faza 2-də (miqrasiya `AddAccounts`, sonra `AddOtpCreatedIndex`) `sessions`, `otp_challenges`, `favorites` və `saved_searches` gəlib; `users` faza 1-dən tamdır. Faza 3-də (miqrasiya `AddListingLifecycle`) `listing_drafts`, `listing_revisions`, `moderation_decisions`, `listing_daily_stats`, `listing_seen` (UNLOGGED), `outbox`, `audit_log` və `idempotency_keys` gəlib. Faza 4-də (miqrasiya `AddReportsRequestsSupport`) `reports`, `service_requests`, `service_request_recipients`, `support_messages` və `service_request_number_seq`, `support_ticket_seq` ardıcıllıqları gəlib. `devices` mobil tətbiqi gözləyir. Reklam və ödəniş cədvəlləri faza 5-dədir.
+**Status:** təsdiqlənib (22 noyabr 2026). Faza 1-in cədvəlləri yaradılıb (miqrasiya `AddCatalogueTables`): `categories`, `cities`, `users`, `photos`, `sellers`, `listings` (`pending_promotion_option_id` faza 5-də, `promotion_options` ilə birlikdə), `listing_photos`, `listing_counters` və `listing_number_seq`. Faza 2-də (miqrasiya `AddAccounts`, sonra `AddOtpCreatedIndex`) `sessions`, `otp_challenges`, `favorites` və `saved_searches` gəlib; `users` faza 1-dən tamdır. Faza 3-də (miqrasiya `AddListingLifecycle`) `listing_drafts`, `listing_revisions`, `moderation_decisions`, `listing_daily_stats`, `listing_seen` (UNLOGGED), `outbox`, `audit_log` və `idempotency_keys` gəlib. Faza 4-də (miqrasiya `AddReportsRequestsSupport`) `reports`, `service_requests`, `service_request_recipients`, `support_messages` və `service_request_number_seq`, `support_ticket_seq` ardıcıllıqları gəlib. Faza 5-də (miqrasiya `AddPromotions`) `promotion_packages`, `promotion_options` (seed: `src/data/promotions.ts`-dən, adlar üç dildə), `promotion_orders`, `payment_events`, `listing_promotions`, `promotion_order_number_seq`, `listings.pending_promotion_option_id` və `listings.promoted_at` (`ix_listings_feed` onu da daxil edir) gəlib. `devices` mobil tətbiqi gözləyir.
 **Əlaqəli sənədlər:** [ARCHITECTURE.md](ARCHITECTURE.md) (ümumi arxitektura), [backend-contract.md](../docs/handoff/backend-contract.md) (frontend müqaviləsi).
 
 Aşağıdakı SQL hədəf sxemdir. Real cədvəllər EF Core miqrasiyaları ilə yaradılacaq, amma nəticə bu sxemlə eyni olmalıdır. Hər miqrasiyanın SQL-i bu sənədlə müqayisə olunur.
@@ -274,7 +274,8 @@ CREATE TABLE listings (
   -- Axtarış, sıralama, reklam
   search_text            text NOT NULL DEFAULT '',                -- §4
   is_promoted            boolean NOT NULL DEFAULT false,          -- API-də `vip`
-  promoted_until         timestamptz,
+  promoted_until         timestamptz,                             -- boş: sonsuz (demo elanlar)
+  promoted_at            timestamptz,                             -- işləyən «Önə çıxan» nə vaxt başlayıb: «Önə çıxan» qrupunun sırası (faza 5)
   sort_at                timestamptz,                             -- greatest(published_at, bumped_at): «Ən yenilər»
 
   -- Moderasiya
@@ -298,11 +299,12 @@ CREATE TABLE listings (
   CHECK (NOT phone_hidden OR whatsapp),                           -- nömrə gizlidirsə, alıcı yalnız WhatsApp-a yazır
   CHECK (status <> 'active' OR (published_at IS NOT NULL AND expires_at IS NOT NULL AND sort_at IS NOT NULL)),
   CHECK (status <> 'rejected' OR rejection_reason_code IS NOT NULL),
-  CHECK (kind = 'service' OR (cardinality(service_city_ids) = 0 AND cardinality(includes) = 0))
+  CHECK (kind = 'service' OR (cardinality(service_city_ids) = 0 AND cardinality(includes) = 0)),
+  CHECK (is_promoted = (promoted_at IS NOT NULL))                 -- ck_listings_promoted_at (faza 5)
 );
 
 -- Public sorğular (yalnız aktiv elanlar)
-CREATE INDEX ix_listings_feed     ON listings (kind, is_promoted DESC, sort_at DESC) WHERE status = 'active' AND deleted_at IS NULL;
+CREATE INDEX ix_listings_feed     ON listings (kind, is_promoted DESC, promoted_at DESC, sort_at DESC) WHERE status = 'active' AND deleted_at IS NULL;
 CREATE INDEX ix_listings_category ON listings (category_id, sort_at DESC)            WHERE status = 'active' AND deleted_at IS NULL;
 CREATE INDEX ix_listings_search   ON listings USING gin (search_text gin_trgm_ops)   WHERE status = 'active' AND deleted_at IS NULL;
 -- Kabinet, satıcı səhifəsi, moderasiya, fon işləri
@@ -581,7 +583,10 @@ CREATE INDEX ix_promotions_listing ON listing_promotions (listing_id, ends_at);
 CREATE INDEX ix_promotions_bump    ON listing_promotions (next_bump_at) WHERE bumps_left > 0;
 ```
 
-- **`listings.is_promoted` və `promoted_until`** `listing_promotions`-dan hesablanan, sürət üçün təkrarlanan sahələrdir. Onları ödəniş təsdiqlənəndə və `Promotions` fon işi yeniləyir.
+- **`listings.is_promoted`, `promoted_until` və `promoted_at`** `listing_promotions`-dan hesablanan, sürət üçün təkrarlanan sahələrdir. Onları ödəniş təsdiqlənəndə və `Promotions` fon işi yeniləyir. Demo elanların `is_promoted`-i sonsuzdur (`promoted_until` boşdur): fon işi onlara toxunmur, «Önə çıxar» alanda da sonsuz qalır.
+- **«Önə çıxan» qrupunun sırası** (faza 5, nəzərdən keçirmədən sonra): «Ən yenilər» və ana səhifənin «Önə çıxan elanlar» bloku (4 elan) `is_promoted DESC, promoted_at DESC, sort_at DESC, number DESC` ilə sıralanır. `promoted_at` yeni «Önə çıxar» başlayanda «indi» olur, işləyənin üstünə alınan günlər onu dəyişmir, nişan götürüləndə boşalır (`ck_listings_promoted_at`: yalnız `is_promoted` olanda dolu). Belə ki, son ödəyən elan, tarixi köhnə olsa da, ana səhifənin blokunda və kataloqun birinci səhifəsində olur; paketin vədi budur. Miqrasiya mövcud «Önə çıxan» elanlara `coalesce(published_at, submitted_at, created_at)` yazır, seed də elə edir, yəni demo elanların öz aralarında sırası dəyişmir. Rotasiya (çox ödəyən olanda ana səhifədə növbə ilə göstərmək) indi yoxdur: blokda son 4 ödəyən görünür.
+- **Faza 5-də sxemə əlavələr** (yuxarıdakı SQL-dən əlavə, hamısı bütövlük üçün): adlarda `CHECK (name ? 'az')` (§2-nin qaydası: `ck_promotion_packages_name`, `…_summary`, `ck_promotion_options_label`), `benefits` massivdir, `promotion_options.id ~ '^[a-z0-9-]{1,40}$'`, `listing_promotions`-da `bumps_left >= 0`, `feature` sətrinin qaldırması yoxdur, qalan qaldırmanın vaxtı var, və `UNIQUE (order_id, kind)` (`ux_listing_promotions_order_kind`): ödənilmiş sifariş hər növü bir dəfə başladır, təkrar callback ikinci sətir yarada bilməz. `promotion_orders.number` `ux_promotion_orders_number`, `UNIQUE (provider, provider_ref)` `ux_promotion_orders_provider_ref` adlı unikal indeksdir.
+- **Qaydalar** (`Modules/Promotion/PromotionRules.cs`): «Önə çıxar» işləyən «Önə çıxar»ın sonundan başlayır (günlər üst-üstə düşmür); «İrəli çək» ödənişlə dərhal qaldırır, qalanlar `days / bumps` fasilə ilə (`next_bump_at`), saytda olmayan elanın qaldırmaları elan qayıdana qədər gözləyir; `expires_at` ödənilən hər şeyin sonuna qədər uzanır və təsdiq onu qısaltmır.
 - **`payment_events`** mübahisə və yoxlama üçündür: provayder nə göndərib və nə vaxt.
 - **Balans** (turbo.az-dakı kimi) gələcəkdə `wallet_transactions` cədvəli ilə əlavə olunur. İndi lazım deyil.
 
@@ -659,6 +664,7 @@ Frontend-in `normalizeSearch` funksiyası da eyni işi görür. Test nümunələ
 | `photos` (elana bağlanmayan) | 24 saat | fayl və sətir silinir |
 | `idempotency_keys` | 24 saat | silinir |
 | `outbox` (göndərilib) | 30 gün | silinir |
+| `payment_events` (imzası səhv) | 30 gün | silinir; yalnız ilk 2048 simvolu saxlanır (faza 5). İmzalı callback-lər «Ödəniş qeydləri»dir |
 | Silinmiş elan | 6 ay | şəkillər yaddaşdan silinir, `contact_phone` və təsvir təmizlənir, nömrə və tarixçə qalır |
 | `audit_log`, `moderation_decisions` | 2 il | silinir |
 | Ödəniş qeydləri | qanunun tələb etdiyi qədər | hüquqşünas deyəcək |

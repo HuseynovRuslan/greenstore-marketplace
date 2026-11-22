@@ -77,6 +77,43 @@ const cityNames: Record<string, Names> = {
   lenkeran: { ru: 'Ленкорань', en: 'Lankaran' },
 }
 
+/**
+ * DRAFT: promotion package names, summaries, benefits and option labels, keyed by the Azerbaijani text (labels such as
+ * «7 gün» repeat across packages). «Önə çıxan» is «В топе» / «Featured»; the word "VIP" is never used.
+ */
+const promotionTexts: Record<string, Names> = {
+  'İrəli çək': { ru: 'Поднять в списке', en: 'Bump up' },
+  'Önə çıxar': { ru: 'Вывести в топ', en: 'Feature' },
+  'Önə çıxar + İrəli çək': { ru: 'Вывести в топ + Поднять в списке', en: 'Feature + Bump up' },
+  'Elan siyahıda yenidən ən yuxarı qalxır, sanki indi yerləşdirilib.': {
+    ru: 'Объявление снова поднимается на самый верх списка, будто его только что разместили.',
+    en: 'The listing goes back to the very top of the list, as if it had just been posted.',
+  },
+  'Elan ana səhifədə və axtarışın başında «Önə çıxan» nişanı ilə göstərilir.': {
+    ru: 'Объявление показывается на главной странице и в начале поиска со значком «В топе».',
+    en: 'The listing is shown on the home page and at the top of search results with the «Featured» badge.',
+  },
+  'Hər ikisi bir arada: həm nişan və ana səhifə, həm də hər gün siyahının başı.': {
+    ru: 'Оба в одном: и значок с главной страницей, и каждый день вверху списка.',
+    en: 'Both in one: the badge and the home page, and the top of the list every day.',
+  },
+  '«Ən yenilər» siyahısında yenidən birinci yerdə': { ru: 'Снова на первом месте в списке «Новые»', en: 'First again in the «Newest» list' },
+  'Tarix yenilənir, elan təzə görünür': { ru: 'Дата обновляется, объявление выглядит свежим', en: 'The date is refreshed, the listing looks new' },
+  'Gündə bir dəfə və ya bir neçə gün ardıcıl': { ru: 'Один раз или каждый день несколько дней подряд', en: 'Once, or every day for several days in a row' },
+  'Ana səhifədə «Önə çıxan elanlar» bölməsində': { ru: 'На главной странице в разделе «Объявления в топе»', en: 'On the home page in the «Featured listings» section' },
+  'Axtarış nəticələrinin başında': { ru: 'В начале результатов поиска', en: 'At the top of search results' },
+  '«Önə çıxan» nişanı ilə seçilir': { ru: 'Выделяется значком «В топе»', en: 'Stands out with the «Featured» badge' },
+  '«Önə çıxar»ın bütün üstünlükləri': { ru: 'Все преимущества «Вывести в топ»', en: 'Everything «Feature» gives' },
+  'Hər gün avtomatik «İrəli çək»': { ru: 'Каждый день автоматически «Поднять в списке»', en: 'An automatic «Bump up» every day' },
+  'Ayrı-ayrı almaqdan sərfəli': { ru: 'Выгоднее, чем покупать по отдельности', en: 'Cheaper than buying them separately' },
+  '1 dəfə': { ru: '1 раз', en: 'Once' },
+  '5 gün, hər gün': { ru: '5 дней, каждый день', en: '5 days, every day' },
+  '10 gün, hər gün': { ru: '10 дней, каждый день', en: '10 days, every day' },
+  '3 gün': { ru: '3 дня', en: '3 days' },
+  '7 gün': { ru: '7 дней', en: '7 days' },
+  '15 gün': { ru: '15 дней', en: '15 days' },
+}
+
 function localized(az: string, names: Names | undefined, what: string) {
   if (!names) throw new Error(`No draft ru/en names for ${what} «${az}»: add them to backend/seed/buildSeed.ts`)
   return { az, ru: names.ru, en: names.en }
@@ -160,16 +197,16 @@ function referenceCities() {
 
 function referencePromotions() {
   return {
-    $comment: comment('Promotion packages and their options (mock prices, AZN). Tables arrive in phase 5; Azerbaijani only for now.'),
+    $comment: comment('Promotion packages and their options (mock prices, AZN). ru/en are DRAFT translations.'),
     items: promotionPackages.map((p, i) => ({
       id: p.id,
-      name: { az: p.name },
-      summary: { az: p.summary },
-      benefits: p.benefits.map((b) => ({ az: b })),
+      name: localized(p.name, promotionTexts[p.name], 'promotion package'),
+      summary: localized(p.summary, promotionTexts[p.summary], 'promotion summary'),
+      benefits: p.benefits.map((b) => localized(b, promotionTexts[b], 'promotion benefit')),
       sortOrder: (i + 1) * 10,
       options: p.options.map((o, j) => ({
         id: o.id,
-        label: { az: o.label },
+        label: localized(o.label, promotionTexts[o.label], 'promotion option'),
         price: o.price,
         ...(o.days != null ? { days: o.days } : {}),
         ...(o.bumps != null ? { bumps: o.bumps } : {}),

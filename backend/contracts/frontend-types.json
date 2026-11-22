@@ -1021,6 +1021,10 @@
         "optional": false,
         "type": "CategoryKind"
       },
+      "pendingPromotion": {
+        "optional": true,
+        "type": "{ packageId: PromotionPackageId; optionId: string }"
+      },
       "photoIds": {
         "optional": false,
         "type": "string[]"
@@ -1150,6 +1154,16 @@
         "type": "Locale"
       }
     },
+    "PromotionCheckout": {
+      "order": {
+        "optional": false,
+        "type": "PromotionOrder"
+      },
+      "paymentUrl": {
+        "optional": true,
+        "type": "string"
+      }
+    },
     "PromotionOption": {
       "bumps": {
         "optional": true,
@@ -1189,6 +1203,10 @@
         "optional": false,
         "type": "string"
       },
+      "number": {
+        "optional": false,
+        "type": "number"
+      },
       "optionId": {
         "optional": false,
         "type": "string"
@@ -1197,9 +1215,31 @@
         "optional": false,
         "type": "PromotionPackageId"
       },
+      "paidAt": {
+        "optional": true,
+        "type": "string"
+      },
       "status": {
         "optional": false,
         "type": "'paid' | 'pending' | 'failed'"
+      }
+    },
+    "PromotionOrderInput": {
+      "listingId": {
+        "optional": false,
+        "type": "string"
+      },
+      "optionId": {
+        "optional": false,
+        "type": "string"
+      },
+      "packageId": {
+        "optional": false,
+        "type": "PromotionPackageId"
+      },
+      "returnPath": {
+        "optional": true,
+        "type": "string"
       }
     },
     "PromotionPackage": {

@@ -63,6 +63,12 @@ public sealed class Listing : IHasRowVersion
 
     public Availability? Availability { get; set; }
 
+    /// <summary>
+    /// The promotion option chosen in «Elan yerləşdir» (<c>ListingInput.promotion</c>), not paid yet: the owner pays for
+    /// it from the cabinet once the listing is approved; a paid order of the listing clears it.
+    /// </summary>
+    public string? PendingPromotionOptionId { get; set; }
+
     public required string CityId { get; set; }
 
     public City? City { get; set; }
@@ -119,7 +125,14 @@ public sealed class Listing : IHasRowVersion
     /// <summary>«Önə çıxan»: <c>vip</c> in the API.</summary>
     public bool IsPromoted { get; set; }
 
+    /// <summary>The end of the paid «Önə çıxan»; null while promoted without an end (the demo data).</summary>
     public DateTimeOffset? PromotedUntil { get; set; }
+
+    /// <summary>
+    /// When the running «Önə çıxan» began: the newest first in the «Önə çıxan» group of the home page and «Ən yenilər»,
+    /// so a listing that has just paid gets the places the package sells. Set exactly while <see cref="IsPromoted"/>.
+    /// </summary>
+    public DateTimeOffset? PromotedAt { get; set; }
 
     /// <summary>greatest(published_at, bumped_at): the «Ən yenilər» order.</summary>
     public DateTimeOffset? SortAt { get; set; }

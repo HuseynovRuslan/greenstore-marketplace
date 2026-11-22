@@ -1,4 +1,5 @@
 using GreenStore.Api.Data;
+using GreenStore.Api.Modules.Promotion;
 using GreenStore.Api.Modules.Taxonomy;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -51,6 +52,8 @@ internal sealed class ListingConfiguration : IEntityTypeConfiguration<Listing>
                 "status <> 'active' OR (published_at IS NOT NULL AND expires_at IS NOT NULL AND sort_at IS NOT NULL)");
             t.HasCheckConstraint("ck_listings_rejected_reason", "status <> 'rejected' OR rejection_reason_code IS NOT NULL");
             t.HasCheckConstraint("ck_listings_service_fields", "kind = 'service' OR (cardinality(service_city_ids) = 0 AND cardinality(includes) = 0)");
+            // The «Önə çıxan» group is ordered by promoted_at: a stale one would reorder the listings that are not.
+            t.HasCheckConstraint("ck_listings_promoted_at", "is_promoted = (promoted_at IS NOT NULL)");
         });
 
         listing.Property(l => l.Id).ValueGeneratedNever();
@@ -70,6 +73,7 @@ internal sealed class ListingConfiguration : IEntityTypeConfiguration<Listing>
         listing.Property(l => l.PriceUnit).IsKebabCase();
         listing.Property(l => l.WholesalePrice).HasPrecision(10, 2);
         listing.Property(l => l.Availability).IsKebabCase();
+        listing.HasOne<PromotionOption>().WithMany().HasForeignKey(l => l.PendingPromotionOptionId).OnDelete(DeleteBehavior.NoAction);
 
         listing.HasOne(l => l.City).WithMany().HasForeignKey(l => l.CityId).OnDelete(DeleteBehavior.NoAction);
         listing.Property(l => l.DeliveryAvailable).HasDefaultValue(false);
@@ -94,9 +98,9 @@ internal sealed class ListingConfiguration : IEntityTypeConfiguration<Listing>
         listing.HasXminRowVersion();
 
         // Public queries (active listings only).
-        listing.HasIndex(l => new { l.Kind, l.IsPromoted, l.SortAt })
+        listing.HasIndex(l => new { l.Kind, l.IsPromoted, l.PromotedAt, l.SortAt })
             .HasDatabaseName("ix_listings_feed")
-            .IsDescending(false, true, true)
+            .IsDescending(false, true, true, true)
             .HasFilter(PublicFilter);
         listing.HasIndex(l => new { l.CategoryId, l.SortAt })
             .HasDatabaseName("ix_listings_category")

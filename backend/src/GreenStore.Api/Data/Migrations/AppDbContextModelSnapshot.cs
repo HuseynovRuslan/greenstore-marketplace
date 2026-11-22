@@ -27,6 +27,9 @@ namespace GreenStore.Api.Data.Migrations
             modelBuilder.HasSequence("listing_number_seq")
                 .StartsAt(10001L);
 
+            modelBuilder.HasSequence("promotion_order_number_seq")
+                .StartsAt(1001L);
+
             modelBuilder.HasSequence("service_request_number_seq")
                 .StartsAt(3001L);
 
@@ -842,6 +845,10 @@ namespace GreenStore.Api.Data.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("owner_user_id");
 
+                    b.Property<string>("PendingPromotionOptionId")
+                        .HasColumnType("text")
+                        .HasColumnName("pending_promotion_option_id");
+
                     b.Property<bool>("PhoneHidden")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("boolean")
@@ -871,6 +878,10 @@ namespace GreenStore.Api.Data.Migrations
                     b.Property<string>("PriceUnit")
                         .HasColumnType("text")
                         .HasColumnName("price_unit");
+
+                    b.Property<DateTimeOffset?>("PromotedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("promoted_at");
 
                     b.Property<DateTimeOffset?>("PromotedUntil")
                         .HasColumnType("timestamp with time zone")
@@ -1005,8 +1016,8 @@ namespace GreenStore.Api.Data.Migrations
                         .HasDatabaseName("ix_listings_owner")
                         .HasFilter("deleted_at IS NULL");
 
-                    b.HasIndex("Kind", "IsPromoted", "SortAt")
-                        .IsDescending(false, true, true)
+                    b.HasIndex("Kind", "IsPromoted", "PromotedAt", "SortAt")
+                        .IsDescending(false, true, true, true)
                         .HasDatabaseName("ix_listings_feed")
                         .HasFilter("status = 'active' AND deleted_at IS NULL");
 
@@ -1045,6 +1056,8 @@ namespace GreenStore.Api.Data.Migrations
                             t.HasCheckConstraint("ck_listings_price_type", "price_type IN ('fixed', 'negotiable', 'agreement')");
 
                             t.HasCheckConstraint("ck_listings_price_unit", "price_unit IN ('piece', 'kg', 'litre', 'sqm', 'bag', 'set', 'metre', 'hour', 'job')");
+
+                            t.HasCheckConstraint("ck_listings_promoted_at", "is_promoted = (promoted_at IS NOT NULL)");
 
                             t.HasCheckConstraint("ck_listings_quantity_available", "quantity_available >= 0");
 
@@ -1479,6 +1492,306 @@ namespace GreenStore.Api.Data.Migrations
                         .HasFilter("sent_at IS NULL");
 
                     b.ToTable("outbox", (string)null);
+                });
+
+            modelBuilder.Entity("GreenStore.Api.Modules.Promotion.ListingPromotion", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<short>("BumpsLeft")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("smallint")
+                        .HasDefaultValue((short)0)
+                        .HasColumnName("bumps_left");
+
+                    b.Property<DateTimeOffset>("EndsAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("ends_at");
+
+                    b.Property<string>("Kind")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("kind");
+
+                    b.Property<Guid>("ListingId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("listing_id");
+
+                    b.Property<DateTimeOffset?>("NextBumpAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("next_bump_at");
+
+                    b.Property<Guid>("OrderId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("order_id");
+
+                    b.Property<DateTimeOffset>("StartsAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("starts_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_listing_promotions");
+
+                    b.HasIndex("NextBumpAt")
+                        .HasDatabaseName("ix_promotions_bump")
+                        .HasFilter("bumps_left > 0");
+
+                    b.HasIndex("ListingId", "EndsAt")
+                        .HasDatabaseName("ix_promotions_listing");
+
+                    b.HasIndex("OrderId", "Kind")
+                        .IsUnique()
+                        .HasDatabaseName("ux_listing_promotions_order_kind");
+
+                    b.ToTable("listing_promotions", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_listing_promotions_bumps_left", "bumps_left >= 0");
+
+                            t.HasCheckConstraint("ck_listing_promotions_feature_has_no_bumps", "kind = 'bump' OR (bumps_left = 0 AND next_bump_at IS NULL)");
+
+                            t.HasCheckConstraint("ck_listing_promotions_kind", "kind IN ('feature', 'bump')");
+
+                            t.HasCheckConstraint("ck_listing_promotions_next_bump", "bumps_left = 0 OR next_bump_at IS NOT NULL");
+
+                            t.HasCheckConstraint("ck_listing_promotions_period", "ends_at > starts_at");
+                        });
+                });
+
+            modelBuilder.Entity("GreenStore.Api.Modules.Promotion.PaymentEvent", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityAlwaysColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("EventType")
+                        .HasColumnType("text")
+                        .HasColumnName("event_type");
+
+                    b.Property<string>("Payload")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("payload");
+
+                    b.Property<DateTimeOffset?>("ProcessedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("processed_at");
+
+                    b.Property<string>("Provider")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("provider");
+
+                    b.Property<string>("ProviderRef")
+                        .HasColumnType("text")
+                        .HasColumnName("provider_ref");
+
+                    b.Property<DateTimeOffset>("ReceivedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("received_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<bool>("SignatureOk")
+                        .HasColumnType("boolean")
+                        .HasColumnName("signature_ok");
+
+                    b.HasKey("Id")
+                        .HasName("pk_payment_events");
+
+                    b.ToTable("payment_events", (string)null);
+                });
+
+            modelBuilder.Entity("GreenStore.Api.Modules.Promotion.PromotionOption", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("text")
+                        .HasColumnName("id");
+
+                    b.Property<short?>("Bumps")
+                        .HasColumnType("smallint")
+                        .HasColumnName("bumps");
+
+                    b.Property<short?>("Days")
+                        .HasColumnType("smallint")
+                        .HasColumnName("days");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true)
+                        .HasColumnName("is_active");
+
+                    b.Property<string>("Label")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("label");
+
+                    b.Property<string>("PackageId")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("package_id");
+
+                    b.Property<decimal>("Price")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("numeric(10,2)")
+                        .HasColumnName("price");
+
+                    b.Property<int>("SortOrder")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0)
+                        .HasColumnName("sort_order");
+
+                    b.HasKey("Id")
+                        .HasName("pk_promotion_options");
+
+                    b.ToTable("promotion_options", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_promotion_options_bumps", "bumps > 0");
+
+                            t.HasCheckConstraint("ck_promotion_options_days", "days > 0");
+
+                            t.HasCheckConstraint("ck_promotion_options_id", "id ~ '^[a-z0-9-]{1,40}$'");
+
+                            t.HasCheckConstraint("ck_promotion_options_label", "jsonb_typeof(label) = 'object' AND label ? 'az'");
+
+                            t.HasCheckConstraint("ck_promotion_options_price", "price > 0");
+
+                            t.HasCheckConstraint("ck_promotion_options_runs", "days IS NOT NULL OR bumps IS NOT NULL");
+                        });
+                });
+
+            modelBuilder.Entity("GreenStore.Api.Modules.Promotion.PromotionOrder", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<decimal>("Amount")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("numeric(10,2)")
+                        .HasColumnName("amount");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<Guid>("ListingId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("listing_id");
+
+                    b.Property<long>("Number")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("number")
+                        .HasDefaultValueSql("nextval('promotion_order_number_seq')");
+
+                    b.Property<string>("OptionId")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("option_id");
+
+                    b.Property<DateTimeOffset?>("PaidAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("paid_at");
+
+                    b.Property<string>("Provider")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("provider");
+
+                    b.Property<string>("ProviderRef")
+                        .HasColumnType("text")
+                        .HasColumnName("provider_ref");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_promotion_orders");
+
+                    b.HasIndex("ListingId")
+                        .HasDatabaseName("ix_orders_listing");
+
+                    b.HasIndex("Number")
+                        .IsUnique()
+                        .HasDatabaseName("ux_promotion_orders_number");
+
+                    b.HasIndex("Provider", "ProviderRef")
+                        .IsUnique()
+                        .HasDatabaseName("ux_promotion_orders_provider_ref");
+
+                    b.ToTable("promotion_orders", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_promotion_orders_amount", "amount > 0");
+
+                            t.HasCheckConstraint("ck_promotion_orders_paid_at", "status <> 'paid' OR paid_at IS NOT NULL");
+
+                            t.HasCheckConstraint("ck_promotion_orders_status", "status IN ('pending', 'paid', 'failed', 'cancelled', 'refunded')");
+                        });
+                });
+
+            modelBuilder.Entity("GreenStore.Api.Modules.Promotion.PromotionPackage", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("text")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Benefits")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("benefits")
+                        .HasDefaultValueSql("'[]'::jsonb");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true)
+                        .HasColumnName("is_active");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("name");
+
+                    b.Property<int>("SortOrder")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0)
+                        .HasColumnName("sort_order");
+
+                    b.Property<string>("Summary")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("summary");
+
+                    b.HasKey("Id")
+                        .HasName("pk_promotion_packages");
+
+                    b.ToTable("promotion_packages", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_promotion_packages_benefits", "jsonb_typeof(benefits) = 'array'");
+
+                            t.HasCheckConstraint("ck_promotion_packages_id", "id IN ('one-cixar', 'ireli-cek', 'paket')");
+
+                            t.HasCheckConstraint("ck_promotion_packages_name", "jsonb_typeof(name) = 'object' AND name ? 'az'");
+
+                            t.HasCheckConstraint("ck_promotion_packages_summary", "jsonb_typeof(summary) = 'object' AND summary ? 'az'");
+                        });
                 });
 
             modelBuilder.Entity("GreenStore.Api.Modules.Sellers.Seller", b =>
@@ -1944,6 +2257,12 @@ namespace GreenStore.Api.Data.Migrations
                         .IsRequired()
                         .HasConstraintName("fk_listings_users_owner_user_id");
 
+                    b.HasOne("GreenStore.Api.Modules.Promotion.PromotionOption", null)
+                        .WithMany()
+                        .HasForeignKey("PendingPromotionOptionId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .HasConstraintName("fk_listings_promotion_options_pending_promotion_option_id");
+
                     b.HasOne("GreenStore.Api.Modules.Sellers.Seller", "Seller")
                         .WithMany()
                         .HasForeignKey("SellerId")
@@ -2053,6 +2372,67 @@ namespace GreenStore.Api.Data.Migrations
                         .HasConstraintName("fk_audit_log_users_actor_user_id");
                 });
 
+            modelBuilder.Entity("GreenStore.Api.Modules.Promotion.ListingPromotion", b =>
+                {
+                    b.HasOne("GreenStore.Api.Modules.Listings.Listing", null)
+                        .WithMany()
+                        .HasForeignKey("ListingId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("fk_listing_promotions_listings_listing_id");
+
+                    b.HasOne("GreenStore.Api.Modules.Promotion.PromotionOrder", "Order")
+                        .WithMany()
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("fk_listing_promotions_promotion_orders_order_id");
+
+                    b.Navigation("Order");
+                });
+
+            modelBuilder.Entity("GreenStore.Api.Modules.Promotion.PromotionOption", b =>
+                {
+                    b.HasOne("GreenStore.Api.Modules.Promotion.PromotionPackage", "Package")
+                        .WithMany("Options")
+                        .HasForeignKey("PackageId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("fk_promotion_options_promotion_packages_package_id");
+
+                    b.Navigation("Package");
+                });
+
+            modelBuilder.Entity("GreenStore.Api.Modules.Promotion.PromotionOrder", b =>
+                {
+                    b.HasOne("GreenStore.Api.Modules.Listings.Listing", "Listing")
+                        .WithMany()
+                        .HasForeignKey("ListingId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("fk_promotion_orders_listings_listing_id");
+
+                    b.HasOne("GreenStore.Api.Modules.Promotion.PromotionOption", "Option")
+                        .WithMany()
+                        .HasForeignKey("OptionId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("fk_promotion_orders_promotion_options_option_id");
+
+                    b.HasOne("GreenStore.Api.Modules.Accounts.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("fk_promotion_orders_users_user_id");
+
+                    b.Navigation("Listing");
+
+                    b.Navigation("Option");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("GreenStore.Api.Modules.Sellers.Seller", b =>
                 {
                     b.HasOne("GreenStore.Api.Modules.Taxonomy.City", "City")
@@ -2117,6 +2497,11 @@ namespace GreenStore.Api.Data.Migrations
                     b.Navigation("Counter");
 
                     b.Navigation("Photos");
+                });
+
+            modelBuilder.Entity("GreenStore.Api.Modules.Promotion.PromotionPackage", b =>
+                {
+                    b.Navigation("Options");
                 });
 
             modelBuilder.Entity("GreenStore.Api.Modules.Taxonomy.Category", b =>

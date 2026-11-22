@@ -13,9 +13,10 @@ public sealed partial class FrontendContract
 {
     /// <summary>
     /// Approved additions of backend-contract.md that src/types does not have yet, by type and property (property →
-    /// TypeScript type). None today: phase 1's frontend added its own (1.3 <c>subcategoryId</c>, 1.7
-    /// <c>Service.priceType</c> and <c>priceUnit</c>, 3.1 <c>phoneMasked</c>), phase 2's added 2.1
-    /// <c>UserProfile.role</c> and <c>locale</c>. A later phase lists here what the API sends before src/types has it.
+    /// TypeScript type). Empty now: every phase's frontend added its own (1.3 <c>subcategoryId</c>, 1.7
+    /// <c>Service.priceType</c> and <c>priceUnit</c>, 3.1 <c>phoneMasked</c>, 2.1 <c>UserProfile.role</c> and
+    /// <c>locale</c>, 5.1 <c>PromotionOrder.number</c> and <c>paidAt</c>, <c>OwnListing.pendingPromotion</c> and
+    /// <c>PromotionCheckout</c>). A new approved field the API sends before the site has it goes here.
     /// </summary>
     public static readonly IReadOnlyDictionary<string, IReadOnlyDictionary<string, string>> ApprovedAdditions =
         new Dictionary<string, IReadOnlyDictionary<string, string>>();

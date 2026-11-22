@@ -34,7 +34,7 @@ node backend/seed/export.mjs
   - demo istifadəçi telefonla, satıcı slug ilə, elan nömrə ilə tanınır.
 - Hamısı bir tranzaksiyada və advisory lock altında gedir: iki proses eyni anda seed etsə, toqquşmur.
 - Faylda dəyişiklik **mövcud bazaya keçmir** (məsələn, düzəldilmiş rus adı). Belə dəyişiklik admin panelindən (faza 4) və ya ayrıca miqrasiya ilə edilir.
-- `promotions.json` hazırdır, amma reklam cədvəlləri faza 5-də gəlir: seeder onu hələ oxumur.
+- `promotions.json` faza 5-dən `promotion_packages` və `promotion_options` cədvəllərinə yazılır (id ilə: `one-cixar`, `one-cixar-7`). Adlar, qısa təsvirlər, üstünlüklər və seçimlərin adları üç dildədir; rus və ingilis mətnləri **qaralamadır** (`buildSeed.ts`-dəki `promotionTexts`), doğma danışan yoxlamalıdır. Qiymətlər mock-un qiymətləridir (AZN): real qiymətlər qərarlaşanda bazada dəyişdirilir, seed mövcud sətrin üstünə yazmır.
 
 ## Demo məlumatı necə qurulur
 

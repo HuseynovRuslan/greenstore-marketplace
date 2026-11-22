@@ -1,5 +1,7 @@
+import Link from 'next/link'
 import { ArrowUp, ChevronDown, Rocket } from 'lucide-react'
 import { ClientGate } from '@/components/layout/ClientGate'
+import { InfoNotice } from '@/components/ui/Notice'
 import { SkeletonBlock } from '@/components/ui/Skeleton'
 import { PromotionPlanner } from '@/features/promotion/PromotionPlanner'
 import { Breadcrumb } from '@/features/seller/ui'
@@ -50,8 +52,12 @@ function HowItShows() {
   )
 }
 
-/** /reklam — promotion packages («İrəli çək», «Önə çıxar», the bundle) with the mock checkout. */
-export default function PromotionPage({ packages }: { packages: PromotionPackage[] }) {
+/**
+ * /reklam — promotion packages («İrəli çək», «Önə çıxar», the bundle) and their checkout: the payment provider's page
+ * with the API, the demo card form with the mock (`demo`). No packages: nothing can be bought here now (the API lists
+ * none until a payment provider is connected), so the page says so and points to free posting instead of prices.
+ */
+export default function PromotionPage({ packages, demo = true }: { packages: PromotionPackage[]; demo?: boolean }) {
   return (
     <div className="page-x mx-auto flex w-full max-w-[1200px] flex-col gap-8 pt-3 pb-14 md:pt-5">
       <Breadcrumb
@@ -72,19 +78,28 @@ export default function PromotionPage({ packages }: { packages: PromotionPackage
 
       {/* Each package card has its id as an anchor (/reklam#one-cixar, #ireli-cek — footer links); the skeletons
           carry the same ids, so a link opened in a new tab lands on the right card before the planner mounts. */}
-      <ClientGate
-        fallback={
-          <div aria-busy className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-            {packages.map((p) => (
-              <div key={p.id} id={p.id}>
-                <SkeletonBlock className="h-[420px] rounded-2xl" />
-              </div>
-            ))}
-          </div>
-        }
-      >
-        <PromotionPlanner packages={packages} />
-      </ClientGate>
+      {packages.length > 0 ? (
+        <ClientGate
+          fallback={
+            <div aria-busy className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+              {packages.map((p) => (
+                <div key={p.id} id={p.id}>
+                  <SkeletonBlock className="h-[420px] rounded-2xl" />
+                </div>
+              ))}
+            </div>
+          }
+        >
+          <PromotionPlanner packages={packages} />
+        </ClientGate>
+      ) : (
+        <InfoNotice title="Onlayn ödəniş tezliklə qoşulacaq">
+          Hazırda reklam paketi almaq olmur. Elanınızı pulsuz yerləşdirin: 30 gün saytda, «Ən yenilər» siyahısında görünəcək.{' '}
+          <Link href="/elan-yerlesdir" className="font-semibold text-forest underline underline-offset-2">
+            Elan yerləşdir
+          </Link>
+        </InfoNotice>
+      )}
 
       <section aria-labelledby="suallar" className="flex flex-col gap-3">
         <h2 id="suallar" className="text-lg leading-[1.3] font-semibold tracking-[-0.01em] text-forest md:text-[22px]">
@@ -101,7 +116,7 @@ export default function PromotionPage({ packages }: { packages: PromotionPackage
             </details>
           ))}
         </div>
-        <p className="text-xs leading-[1.5] text-muted">Qiymətlər manatla, ƏDV daxil. Demo: ödəniş alınmır.</p>
+        {packages.length > 0 && <p className="text-xs leading-[1.5] text-muted">Qiymətlər manatla, ƏDV daxil.{demo ? ' Demo: ödəniş alınmır.' : ''}</p>}
       </section>
     </div>
   )

@@ -210,13 +210,11 @@ describe('apiRepository: answers', () => {
     expect(await apiRepository.getCity('paris')).toBeUndefined()
   })
 
-  it('says which later phase brings a method that has no endpoint yet', async () => {
-    const error = await apiRepository.createPromotionOrder({} as never).catch((e: unknown) => e)
-    expect(error).toBeInstanceOf(NotImplementedError)
+  it('names the phase of a method that has no endpoint yet (none since phase 5)', () => {
+    const error = new NotImplementedError('someLaterMethod', 6)
     expect(isNotImplemented(error)).toBe(true)
-    expect((error as Error).message).toBe('DATA_SOURCE=api: createPromotionOrder is not implemented yet (phase 5).')
-    await expect(apiRepository.listPromotionPackages()).rejects.toThrow('(phase 5)')
-    expect(calls).toHaveLength(0)
+    expect(isNotImplemented(new Error('x'))).toBe(false)
+    expect(error.message).toBe('DATA_SOURCE=api: someLaterMethod is not implemented yet (phase 6).')
   })
 
   it('refuses to run without API_BASE_URL', async () => {

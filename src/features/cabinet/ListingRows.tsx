@@ -24,17 +24,20 @@ import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { Dialog } from '@/components/ui/Dialog'
 import { Popover } from '@/components/ui/Popover'
+import { PromotedBadge } from '@/components/ui/PromotedBadge'
 import { useToast } from '@/components/ui/Toast'
 import { cityName } from '@/data/cities'
 import { promotionPackage } from '@/data/promotions'
 import { listingPrice } from '@/features/listing/facts'
 import { ownerPreviewPath } from '@/features/listing/ownerPreview'
+import { findOption } from '@/features/promotion/checkout'
+import { usePromotionPackages } from '@/features/promotion/usePromotionPackages'
 import { rejectionText } from '@/features/listing/rejection'
 import { STEPS, type PostingDraft } from '@/features/posting/draft'
 import { cn, formatDayMonth, formatNumber } from '@/lib/format'
 import { useBrokenImage } from '@/lib/useBrokenImage'
 import type { Listing, ListingStats } from '@/types'
-import { actionsFor, daysLeft, expiryLabel, statusBadges, type CabinetAction } from './model'
+import { actionsFor, daysLeft, expiryLabel, isFeatured, pendingPromotionOf, statusBadges, type CabinetAction } from './model'
 import type { RowResult } from './useCabinet'
 
 const actionClass =
@@ -85,6 +88,12 @@ export function ListingRowCard({ listing, stats, now, handlers }: { listing: Lis
   const price = listingPrice(listing)
   const expiry = listing.status === 'active' ? expiryLabel(daysLeft(listing, now)) : undefined
   const promo = listing.promotion && Date.parse(listing.promotion.until) > now ? listing.promotion : undefined
+  // «Önə çıxan» as buyers see it (`vip`); a running «İrəli çək» alone keeps its own name.
+  const featured = isFeatured(listing, now)
+  const pending = pendingPromotionOf(listing)
+  // The choice made while posting, while it is on sale (DATA_SOURCE=api: the API's packages, so its name and price).
+  const packages = usePromotionPackages()
+  const pendingOffer = pending && packages && (listing.status === 'active' || listing.status === 'pending') ? findOption(packages, pending.optionId) : undefined
   const href = listing.status === 'active' ? `/elanlar/${listing.slug}` : ownerPreviewPath(listing.slug)
 
   const edit = async () => {
@@ -197,11 +206,15 @@ export function ListingRowCard({ listing, stats, now, handlers }: { listing: Lis
         <div className="flex min-w-0 flex-1 flex-col gap-1">
           <div className="flex flex-wrap items-center gap-1.5">
             <Badge tone={badge.tone}>{badge.label}</Badge>
-            {promo && (
-              <span className="inline-flex items-center gap-1 rounded-[5px] bg-vip px-2 py-[5px] text-xs leading-[normal] font-semibold whitespace-nowrap text-olive-text">
-                <Rocket aria-hidden size={12} strokeWidth={2.2} />
-                {promotionPackage(promo.packageId)?.name}
-              </span>
+            {featured ? (
+              <PromotedBadge />
+            ) : (
+              promo && (
+                <span className="inline-flex items-center gap-1 rounded-[5px] bg-vip px-2 py-[5px] text-xs leading-[normal] font-semibold whitespace-nowrap text-olive-text">
+                  <Rocket aria-hidden size={12} strokeWidth={2.2} />
+                  {(packages?.find((p) => p.id === promo.packageId) ?? promotionPackage(promo.packageId))?.name}
+                </span>
+              )
             )}
           </div>
           <h3 className="line-clamp-2 text-[15px] leading-[1.35] font-semibold break-words text-ink" title={listing.title}>
@@ -233,6 +246,26 @@ export function ListingRowCard({ listing, stats, now, handlers }: { listing: Lis
           <Clock3 aria-hidden size={15} strokeWidth={2} />
           Moderator adətən 1 saat ərzində yoxlayır.
         </p>
+      )}
+      {pending && pendingOffer && (
+        <div className="flex flex-col gap-2 rounded-lg bg-vip px-3 py-2.5 text-[13px] leading-[1.5] text-ink sm:flex-row sm:items-center sm:justify-between">
+          <p className="flex gap-2">
+            <Rocket aria-hidden size={16} strokeWidth={2} className="mt-0.5 shrink-0 text-olive" />
+            <span>
+              Elan yerləşdirəndə{' '}
+              <span className="font-semibold">
+                «{pendingOffer.pkg.name} · {pendingOffer.option.label}»
+              </span>{' '}
+              seçmisiniz.{listing.status === 'pending' ? ' Elan yoxlamadan keçəndən sonra burada ödəyib işə sala bilərsiniz.' : ''}
+            </span>
+          </p>
+          {listing.status === 'active' && (
+            <Link href={`/reklam?${new URLSearchParams({ elan: listing.id, secim: pending.optionId })}`} className={cn(quiet, 'self-start sm:self-auto')}>
+              <Rocket aria-hidden size={15} strokeWidth={2} />
+              Ödə və işə sal
+            </Link>
+          )}
+        </div>
       )}
 
       <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 border-t border-line pt-3">

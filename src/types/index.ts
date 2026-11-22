@@ -411,6 +411,31 @@ export interface PromotionOrder {
   /** The mock pays at once; a real payment returns "pending" until the provider confirms */
   status: 'paid' | 'pending' | 'failed'
   createdAt: string
+  /** «Sifariş № 1001» (backend-contract.md 5.1) */
+  number: number
+  /** ISO time the provider confirmed the payment */
+  paidAt?: string
+}
+
+/** What «Ödə» asks for (`POST /promotion-orders`, backend-contract.md 5.1). */
+export interface PromotionOrderInput {
+  listingId: string
+  packageId: PromotionPackageId
+  optionId: string
+  /**
+   * The site's page the payment provider brings the visitor back to, with `?order=<id>` added (one leading `/`,
+   * ≤ 200 printable ASCII, no `#` or `\`); `/kabinet` when not given.
+   */
+  returnPath?: string
+}
+
+/**
+ * The answer to «Ödə» (backend-contract.md 5.1): the order, and the provider's page to send the visitor to. The
+ * promotion starts once the provider confirms the payment. No `paymentUrl` when the order is paid already (the demo).
+ */
+export interface PromotionCheckout {
+  order: PromotionOrder
+  paymentUrl?: string
 }
 
 /* ---------- Posting ---------- */
@@ -480,6 +505,11 @@ export interface OwnListing extends Listing {
   version: string
   /** The photos' ids in gallery order (the same order as `images`): an edit keeps them without uploading again */
   photoIds: string[]
+  /**
+   * The promotion chosen in «Elan yerləşdir», not paid yet (backend-contract.md 5.1): the owner pays it with an
+   * ordinary order once the listing is approved; paying any order for the listing clears it.
+   */
+  pendingPromotion?: { packageId: PromotionPackageId; optionId: string }
 }
 
 /* ---------- Photo upload (backend-contract.md 3.2) ---------- */

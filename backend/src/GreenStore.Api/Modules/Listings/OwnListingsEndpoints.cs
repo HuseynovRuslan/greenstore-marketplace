@@ -4,6 +4,7 @@ using GreenStore.Api.Common.Errors;
 using GreenStore.Api.Data;
 using GreenStore.Api.Modules.Accounts.Auth;
 using GreenStore.Api.Modules.Platform;
+using GreenStore.Api.Modules.Promotion;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -61,7 +62,7 @@ public static class OwnListingsEndpoints
     /// owner's fields (<c>contactPhone</c>, <c>rejectionReasonCode</c>, <c>version</c>, …), the last changed first.
     /// Drafts are <c>GET /me/drafts</c>.
     /// </summary>
-    private static async Task<Ok<List<OwnListingDto>>> List(CurrentUser me, HttpContext http, AppDbContext db, CancellationToken ct)
+    private static async Task<Ok<List<OwnListingDto>>> List(CurrentUser me, HttpContext http, AppDbContext db, TimeProvider clock, CancellationToken ct)
     {
         var rows = await db.Listings.AsNoTracking()
             .Where(l => l.OwnerUserId == me.UserId && l.DeletedAt == null)
@@ -70,15 +71,23 @@ public static class OwnListingsEndpoints
             .WithCardData()
             .ToListAsync(ct);
         var read = await ReadContext.CreateAsync(http, db, ct);
-        return TypedResults.Ok(rows.Select(l => l.ToOwnListingDto(read)).ToList());
+        var promotions = await OwnerPromotions.LoadAsync(db, rows, clock.GetUtcNow(), ct);
+        return TypedResults.Ok(rows.Select(l => l.ToOwnListingDto(read, promotions.GetValueOrDefault(l.Id))).ToList());
     }
 
     /// <summary><c>GET /me/listings/{id}</c> → the owner's <c>Listing</c> (the cabinet's preview, the edit form).</summary>
-    private static async Task<Ok<OwnListingDto>> Get(Guid id, CurrentUser me, HttpContext http, AppDbContext db, ListingWriteService writes, CancellationToken ct)
+    private static async Task<Ok<OwnListingDto>> Get(Guid id, CurrentUser me, HttpContext http, AppDbContext db, ListingWriteService writes, TimeProvider clock, CancellationToken ct)
     {
         var listing = await writes.OwnAsync(me, id, ct);
+        return TypedResults.Ok(await OwnDtoAsync(listing, http, db, clock, ct));
+    }
+
+    /// <summary>The owner's DTO of one listing, with what runs on it and the promotion still to pay for.</summary>
+    private static async Task<OwnListingDto> OwnDtoAsync(Listing listing, HttpContext http, AppDbContext db, TimeProvider clock, CancellationToken ct)
+    {
         var read = await ReadContext.CreateAsync(http, db, ct);
-        return TypedResults.Ok(listing.ToOwnListingDto(read));
+        var promotions = await OwnerPromotions.LoadAsync(db, [listing], clock.GetUtcNow(), ct);
+        return listing.ToOwnListingDto(read, promotions.GetValueOrDefault(listing.Id));
     }
 
     /// <summary>
@@ -92,8 +101,8 @@ public static class OwnListingsEndpoints
     private static async Task<Ok<OwnListingDto>> ChangeAsync(Guid id, ListingAction action, CurrentUser me, HttpContext http, AppDbContext db, ListingWriteService writes, CancellationToken ct)
     {
         var listing = await writes.ChangeStatusAsync(me, id, action, ct);
-        var read = await ReadContext.CreateAsync(http, db, ct);
-        return TypedResults.Ok(listing.ToOwnListingDto(read));
+        var clock = http.RequestServices.GetRequiredService<TimeProvider>();
+        return TypedResults.Ok(await OwnDtoAsync(listing, http, db, clock, ct));
     }
 
     /// <summary><c>DELETE /me/listings/{id}</c> → 204. The row stays (<c>deleted_at</c>); the listing is gone for everyone.</summary>

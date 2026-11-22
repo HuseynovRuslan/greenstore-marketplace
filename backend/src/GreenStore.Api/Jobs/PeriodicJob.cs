@@ -7,7 +7,7 @@ public sealed class JobsOptions
 {
     public const string Section = "Jobs";
 
-    /// <summary>Run the frequent jobs (expiry, outbox) in this API instance. The tests run them by hand instead.</summary>
+    /// <summary>Run the frequent jobs (expiry, promotions, outbox) in this API instance. The tests run them by hand instead.</summary>
     public bool Enabled { get; set; } = true;
 
     /// <summary>Wait after the start before the first run.</summary>
@@ -18,6 +18,9 @@ public sealed class JobsOptions
 
     /// <summary><see cref="OutboxDispatcher"/>: every 5 seconds.</summary>
     public int OutboxSeconds { get; set; } = 5;
+
+    /// <summary><see cref="Promotions"/>: every 10 minutes.</summary>
+    public int PromotionsSeconds { get; set; } = 600;
 }
 
 /// <summary>The daily clean-up (section "Cleanup", ARCHITECTURE.md §12 <c>Cleanup</c>).</summary>
@@ -100,6 +103,16 @@ public sealed class ExpireListingsJob(IServiceScopeFactory scopes, IOptions<Jobs
     protected override TimeSpan FirstDelay => TimeSpan.FromSeconds(options.Value.FirstRunDelaySeconds);
 
     protected override TimeSpan Interval => TimeSpan.FromSeconds(options.Value.ExpireListingsSeconds);
+}
+
+public sealed class PromotionsJob(IServiceScopeFactory scopes, IOptions<JobsOptions> options, TimeProvider clock, ILogger<PromotionsJob> logger)
+    : PeriodicJob<Promotions>(scopes, clock, logger)
+{
+    protected override bool Enabled => options.Value.Enabled;
+
+    protected override TimeSpan FirstDelay => TimeSpan.FromSeconds(options.Value.FirstRunDelaySeconds);
+
+    protected override TimeSpan Interval => TimeSpan.FromSeconds(options.Value.PromotionsSeconds);
 }
 
 public sealed class OutboxJob(IServiceScopeFactory scopes, IOptions<JobsOptions> options, TimeProvider clock, ILogger<OutboxJob> logger)

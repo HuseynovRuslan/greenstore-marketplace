@@ -15,24 +15,31 @@ import { useCabinet } from '@/features/cabinet/useCabinet'
 import { listingPrice } from '@/features/listing/facts'
 import { optionClass } from '@/features/search/filterStyles'
 import { cn, formatPrice } from '@/lib/format'
+import { useSession } from '@/state/store'
 import type { PromotionOrder, PromotionPackage, PromotionPackageId } from '@/types'
-import { buyPromotion } from './actions'
+import { buyPromotion, type BuyPromotionResult } from './actions'
 import { cardErrors, formatCard, formatExpiry } from './card'
+import { initialChoice, newOrderKey, openPaymentPage } from './checkout'
 
 const icons: Record<PromotionPackageId, typeof Rocket> = { 'ireli-cek': ArrowUp, 'one-cixar': Rocket, paket: Rocket }
 
 /**
- * /reklam — choose a listing (from «Elanlarım» or ?elan=), a package and its duration, then pay (DEMO checkout:
- * a card form checked in the browser, nothing charged). Paying applies the promotion to the listing in the cabinet.
- * Guests see the packages and are asked to sign in to buy.
+ * /reklam — choose a listing (from «Elanlarım» or ?elan=), a package and its duration (?secim= picks an option, e.g.
+ * the one chosen while posting), then pay. Guests see the packages and are asked to sign in to buy.
+ * - DATA_SOURCE=api (backend-contract.md 5.1): «Ödə» opens the order's summary; its button creates the order and sends
+ *   the browser to the payment provider's page, which brings the visitor back to /kabinet/odenis. The promotion
+ *   starts when the provider confirms the payment (the cabinet then shows «Önə çıxan»).
+ * - DATA_SOURCE=mock (DEMO): a card form checked in the browser, nothing charged; paying applies the promotion to the
+ *   listing in this browser's cabinet.
  */
 export function PromotionPlanner({ packages }: { packages: PromotionPackage[] }) {
   const params = useSearchParams()
   const { account } = useAccount()
+  const { source } = useSession()
   const cabinet = useCabinet(account)
   const active = cabinet.listings.filter((l) => l.status === 'active')
   const [listingId, setListingId] = useState(params.get('elan') ?? '')
-  const [choice, setChoice] = useState<{ packageId: PromotionPackageId; optionId: string }>({ packageId: 'one-cixar', optionId: 'one-cixar-7' })
+  const [choice, setChoice] = useState<{ packageId: PromotionPackageId; optionId: string }>(() => initialChoice(packages, params.get('secim')))
   const [checkout, setCheckout] = useState(false)
   const listing = active.find((l) => l.id === listingId)
   const pkg = packages.find((p) => p.id === choice.packageId)
@@ -168,7 +175,18 @@ export function PromotionPlanner({ packages }: { packages: PromotionPackage[] })
       </div>
 
       <Dialog open={checkout} onClose={() => setCheckout(false)} title="Ödəniş">
-        {listing && pkg && option && (
+        {listing && pkg && option && source === 'api' ? (
+          <ProviderCheckout
+            // One order key per listing and option: pressing again after a lost answer gets the same order.
+            key={`${listing.id}:${option.id}`}
+            summary={`${pkg.name} · ${option.label}`}
+            listingTitle={listing.title}
+            amount={option.price}
+            buy={(orderKey) => buyPromotion({ listingId: listing.id, packageId: pkg.id, optionId: option.id }, orderKey)}
+            listingHref={`/elanlar/${listing.slug}`}
+            signInHref={`/daxil-ol?next=${encodeURIComponent(`/reklam?elan=${listing.id}`)}`}
+          />
+        ) : listing && pkg && option ? (
           <Checkout
             summary={`${pkg.name} · ${option.label}`}
             listingTitle={listing.title}
@@ -177,9 +195,127 @@ export function PromotionPlanner({ packages }: { packages: PromotionPackage[] })
             buy={() => buyPromotion({ listingId: listing.id, packageId: pkg.id, optionId: option.id })}
             listingHref={`/elanlar/${listing.slug}`}
           />
-        )}
+        ) : null}
       </Dialog>
     </div>
+  )
+}
+
+/** What is being paid for: the package and option, the listing, the total. */
+function OrderSummary({ summary, listingTitle, amount }: { summary: string; listingTitle: string; amount: number }) {
+  return (
+    <dl className="flex flex-col gap-1.5 rounded-lg bg-cream p-4 text-sm leading-[1.45]">
+      <div className="flex justify-between gap-4">
+        <dt className="text-muted">Paket</dt>
+        <dd className="text-right font-semibold text-ink">{summary}</dd>
+      </div>
+      <div className="flex justify-between gap-4">
+        <dt className="text-muted">Elan</dt>
+        <dd className="min-w-0 truncate text-right text-ink">{listingTitle}</dd>
+      </div>
+      <div className="flex justify-between gap-4 border-t border-line pt-1.5">
+        <dt className="font-semibold text-ink">Cəmi</dt>
+        <dd className="font-bold text-forest tabular-nums">{formatPrice(amount)}</dd>
+      </div>
+    </dl>
+  )
+}
+
+/** A paid order: the package works now. */
+function PaidOrder({ order, summary, listingTitle, listingHref }: { order: PromotionOrder; summary: string; listingTitle: string; listingHref: string }) {
+  return (
+    <div className="flex flex-col items-center gap-4 text-center">
+      <CircleCheck aria-hidden size={44} strokeWidth={1.8} className="text-success" />
+      <div className="flex flex-col gap-1">
+        <p className="text-lg font-semibold text-forest">Paket aktivdir</p>
+        <p className="text-sm leading-[1.5] text-ink-soft">
+          {summary} — «{listingTitle}». Sifariş № {order.number}, {formatPrice(order.amount)}.
+        </p>
+      </div>
+      <div className="flex w-full flex-col gap-2.5 sm:flex-row">
+        <ButtonLink href="/kabinet" className="flex-1">
+          Elanlarım
+        </ButtonLink>
+        <ButtonLink href={listingHref} variant="secondary" className="flex-1">
+          Elana bax
+        </ButtonLink>
+      </div>
+    </div>
+  )
+}
+
+const UNREACHABLE: BuyPromotionResult = { ok: false, error: 'Ödənişə keçmək alınmadı. İnternet bağlantısını yoxlayın.' }
+
+/**
+ * DATA_SOURCE=api: the order's summary and «… ödə», which creates the order and sends the browser to the payment
+ * provider's page (backend-contract.md 5.1). No card is asked for here: the provider's page takes it.
+ */
+function ProviderCheckout({
+  summary,
+  listingTitle,
+  amount,
+  buy,
+  listingHref,
+  signInHref,
+}: {
+  summary: string
+  listingTitle: string
+  amount: number
+  buy: (orderKey: string) => Promise<BuyPromotionResult>
+  listingHref: string
+  signInHref: string
+}) {
+  const [orderKey] = useState(newOrderKey)
+  const [busy, setBusy] = useState(false)
+  const [failure, setFailure] = useState<{ error: string; signedOut?: boolean }>()
+  const [paid, setPaid] = useState<PromotionOrder>()
+
+  const pay = async (e: FormEvent) => {
+    e.preventDefault()
+    setBusy(true)
+    setFailure(undefined)
+    const result = await buy(orderKey).catch(() => UNREACHABLE)
+    if (!result.ok) {
+      setBusy(false)
+      return setFailure(result)
+    }
+    if (result.paymentUrl) {
+      // The button stays busy while the browser leaves for the provider's page.
+      openPaymentPage(result.paymentUrl)
+      return
+    }
+    setBusy(false)
+    setPaid(result.order)
+  }
+
+  if (paid) return <PaidOrder order={paid} summary={summary} listingTitle={listingTitle} listingHref={listingHref} />
+
+  return (
+    <form onSubmit={pay} noValidate className="flex flex-col gap-5">
+      <OrderSummary summary={summary} listingTitle={listingTitle} amount={amount} />
+      <p className="text-sm leading-[1.55] text-ink-soft">
+        Ödəniş təhlükəsiz ödəniş səhifəsində aparılır: kart məlumatını orada yazırsınız, GreenStore onu görmür. Ödənişdən sonra bu sayta qayıdacaqsınız; reklam ödəniş təsdiqlənən kimi işə düşür.
+      </p>
+      {failure && (
+        <Notice tone="danger" title="Ödənişə keçmək alınmadı">
+          {failure.error}
+          {failure.signedOut && (
+            <>
+              {' '}
+              <Link href={signInHref} className="font-semibold underline underline-offset-2">
+                Daxil ol
+              </Link>
+            </>
+          )}
+        </Notice>
+      )}
+      <Button type="submit" fullWidth disabled={busy} aria-busy={busy} icon={<Lock aria-hidden size={16} strokeWidth={2} />}>
+        {busy ? 'Ödəniş səhifəsi açılır…' : `${formatPrice(amount)} ödə`}
+      </Button>
+      <p className="text-center text-xs leading-[1.5] text-muted">
+        Ödənişlər bank tərəfindən qorunur. <Link href="/istifade-sertleri" className="underline underline-offset-2">Şərtlər</Link>
+      </p>
+    </form>
   )
 }
 
@@ -194,7 +330,7 @@ function Checkout({
   summary: string
   listingTitle: string
   amount: number
-  buy: () => Promise<{ ok: true; order: PromotionOrder } | { ok: false; error: string }>
+  buy: () => Promise<BuyPromotionResult>
   onPaid: () => void
   listingHref: string
 }) {
@@ -223,44 +359,11 @@ function Checkout({
     toast('Ödəniş qəbul olundu')
   }
 
-  if (order) {
-    return (
-      <div className="flex flex-col items-center gap-4 text-center">
-        <CircleCheck aria-hidden size={44} strokeWidth={1.8} className="text-success" />
-        <div className="flex flex-col gap-1">
-          <p className="text-lg font-semibold text-forest">Paket aktivdir</p>
-          <p className="text-sm leading-[1.5] text-ink-soft">
-            {summary} — «{listingTitle}». Sifariş № {order.id.replace('ord-', '')}, {formatPrice(order.amount)}.
-          </p>
-        </div>
-        <div className="flex w-full flex-col gap-2.5 sm:flex-row">
-          <ButtonLink href="/kabinet" className="flex-1">
-            Elanlarım
-          </ButtonLink>
-          <ButtonLink href={listingHref} variant="secondary" className="flex-1">
-            Elana bax
-          </ButtonLink>
-        </div>
-      </div>
-    )
-  }
+  if (order) return <PaidOrder order={order} summary={summary} listingTitle={listingTitle} listingHref={listingHref} />
 
   return (
     <form onSubmit={pay} noValidate className="flex flex-col gap-5">
-      <dl className="flex flex-col gap-1.5 rounded-lg bg-cream p-4 text-sm leading-[1.45]">
-        <div className="flex justify-between gap-4">
-          <dt className="text-muted">Paket</dt>
-          <dd className="text-right font-semibold text-ink">{summary}</dd>
-        </div>
-        <div className="flex justify-between gap-4">
-          <dt className="text-muted">Elan</dt>
-          <dd className="min-w-0 truncate text-right text-ink">{listingTitle}</dd>
-        </div>
-        <div className="flex justify-between gap-4 border-t border-line pt-1.5">
-          <dt className="font-semibold text-ink">Cəmi</dt>
-          <dd className="font-bold text-forest tabular-nums">{formatPrice(amount)}</dd>
-        </div>
-      </dl>
+      <OrderSummary summary={summary} listingTitle={listingTitle} amount={amount} />
       <TextField
         id="kart-number"
         label="Kart nömrəsi"

@@ -2,6 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
 using GreenStore.Api.Common;
 using GreenStore.Api.Data;
+using GreenStore.Api.Modules.Promotion;
 using GreenStore.Api.Modules.Taxonomy;
 
 namespace GreenStore.Api.Modules.Listings;
@@ -132,6 +133,17 @@ public sealed record OwnListingDto : ListingDto
     /// </summary>
     [JsonPropertyOrder(1)]
     public IReadOnlyList<string> PhotoIds { get; init; } = [];
+
+    /// <summary>
+    /// What runs now: «Önə çıxar» (or the bundle) until its last paid day, otherwise «İrəli çək» (<c>Listing.promotion</c>
+    /// of src/types). In the owner's own reads only.
+    /// </summary>
+    [JsonPropertyOrder(1)]
+    public ListingPromotionDto? Promotion { get; init; }
+
+    /// <summary>★ The promotion chosen in «Elan yerləşdir», not paid yet: the cabinet offers it once the listing is active.</summary>
+    [JsonPropertyOrder(1)]
+    public PendingPromotionDto? PendingPromotion { get; init; }
 }
 
 public sealed record WholesaleDto(decimal Price, int MinQuantity);
@@ -263,8 +275,11 @@ public static class ListingMapping
         };
     }
 
-    /// <summary>The owner's (and the moderator's) view of a listing in any status.</summary>
-    public static OwnListingDto ToOwnListingDto(this Listing l, ReadContext read)
+    /// <summary>
+    /// The owner's (and the moderator's) view of a listing in any status; <paramref name="promotion"/> (the owner's own
+    /// reads, <see cref="OwnerPromotions"/>) adds what runs on it and the choice still to pay for.
+    /// </summary>
+    public static OwnListingDto ToOwnListingDto(this Listing l, ReadContext read, OwnerPromotion? promotion = null)
     {
         var listing = l.ToListingDto(read);
         if (l.Kind == CategoryKind.Service)
@@ -287,6 +302,8 @@ public static class ListingMapping
                 .Where(p => read.PhotoUrl(p.Photo) is not null)
                 .Select(p => p.PhotoId.ToString())
                 .ToList(),
+            Promotion = promotion?.Promotion,
+            PendingPromotion = promotion?.Pending,
         };
     }
 

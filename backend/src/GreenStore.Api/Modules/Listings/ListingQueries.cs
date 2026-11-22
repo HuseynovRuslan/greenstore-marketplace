@@ -136,9 +136,10 @@ public static class ListingQueries
     }
 
     /// <summary>
-    /// «Ən yenilər»: «Önə çıxan» first, then the newest publication or «İrəli çək» (<c>sort_at</c>). Price orders put
-    /// listings priced «Razılaşma ilə» last (backend-contract.md 1.6). Ties end with the newest number, so pages never
-    /// overlap.
+    /// «Ən yenilər»: «Önə çıxan» first, the newest «Önə çıxar» purchase first among them (<c>promoted_at</c>: a listing
+    /// that has just paid tops the group and the home page's block), then the newest publication or «İrəli çək»
+    /// (<c>sort_at</c>). Price orders put listings priced «Razılaşma ilə» last (backend-contract.md 1.6). Ties end with
+    /// the newest number, so pages never overlap.
     /// </summary>
     public static IOrderedQueryable<Listing> Sort(this IQueryable<Listing> listings, ListingSort sort) => sort switch
     {
@@ -152,8 +153,10 @@ public static class ListingQueries
             .ThenByDescending(l => l.Price)
             .ThenByDescending(l => l.SortAt)
             .ThenByDescending(l => l.Number),
+        // promoted_at is set exactly while is_promoted (ck_listings_promoted_at): it orders the promoted group only.
         _ => listings
             .OrderByDescending(l => l.IsPromoted)
+            .ThenByDescending(l => l.PromotedAt)
             .ThenByDescending(l => l.SortAt)
             .ThenByDescending(l => l.Number),
     };

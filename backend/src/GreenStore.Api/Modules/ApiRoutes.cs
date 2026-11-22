@@ -3,6 +3,7 @@ using GreenStore.Api.Modules.Admin;
 using GreenStore.Api.Modules.Engagement;
 using GreenStore.Api.Modules.Listings;
 using GreenStore.Api.Modules.Media;
+using GreenStore.Api.Modules.Promotion;
 using GreenStore.Api.Modules.Sellers;
 using GreenStore.Api.Modules.Taxonomy;
 
@@ -43,6 +44,7 @@ public static class ApiRoutes
         api.MapAdminReports();
         api.MapAdminCategories();
         api.MapAdminAccounts();
+        api.MapPromotion();
 
         foreach (var extra in app.ServiceProvider.GetServices<IExtraApiEndpoints>())
         {

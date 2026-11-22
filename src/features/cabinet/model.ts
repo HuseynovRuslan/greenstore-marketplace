@@ -1,5 +1,5 @@
 import type { BadgeTone } from '@/components/ui/Badge'
-import type { Listing, ListingStatus, PromotionPackageId } from '@/types'
+import type { Listing, ListingStatus, OwnListing, PromotionPackageId } from '@/types'
 
 /*
  * «Elanlarım» (Nov 2026). The owner's listings come from the API (listOwnListings + getListingStats); what the owner
@@ -106,4 +106,20 @@ export function expiryLabel(days: number | undefined): { text: string; soon: boo
   if (days <= 0) return { text: 'Bu gün bitir', soon: true }
   if (days === 1) return { text: 'Sabah bitir', soon: true }
   return { text: `${days} gün qalıb`, soon: days <= 3 }
+}
+
+/**
+ * The listing shows as «Önə çıxan» to buyers now: on the site and promoted (`vip`, which the API sets while a paid
+ * «Önə çıxar» or bundle runs), or with a running «Önə çıxar» / bundle this browser applied (the demo).
+ */
+export function isFeatured(listing: Pick<Listing, 'status' | 'vip' | 'promotion'>, now: number): boolean {
+  if (listing.status !== 'active') return false
+  if (listing.vip) return true
+  const promo = listing.promotion
+  return Boolean(promo && promo.packageId !== 'ireli-cek' && Date.parse(promo.until) > now)
+}
+
+/** The promotion chosen while posting and not paid yet (backend-contract.md 5.1; the API's own listings only). */
+export function pendingPromotionOf(listing: Listing): OwnListing['pendingPromotion'] {
+  return (listing as Partial<OwnListing>).pendingPromotion
 }

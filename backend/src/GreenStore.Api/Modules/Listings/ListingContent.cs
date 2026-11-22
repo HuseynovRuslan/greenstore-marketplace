@@ -73,7 +73,10 @@ public sealed record ListingContent
     /// <summary>Cover first; at most <see cref="ListingPhoto.MaxPhotos"/>.</summary>
     public List<Guid> PhotoIds { get; init; } = [];
 
-    /// <summary>«Önə çıxar» chosen while posting; paid after approval (phase 5). Kept, not acted on yet.</summary>
+    /// <summary>
+    /// «Önə çıxar» chosen while posting: kept in the revision, and as the listing's
+    /// <see cref="Listing.PendingPromotionOptionId"/> the owner pays for after approval.
+    /// </summary>
     public PromotionChoice? Promotion { get; init; }
 
     /// <summary>Writes the content into the listing's columns (not the photos, the slug or the search text).</summary>

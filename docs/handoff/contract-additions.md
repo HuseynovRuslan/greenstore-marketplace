@@ -122,11 +122,12 @@ The catalogue's pending «Kök sistemi» filter can use `plant.rootSystem`.
 | `listProviderServices(providerId)` | filters the sample services | `GET /api/providers/{id}/services` |
 | `listOwnListings(sellerId)` | the seller's sample listings in every status | `GET /api/me/listings` (session decides the seller) |
 | `getListingStats(listingId)` | deterministic numbers from the listing's views | `GET /api/me/listings/{id}/stats` |
-| `listPromotionPackages()` | `src/data/promotions.ts` | `GET /api/promotions` |
+| `listPromotionPackages()` | `src/data/promotions.ts` | `GET /api/v1/promotion-packages` |
 | `submitListing(input)` | checks required fields, returns the next number, status `pending` | `POST /api/listings` |
 | `revealPhone(listingId)` | `{ phone?, whatsappUrl? }`: the number unless `phoneHidden` (then the WhatsApp link only); services too | `POST /api/v1/listings/{id}/phone-reveals` (counts reveals; phase 3) |
 | `revealSellerPhone(sellerId)` | the same for a business's page | `POST /api/v1/sellers/{id}/phone-reveals` (phase 3) |
-| `createPromotionOrder(input)` | prices the option, status `paid` at once | `POST /api/promotion-orders` → payment provider redirect |
+| `createPromotionOrder(input, idempotencyKey?)` | prices the option, `{ order }` with status `paid` at once | `POST /api/v1/promotion-orders` → `{ order, paymentUrl }`, the site redirects to `paymentUrl` (backend-contract.md 5.1) |
+| `getPromotionOrder(id)` | the order created in this server process | `GET /api/v1/me/promotion-orders/{id}` (the return page `/kabinet/odenis`) |
 | `submitReport(input)` | returns an id | `POST /api/reports` |
 | `submitServiceRequest(input)` | returns «Sorğu № 3021…» | `POST /api/service-requests` |
 | `submitSupportMessage(input)` | returns a ticket number [footer pages] | `POST /api/support` (to the support inbox) |

@@ -6,6 +6,7 @@ using GreenStore.Api.Jobs;
 using GreenStore.Api.Modules.Listings;
 using GreenStore.Api.Modules.Media;
 using GreenStore.Api.Modules.Platform;
+using GreenStore.Api.Modules.Promotion;
 using GreenStore.Api.Tests.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
@@ -22,12 +23,13 @@ namespace GreenStore.Api.Tests.Listings;
 public sealed class JobsTests(LifecycleApi api)
 {
     [Fact]
-    public async Task The_api_runs_the_three_jobs()
+    public async Task The_api_runs_the_four_jobs()
     {
         await using var factory = api.Variant();
         var hosted = factory.Services.GetServices<IHostedService>().ToList();
 
         Assert.Contains(hosted, s => s is ExpireListingsJob);
+        Assert.Contains(hosted, s => s is PromotionsJob);
         Assert.Contains(hosted, s => s is OutboxJob);
         Assert.Contains(hosted, s => s is CleanupJob);
     }
@@ -276,6 +278,9 @@ public sealed class JobsTests(LifecycleApi api)
             db.ListingSeen.Add(new ListingSeen { ListingId = Guid.NewGuid(), VisitorHash = [1, 2], Day = BakuTime.Today(old), Action = SeenAction.View });
             db.IdempotencyKeys.Add(new IdempotencyKey { Scope = "x", Key = Guid.NewGuid().ToString(), RequestHash = [1], CreatedAt = old });
             db.Outbox.Add(new OutboxMessage { Type = OutboxTypes.Revalidate, Payload = "{\"tags\":[]}", CreatedAt = old, NextAttemptAt = old, SentAt = old });
+            // A forged payment callback goes after 30 days; a signed one is a payment record and stays.
+            db.PaymentEvents.Add(new PaymentEvent { Provider = "fake", ProviderRef = $"forged-{abandoned}", Payload = "{}", SignatureOk = false, ReceivedAt = old });
+            db.PaymentEvents.Add(new PaymentEvent { Provider = "fake", ProviderRef = $"signed-{abandoned}", Payload = "{}", SignatureOk = true, ReceivedAt = old });
             await db.SaveChangesAsync(Ct);
         }
 
@@ -292,7 +297,10 @@ public sealed class JobsTests(LifecycleApi api)
         Assert.True(result.Seen >= 1);
         Assert.True(result.IdempotencyKeys >= 1);
         Assert.True(result.Outbox >= 1);
+        Assert.True(result.UnsignedPaymentEvents >= 1);
         await using var check = api.CreateDbContext();
+        Assert.False(await check.PaymentEvents.AnyAsync(e => e.ProviderRef == $"forged-{abandoned}", Ct));
+        Assert.True(await check.PaymentEvents.AnyAsync(e => e.ProviderRef == $"signed-{abandoned}", Ct));
         Assert.False(await check.Photos.AnyAsync(p => p.Id == abandoned, Ct));
         Assert.True(await check.Photos.AnyAsync(p => p.Id == attached, Ct));
         Assert.False(File.Exists(Path.Combine(root, abandonedFile)));

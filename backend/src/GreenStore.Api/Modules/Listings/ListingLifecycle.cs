@@ -168,7 +168,8 @@ public static class ListingLifecycle
                         PublishedAt = published,
                         // The first approval puts the listing at the top of «Ən yenilər»; approving an edit does not.
                         SortAt = state.SortAt ?? Latest(published, state.BumpedAt),
-                        ExpiresAt = ExpiryFrom(now, state.PromotedUntil),
+                        // An approval never shortens a running term: a paid «İrəli çək» may have lengthened it.
+                        ExpiresAt = Latest(ExpiryFrom(now, state.PromotedUntil), state.ExpiresAt),
                         RejectionReasonCode = null,
                         RejectionNote = null,
                     };
