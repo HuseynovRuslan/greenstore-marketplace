@@ -7,7 +7,7 @@
 - İkonlar: yalnız `lucide-react`. Brend loqoları (Instagram, Facebook, TikTok, WhatsApp və s.) yalnız `@icons-pack/react-simple-icons`-dan. Kodda əl ilə `<svg>` yazma və SVG path kopyalama.
 - `src/services/repository.ts` və `src/types` backend ilə müqavilədir. Dəyişmək lazımdırsa, əvvəl soruş və `docs/handoff/`-a qeyd yaz.
 - UI mətnləri Azərbaycan dilində, düzgün hərflərlə. Önə çıxarılan elanların adı: «Önə çıxan». "VIP" sözü işlənmir.
-- Hər commit-dən əvvəl: `npm run lint`, `npm run typecheck`, `npm test`, `npm run build`.
+- Hər commit-dən əvvəl: `npm run lint`, `npm run typecheck`, `npm test`, `npm run build`. `backend/` dəyişibsə, həm də: `dotnet build backend`, `dotnet test backend`.
 - Commit yalnız mənim OK-dan sonra. Push etmə.
 - Brauzerdə yoxlama: `playwright-cli`. Video və CLS ölçmək: `webapp-testing`.
 - Ekran şəkli və video çəkmə, yalnız mən açıq şəkildə istəsəm. Nəticəni özüm localhost-da yoxlayıram. Brauzer yoxlamaları (yana sürüşmə, ölçülər, kontrast, axe) şəkilsiz, ölçmə ilə edilir. Şəkil istəsəm, `.screenshots/` qovluğuna yazılır, git-ə əlavə olunmur.
