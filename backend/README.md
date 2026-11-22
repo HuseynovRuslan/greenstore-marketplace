@@ -10,6 +10,8 @@ ASP.NET Core 10 Web API və PostgreSQL. Sayt (Next.js) onu `DATA_SOURCE=api` rej
 
 **Faza 5-in API tərəfi də hazırdır (§15):** reklam paketləri (`GET /promotion-packages`, üç dildə), sifariş (`POST /promotion-orders` → `{ order, paymentUrl }`), saxta ödəniş səhifəsi («Test ödənişi», yalnız Development və Staging), provayderin callback-i (`POST /payments/{provider}/callback`: imza, `payment_events`, təkrar callback ikinci dəfə tətbiq olunmur), ödənişdən sonra «Önə çıxan» və «İrəli çək», `Promotions` fon işi. Saytın tərəfi də hazırdır (backend-contract.md 5.1): `/reklam` paketləri API-dən oxuyur, «Ödə» sifarişi yaradıb ziyarətçini ödəniş səhifəsinə göndərir, provayder onu `/kabinet/odenis?order=<id>` səhifəsinə qaytarır (nəticəni API-dəki sifariş deyir: «Ödəniş qəbul olundu», «Ödəniş yoxlanılır» və ya «Ödəniş alınmadı»), kabinet «Önə çıxan» nişanını və yerləşdirəndə seçilən, hələ ödənilməmiş reklamı («Ödə və işə sal») göstərir.
 
+**Gecənin yekun hesabatı** (nə hazırdır, nə qalıb, deploy və yoxlama siyahısı, təhlükəsizlik riskləri): [docs/handoff/backend-status.md](../docs/handoff/backend-status.md).
+
 **Hələ real olmayanlar** (biznes qərarı gözləyir): SMS provayderi (kodlar indi loqa yazılır, §8), ödəniş provayderi (indi saxta provayder işləyir, Production-da reklam satılmır, §16), hostinq və deploy, şəkillər üçün S3 yaddaşı və CDN (kod hazırdır, §13).
 
 ## Tələblər
@@ -23,8 +25,10 @@ ASP.NET Core 10 Web API və PostgreSQL. Sayt (Next.js) onu `DATA_SOURCE=api` rej
 **Docker ilə** (`backend/` qovluğunda):
 
 ```bash
-docker compose up -d
+docker compose up -d postgres
 ```
+
+`docker compose up -d --build` bazadan əlavə miqrasiyanı (`api-migrate`) və API-ni (`api`, <http://localhost:5080>) də konteynerdə işə salır (`Dockerfile`). Bu iki servis və `Dockerfile` Docker-siz maşında yazılıb və **heç vaxt build olunmayıb**: ilk dəfə yoxlayın ([backend-status.md §12](../docs/handoff/backend-status.md#12-docker-yoxlanmayıb)).
 
 **Docker olmadan.** PostgreSQL-də rol və baza bir dəfə yaradılır (superuser ilə, məsələn `sudo -u postgres psql`):
 
@@ -261,7 +265,8 @@ Yalnız Development-də (`Seed:DevAccounts=true`, `appsettings.Development.json`
 ```
 backend/
   GreenStore.slnx, global.json, Directory.Build.props, Directory.Packages.props
-  docker-compose.yml          PostgreSQL 16 (Docker olanlar üçün)
+  docker-compose.yml          PostgreSQL 16, miqrasiya və API konteyneri (Docker olanlar üçün; API hissəsi yoxlanmayıb)
+  Dockerfile                  API image-i (yoxlanmayıb, ARCHITECTURE.md §16)
   contracts/                  frontend ilə ortaq test faylları (normallaşdırma, src/types-ın forması, mock ilə uyğunluq)
   seed/                       seed faylları və onları src/data-dan yaradan skript (seed/README.md)
   src/GreenStore.Api/

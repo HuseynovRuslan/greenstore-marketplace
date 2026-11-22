@@ -1,6 +1,6 @@
 # GreenStore backend: arxitektura
 
-**Status:** təsdiqlənib (22 noyabr 2026). Faza 0 (skelet) və faza 1 (kataloq cədvəlləri, seed, oxuma endpoint-ləri və saytın `DATA_SOURCE=api` rejimi, `src/services/apiRepository.ts`) yazılıb. Faza 2-nin API tərəfi də hazırdır: SMS kodu, qeydiyyat (biznes hesabı «mağaza»nı da açır), şifrə və SMS ilə giriş, sessiyalar və «Aktiv cihazlar», `/me`, `/me/seller`, seçilmişlər, yadda saxlanılan axtarışlar. Faza 3 həm API, həm sayt tərəfində yazılıb: şəkil yükləmə və emalı (brauzerdən birbaşa API-yə), elan yerləşdirmə (`Idempotency-Key` ilə), «Elanlarım» və qaralamalar, moderasiya (`/idareetme/moderasiya`, `AdminRepository`), müddət, statistika, baxış sayğacı, «Nömrəni göstər», keşin yenilənməsi (`POST /api/revalidate`) və fon işləri. Faza 4-ün API tərəfi hazırdır: şikayətlər (səbəb kodu ilə) və onların admin baxışı, «Usta çağır» (ustalara paylanma, SMS xəbəri outbox ilə, ustanın gələn sorğuları), dəstək, admin panelinin rəqəmləri, kateqoriyaların idarəsi (üç dildə), satıcı təsdiqi və bloklama; sayt tərəfi də yazılıb (şikayət dialoqunun kodları, «Usta çağır», dəstək, ustanın «Gələn sorğular» səhifəsi `/kabinet/sorgular`, `/idareetme` rəqəmləri, `/idareetme/sikayetler`, `/idareetme/kateqoriyalar`). Faza 5-in API tərəfi hazırdır: reklam paketləri (üç dildə), sifariş (`{ order, paymentUrl }`), `IPaymentGateway` və saxta provayder (Development və Staging: API-nin «Test ödənişi» səhifəsi imzalı callback göndərib sayta qaytarır; Production-da reklam satılmır), callback (`payment_events`, `(provider, provider_ref)` üzrə bir dəfə), «Önə çıxan» və «İrəli çək», `Promotions` fon işi; sayt tərəfi də yazılıb (`/reklam`-da «Ödə» ödəniş səhifəsinə aparır, qayıdış səhifəsi `/kabinet/odenis`, kabinetdə «Önə çıxan» və ödənilməmiş seçim). İşə salmaq üçün: [README.md](README.md).
+**Status:** təsdiqlənib (22 noyabr 2026). Faza 0 (skelet) və faza 1 (kataloq cədvəlləri, seed, oxuma endpoint-ləri və saytın `DATA_SOURCE=api` rejimi, `src/services/apiRepository.ts`) yazılıb. Faza 2-nin API tərəfi də hazırdır: SMS kodu, qeydiyyat (biznes hesabı «mağaza»nı da açır), şifrə və SMS ilə giriş, sessiyalar və «Aktiv cihazlar», `/me`, `/me/seller`, seçilmişlər, yadda saxlanılan axtarışlar. Faza 3 həm API, həm sayt tərəfində yazılıb: şəkil yükləmə və emalı (brauzerdən birbaşa API-yə), elan yerləşdirmə (`Idempotency-Key` ilə), «Elanlarım» və qaralamalar, moderasiya (`/idareetme/moderasiya`, `AdminRepository`), müddət, statistika, baxış sayğacı, «Nömrəni göstər», keşin yenilənməsi (`POST /api/revalidate`) və fon işləri. Faza 4-ün API tərəfi hazırdır: şikayətlər (səbəb kodu ilə) və onların admin baxışı, «Usta çağır» (ustalara paylanma, SMS xəbəri outbox ilə, ustanın gələn sorğuları), dəstək, admin panelinin rəqəmləri, kateqoriyaların idarəsi (üç dildə), satıcı təsdiqi və bloklama; sayt tərəfi də yazılıb (şikayət dialoqunun kodları, «Usta çağır», dəstək, ustanın «Gələn sorğular» səhifəsi `/kabinet/sorgular`, `/idareetme` rəqəmləri, `/idareetme/sikayetler`, `/idareetme/kateqoriyalar`). Faza 5-in API tərəfi hazırdır: reklam paketləri (üç dildə), sifariş (`{ order, paymentUrl }`), `IPaymentGateway` və saxta provayder (Development və Staging: API-nin «Test ödənişi» səhifəsi imzalı callback göndərib sayta qaytarır; Production-da reklam satılmır), callback (`payment_events`, `(provider, provider_ref)` üzrə bir dəfə), «Önə çıxan» və «İrəli çək», `Promotions` fon işi; sayt tərəfi də yazılıb (`/reklam`-da «Ödə» ödəniş səhifəsinə aparır, qayıdış səhifəsi `/kabinet/odenis`, kabinetdə «Önə çıxan» və ödənilməmiş seçim). İşə salmaq üçün: [README.md](README.md). **Bütün fazalar (0–5) yazılıb və yoxlanıb**; gecənin yekun hesabatı, end-to-end yoxlama, deploy və yoxlama siyahısı: [backend-status.md](../docs/handoff/backend-status.md). `Dockerfile` və `docker-compose.yml`-in `api-migrate`/`api` servisləri yazılıb, amma yoxlanmayıb (Docker yox idi).
 **Müqavilə dəyişiklikləri:** [`docs/handoff/backend-contract.md`](../docs/handoff/backend-contract.md). `repository.ts` və `src/types` hər fazada ayrıca razılıqla dəyişir.
 
 ## 1. Tələblər
@@ -323,7 +323,7 @@ Tətbiq 1 il ərzində gələcək. Onun üçün indi edilən və sonraya qalan i
 
 ## 14. Təhlükəsizlik
 
-- **Telefon nömrələri public cavablarda olmur.** Nömrə yalnız `phone-reveals` endpoint-i ilə verilir və bu endpoint IP və elan üzrə limitlidir. Bu, nömrələrin skreypinqlə yığılmasının qarşısını alır və «Nömrəni göstər» statistikasını düzgün edir. İndi nömrə elan səhifəsinin HTML-inə birbaşa yazılır (`src/views/ListingDetailPage.tsx:105`). Açıq API-də bu ehtiyat daha da vacibdir, çünki robot artıq Next-dən keçmədən birbaşa API-yə gələ bilər.
+- **Telefon nömrələri public cavablarda olmur.** Nömrə yalnız `phone-reveals` endpoint-i ilə verilir və bu endpoint IP və elan üzrə limitlidir. Bu, nömrələrin skreypinqlə yığılmasının qarşısını alır və «Nömrəni göstər» statistikasını düzgün edir. Faza 1-dən nömrə səhifənin HTML-ində də yoxdur: «Nömrəni göstər» onu kliklə Server Action-dan soruşur (`src/features/contact/actions.ts`). Açıq API-də bu ehtiyat daha da vacibdir, çünki robot artıq Next-dən keçmədən birbaşa API-yə gələ bilər.
 - **SMS fırıldağına qarşı** (bot saxta nömrələrə kod istəyib SMS pulunu yandırır):
   - limitlər: hər nömrə üçün 60 saniyədə 1, saatda 5, gündə 10 kod; IP üzrə limit; bütün sayt üçün gündəlik ümumi limit və aşılanda xəbərdarlıq;
   - kod yalnız +994 mobil nömrələrinə gedir;
@@ -351,13 +351,13 @@ Tətbiq 1 il ərzində gələcək. Onun üçün indi edilən və sonraya qalan i
 |---|---|---|---|
 | Məlumat | seed (`src/data`-dan, adlar üç dildə) | seed | boş: yalnız kateqoriyalar, şəhərlər, paketlər |
 | SMS | loqa yazılır, `demoCode` qaytarılır | loq və ya test nömrələri | real provayder, `demoCode` heç vaxt qaytarılmır |
-| Ödəniş | saxta (dərhal «ödənildi») | saxta və ya provayderin test rejimi | real |
+| Ödəniş | saxta (API-nin «Test ödənişi» səhifəsi) | saxta və ya provayderin test rejimi | real |
 | Şəkil yaddaşı | lokal disk | S3 | S3 və CDN |
 | `SEO_INDEXABLE` | `false` | **`false`** | `true` |
 
 > **Diqqət.** `src/seo/env.ts` `DATA_SOURCE` `mock` olmayan kimi indeksləməyə icazə verir. Staging API-də nümunə məlumat olacaq, ona görə orada `SEO_INDEXABLE=false` mütləq saxlanmalıdır.
 
-- **Docker image:** multi-stage build, `mcr.microsoft.com/dotnet/aspnet:10.0` əsasında.
+- **Docker image:** multi-stage build, `mcr.microsoft.com/dotnet/aspnet:10.0` əsasında: `backend/Dockerfile`; lokal `docker-compose.yml`-də `api-migrate` (miqrasiya, sonra çıxır) və `api` servisləri. **Yoxlanmayıb:** yazıldığı maşında Docker daemon yox idi, ilk build-i Docker olan maşında edin.
 - **Miqrasiyalar** deploy-un ayrıca addımıdır: API-nin öz `migrate` əmri (image-də `dotnet GreenStore.Api.dll migrate`, lokalda `dotnet run -- migrate`) miqrasiyaları tətbiq edir və çıxır. Əmr eyni image-də olduğu üçün ayrıca EF migrations bundle lazım deyil. Staging və Prod-da tətbiq başlayanda miqrasiya işləmir, yalnız Development-də rahatlıq üçün başlanğıcda işləyir (`Database:MigrateOnStartup`).
 - **Sağlamlıq yoxlaması:** `/health/live` və `/health/ready` (sonuncu bazanı da yoxlayır).
 - **Loqlar** JSON formatında konsola yazılır. OpenTelemetry (trace və metrikalar) qoşulur, exporter sonra seçilir.
@@ -376,6 +376,8 @@ Tətbiq 1 il ərzində gələcək. Onun üçün indi edilən və sonraya qalan i
 | **5. Ödəniş** | sifarişlər, ödəniş provayderi, «İrəli çək» cədvəli | reklam satılır |
 | **Paralel: frontend dilləri** | UI tərcümə faylları, `/ru` və `/en` linkləri, `hreflang` | sayt üç dildə |
 | **Sonra: mobil** | `devices`, push, versiya yoxlaması, deep link-lər (§9) | tətbiq eyni API ilə işləyir |
+
+**Vəziyyət (23 noyabr 2026):** fazalar 0–5 həm API, həm sayt tərəfində yazılıb, hər biri ayrıca yoxlanıb və sonda saytda başdan sona keçilib ([backend-status.md](../docs/handoff/backend-status.md) §2–3). Real SMS və ödəniş provayderi, hostinq və frontend dilləri sahibin qərarını gözləyir; mobil hələ başlamayıb.
 
 ## 18. Qərarlar
 
