@@ -10,10 +10,20 @@ import type { ReportTarget } from '@/types'
 
 const ID_RE = /^[a-z0-9-]{1,80}$/
 
-/** «Nömrəni göstər» on a listing: counted for the seller's statistics. Fire and forget from the client. */
-export async function recordPhoneReveal(listingId: string): Promise<void> {
+// «Nömrəni göstər» lives in features/contact/actions.ts: it counts the click and returns the number.
+
+/**
+ * A view of a listing's or a service's page (backend-contract.md 3.4), sent once per page view by the page's beacon
+ * (ViewBeacon): pages are cached, so the render cannot count. The API counts one per visitor a day, never the owner.
+ * Nothing to tell the visitor either way, so a failure stays silent.
+ */
+export async function recordView(listingId: string): Promise<void> {
   if (typeof listingId !== 'string' || !ID_RE.test(listingId)) return
-  await getRepository().revealPhone(listingId)
+  try {
+    await getRepository().recordListingView(listingId)
+  } catch {
+    // Not counted (the API is down, the listing has just gone): the page works the same.
+  }
 }
 
 export type ReportResult = { ok: true; id: string } | { ok: false; error: string }

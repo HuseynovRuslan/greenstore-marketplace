@@ -25,11 +25,12 @@ const leads: Record<Stage, string> = {
 
 /**
  * /sifreni-berpa-et — phone → SMS code → new password → signed in. Each stage keeps what was typed when going back.
- * DEMO: no SMS is sent (the code is on screen) and the new password is not stored anywhere.
+ * DEMO (DATA_SOURCE=mock): no SMS is sent (the code is on screen) and the new password is not stored anywhere. With
+ * the API the password changes there (every other device is signed out) and the account signs in with it.
  */
 export default function ResetPasswordPage() {
   const router = useRouter()
-  const { signIn } = useSession()
+  const { signIn, source } = useSession()
   const { toast } = useToast()
   const [stage, setStage] = useState<Stage>('phone')
   const [phone, setPhone] = useState('')
@@ -68,14 +69,20 @@ export default function ResetPasswordPage() {
     }
     if (!verifiedId) return setStage('phone')
     setBusy(true)
-    const result = await resetPasswordWithCode(verifiedId, password)
+    const result = await resetPasswordWithCode(verifiedId, password, phone)
     setBusy(false)
     if (!result.ok) {
       setFormError(result.error)
       setStage('phone')
       return
     }
-    signIn({ phone })
+    if (source === 'api' && !result.account) {
+      // The password is changed, but signing in with it did not work just now: the login form takes it.
+      toast('Şifrə dəyişdi. İndi yeni şifrə ilə daxil olun.')
+      router.replace('/daxil-ol')
+      return
+    }
+    signIn(result.account ?? { phone })
     toast('Şifrə dəyişdi. Xoş gəldiniz!')
     router.replace('/kabinet')
   }

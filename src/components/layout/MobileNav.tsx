@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation'
 import { CirclePlus, Heart, House, Search, UserRound, type LucideIcon } from 'lucide-react'
 import { useSession } from '@/state/store'
 import { preHydrationClass } from '@/state/bootstrap'
-import { useHydrated } from './ClientGate'
+import { useSessionKnown } from './ClientGate'
 import { cn } from '@/lib/format'
 
 /** Same matching as a non-`end` NavLink: the path itself or anything below it. */
@@ -19,9 +19,9 @@ function isWithin(pathname: string, base: string) {
 export function MobileNav() {
   const { user } = useSession()
   const pathname = usePathname()
-  const hydrated = useHydrated()
+  const hydrated = useSessionKnown()
   type Item = { label: string; to: string; icon: LucideIcon; end?: boolean; also?: string[]; preHydration?: 'user' | 'guest' }
-  // Before hydration the session is unknown to React: render both "Profil" targets, CSS shows one (bootstrap.ts).
+  // Until React knows the session: render both "Profil" targets, CSS shows one (bootstrap.ts).
   const profile: Item[] = hydrated
     ? [{ label: 'Profil', to: user ? '/kabinet' : '/daxil-ol', icon: UserRound }]
     : [

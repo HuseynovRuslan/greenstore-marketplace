@@ -38,7 +38,7 @@ exhaustive `switch`/`Record` code on your side — please check.
 | `careTips` | string[] | The seller's own care tips |
 | `plantingAvailable` | boolean | «Əkin xidməti var» |
 | `deliveryAreas` | string | «Çatdırılma: Bakı və Abşeron» (`deliveryAvailable` stays the flag) |
-| `contactName`, `contactPhone` | string | Contact for listings without a seller profile (individuals) |
+| `contactName`, `contactPhone` | string | Contact for listings without a seller profile (individuals). `contactPhone` is the owner's and admin's only: public reads send `phoneMasked` instead (backend-contract.md 3.1) |
 | `whatsapp` | boolean | Show «WhatsApp-a yaz» |
 | `phoneHidden` | boolean | Seller hides the number; buyers can only write on WhatsApp |
 | `promotion` | `{ packageId, until }` | Running «Önə çıxar» / bundle; `vip` stays the public flag |
@@ -124,7 +124,8 @@ The catalogue's pending «Kök sistemi» filter can use `plant.rootSystem`.
 | `getListingStats(listingId)` | deterministic numbers from the listing's views | `GET /api/me/listings/{id}/stats` |
 | `listPromotionPackages()` | `src/data/promotions.ts` | `GET /api/promotions` |
 | `submitListing(input)` | checks required fields, returns the next number, status `pending` | `POST /api/listings` |
-| `revealPhone(listingId)` | returns the number unless `phoneHidden` | `POST /api/listings/{id}/phone-reveals` (counts reveals) |
+| `revealPhone(listingId)` | `{ phone?, whatsappUrl? }`: the number unless `phoneHidden` (then the WhatsApp link only); services too | `POST /api/v1/listings/{id}/phone-reveals` (counts reveals; phase 3) |
+| `revealSellerPhone(sellerId)` | the same for a business's page | `POST /api/v1/sellers/{id}/phone-reveals` (phase 3) |
 | `createPromotionOrder(input)` | prices the option, status `paid` at once | `POST /api/promotion-orders` → payment provider redirect |
 | `submitReport(input)` | returns an id | `POST /api/reports` |
 | `submitServiceRequest(input)` | returns «Sorğu № 3021…» | `POST /api/service-requests` |

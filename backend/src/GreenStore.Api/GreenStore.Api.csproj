@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <RootNamespace>GreenStore.Api</RootNamespace>
+    <!-- Search normalisation needs ICU (Unicode normalisation and case mapping). Keep globalization on. -->
+    <InvariantGlobalization>false</InvariantGlobalization>
+    <UserSecretsId>greenstore-api</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
+    <PackageReference Include="EFCore.NamingConventions" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
+    <PackageReference Include="NetVips" />
+    <PackageReference Include="NetVips.Native" />
+    <PackageReference Include="AWSSDK.S3" />
+    <!-- PasswordHasher (ARCHITECTURE.md §3, no ASP.NET Core Identity) comes from Microsoft.Extensions.Identity.Core,
+         which is part of the ASP.NET Core shared framework this project already references: a PackageReference to it
+         is pruned by the SDK (warning NU1510). Its version stays pinned in Directory.Packages.props. -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="GreenStore.Api.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Seed data (DATABASE.md §7), generated from src/data by backend/seed/export.mjs; read from seed/ next to the
+         binaries by Data/Seed/Seeder.cs. -->
+    <Content Include="../../seed/**/*.json" LinkBase="seed" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>

@@ -4,7 +4,8 @@
  * Indexing is OFF unless BOTH are true:
  *   - SEO_INDEXABLE=true            (explicit opt-in per environment — production only)
  *   - DATA_SOURCE is not "mock"     (the sample listings must never be indexed as real inventory)
- * Today the only data source is the Figma demo data, so every environment is non-indexable.
+ * DATA_SOURCE=api alone is not enough: dev and staging run the API on the seeded demo data (backend/seed), which is
+ * sample inventory too, so they stay non-indexable until production sets SEO_INDEXABLE=true.
  */
 export type DataSource = 'mock' | 'api'
 

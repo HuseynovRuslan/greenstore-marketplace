@@ -5,6 +5,7 @@ import { categoryById } from '@/data/categories'
 import { parseWorstCaseMode, worstCaseModes, type WorstCaseMode } from '@/dev/worstCase'
 import { worstDraft, worstListing, worstRows, worstSeller, worstServices } from '@/dev/worstPages'
 import { WorstCaseDraftCard, WorstCaseRows } from '@/dev/WorstCaseRows'
+import { loadSellerListings } from '@/features/seller/sellerListingQuery'
 import { cn } from '@/lib/format'
 import type { RawSearchParams } from '@/lib/searchParams'
 import { getRepository } from '@/services/repository'
@@ -61,11 +62,14 @@ export default async function Page({ searchParams }: Props) {
       )
   } else if (view === 'satici') {
     const demo = (await repo.getSeller(DEMO_SELLER))!
-    const all = await repo.listServices()
-    const own = all.filter((s) => demo.serviceIds?.includes(s.id) || s.providerId === demo.id)
-    body = <SellerPage seller={worstSeller(demo, mode)} listingQuery="" services={worstServices(all, own, mode)} />
+    const [catalogue, own, listings] = await Promise.all([
+      repo.searchServices({ q: '', tab: 'all', sort: 'newest', page: 1 }),
+      repo.listProviderServices(demo.id),
+      loadSellerListings(repo, demo.id),
+    ])
+    body = <SellerPage seller={worstSeller(demo, mode)} listings={listings} listingQuery="" services={worstServices(catalogue.items, own, mode)} />
   } else {
-    const own = await repo.listOwnListings(DEMO_SELLER)
+    const own = await repo.listOwnListings()
     body = (
       <div className="page-x mx-auto flex w-full max-w-[1440px] flex-col gap-3 pt-6">
         <WorstCaseRows rows={worstRows(own, mode, now)} draft={mode === 'worst' ? { ...worstDraft(mode), title: '', reachedStep: 3 } : undefined} now={now} />

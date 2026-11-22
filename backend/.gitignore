@@ -1,0 +1,11 @@
+# Build output
+bin/
+obj/
+TestResults/
+*.user
+*.suo
+.vs/
+
+# Local media storage (photo uploads in Development). Dot-prefixed on purpose: a plain "media/" pattern would also
+# hide the Modules/Media source folder on case-insensitive file systems (macOS, Windows).
+.media/

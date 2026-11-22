@@ -47,7 +47,7 @@ describe('mock listing statistics', () => {
 
 describe('mock repository additions', () => {
   it('lists every status of the demo seller', async () => {
-    const own = await mockRepository.listOwnListings('abseron-tingcilik')
+    const own = await mockRepository.listOwnListings()
     expect(new Set(own.map((l) => l.status))).toEqual(new Set(['active', 'pending', 'expired', 'rejected', 'inactive']))
     expect(own.find((l) => l.status === 'rejected')?.rejectionReason).toBeTruthy()
   })
@@ -62,8 +62,8 @@ describe('mock repository additions', () => {
     await expect(mockRepository.createPromotionOrder({ listingId: 'zeytun-agaci', packageId: 'ireli-cek', optionId: 'one-cixar-7' })).rejects.toThrow()
   })
 
-  it('keeps a hidden number hidden', async () => {
-    expect(await mockRepository.revealPhone('limon-agaci')).toEqual({})
-    expect((await mockRepository.revealPhone('zeytun-agaci')).phone).toBe('+994 50 555 12 34')
+  it('keeps a hidden number hidden: WhatsApp only (backend-contract.md 3.1)', async () => {
+    expect(await mockRepository.revealPhone('limon-agaci')).toEqual({ whatsappUrl: 'https://wa.me/994517023314' })
+    expect(await mockRepository.revealPhone('zeytun-agaci')).toEqual({ phone: '+994 50 555 12 34', whatsappUrl: 'https://wa.me/994505551234' })
   })
 })

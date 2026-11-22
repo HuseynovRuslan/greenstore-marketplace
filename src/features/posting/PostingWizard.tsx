@@ -10,8 +10,8 @@ import { QuietFieldErrors } from '@/components/ui/Field'
 import { Notice } from '@/components/ui/Notice'
 import { cn } from '@/lib/format'
 import { useMyListings, useSession } from '@/state/store'
-import { submitPosting } from './actions'
-import { STEPS, hasProgress, toListing, type StepNumber } from './draft'
+import { submitPosting, type SubmitResult } from './actions'
+import { STEPS, hasProgress, toListing, type DraftPhoto, type PostingDraft, type StepNumber } from './draft'
 import { PhotoManager } from './PhotoManager'
 import { PostingSkeleton } from './PostingSkeleton'
 import { photoStore, thumbnailDataUrl } from './photos'
@@ -19,7 +19,8 @@ import { ReviewStep } from './ReviewStep'
 import { clearStepChange, markStepChange, stepDirection } from './stepMotion'
 import { CategoryStep, ContactStep, DetailsStep, PriceStep, type StepProps } from './steps'
 import { DraftCard, ErrorSummary, StepProgress, stepPath } from './ui'
-import { LAST_SENT_KEY, usePhotoUrls, usePostingDraft } from './useDraft'
+import { uploadDraftPhotos } from './upload'
+import { LAST_SENT_KEY, usePhotoUrls, usePostingDraft, type LastSent } from './useDraft'
 import { firstInvalidStep, validateStep } from './validation'
 
 /** Field names for the error summary («Başlıq: Başlıq yazın…»). */
@@ -53,6 +54,15 @@ const TIPS: Record<StepNumber, string[]> = {
   6: [],
 }
 
+/** A new draft's `Idempotency-Key` (≤ 80 printable ASCII characters). */
+function newSendKey(): string {
+  const id = typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 12)}`
+  return `elan-${id}`
+}
+
+/** A sent listing and the photos it went with (their API addresses, for the confirmation's card). */
+type Sent = { outcome: SubmitResult; photos: DraftPhoto[] }
+
 const timeOf = (iso: string) => {
   const d = new Date(iso)
   return Number.isNaN(d.getTime()) ? '' : `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
@@ -66,7 +76,7 @@ const timeOf = (iso: string) => {
  */
 export function PostingWizard({ step }: { step: StepNumber }) {
   const router = useRouter()
-  const { user } = useSession()
+  const { user, source } = useSession()
   const { addListing } = useMyListings()
   const { draft, update, reset } = usePostingDraft(user)
   const urls = usePhotoUrls(draft.photos)
@@ -74,6 +84,11 @@ export function PostingWizard({ step }: { step: StepNumber }) {
   const [touched, setTouched] = useState<Record<string, boolean>>({})
   const [sending, setSending] = useState(false)
   const [sendError, setSendError] = useState<string>()
+  const [sendErrorStep, setSendErrorStep] = useState<StepNumber>()
+  // DATA_SOURCE=api: the photos on their way to the API before the listing is sent («Şəkillər yüklənir · 2 / 5»).
+  const [uploading, setUploading] = useState<{ done: number; total: number } | null>(null)
+  // The API said the session has ended: sending asks to sign in again (the draft waits).
+  const [signedOut, setSignedOut] = useState(false)
   const [resetOpen, setResetOpen] = useState(false)
   // Sent: the draft is reset on the way to the confirmation, which must not trip the step guard below.
   const [sent, setSent] = useState(false)
@@ -116,6 +131,28 @@ export function PostingWizard({ step }: { step: StepNumber }) {
     touch: (key) => setTouched((t) => (t[key] ? t : { ...t, [key]: true })),
   }
 
+  /**
+   * DATA_SOURCE=api: the photos go to the API first (each one once: an uploaded photo keeps its id in the draft), then
+   * the listing with the draft's `Idempotency-Key`. When the API no longer has the uploaded photos (they wait a day
+   * for their listing), this browser's copies are uploaded again and the listing is sent once more.
+   */
+  const sendToApi = async (current: PostingDraft): Promise<Sent> => {
+    const sendKey = current.sendKey ?? newSendKey()
+    if (!current.sendKey) update({ sendKey })
+    const keep = (photo: DraftPhoto) => update((d) => ({ ...d, photos: d.photos.map((p) => (p.id === photo.id ? photo : p)) }))
+    let photos = current.photos
+    for (let attempt = 0; ; attempt++) {
+      const uploaded = await uploadDraftPhotos(photos, { onProgress: (done, total) => setUploading(total ? { done, total } : null), onUploaded: keep })
+      setUploading(null)
+      if (!uploaded.ok) return { outcome: { ok: false, error: uploaded.error, step: 3, signedOut: uploaded.signedOut }, photos }
+      photos = uploaded.photos
+      const outcome = await submitPosting({ ...current, photos, sendKey }, sendKey)
+      if (outcome.ok || !outcome.uploadAgain || attempt > 0) return { outcome, photos }
+      // Photos with a copy in this browser are uploaded again; an edit's own photos (no copy here) keep their id.
+      photos = await Promise.all(photos.map(async (p) => ((await photoStore.get(p.id)) ? { ...p, remoteId: undefined, url: undefined } : p)))
+    }
+  }
+
   const failed = () => {
     setAttempted(true)
     requestAnimationFrame(() => summaryRef.current?.focus())
@@ -136,24 +173,40 @@ export function PostingWizard({ step }: { step: StepNumber }) {
     if (!user) return
     setSending(true)
     setSendError(undefined)
-    const result = await submitPosting(draft)
+    setSendErrorStep(undefined)
+    setSignedOut(false)
+    const api = source === 'api'
+    const { outcome: result, photos } = api ? await sendToApi(draft) : { outcome: await submitPosting(draft), photos: draft.photos }
     if (!result.ok) {
       setSending(false)
       setSendError(result.error)
-      if (result.step) go(result.step)
+      setSignedOut(Boolean(result.signedOut))
+      // The demo's refusal is a step left incomplete: back there. The API's names one field: the notice says which
+      // and links its step (the message would not survive the step's own page).
+      if (!api && result.step) go(result.step)
+      else setSendErrorStep(result.step && result.step !== step ? result.step : undefined)
       return
     }
-    // The demo keeps a copy in «Elanlarım» with small photos (data URLs survive a reload; blob URLs don't).
-    const blobs = await Promise.all(draft.photos.map((p) => photoStore.get(p.id)))
-    const images = (await Promise.all(blobs.map((b) => (b ? thumbnailDataUrl(b) : undefined)))).filter((u): u is string => Boolean(u))
     const editing = draft.editing
     const number = editing?.number ?? result.result.number
-    const built = toListing(draft, { images, now: new Date(), number, sellerId: user.sellerId })
-    // An edit keeps the listing's id, number and address; it goes back to review.
-    const listing = editing ? { ...built, id: editing.id, slug: editing.slug, updatedAt: new Date().toISOString() } : built
-    addListing(listing)
+    let last: LastSent
+    if (api) {
+      // The API keeps the listing: «Elanlarım» reads it from there. The confirmation shows what was sent.
+      const images = photos.map((p) => p.url).filter((u): u is string => Boolean(u))
+      const built = toListing({ ...draft, photos }, { images, now: new Date(), number: result.result.number, sellerId: user.sellerId })
+      last = { id: result.result.id, promotion: draft.promotion, edited: Boolean(editing), listing: { ...built, id: result.result.id, slug: result.result.slug } }
+    } else {
+      // The demo keeps a copy in «Elanlarım» with small photos (data URLs survive a reload; blob URLs don't).
+      const blobs = await Promise.all(draft.photos.map((p) => photoStore.get(p.id)))
+      const images = (await Promise.all(blobs.map((b) => (b ? thumbnailDataUrl(b) : undefined)))).filter((u): u is string => Boolean(u))
+      const built = toListing(draft, { images, now: new Date(), number, sellerId: user.sellerId })
+      // An edit keeps the listing's id, number and address; it goes back to review.
+      const listing = editing ? { ...built, id: editing.id, slug: editing.slug, updatedAt: new Date().toISOString() } : built
+      addListing(listing)
+      last = { id: listing.id, promotion: draft.promotion, edited: Boolean(editing) }
+    }
     try {
-      window.localStorage.setItem(LAST_SENT_KEY, JSON.stringify({ id: listing.id, promotion: draft.promotion, edited: Boolean(editing) }))
+      window.localStorage.setItem(LAST_SENT_KEY, JSON.stringify(last))
     } catch {
       /* storage full: the confirmation page falls back to «Elanlarım» */
     }
@@ -191,9 +244,11 @@ export function PostingWizard({ step }: { step: StepNumber }) {
   }
 
   const review = step === 6
-  const primaryLabel = review ? (sending ? 'Göndərilir…' : editing ? 'Dəyişiklikləri göndər' : 'Elanı göndər') : 'Davam et'
+  const sendingLabel = uploading ? `Şəkillər yüklənir · ${uploading.done} / ${uploading.total}` : 'Göndərilir…'
+  const primaryLabel = review ? (sending ? sendingLabel : editing ? 'Dəyişiklikləri göndər' : 'Elanı göndər') : 'Davam et'
   const primaryIcon = review ? <Send aria-hidden size={18} strokeWidth={1.8} /> : <ArrowRight aria-hidden size={18} strokeWidth={1.8} />
   const guestAtEnd = review && !user
+  const signInAgain = review && Boolean(user) && signedOut
 
   return (
     <div className="page-x mx-auto flex w-full max-w-[1200px] flex-col gap-6 pt-5 pb-[calc(112px+env(safe-area-inset-bottom,0px))] md:gap-8 md:pt-8 md:pb-16">
@@ -241,12 +296,19 @@ export function PostingWizard({ step }: { step: StepNumber }) {
             <QuietFieldErrors>{body}</QuietFieldErrors>
           </div>
 
-          {sendError && (
+          {sendError && !signInAgain && (
             <Notice tone="danger" title="Elan göndərilmədi">
               {sendError}
+              {sendErrorStep && (
+                <span className="mt-3 flex">
+                  <ButtonLink href={stepPath(sendErrorStep)} onClick={() => markStepChange(step, sendErrorStep)} variant="secondary">
+                    «{STEPS[sendErrorStep - 1].title}» addımına keç
+                  </ButtonLink>
+                </span>
+              )}
             </Notice>
           )}
-          {guestAtEnd && (
+          {(guestAtEnd || signInAgain) && (
             <Notice tone="info" title="Göndərmək üçün hesabınıza daxil olun">
               Qaralama bu brauzerdə saxlanılır: daxil olandan sonra bura qayıdacaqsınız.
               <span className="mt-3 flex flex-wrap gap-2.5">

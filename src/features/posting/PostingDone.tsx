@@ -10,7 +10,7 @@ import { listingPrice } from '@/features/listing/facts'
 import { readStored } from '@/hooks/useLocalStorage'
 import { cn, formatPrice } from '@/lib/format'
 import { useMyListings } from '@/state/store'
-import { LAST_SENT_KEY } from './useDraft'
+import { LAST_SENT_KEY, type LastSent } from './useDraft'
 
 const timeline = [
   { title: 'Göndərildi', text: 'Elan bizdədir, qaralama silindi.', done: true },
@@ -25,8 +25,9 @@ const timeline = [
  */
 export function PostingDone() {
   const { submitted } = useMyListings()
-  const last = readStored<{ id?: string; promotion?: { optionId: string } | null; edited?: boolean } | null>(LAST_SENT_KEY, null)
-  const listing = submitted.find((l) => l.id === last?.id) ?? submitted[0]
+  const last = readStored<Partial<LastSent> | null>(LAST_SENT_KEY, null)
+  // The API keeps the listing (its number is the API's); the demo keeps a copy in this browser's «Elanlarım».
+  const listing = last?.listing ?? submitted.find((l) => l.id === last?.id) ?? submitted[0]
   const promo = last?.promotion ? promotionOption(last.promotion.optionId) : undefined
   // Arriving from «Elanı göndər» the focus would be left on the page body: the result's heading takes it, so a
   // screen reader says what happened.

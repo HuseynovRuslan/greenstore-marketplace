@@ -4,14 +4,14 @@ import { ButtonLink } from '@/components/ui/Button'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { PaginationLinks } from '@/components/ui/PaginationLinks'
 import { cityName } from '@/data/cities'
-import { serviceCategories, services } from '@/data/services'
+import { serviceCategories } from '@/data/services'
 import { Breadcrumb } from '@/features/seller/ui'
 import { optionClass } from '@/features/search/filterStyles'
 import type { ProductMatches } from '@/features/services/productMatches'
 import { RequestButton } from '@/features/services/RequestDialog'
 import { ServiceSearchCard, ServiceSort } from '@/features/services/ServiceCatalogControls'
 import { ServiceTile } from '@/features/services/ServiceTile'
-import { filterServices, providerTabs, serviceHref, type ServiceQuery } from '@/features/services/query'
+import { providerTabs, serviceHref, type ServiceQuery } from '@/features/services/query'
 import { cn, formatNumber } from '@/lib/format'
 import type { ServiceSearchResult } from '@/services/repository'
 
@@ -44,10 +44,14 @@ interface ServicesPageProps {
   result: ServiceSearchResult
   /** With no service found: product listings for the same word (the empty state points there). */
   productMatches?: ProductMatches
+  /** Matches per service type with the other filters kept (`loadServiceCategoryCounts`); '' = every type */
+  categoryCounts: Record<string, number>
+  /** Who provides each service on the page, by provider id (`loadProviderNames`) */
+  providerNames?: Record<string, string>
 }
 
-export default function ServicesPage({ query, parsed, result, productMatches }: ServicesPageProps) {
-  const countFor = (categoryId?: string) => filterServices(services, { ...parsed, categoryId }).length
+export default function ServicesPage({ query, parsed, result, productMatches, categoryCounts, providerNames }: ServicesPageProps) {
+  const countFor = (categoryId?: string) => categoryCounts[categoryId ?? ''] ?? 0
   const heading = parsed.categoryId ? (serviceCategories.find((c) => c.id === parsed.categoryId)?.name ?? 'Bağ xidmətləri') : 'Bağ xidmətləri'
   const presetOn = (p: (typeof pricePresets)[number]) => String(parsed.minPrice ?? '') === (p.min ?? '') && String(parsed.maxPrice ?? '') === (p.max ?? '')
 
@@ -160,7 +164,7 @@ export default function ServicesPage({ query, parsed, result, productMatches }: 
             <ul className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-5">
               {result.items.map((s) => (
                 <li key={s.id} className="flex">
-                  <ServiceTile service={s} />
+                  <ServiceTile service={s} providerName={providerNames?.[s.providerId]} />
                 </li>
               ))}
             </ul>

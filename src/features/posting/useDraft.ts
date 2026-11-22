@@ -2,13 +2,25 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { readStored, writeStored } from '@/hooks/useLocalStorage'
-import type { UserProfile } from '@/types'
+import type { Listing, PromotionPackageId, UserProfile } from '@/types'
 import { createDraft, restoreDraft, type DraftPhoto, type PostingDraft } from './draft'
 import { photoStore } from './photos'
 
 export const DRAFT_KEY = 'greenstore:posting:draft'
 /** Id of the listing sent last (the confirmation page reads it after a reload). */
 export const LAST_SENT_KEY = 'greenstore:posting:last-sent'
+
+/** What the confirmation page («Elan yoxlamaya göndərildi») reads, stored under LAST_SENT_KEY. */
+export interface LastSent {
+  id: string
+  promotion: { packageId: PromotionPackageId; optionId: string } | null
+  edited: boolean
+  /**
+   * DATA_SOURCE=api: the listing as sent, with its real number and the uploaded photos' addresses (the demo keeps its
+   * copy in «Elanlarım» instead).
+   */
+  listing?: Listing
+}
 
 const contactOf = (user: UserProfile | null) => (user ? { name: user.fullName, phone: user.phone } : undefined)
 
@@ -54,13 +66,14 @@ const urlCache = new Map<string, string>()
 
 export function usePhotoUrls(photos: DraftPhoto[]): Record<string, string | undefined> {
   const [urls, setUrls] = useState<Record<string, string | undefined>>(() =>
-    Object.fromEntries(photos.map((p) => [p.id, urlCache.get(p.id)])),
+    Object.fromEntries(photos.map((p) => [p.id, urlCache.get(p.id) ?? p.url])),
   )
-  const key = photos.map((p) => p.id).join(',')
+  const key = photos.map((p) => `${p.id}:${p.url ?? ''}`).join(',')
 
   useEffect(() => {
     let cancelled = false
-    const missing = photos.filter((p) => !urlCache.has(p.id))
+    // A photo with a copy in this browser shows it; an edit's photos (DATA_SOURCE=api) have only their address.
+    const missing = photos.filter((p) => !urlCache.has(p.id) && !p.url)
     Promise.all(
       missing.map(async (p) => {
         const blob = await photoStore.get(p.id)
@@ -68,7 +81,7 @@ export function usePhotoUrls(photos: DraftPhoto[]): Record<string, string | unde
       }),
     ).then(() => {
       // '' = looked up and not found (site data cleared, another browser): the grid says so instead of loading forever.
-      if (!cancelled) setUrls(Object.fromEntries(photos.map((p) => [p.id, urlCache.get(p.id) ?? ''])))
+      if (!cancelled) setUrls(Object.fromEntries(photos.map((p) => [p.id, urlCache.get(p.id) ?? p.url ?? ''])))
     })
     return () => {
       cancelled = true

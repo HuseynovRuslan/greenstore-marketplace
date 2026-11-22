@@ -25,7 +25,11 @@ export default function ProfilePage() {
   const { account, updateAccount } = useAccount()
   if (!account) return <SignInPrompt next="/kabinet/profil" />
 
-  const seller = sellerById(account.sellerId)
+  // The public page: the demo seller's from src/data, or (DATA_SOURCE=api) the business's own from the API.
+  const demoSeller = sellerById(account.sellerId)
+  const publicPage = account.sellerSlug
+    ? { slug: account.sellerSlug, image: account.sellerImage ?? '' }
+    : demoSeller && { slug: demoSeller.slug, image: demoSeller.slug === 'abseron-tingcilik' ? '/images/sellers/abseron-tingcilik-profile.webp' : demoSeller.image }
   const notifications = account.notifications ?? defaultNotifications
 
   return (
@@ -40,7 +44,7 @@ export default function ProfilePage() {
         </div>
 
         <div className="grid min-w-0 grid-cols-1 items-start gap-6 md:grid-cols-2 xl:grid-cols-1">
-          {seller && <PublicProfileCard account={account} image={seller.slug === 'abseron-tingcilik' ? '/images/sellers/abseron-tingcilik-profile.webp' : seller.image} slug={seller.slug} />}
+          {publicPage && <PublicProfileCard account={account} image={publicPage.image} slug={publicPage.slug} />}
 
           <Card className="w-full gap-5">
             <PanelTitle>Bildiriş seçimləri</PanelTitle>
@@ -67,12 +71,15 @@ export default function ProfilePage() {
   )
 }
 
-/** Figma public profile card: 170 px photo, 15 px name, "Təsdiqlənmiş satıcı", "İctimai profilə bax". */
+/**
+ * Figma public profile card: 170 px photo, 15 px name, "Təsdiqlənmiş satıcı", "İctimai profilə bax". A new business has
+ * no photo yet (photos come with uploads, phase 3): the card goes without one.
+ */
 function PublicProfileCard({ account, image, slug }: { account: AccountProfile; image: string; slug: string }) {
   const name = account.companyName || account.fullName
   return (
     <Card className="w-full gap-5">
-      <img src={image} alt={name} className="h-[170px] w-full shrink-0 rounded-lg object-cover" />
+      {image && <img src={image} alt={name} className="h-[170px] w-full shrink-0 rounded-lg object-cover" />}
       <p className="w-full text-[15px] leading-[1.5] font-semibold text-ink">{name}</p>
       {account.verified && <Badge tone="success">Təsdiqlənmiş satıcı</Badge>}
       <ButtonLink href={`/saticilar/${slug}`} variant="secondary" fullWidth>

@@ -5,23 +5,25 @@ import { Heart, MessageCircle, Phone } from 'lucide-react'
 import { Button, buttonClass } from '@/components/ui/Button'
 import { useToast } from '@/components/ui/Toast'
 import { useReveal } from '@/features/contact/RevealContext'
-import { telHref, whatsappHref } from '@/features/seller/contact'
+import { chatHref, openChat, telHref } from '@/features/seller/contact'
 import { cn } from '@/lib/format'
 import { useFavorites } from '@/state/store'
-import { recordPhoneReveal } from './actions'
 
+/** What the page knows before «Nömrəni göstər»: whether there is a number to call or to message, never the number. */
 export interface ContactInfo {
   listingId: string
   title: string
-  phone?: string
+  /** The listing has a number buyers can call (`phoneMasked`) */
+  callable: boolean
+  /** The number takes WhatsApp messages */
   whatsapp: boolean
   /** The seller takes WhatsApp messages only */
   phoneHidden: boolean
 }
 
 /** WhatsApp chat with a first line already written, so the seller knows which listing it is about. */
-export function whatsappMessageHref(phone: string, title: string) {
-  return `${whatsappHref(phone)}?text=${encodeURIComponent(`Salam! GreenStore-dakı «${title}» elanı ilə bağlı yazıram.`)}`
+export function listingChatHref(whatsappUrl: string, title: string) {
+  return chatHref(whatsappUrl, `Salam! GreenStore-dakı «${title}» elanı ilə bağlı yazıram.`)
 }
 
 /** "+994 50 555 12 34" → "050 555 12 34", how people say a number here. */
@@ -31,15 +33,16 @@ export function localPhone(phone: string) {
 }
 
 /**
- * «Nömrəni göstər» → the number as a «call» link (focus moves to it), counted for the seller's statistics in the
- * background (a failed count never blocks the number). «WhatsApp-a yaz» when the seller takes messages. A seller who
- * hid the number gets WhatsApp only, with a line saying so.
+ * «Nömrəni göstər» → the number as a «call» link (focus moves to it); the number is asked for only now, and asking
+ * counts the reveal for the seller's statistics (RevealContext). «WhatsApp-a yaz» when the seller takes messages: the
+ * first click asks for the link too and opens the chat. A seller who hid the number gets WhatsApp only, with a line
+ * saying so.
  */
 export function ContactButtons({ info, layout = 'panel' }: { info: ContactInfo; layout?: 'panel' | 'bar' }) {
-  const { revealed, reveal } = useReveal()
+  const { revealed, pending, contact, reveal } = useReveal()
   const linkRef = useRef<HTMLAnchorElement>(null)
   const requested = useRef(false)
-  const { phone, whatsapp, phoneHidden, listingId, title } = info
+  const { whatsapp, phoneHidden, title } = info
 
   useEffect(() => {
     if (revealed && requested.current) {
@@ -49,36 +52,60 @@ export function ContactButtons({ info, layout = 'panel' }: { info: ContactInfo; 
   }, [revealed])
 
   const onReveal = () => {
+    if (pending) return
     requested.current = true
-    reveal()
-    recordPhoneReveal(listingId).catch(() => {})
+    void reveal()
+  }
+
+  const onChat = async () => {
+    if (pending) return
+    const found = await reveal()
+    if (found?.whatsappUrl) openChat(listingChatHref(found.whatsappUrl, title))
   }
 
   const bar = layout === 'bar'
-  const callable = Boolean(phone) && !phoneHidden
-  const call = !callable ? null : revealed && phone ? (
-    <a ref={linkRef} href={telHref(phone)} aria-label={`Zəng et: ${localPhone(phone)}`} className={buttonClass('primary', cn('tabular-nums', bar ? 'w-full min-w-0 px-2' : 'w-full text-base'))}>
-      <Phone aria-hidden size={18} strokeWidth={1.8} />
-      {localPhone(phone)}
-    </a>
-  ) : (
-    <Button onClick={onReveal} className={bar ? 'w-full min-w-0 px-2' : 'w-full'} icon={<Phone aria-hidden size={18} strokeWidth={1.8} className={cn(bar && 'max-[359px]:hidden')} />}>
-      {bar ? 'Zəng et' : 'Nömrəni göstər'}
-    </Button>
-  )
-  const chat =
-    whatsapp && phone ? (
-      <a
-        href={whatsappMessageHref(phone, title)}
-        target="_blank"
-        rel="noopener noreferrer"
-        className={buttonClass(callable ? 'secondary' : 'primary', bar ? 'w-full min-w-0 px-2' : 'w-full')}
-      >
-        {/* Narrow phones: the word alone, so two buttons and the price fit one row. */}
-        <MessageCircle aria-hidden size={18} strokeWidth={1.8} className={cn(bar && 'max-[419px]:hidden')} />
-        {bar ? 'WhatsApp' : 'WhatsApp-a yaz'}
+  const callable = info.callable && !phoneHidden
+  const chatOffered = whatsapp && (info.callable || phoneHidden)
+  const wide = bar ? 'w-full min-w-0 px-2' : 'w-full'
+
+  let call = null
+  if (callable && !revealed) {
+    call = (
+      <Button onClick={onReveal} aria-busy={pending || undefined} className={wide} icon={<Phone aria-hidden size={18} strokeWidth={1.8} className={cn(bar && 'max-[359px]:hidden')} />}>
+        {bar ? 'Zəng et' : 'Nömrəni göstər'}
+      </Button>
+    )
+  } else if (callable && contact.phone) {
+    call = (
+      <a ref={linkRef} href={telHref(contact.phone)} aria-label={`Zəng et: ${localPhone(contact.phone)}`} className={buttonClass('primary', cn('tabular-nums', bar ? wide : 'w-full text-base'))}>
+        <Phone aria-hidden size={18} strokeWidth={1.8} />
+        {localPhone(contact.phone)}
       </a>
-    ) : null
+    )
+  }
+
+  // Narrow phones: the word alone, so two buttons and the price fit one row.
+  const chatLabel = (
+    <>
+      <MessageCircle aria-hidden size={18} strokeWidth={1.8} className={cn(bar && 'max-[419px]:hidden')} />
+      {bar ? 'WhatsApp' : 'WhatsApp-a yaz'}
+    </>
+  )
+  const chatClass = buttonClass(callable ? 'secondary' : 'primary', wide)
+  let chat = null
+  if (chatOffered && !revealed) {
+    chat = (
+      <button type="button" onClick={onChat} aria-busy={pending || undefined} className={chatClass}>
+        {chatLabel}
+      </button>
+    )
+  } else if (chatOffered && contact.whatsappUrl) {
+    chat = (
+      <a href={listingChatHref(contact.whatsappUrl, title)} target="_blank" rel="noopener noreferrer" className={chatClass}>
+        {chatLabel}
+      </a>
+    )
+  }
 
   if (!call && !chat) {
     return <p className="text-sm leading-[1.5] text-muted">Satıcının əlaqə nömrəsi göstərilmir.</p>

@@ -13,7 +13,7 @@ import { SellerListings } from '@/features/seller/SellerListings'
 import { Breadcrumb } from '@/features/seller/ui'
 import { ServiceTile } from '@/features/services/ServiceTile'
 import { formatNumber } from '@/lib/format'
-import type { Seller, Service } from '@/types'
+import type { Listing, Seller, Service } from '@/types'
 
 export const sellerCrumbs = (seller: Seller) => [
   { label: 'Ana səhifə', to: '/' },
@@ -45,9 +45,10 @@ const heading = 'text-lg leading-[1.3] font-semibold tracking-[-0.01em] text-for
  * Business page of a nursery, garden centre or landscaping company (Nov 2026): cover and logo, verified mark, kind,
  * member since, reply time, offers; about and terms; the services it publishes; its listings with category tabs,
  * search and sort; and a sticky contact column (call / WhatsApp, Instagram, website, weekly hours with «open now»,
- * address with a map link, share, report). `listingQuery` is the request's query string (tab, search, sort, page).
+ * address with a map link, share, report). `listingQuery` is the request's query string (tab, search, sort, page);
+ * `listings` are the seller's public listings (`loadSellerListings`).
  */
-export default function SellerPage({ seller, listingQuery, services }: { seller: Seller; listingQuery: string; services: Service[] }) {
+export default function SellerPage({ seller, listings, listingQuery, services }: { seller: Seller; listings: Listing[]; listingQuery: string; services: Service[] }) {
   const place = seller.address ?? cityName(seller.cityId)
   const facts = [
     seller.kind,
@@ -56,7 +57,7 @@ export default function SellerPage({ seller, listingQuery, services }: { seller:
   ].filter(Boolean)
 
   return (
-    <RevealProvider>
+    <RevealProvider target={{ kind: 'seller', id: seller.id }}>
       <div className="page-x mx-auto flex w-full max-w-[1440px] flex-col gap-4 pt-3 pb-12 md:gap-5 md:pt-5">
         <Breadcrumb items={sellerCrumbs(seller)} />
 
@@ -141,13 +142,13 @@ export default function SellerPage({ seller, listingQuery, services }: { seller:
                 </h2>
                 <div className="grid w-full grid-cols-2 gap-3 md:grid-cols-3 md:gap-5">
                   {services.map((s) => (
-                    <ServiceTile key={s.id} service={s} />
+                    <ServiceTile key={s.id} service={s} providerName={seller.name} />
                   ))}
                 </div>
               </section>
             )}
 
-            <SellerListings seller={seller} initialQuery={listingQuery} />
+            <SellerListings seller={seller} listings={listings} initialQuery={listingQuery} />
           </div>
 
           <div className="flex flex-col gap-4 lg:col-start-2 lg:row-start-2">

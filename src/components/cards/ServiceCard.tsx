@@ -1,11 +1,15 @@
 import Link from 'next/link'
 import { Badge } from '@/components/ui/Badge'
-import { providerName } from '@/data/services'
+import { providerName as demoProviderName } from '@/data/services'
 import type { Service } from '@/types'
 
 /* Figma home "Xidmət kartı": p 12, gap 12, radius 12, photo h 200, price 22 px semibold, title 15 px semibold, provider 13 px muted */
-/** `image` lets curated sections (home showcase) use the photo Figma shows there. */
-export function ServiceCard({ service, image }: { service: Service; image?: string }) {
+/**
+ * `image` lets curated sections (home showcase) use the photo Figma shows there. `providerName` comes from the page
+ * (`loadProviderNames`); without it the demo data names the provider.
+ */
+export function ServiceCard({ service, image, providerName }: { service: Service; image?: string; providerName?: string }) {
+  const provider = providerName ?? demoProviderName(service.providerId)
   return (
     <Link
       href={`/xidmetler/${service.slug}`}
@@ -15,7 +19,7 @@ export function ServiceCard({ service, image }: { service: Service; image?: stri
       <p className="text-[22px] leading-[1.5] font-semibold whitespace-nowrap text-ink">{service.priceLabel}</p>
       <h3 className="w-full text-[15px] leading-[1.5] font-semibold text-ink">{service.homeTitle ?? service.title}</h3>
       <p className="w-full text-[13px] leading-[1.5] text-muted">
-        {providerName(service.providerId)} · {service.areas.join(', ')}
+        {[provider, service.areas.join(', ')].filter(Boolean).join(' · ')}
       </p>
       {service.verified && <Badge tone="success">Təsdiqlənmiş xidmət göstərən</Badge>}
     </Link>

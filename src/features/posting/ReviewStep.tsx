@@ -1,13 +1,17 @@
 'use client'
 
 import Link from 'next/link'
+import { useEffect, useState } from 'react'
 import { Eye, Pencil, Rocket } from 'lucide-react'
 import { CheckboxField, ChoiceCard, FieldGroup } from '@/components/ui/FormControls'
 import { categoryById } from '@/data/categories'
 import { promotionOption } from '@/data/promotions'
 import { sellerById } from '@/data/sellers'
 import { formatPrice } from '@/lib/format'
+import { useDataSource } from '@/state/store'
+import type { Seller } from '@/types'
 import { ListingDetail } from '@/views/ListingDetailPage'
+import { previewSeller } from './actions'
 import { toListing, STEPS } from './draft'
 import type { StepProps } from './steps'
 import { stepPath } from './ui'
@@ -17,6 +21,28 @@ import { fieldDomId } from './validation'
 const OFFERS = ['ireli-cek-5', 'one-cixar-7', 'paket-7']
 
 /**
+ * Who the preview names as the seller: a business account's «mağaza» (DATA_SOURCE=api asks the API for it; the demo's
+ * are in src/data/sellers), nobody for a private account («Fərdi satıcı»).
+ */
+function usePreviewSeller(user: StepProps['user']): Seller | undefined {
+  const api = useDataSource() === 'api'
+  const sellerId = user?.accountType === 'business' ? user.sellerId : undefined
+  const [fromApi, setFromApi] = useState<{ id: string; seller?: Seller }>()
+  useEffect(() => {
+    if (!api || !sellerId) return
+    let current = true
+    void previewSeller().then((seller) => {
+      if (current) setFromApi({ id: sellerId, seller })
+    })
+    return () => {
+      current = false
+    }
+  }, [api, sellerId])
+  if (!api) return sellerById(user?.sellerId)
+  return fromApi && fromApi.id === sellerId ? fromApi.seller : undefined
+}
+
+/**
  * Step 6 — the listing exactly as buyers will see it (the real listing page components in preview mode), links back
  * to each step, an optional promotion package (paid only after moderation approves the listing; mocked), and the
  * rules checkbox.
@@ -24,7 +50,7 @@ const OFFERS = ['ireli-cek-5', 'one-cixar-7', 'paket-7']
 export function ReviewStep({ draft, update, error, urls, user }: StepProps & { urls: Record<string, string | undefined> }) {
   const images = draft.photos.map((p) => urls[p.id]).filter((u): u is string => Boolean(u))
   const listing = toListing(draft, { images, now: new Date(), sellerId: user?.sellerId, status: 'active' })
-  const seller = sellerById(user?.sellerId)
+  const seller = usePreviewSeller(user)
   const chosen = draft.promotion ? promotionOption(draft.promotion.optionId) : undefined
 
   return (

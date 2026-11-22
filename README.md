@@ -45,14 +45,22 @@ request and on pushes to `main`.
 
 ## Environment variables
 
-None are required. Copy [`.env.example`](.env.example) to `.env.local` to override them locally.
+None are required for the demo (`DATA_SOURCE=mock`). Copy [`.env.example`](.env.example) to `.env.local` to
+override them locally.
 
 | Variable | Default | Purpose |
 | --- | --- | --- |
 | `NEXT_PUBLIC_SITE_URL` | Vercel URL, else `http://localhost:3000` | Public origin for canonical URLs, Open Graph, the sitemap and robots.txt |
 | `NEXT_PUBLIC_DEMO_MODE` | `true` | "Demo versiya" banner |
 | `SEO_INDEXABLE` | `false` | Indexing opt-in. It only takes effect together with `DATA_SOURCE` ≠ `mock` |
-| `DATA_SOURCE` | `mock` | `mock`: Figma sample data. `api`: the future Web API repository, not implemented yet |
+| `DATA_SOURCE` | `mock` | `mock`: Figma sample data. `api`: the GreenStore Web API (`backend/`, `src/services/apiRepository.ts`) |
+| `API_BASE_URL` | – | `DATA_SOURCE=api` only, server-only: the API's origin, e.g. `http://localhost:5080` |
+| `API_INTERNAL_KEY` | – | `DATA_SOURCE=api` only, server-only secret: sent as `X-Internal-Key`, equal to the API's `Internal__ApiKey`. Never commit a real value |
+| `CLIENT_IP_HEADER` | – | `DATA_SOURCE=api` only: a header the hosting overwrites with the visitor's IP on every request (`x-vercel-forwarded-for`, `cf-connecting-ip`, `x-real-ip` from nginx). When set, only it is read. See [Visitor IP](#visitor-ip-behind-the-hostings-proxy) |
+| `TRUSTED_PROXY_HOPS` | `1` | `DATA_SOURCE=api` only: how many proxies in front of Next.js append to `X-Forwarded-For`. The visitor's IP is that many entries from the right; `0` passes no IP |
+| `API_PUBLIC_URL` | `API_BASE_URL` | `DATA_SOURCE=api` only: the API's address as browsers reach it. The posting's photos are uploaded there straight from the browser, so the CSP's `connect-src` names it. Set it when `API_BASE_URL` is a private address |
+| `MEDIA_BASE_URL` | `<API_PUBLIC_URL>/media` | `DATA_SOURCE=api` only: where uploaded photos are served (the API's `Media__BaseUrl`, later the CDN): the CSP's `img-src` and `images.remotePatterns`. Read when the server starts, so set it for the build and the server alike |
+| `REVALIDATE_SECRET` | – | `DATA_SOURCE=api` only, server-only secret: the API's change notices (`POST /api/revalidate`) carry it; equal to the API's `Revalidation__Secret` (dev: `dev-revalidate-secret`). Unset, every notice is refused and pages refresh within a minute on their own |
 
 ## Project structure
 
@@ -142,17 +150,84 @@ Follow the launch checklist in [`SEO_ARCHITECTURE.md`](SEO_ARCHITECTURE.md#9-lau
 
 If the API runs on another origin, add it to `connect-src` in the CSP (`next.config.ts`).
 
+### Visitor IP behind the hosting's proxy
+
+With `DATA_SOURCE=api` the Next.js server passes the visitor's IP to the API (`X-Client-IP`, believed only with
+`API_INTERNAL_KEY`), and the API's per-IP limits count it: SMS codes (20 an hour, 100 a day per IP), wrong passwords
+and anonymous writes. The IP must therefore come from the hosting, never from the browser. Next.js fills
+`X-Forwarded-For` itself only when the request has none, so a visitor who reaches `next start` directly can send any
+value and dodge those limits, for example to burn the site-wide daily SMS cap (`src/services/clientIp.ts`).
+
+* **Never expose `next start` to the internet directly.** Put the hosting's proxy or a reverse proxy in front of it and
+  let only that proxy reach the Next.js port.
+* **Vercel:** nothing to set. Vercel overwrites `X-Forwarded-For` with the visitor's address, and the default
+  `TRUSTED_PROXY_HOPS=1` reads it. `CLIENT_IP_HEADER=x-vercel-forwarded-for` is the explicit alternative.
+* **nginx in front of `next start`:** either `proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;` (appends
+  the address nginx saw; default `TRUSTED_PROXY_HOPS=1`), or `proxy_set_header X-Real-IP $remote_addr;` with
+  `CLIENT_IP_HEADER=x-real-ip`.
+* **Cloudflare in front:** `CLIENT_IP_HEADER=cf-connecting-ip`, and let only Cloudflare's addresses reach the origin.
+  With Cloudflare and nginx both appending to `X-Forwarded-For`, `TRUSTED_PROXY_HOPS=2` works too.
+* **Another platform:** find the header it overwrites (Fly.io: `fly-client-ip`) or count its proxies that append to
+  `X-Forwarded-For`. If you cannot tell, set `TRUSTED_PROXY_HOPS=0`: no IP is passed, which is safe, but every visitor
+  then shares the Next.js server's per-IP limits, so a busy site soon hits them.
+* A proxy that passes the browser's `X-Forwarded-For` on untouched (nginx without either line above) is as unsafe as no
+  proxy. A self-hosted production server that sets neither variable logs a reminder once
+  (`CLIENT_IP_HEADER and TRUSTED_PROXY_HOPS are not set`).
+
 ## Backend integration (ASP.NET Core Web API)
 
-There is no backend yet. Its integration points are:
+The API lives in [`backend/`](backend/README.md) (ASP.NET Core 10, PostgreSQL). Its integration points are:
 
-* **Reads.** Server pages read data only through `MarketplaceRepository` (`src/services/repository.ts`): listings
-  search and paging, listing, seller and service detail, taxonomy, and home content. Implement it with `fetch` calls
-  to the Web API. The planned query shape is
-  `GET /api/listings?q=&categoryId=&cityIds=&minPrice=&maxPrice=&vip=&delivery=&sellerType=&sort=&page=`.
-  Then switch `getRepository()` with `DATA_SOURCE=api`. The types in `src/types` are shaped like camelCase JSON DTOs.
-* **Auth and per-user state.** The demo session, favourites and submitted ads live in `src/state/store.tsx`
-  (`localStorage`). Replace them with authenticated API calls (`/api/auth`, `/api/favorites`, `/api/me/listings`).
-  The private routes are already isolated in their own route groups and are `noindex`.
-* **Images.** Image paths (`/images/...`) stand in for object-storage URLs. Switch to `next/image` with a loader once
-  uploads exist.
+* **Reads (phase 1, done).** Server pages read data only through `MarketplaceRepository`
+  (`src/services/repository.ts`). `DATA_SOURCE=api` selects `src/services/apiRepository.ts`: `fetch` to
+  `API_BASE_URL/api/v1/...` with `Accept-Language: az` and `X-Internal-Key`, cached by Next for 60 seconds with tags
+  (`next: { revalidate: 60, tags }`). Methods whose endpoints come in a later phase throw «not implemented yet
+  (phase N)». Contract changes: [`docs/handoff/backend-contract.md`](docs/handoff/backend-contract.md).
+* **Running the site on the API locally:**
+
+  ```bash
+  cd backend && dotnet run --project src/GreenStore.Api     # http://localhost:5080, migrates and seeds the dev DB
+  # in another terminal, from the repo root:
+  DATA_SOURCE=api API_BASE_URL=http://localhost:5080 API_INTERNAL_KEY=dev-internal-key npm run dev
+  ```
+
+  `next build` with `DATA_SOURCE=api` reads the API for the static pages (home), so start the API first. Listing and
+  service pages are not prerendered with the API: each renders on its first visit and is then cached.
+* **Phone numbers** are never part of a page (backend-contract.md 3.1): public reads carry only `phoneMasked`, and
+  «Nömrəni göstər» asks a Server Action (`src/features/contact/actions.ts`) for the number (`POST
+  /listings/{id}/phone-reveals`, `/sellers/{id}/phone-reveals` in API mode), which the owner's statistics count.
+* **Accounts (phase 2, done).** With `DATA_SOURCE=mock` the demo session, favourites and saved searches stay in
+  `localStorage` (`src/state/store.tsx`), exactly as before. With `DATA_SOURCE=api`:
+  * the sign-ins and registration are Server Actions (`src/features/auth/actions.ts`); they keep the API's session
+    token in the httpOnly cookie `gs_session` (Secure in production, SameSite=Lax, 30 days, `src/services/session.ts`)
+    and write `gs_hint` next to it: «signed in» and the avatar's initials only, which the pre-hydration script reads for
+    the first paint (`src/state/bootstrap.ts`). «Çıxış» ends the session on the API and removes both;
+  * after the page loads the store asks the server who is signed in (`loadSession` in
+    `src/features/account/actions.ts`: `GET /me`, `/me/seller`, `/me/favorites`) when the hint says someone is;
+  * favourites and saved searches of a signed-in visitor are the API's; a guest's favourites stay in `localStorage` and
+    join the account on sign-in;
+  * `/kabinet/profil` saves to `PATCH /me` and, for a business, its «mağaza» (`PATCH /me/seller`), which its public
+    page `/saticilar/<slug>` shows at once. A new phone number is confirmed with an SMS code first;
+  The SMS code is shown on screen while the API runs with `Otp:ExposeDemoCode=true` (Development only). The private
+  routes are isolated in their own route groups and are `noindex`.
+* **Listing cycle (phase 3, done).** With `DATA_SOURCE=mock` posting, «Elanlarım» and the moderation page work in the
+  browser as before (`localStorage`, `src/data/admin`). With `DATA_SOURCE=api`:
+  * «Elan yerləşdir» keeps the draft and its photos in the browser (a guest can fill it all), and on «Elanı göndər»
+    uploads each photo straight to the API (`startPhotoUpload` asks for a one-time address, the browser `PUT`s the
+    file there: `src/features/posting/upload.ts`), then sends the listing with the draft's `Idempotency-Key`
+    (`submitPosting`). The confirmation shows the API's listing number. A refusal names the field and links its step;
+    an uploaded photo is not uploaded again on a retry;
+  * «Elanlarım» lists `GET /me/listings` with each listing's 14-day statistics; «Yenilə», «Deaktiv et», «Aktiv et» and
+    «Sil» go to the API (`src/features/cabinet/actions.ts`), and a rejection shows the reason's words for its code with
+    the moderator's note. «Redaktə et» keeps the listing's photos on the API (`OwnListing.photoIds`) and sends the
+    version it opened; the owner's preview (`/kabinet/elanlar/<slug>`) renders on the server;
+  * the listing and service pages send one view per page view (`ViewBeacon`, a Server Action), which the API counts
+    once a visitor a day and never for the owner;
+  * `/idareetme/moderasiya` is the API's queue (`src/services/adminRepository.ts`) for a signed-in moderator or admin
+    (anyone else is asked to sign in or told it is for staff), rendered on the server, with the filters in the address
+    and the decision sent with the version the moderator saw;
+  * a Server Action that changes what the site shows refreshes those pages at once (`updateTag` with the API's tags),
+    and `POST /api/revalidate` takes the API's change notices for the rest (`REVALIDATE_SECRET`). The data cache is per
+    server process: with several Next.js servers each needs the notice (or a shared cache handler).
+* **Images.** Demo image paths (`/images/...`) are the site's own; uploaded photos come from the API's media address
+  (`MEDIA_BASE_URL`), which the CSP and `images.remotePatterns` allow.

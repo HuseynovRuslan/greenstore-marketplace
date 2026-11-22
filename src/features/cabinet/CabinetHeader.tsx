@@ -43,7 +43,7 @@ export function CabinetHeader({ active, counts }: { active: CabinetSection; coun
           <button
             type="button"
             onClick={() => {
-              signOut()
+              void signOut()
               router.push('/')
             }}
             className="inline-flex min-h-11 items-center gap-2 rounded-lg px-3 text-sm leading-[normal] font-medium text-muted transition-colors duration-(--dur-fast) hover:bg-mint hover:text-forest"

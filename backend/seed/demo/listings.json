@@ -1,0 +1,3188 @@
+{
+  "$comment": "Demo product listings in every status. Photos are paths under /public (served by Next). Generated from src/data by backend/seed/export.mjs: do not edit by hand.",
+  "items": [
+    {
+      "key": "zeytun-agaci",
+      "number": 10482,
+      "status": "active",
+      "owner": "owner-abseron-tingcilik",
+      "seller": "abseron-tingcilik",
+      "title": "Zeytun ağacı — Olea europaea",
+      "description": [
+        "Sağlam və formalaşmış zeytun ağacları satışdadır. Hündürlüyü dibçək daxil olmaqla 180–200 sm-dir. Ağaclar Abşeron iqliminə uyğunlaşdırılıb və açıq sahədə yetişdirilib. Bağ, həyət və terrasların yaşıllaşdırılması üçün uyğundur.",
+        "Bitkiləri təsərrüfatımızda yerində görə bilərsiniz. Bakı və Abşerona çatdırılma ayrıca razılaşdırılır. Əkin və ilkin qulluq barədə məsləhət veririk. Digər ölçülər üçün bizimlə əlaqə saxlayın."
+      ],
+      "categoryId": "agaclar",
+      "subcategoryId": "agaclar-meyve",
+      "cityId": "abseron",
+      "area": "Məhəmmədi qəsəbəsi",
+      "priceType": "negotiable",
+      "price": 145,
+      "priceUnit": "piece",
+      "wholesale": {
+        "price": 130,
+        "minQuantity": 10
+      },
+      "quantityAvailable": 40,
+      "deliveryAvailable": true,
+      "deliveryAreas": "Bakı və Abşeron",
+      "plantingAvailable": true,
+      "contactName": "Elvin Əliyev",
+      "contactPhone": "+994505551234",
+      "whatsapp": true,
+      "phoneHidden": false,
+      "plant": {
+        "species": "Olea europaea",
+        "heightCm": {
+          "min": 180,
+          "max": 200
+        },
+        "ageYears": 5,
+        "rootSystem": "container",
+        "potLitres": 45,
+        "sun": "full-sun",
+        "water": "low",
+        "frostHardinessC": -10,
+        "foliage": "evergreen",
+        "plantingMonths": [
+          3,
+          4,
+          5,
+          9,
+          10
+        ]
+      },
+      "attributes": {
+        "species": "Olea europaea",
+        "heightMin": "180",
+        "heightMax": "200",
+        "age": "5",
+        "rootSystem": "container",
+        "potLitres": "45",
+        "sun": "full-sun",
+        "water": "low",
+        "frost": "-10",
+        "foliage": "evergreen",
+        "plantingMonths": "3,4,5,9,10"
+      },
+      "careTips": [
+        "Əkindən sonra ilk ay həftədə 2 dəfə bol suvarın, sonra torpaq quruduqca.",
+        "Ağır gil torpaqda çuxura çınqıl və qum əlavə edin: zeytun durğun suyu sevmir.",
+        "Şaxtalı gecələrdə gənc ağacın gövdəsini aqrolifə bükün."
+      ],
+      "promoted": true,
+      "views": 248,
+      "submittedAt": "2026-10-12T05:00:00Z",
+      "publishedAt": "2026-10-12T05:00:00Z",
+      "expiresAt": "2026-11-27T06:15:00Z",
+      "editedAt": "2026-10-28T06:15:00Z",
+      "photos": [
+        "/images/listings/zeytun-agaci-1.webp",
+        "/images/listings/zeytun-agaci-gallery-1.webp",
+        "/images/listings/zeytun-agaci-gallery-2.webp",
+        "/images/listings/zeytun-agaci-gallery-3.webp",
+        "/images/listings/zeytun-agaci-gallery-4.webp",
+        "/images/listings/zeytun-agaci-5.webp",
+        "/images/listings/zeytun-agaci-2.webp",
+        "/images/listings/zeytun-agaci-3.webp",
+        "/images/listings/zeytun-agaci-4.webp",
+        "/images/dashboard/my-listing-1.webp"
+      ]
+    },
+    {
+      "key": "mavi-kuknar",
+      "number": 10601,
+      "status": "active",
+      "owner": "contact-554102287",
+      "title": "Mavi küknar — Picea pungens",
+      "description": [],
+      "categoryId": "agaclar",
+      "subcategoryId": "agaclar-iyneyarpaqli",
+      "cityId": "baki",
+      "priceType": "fixed",
+      "price": 85,
+      "priceUnit": "piece",
+      "deliveryAvailable": true,
+      "plantingAvailable": false,
+      "contactName": "Rəşad",
+      "contactPhone": "+994554102287",
+      "whatsapp": true,
+      "phoneHidden": false,
+      "plant": {
+        "species": "Picea pungens 'Glauca'",
+        "heightCm": {
+          "min": 100,
+          "max": 120
+        },
+        "ageYears": 3,
+        "rootSystem": "container",
+        "potLitres": 25,
+        "sun": "full-sun",
+        "water": "medium",
+        "frostHardinessC": -35,
+        "foliage": "evergreen",
+        "plantingMonths": [
+          3,
+          4,
+          10,
+          11
+        ]
+      },
+      "attributes": {
+        "species": "Picea pungens 'Glauca'",
+        "heightMin": "100",
+        "heightMax": "120",
+        "age": "3",
+        "rootSystem": "container",
+        "potLitres": "25",
+        "sun": "full-sun",
+        "water": "medium",
+        "frost": "-35",
+        "foliage": "evergreen",
+        "plantingMonths": "3,4,10,11"
+      },
+      "careTips": [
+        "İsti yayda kökətrafı sahəni mulçalayın.",
+        "Yazda iynəyarpaqlılar üçün gübrə verin."
+      ],
+      "promoted": true,
+      "views": 0,
+      "submittedAt": "2026-10-12T04:55:00Z",
+      "publishedAt": "2026-10-12T04:55:00Z",
+      "expiresAt": "2026-11-11T05:00:00Z",
+      "photos": [
+        "/images/listings/mavi-kuknar-1.webp",
+        "/images/listings/mavi-kuknar-4.webp",
+        "/images/listings/mavi-kuknar-5.webp",
+        "/images/listings/mavi-kuknar-2.webp",
+        "/images/listings/mavi-kuknar-3.webp"
+      ]
+    },
+    {
+      "key": "yapon-agcaqayini",
+      "number": 10602,
+      "status": "active",
+      "owner": "contact-703184509",
+      "title": "Yapon ağcaqayını",
+      "description": [],
+      "categoryId": "agaclar",
+      "subcategoryId": "agaclar-enliyarpaqli-yarpaqtoken",
+      "cityId": "quba",
+      "priceType": "fixed",
+      "price": 120,
+      "priceUnit": "piece",
+      "deliveryAvailable": false,
+      "plantingAvailable": false,
+      "contactName": "Nərmin",
+      "contactPhone": "+994703184509",
+      "whatsapp": true,
+      "phoneHidden": false,
+      "plant": {
+        "species": "Acer palmatum",
+        "heightCm": {
+          "min": 120
+        },
+        "ageYears": 4,
+        "rootSystem": "container",
+        "potLitres": 30,
+        "sun": "part-shade",
+        "water": "medium",
+        "frostHardinessC": -20,
+        "foliage": "deciduous",
+        "plantingMonths": [
+          3,
+          4,
+          10,
+          11
+        ]
+      },
+      "attributes": {
+        "species": "Acer palmatum",
+        "heightMin": "120",
+        "age": "4",
+        "rootSystem": "container",
+        "potLitres": "30",
+        "sun": "part-shade",
+        "water": "medium",
+        "frost": "-20",
+        "foliage": "deciduous",
+        "plantingMonths": "3,4,10,11"
+      },
+      "careTips": [
+        "Günortadan sonra kölgə düşən yer seçin: yarpaqlar yanmasın.",
+        "Torpaq həmişə azca nəm qalsın."
+      ],
+      "promoted": true,
+      "views": 0,
+      "submittedAt": "2026-10-12T04:50:00Z",
+      "publishedAt": "2026-10-12T04:50:00Z",
+      "expiresAt": "2026-11-11T05:00:00Z",
+      "photos": [
+        "/images/listings/yapon-agcaqayini-1.webp",
+        "/images/listings/yapon-agcaqayini-4.webp",
+        "/images/listings/yapon-agcaqayini-2.webp",
+        "/images/listings/yapon-agcaqayini-3.webp"
+      ]
+    },
+    {
+      "key": "limon-agaci",
+      "number": 10603,
+      "status": "active",
+      "owner": "contact-517023314",
+      "title": "Limon ağacı",
+      "description": [],
+      "categoryId": "agaclar",
+      "subcategoryId": "agaclar-meyve",
+      "cityId": "lenkeran",
+      "priceType": "fixed",
+      "price": 65,
+      "priceUnit": "piece",
+      "deliveryAvailable": false,
+      "plantingAvailable": false,
+      "contactName": "Tural",
+      "contactPhone": "+994517023314",
+      "whatsapp": true,
+      "phoneHidden": true,
+      "plant": {
+        "species": "Citrus limon",
+        "heightCm": {
+          "min": 80,
+          "max": 100
+        },
+        "ageYears": 3,
+        "rootSystem": "container",
+        "potLitres": 20,
+        "sun": "full-sun",
+        "water": "medium",
+        "frostHardinessC": -3,
+        "foliage": "evergreen",
+        "plantingMonths": [
+          4,
+          5
+        ]
+      },
+      "attributes": {
+        "species": "Citrus limon",
+        "heightMin": "80",
+        "heightMax": "100",
+        "age": "3",
+        "rootSystem": "container",
+        "potLitres": "20",
+        "sun": "full-sun",
+        "water": "medium",
+        "frost": "-3",
+        "foliage": "evergreen",
+        "plantingMonths": "4,5"
+      },
+      "careTips": [
+        "Qışda +5 °C-dən soyuq olmayan işıqlı otaqda saxlayın.",
+        "Suvarma suyu otaq temperaturunda olsun."
+      ],
+      "promoted": true,
+      "views": 0,
+      "submittedAt": "2026-10-12T08:00:00Z",
+      "publishedAt": "2026-10-12T08:00:00Z",
+      "expiresAt": "2026-11-11T05:00:00Z",
+      "photos": [
+        "/images/listings/limon-agaci-1.webp",
+        "/images/listings/limon-agaci-2.webp",
+        "/images/listings/limon-agaci-3.webp"
+      ]
+    },
+    {
+      "key": "leyland-servi",
+      "number": 10604,
+      "status": "active",
+      "owner": "contact-502331840",
+      "title": "Leyland sərvi",
+      "description": [],
+      "categoryId": "agaclar",
+      "subcategoryId": "agaclar-iyneyarpaqli",
+      "cityId": "sumqayit",
+      "priceType": "fixed",
+      "price": 38,
+      "priceUnit": "piece",
+      "wholesale": {
+        "price": 32,
+        "minQuantity": 20
+      },
+      "quantityAvailable": 300,
+      "deliveryAvailable": false,
+      "deliveryAreas": "Sumqayıt, Bakı",
+      "plantingAvailable": true,
+      "contactName": "Sumqayıt Yaşıllıq",
+      "contactPhone": "+994502331840",
+      "whatsapp": true,
+      "phoneHidden": false,
+      "plant": {
+        "species": "× Cupressocyparis leylandii",
+        "heightCm": {
+          "min": 100,
+          "max": 120
+        },
+        "ageYears": 2,
+        "rootSystem": "container",
+        "potLitres": 10,
+        "sun": "full-sun",
+        "water": "medium",
+        "frostHardinessC": -20,
+        "foliage": "evergreen",
+        "plantingMonths": [
+          3,
+          4,
+          10,
+          11
+        ]
+      },
+      "attributes": {
+        "species": "× Cupressocyparis leylandii",
+        "heightMin": "100",
+        "heightMax": "120",
+        "age": "2",
+        "rootSystem": "container",
+        "potLitres": "10",
+        "sun": "full-sun",
+        "water": "medium",
+        "frost": "-20",
+        "foliage": "evergreen",
+        "plantingMonths": "3,4,10,11"
+      },
+      "careTips": [
+        "Canlı hasar üçün tingləri 60–80 sm aralıqla əkin.",
+        "İlk iki yayda damcı suvarma qurun."
+      ],
+      "promoted": false,
+      "views": 0,
+      "submittedAt": "2026-10-12T07:55:00Z",
+      "publishedAt": "2026-10-12T07:55:00Z",
+      "expiresAt": "2026-11-11T05:00:00Z",
+      "photos": [
+        "/images/listings/leyland-servi-1.webp",
+        "/images/listings/leyland-servi-2.webp",
+        "/images/listings/leyland-servi-3.webp"
+      ]
+    },
+    {
+      "key": "qizilgul-fidani",
+      "number": 10605,
+      "status": "active",
+      "owner": "contact-222564011",
+      "title": "Qızılgül fidanı",
+      "description": [],
+      "categoryId": "guller",
+      "subcategoryId": "guller-coxillik",
+      "cityId": "gence",
+      "priceType": "fixed",
+      "price": 12,
+      "priceUnit": "piece",
+      "deliveryAvailable": false,
+      "plantingAvailable": false,
+      "contactName": "Gəncə Gül Evi",
+      "contactPhone": "+994222564011",
+      "whatsapp": false,
+      "phoneHidden": false,
+      "plant": {
+        "species": "Rosa hybrida",
+        "heightCm": {
+          "min": 40,
+          "max": 60
+        },
+        "rootSystem": "container",
+        "potLitres": 5,
+        "sun": "full-sun",
+        "water": "medium",
+        "frostHardinessC": -20,
+        "foliage": "deciduous",
+        "plantingMonths": [
+          3,
+          4,
+          10
+        ]
+      },
+      "attributes": {
+        "species": "Rosa hybrida",
+        "heightMin": "40",
+        "heightMax": "60",
+        "rootSystem": "container",
+        "potLitres": "5",
+        "sun": "full-sun",
+        "water": "medium",
+        "frost": "-20",
+        "foliage": "deciduous",
+        "plantingMonths": "3,4,10"
+      },
+      "careTips": [
+        "Solmuş çiçəkləri kəsin: yenisi tez açır."
+      ],
+      "promoted": false,
+      "views": 0,
+      "submittedAt": "2026-10-12T07:50:00Z",
+      "publishedAt": "2026-10-12T07:50:00Z",
+      "expiresAt": "2026-11-11T05:00:00Z",
+      "photos": [
+        "/images/listings/qizilgul-fidani-1.webp",
+        "/images/listings/qizilgul-fidani-2.webp",
+        "/images/listings/qizilgul-fidani-3.webp"
+      ]
+    },
+    {
+      "key": "alma-fidani",
+      "number": 10606,
+      "status": "active",
+      "owner": "contact-242441870",
+      "title": "Meyvə bağı üçün alma fidanı",
+      "description": [],
+      "categoryId": "agaclar",
+      "subcategoryId": "agaclar-meyve",
+      "cityId": "seki",
+      "priceType": "fixed",
+      "price": 9,
+      "priceUnit": "piece",
+      "wholesale": {
+        "price": 7,
+        "minQuantity": 50
+      },
+      "quantityAvailable": 1200,
+      "deliveryAvailable": false,
+      "deliveryAreas": "Bütün Azərbaycan (poçt ilə)",
+      "plantingAvailable": false,
+      "contactName": "Şəki Fidanlığı",
+      "contactPhone": "+994242441870",
+      "whatsapp": false,
+      "phoneHidden": false,
+      "plant": {
+        "species": "Malus domestica 'Golden Delicious'",
+        "ageYears": 2,
+        "rootSystem": "bare-root",
+        "sun": "full-sun",
+        "water": "medium",
+        "frostHardinessC": -30,
+        "foliage": "deciduous",
+        "plantingMonths": [
+          3,
+          4,
+          10,
+          11
+        ]
+      },
+      "attributes": {
+        "species": "Malus domestica 'Golden Delicious'",
+        "age": "2",
+        "rootSystem": "bare-root",
+        "sun": "full-sun",
+        "water": "medium",
+        "frost": "-30",
+        "foliage": "deciduous",
+        "plantingMonths": "3,4,10,11"
+      },
+      "careTips": [
+        "Açıq köklü fidanı alandan sonra 2 gün ərzində əkin.",
+        "Əkindən əvvəl kökləri 2–3 saat suda saxlayın."
+      ],
+      "promoted": false,
+      "views": 0,
+      "submittedAt": "2026-10-12T07:40:00Z",
+      "publishedAt": "2026-10-12T07:40:00Z",
+      "expiresAt": "2026-11-11T05:00:00Z",
+      "photos": [
+        "/images/listings/alma-fidani-1.webp",
+        "/images/listings/alma-fidani-2.webp",
+        "/images/listings/alma-fidani-3.webp"
+      ]
+    },
+    {
+      "key": "tuya-smaragd",
+      "number": 10362,
+      "status": "active",
+      "owner": "owner-abseron-tingcilik",
+      "seller": "abseron-tingcilik",
+      "title": "Tuya — Smaragd",
+      "description": [],
+      "categoryId": "agaclar",
+      "subcategoryId": "agaclar-iyneyarpaqli",
+      "cityId": "abseron",
+      "area": "Məhəmmədi qəsəbəsi",
+      "priceType": "fixed",
+      "price": 55,
+      "priceUnit": "piece",
+      "wholesale": {
+        "price": 48,
+        "minQuantity": 20
+      },
+      "quantityAvailable": 180,
+      "deliveryAvailable": true,
+      "deliveryAreas": "Bakı və Abşeron",
+      "plantingAvailable": true,
+      "contactName": "Elvin Əliyev",
+      "contactPhone": "+994505551234",
+      "whatsapp": true,
+      "phoneHidden": false,
+      "plant": {
+        "species": "Thuja occidentalis 'Smaragd'",
+        "heightCm": {
+          "min": 140
+        },
+        "ageYears": 3,
+        "rootSystem": "container",
+        "potLitres": 15,
+        "sun": "full-sun",
+        "water": "medium",
+        "frostHardinessC": -35,
+        "foliage": "evergreen",
+        "plantingMonths": [
+          3,
+          4,
+          10,
+          11
+        ]
+      },
+      "attributes": {
+        "species": "Thuja occidentalis 'Smaragd'",
+        "heightMin": "140",
+        "age": "3",
+        "rootSystem": "container",
+        "potLitres": "15",
+        "sun": "full-sun",
+        "water": "medium",
+        "frost": "-35",
+        "foliage": "evergreen",
+        "plantingMonths": "3,4,10,11"
+      },
+      "careTips": [
+        "Canlı hasar üçün hər metrə 2 ting əkin.",
+        "Yayın istisində axşam çiləyin."
+      ],
+      "promoted": false,
+      "views": 176,
+      "submittedAt": "2026-10-12T04:47:00Z",
+      "publishedAt": "2026-10-12T04:47:00Z",
+      "expiresAt": "2026-12-02T04:30:00Z",
+      "editedAt": "2026-11-02T04:30:00Z",
+      "photos": [
+        "/images/listings/tuya-smaragd-1.webp",
+        "/images/listings/tuya-smaragd-2.webp",
+        "/images/dashboard/my-listing-2.webp"
+      ]
+    },
+    {
+      "key": "defne-agaci",
+      "number": 10607,
+      "status": "active",
+      "owner": "owner-abseron-tingcilik",
+      "seller": "abseron-tingcilik",
+      "title": "Dəfnə ağacı",
+      "description": [],
+      "categoryId": "agaclar",
+      "subcategoryId": "agaclar-enliyarpaqli-hemiseyasil",
+      "cityId": "abseron",
+      "area": "Məhəmmədi qəsəbəsi",
+      "priceType": "fixed",
+      "price": 48,
+      "priceUnit": "piece",
+      "deliveryAvailable": true,
+      "deliveryAreas": "Bakı və Abşeron",
+      "plantingAvailable": true,
+      "contactName": "Elvin Əliyev",
+      "contactPhone": "+994505551234",
+      "whatsapp": true,
+      "phoneHidden": false,
+      "plant": {
+        "species": "Laurus nobilis",
+        "heightCm": {
+          "min": 90
+        },
+        "ageYears": 3,
+        "rootSystem": "container",
+        "potLitres": 20,
+        "sun": "full-sun",
+        "water": "low",
+        "frostHardinessC": -10,
+        "foliage": "evergreen",
+        "plantingMonths": [
+          3,
+          4,
+          5
+        ]
+      },
+      "attributes": {
+        "species": "Laurus nobilis",
+        "heightMin": "90",
+        "age": "3",
+        "rootSystem": "container",
+        "potLitres": "20",
+        "sun": "full-sun",
+        "water": "low",
+        "frost": "-10",
+        "foliage": "evergreen",
+        "plantingMonths": "3,4,5"
+      },
+      "careTips": [],
+      "promoted": false,
+      "views": 0,
+      "submittedAt": "2026-10-12T04:35:00Z",
+      "publishedAt": "2026-10-12T04:35:00Z",
+      "expiresAt": "2026-11-11T05:00:00Z",
+      "photos": [
+        "/images/listings/defne-agaci-1.webp",
+        "/images/listings/defne-agaci-2.webp"
+      ]
+    },
+    {
+      "key": "nar-fidani",
+      "number": 10608,
+      "status": "active",
+      "owner": "owner-abseron-tingcilik",
+      "seller": "abseron-tingcilik",
+      "title": "Nar fidanı — Güleyşə",
+      "description": [],
+      "categoryId": "agaclar",
+      "subcategoryId": "agaclar-meyve",
+      "cityId": "abseron",
+      "area": "Məhəmmədi qəsəbəsi",
+      "priceType": "fixed",
+      "price": 15,
+      "priceUnit": "piece",
+      "wholesale": {
+        "price": 12,
+        "minQuantity": 30
+      },
+      "deliveryAvailable": false,
+      "deliveryAreas": "Bakı və Abşeron",
+      "plantingAvailable": false,
+      "contactName": "Elvin Əliyev",
+      "contactPhone": "+994505551234",
+      "whatsapp": true,
+      "phoneHidden": false,
+      "plant": {
+        "species": "Punica granatum 'Gülöyşə'",
+        "heightCm": {
+          "min": 80
+        },
+        "ageYears": 2,
+        "rootSystem": "container",
+        "potLitres": 7,
+        "sun": "full-sun",
+        "water": "low",
+        "frostHardinessC": -15,
+        "foliage": "deciduous",
+        "plantingMonths": [
+          3,
+          4,
+          10
+        ]
+      },
+      "attributes": {
+        "species": "Punica granatum 'Gülöyşə'",
+        "heightMin": "80",
+        "age": "2",
+        "rootSystem": "container",
+        "potLitres": "7",
+        "sun": "full-sun",
+        "water": "low",
+        "frost": "-15",
+        "foliage": "deciduous",
+        "plantingMonths": "3,4,10"
+      },
+      "careTips": [],
+      "promoted": false,
+      "views": 0,
+      "submittedAt": "2026-10-12T04:30:00Z",
+      "publishedAt": "2026-10-12T04:30:00Z",
+      "expiresAt": "2026-11-11T05:00:00Z",
+      "photos": [
+        "/images/listings/nar-fidani-1.webp"
+      ]
+    },
+    {
+      "key": "italyan-sami",
+      "number": 10609,
+      "status": "active",
+      "owner": "contact-775206413",
+      "title": "İtalyan şamı",
+      "description": [],
+      "categoryId": "agaclar",
+      "subcategoryId": "agaclar-iyneyarpaqli",
+      "cityId": "baki",
+      "priceType": "negotiable",
+      "price": 160,
+      "priceUnit": "piece",
+      "deliveryAvailable": true,
+      "plantingAvailable": true,
+      "contactName": "Kamran",
+      "contactPhone": "+994775206413",
+      "whatsapp": true,
+      "phoneHidden": false,
+      "plant": {
+        "species": "Pinus pinea",
+        "heightCm": {
+          "min": 200
+        },
+        "ageYears": 5,
+        "rootSystem": "rootball",
+        "sun": "full-sun",
+        "water": "low",
+        "frostHardinessC": -15,
+        "foliage": "evergreen",
+        "plantingMonths": [
+          3,
+          4,
+          10,
+          11
+        ]
+      },
+      "attributes": {
+        "species": "Pinus pinea",
+        "heightMin": "200",
+        "age": "5",
+        "rootSystem": "rootball",
+        "sun": "full-sun",
+        "water": "low",
+        "frost": "-15",
+        "foliage": "evergreen",
+        "plantingMonths": "3,4,10,11"
+      },
+      "careTips": [],
+      "promoted": false,
+      "views": 0,
+      "submittedAt": "2026-10-12T04:45:00Z",
+      "publishedAt": "2026-10-12T04:45:00Z",
+      "expiresAt": "2026-11-11T05:00:00Z",
+      "photos": [
+        "/images/listings/italyan-sami-1.webp"
+      ]
+    },
+    {
+      "key": "qaracohre",
+      "number": 10610,
+      "status": "active",
+      "owner": "contact-503779021",
+      "title": "Qaraçöhrə — Taxus baccata",
+      "description": [],
+      "categoryId": "agaclar",
+      "subcategoryId": "agaclar-iyneyarpaqli",
+      "cityId": "baki",
+      "priceType": "fixed",
+      "price": 72,
+      "priceUnit": "piece",
+      "deliveryAvailable": true,
+      "plantingAvailable": false,
+      "contactName": "Bağban Ramil",
+      "contactPhone": "+994503779021",
+      "whatsapp": false,
+      "phoneHidden": false,
+      "plant": {
+        "species": "Taxus baccata",
+        "heightCm": {
+          "min": 100
+        },
+        "ageYears": 3,
+        "rootSystem": "container",
+        "potLitres": 20,
+        "sun": "part-shade",
+        "water": "medium",
+        "frostHardinessC": -25,
+        "foliage": "evergreen",
+        "plantingMonths": [
+          3,
+          4,
+          10,
+          11
+        ]
+      },
+      "attributes": {
+        "species": "Taxus baccata",
+        "heightMin": "100",
+        "age": "3",
+        "rootSystem": "container",
+        "potLitres": "20",
+        "sun": "part-shade",
+        "water": "medium",
+        "frost": "-25",
+        "foliage": "evergreen",
+        "plantingMonths": "3,4,10,11"
+      },
+      "careTips": [],
+      "promoted": false,
+      "views": 0,
+      "submittedAt": "2026-10-12T04:48:00Z",
+      "publishedAt": "2026-10-12T04:48:00Z",
+      "expiresAt": "2026-11-11T05:00:00Z",
+      "photos": [
+        "/images/listings/qaracohre-1.webp"
+      ]
+    },
+    {
+      "key": "leyland-servi-120",
+      "number": 10524,
+      "status": "pending",
+      "owner": "owner-abseron-tingcilik",
+      "seller": "abseron-tingcilik",
+      "title": "Leyland sərvi — 120 sm",
+      "description": [],
+      "categoryId": "agaclar",
+      "subcategoryId": "agaclar-iyneyarpaqli",
+      "cityId": "abseron",
+      "area": "Məhəmmədi qəsəbəsi",
+      "priceType": "fixed",
+      "price": 38,
+      "priceUnit": "piece",
+      "deliveryAvailable": false,
+      "deliveryAreas": "Bakı və Abşeron",
+      "plantingAvailable": false,
+      "contactName": "Elvin Əliyev",
+      "contactPhone": "+994505551234",
+      "whatsapp": true,
+      "phoneHidden": false,
+      "plant": {
+        "species": "× Cupressocyparis leylandii",
+        "heightCm": {
+          "min": 120
+        },
+        "ageYears": 2,
+        "rootSystem": "container",
+        "sun": "full-sun",
+        "water": "medium"
+      },
+      "attributes": {
+        "species": "× Cupressocyparis leylandii",
+        "heightMin": "120",
+        "age": "2",
+        "rootSystem": "container",
+        "sun": "full-sun",
+        "water": "medium"
+      },
+      "careTips": [],
+      "promoted": false,
+      "views": 0,
+      "submittedAt": "2026-10-12T09:00:00Z",
+      "photos": [
+        "/images/post-ad/upload-1.webp",
+        "/images/post-ad/upload-2.webp",
+        "/images/post-ad/upload-3.webp",
+        "/images/post-ad/preview.webp",
+        "/images/admin/moderation-leyland.webp",
+        "/images/post-ad/submitted.webp",
+        "/images/dashboard/my-listing-3.webp"
+      ]
+    },
+    {
+      "key": "lavanda-fidani",
+      "number": 10118,
+      "status": "expired",
+      "owner": "owner-abseron-tingcilik",
+      "seller": "abseron-tingcilik",
+      "title": "Lavanda fidanı",
+      "description": [],
+      "categoryId": "kollar",
+      "subcategoryId": "kollar-hemiseyasil",
+      "cityId": "abseron",
+      "priceType": "fixed",
+      "price": 7,
+      "priceUnit": "piece",
+      "deliveryAvailable": false,
+      "plantingAvailable": false,
+      "contactName": "Elvin Əliyev",
+      "contactPhone": "+994505551234",
+      "whatsapp": false,
+      "phoneHidden": false,
+      "plant": {
+        "species": "Lavandula angustifolia",
+        "rootSystem": "container",
+        "potLitres": 2,
+        "sun": "full-sun",
+        "water": "low",
+        "frostHardinessC": -20,
+        "foliage": "evergreen"
+      },
+      "attributes": {
+        "species": "Lavandula angustifolia",
+        "rootSystem": "container",
+        "potLitres": "2",
+        "sun": "full-sun",
+        "water": "low",
+        "frost": "-20",
+        "foliage": "evergreen"
+      },
+      "careTips": [],
+      "promoted": false,
+      "views": 92,
+      "submittedAt": "2026-09-12T06:00:00Z",
+      "publishedAt": "2026-09-12T06:00:00Z",
+      "expiresAt": "2026-10-12T06:00:00Z",
+      "photos": [
+        "/images/dashboard/my-listing-4.webp"
+      ]
+    },
+    {
+      "key": "sarv-tingleri-topdan",
+      "number": 10531,
+      "status": "rejected",
+      "owner": "owner-abseron-tingcilik",
+      "seller": "abseron-tingcilik",
+      "title": "Sərv tingləri — topdan, 100 ədəddən",
+      "description": [],
+      "categoryId": "agaclar",
+      "subcategoryId": "agaclar-iyneyarpaqli",
+      "cityId": "abseron",
+      "priceType": "fixed",
+      "price": 5,
+      "priceUnit": "piece",
+      "wholesale": {
+        "price": 4,
+        "minQuantity": 100
+      },
+      "deliveryAvailable": false,
+      "plantingAvailable": false,
+      "contactName": "Elvin Əliyev",
+      "contactPhone": "+994505551234",
+      "whatsapp": false,
+      "phoneHidden": false,
+      "attributes": {},
+      "careTips": [],
+      "promoted": false,
+      "views": 0,
+      "submittedAt": "2026-11-03T12:20:00Z",
+      "rejectionReasonCode": "bad-photos",
+      "rejectionNote": "Şəkillərdə başqa bitki görünür. Satdığınız tinglərin öz şəkillərini əlavə edin və elanı yenidən göndərin.",
+      "photos": [
+        "/images/listings/leyland-servi-1.webp"
+      ]
+    },
+    {
+      "key": "yasil-hasar-paketi",
+      "number": 10377,
+      "status": "inactive",
+      "owner": "owner-abseron-tingcilik",
+      "seller": "abseron-tingcilik",
+      "title": "Yaşıl hasar dəsti — 10 tuya + əkin",
+      "description": [],
+      "categoryId": "agaclar",
+      "subcategoryId": "agaclar-iyneyarpaqli",
+      "cityId": "abseron",
+      "priceType": "fixed",
+      "price": 520,
+      "priceUnit": "set",
+      "deliveryAvailable": false,
+      "plantingAvailable": false,
+      "contactName": "Elvin Əliyev",
+      "contactPhone": "+994505551234",
+      "whatsapp": false,
+      "phoneHidden": false,
+      "attributes": {},
+      "careTips": [],
+      "promoted": false,
+      "views": 61,
+      "submittedAt": "2026-10-02T07:00:00Z",
+      "publishedAt": "2026-10-02T07:00:00Z",
+      "expiresAt": "2026-12-01T06:00:00Z",
+      "photos": [
+        "/images/listings/tuya-smaragd-1.webp"
+      ]
+    },
+    {
+      "key": "cinar",
+      "number": 10440,
+      "status": "active",
+      "owner": "owner-quba-fidan",
+      "seller": "quba-fidan",
+      "title": "Çinar — Platanus orientalis",
+      "description": [],
+      "categoryId": "agaclar",
+      "subcategoryId": "agaclar-enliyarpaqli-yarpaqtoken",
+      "cityId": "quba",
+      "priceType": "fixed",
+      "price": 89,
+      "priceUnit": "piece",
+      "deliveryAvailable": true,
+      "deliveryAreas": "Bütün Azərbaycan",
+      "plantingAvailable": true,
+      "contactName": "Quba Fidan",
+      "contactPhone": "+994233351208",
+      "whatsapp": true,
+      "phoneHidden": false,
+      "plant": {
+        "species": "Platanus orientalis",
+        "heightCm": {
+          "min": 250,
+          "max": 300
+        },
+        "ageYears": 5,
+        "rootSystem": "rootball",
+        "sun": "full-sun",
+        "water": "medium",
+        "frostHardinessC": -25,
+        "foliage": "deciduous",
+        "plantingMonths": [
+          3,
+          4,
+          10,
+          11
+        ]
+      },
+      "attributes": {
+        "species": "Platanus orientalis",
+        "heightMin": "250",
+        "heightMax": "300",
+        "age": "5",
+        "rootSystem": "rootball",
+        "sun": "full-sun",
+        "water": "medium",
+        "frost": "-25",
+        "foliage": "deciduous",
+        "plantingMonths": "3,4,10,11"
+      },
+      "careTips": [],
+      "promoted": false,
+      "views": 0,
+      "submittedAt": "2026-10-11T12:00:00Z",
+      "publishedAt": "2026-10-11T12:00:00Z",
+      "photos": [
+        "/images/listings/placeholder-agaclar.webp"
+      ]
+    },
+    {
+      "key": "coke",
+      "number": 10441,
+      "status": "active",
+      "owner": "owner-quba-fidan",
+      "seller": "quba-fidan",
+      "title": "Cökə — Tilia cordata",
+      "description": [],
+      "categoryId": "agaclar",
+      "subcategoryId": "agaclar-enliyarpaqli-yarpaqtoken",
+      "cityId": "quba",
+      "priceType": "fixed",
+      "price": 75,
+      "priceUnit": "piece",
+      "deliveryAvailable": true,
+      "deliveryAreas": "Bütün Azərbaycan",
+      "plantingAvailable": false,
+      "contactName": "Quba Fidan",
+      "contactPhone": "+994233351208",
+      "whatsapp": true,
+      "phoneHidden": false,
+      "plant": {
+        "species": "Tilia cordata",
+        "heightCm": {
+          "min": 200,
+          "max": 250
+        },
+        "ageYears": 4,
+        "rootSystem": "bare-root",
+        "sun": "part-shade",
+        "water": "medium",
+        "frostHardinessC": -35,
+        "foliage": "deciduous",
+        "plantingMonths": [
+          3,
+          4,
+          10,
+          11
+        ]
+      },
+      "attributes": {
+        "species": "Tilia cordata",
+        "heightMin": "200",
+        "heightMax": "250",
+        "age": "4",
+        "rootSystem": "bare-root",
+        "sun": "part-shade",
+        "water": "medium",
+        "frost": "-35",
+        "foliage": "deciduous",
+        "plantingMonths": "3,4,10,11"
+      },
+      "careTips": [],
+      "promoted": false,
+      "views": 0,
+      "submittedAt": "2026-10-09T12:00:00Z",
+      "publishedAt": "2026-10-09T12:00:00Z",
+      "photos": [
+        "/images/listings/placeholder-agaclar.webp"
+      ]
+    },
+    {
+      "key": "sabalid",
+      "number": 10442,
+      "status": "active",
+      "owner": "contact-507124018",
+      "title": "Şabalıd — Castanea sativa",
+      "description": [],
+      "categoryId": "agaclar",
+      "subcategoryId": "agaclar-enliyarpaqli-yarpaqtoken",
+      "cityId": "seki",
+      "priceType": "fixed",
+      "price": 60,
+      "priceUnit": "piece",
+      "deliveryAvailable": false,
+      "plantingAvailable": false,
+      "contactName": "Elçin",
+      "contactPhone": "+994507124018",
+      "whatsapp": true,
+      "phoneHidden": false,
+      "plant": {
+        "species": "Castanea sativa",
+        "heightCm": {
+          "min": 150,
+          "max": 180
+        },
+        "ageYears": 3,
+        "rootSystem": "rootball",
+        "sun": "full-sun",
+        "water": "medium",
+        "frostHardinessC": -20,
+        "foliage": "deciduous",
+        "plantingMonths": [
+          3,
+          4,
+          10
+        ]
+      },
+      "attributes": {
+        "species": "Castanea sativa",
+        "heightMin": "150",
+        "heightMax": "180",
+        "age": "3",
+        "rootSystem": "rootball",
+        "sun": "full-sun",
+        "water": "medium",
+        "frost": "-20",
+        "foliage": "deciduous",
+        "plantingMonths": "3,4,10"
+      },
+      "careTips": [],
+      "promoted": false,
+      "views": 0,
+      "submittedAt": "2026-10-07T12:00:00Z",
+      "publishedAt": "2026-10-07T12:00:00Z",
+      "photos": [
+        "/images/listings/placeholder-agaclar.webp"
+      ]
+    },
+    {
+      "key": "maqnoliya",
+      "number": 10443,
+      "status": "active",
+      "owner": "contact-516042875",
+      "title": "Maqnoliya — Magnolia grandiflora",
+      "description": [],
+      "categoryId": "agaclar",
+      "subcategoryId": "agaclar-enliyarpaqli-hemiseyasil",
+      "cityId": "lenkeran",
+      "priceType": "negotiable",
+      "price": 180,
+      "priceUnit": "piece",
+      "deliveryAvailable": false,
+      "plantingAvailable": false,
+      "contactName": "Fərid",
+      "contactPhone": "+994516042875",
+      "whatsapp": true,
+      "phoneHidden": false,
+      "plant": {
+        "species": "Magnolia grandiflora",
+        "heightCm": {
+          "min": 150,
+          "max": 170
+        },
+        "ageYears": 5,
+        "rootSystem": "container",
+        "potLitres": 45,
+        "sun": "full-sun",
+        "water": "medium",
+        "frostHardinessC": -15,
+        "foliage": "evergreen",
+        "plantingMonths": [
+          4,
+          5,
+          9,
+          10
+        ]
+      },
+      "attributes": {
+        "species": "Magnolia grandiflora",
+        "heightMin": "150",
+        "heightMax": "170",
+        "age": "5",
+        "rootSystem": "container",
+        "potLitres": "45",
+        "sun": "full-sun",
+        "water": "medium",
+        "frost": "-15",
+        "foliage": "evergreen",
+        "plantingMonths": "4,5,9,10"
+      },
+      "careTips": [],
+      "promoted": false,
+      "views": 0,
+      "submittedAt": "2026-10-10T12:00:00Z",
+      "publishedAt": "2026-10-10T12:00:00Z",
+      "photos": [
+        "/images/listings/placeholder-agaclar.webp"
+      ]
+    },
+    {
+      "key": "das-palid",
+      "number": 10444,
+      "status": "active",
+      "owner": "owner-yasil-bag-merkezi",
+      "seller": "yasil-bag-merkezi",
+      "title": "Daş palıd — Quercus ilex",
+      "description": [],
+      "categoryId": "agaclar",
+      "subcategoryId": "agaclar-enliyarpaqli-hemiseyasil",
+      "cityId": "baki",
+      "priceType": "fixed",
+      "price": 140,
+      "priceUnit": "piece",
+      "deliveryAvailable": true,
+      "deliveryAreas": "Bakı daxilində",
+      "plantingAvailable": true,
+      "contactName": "Yaşıl Bağ Mərkəzi",
+      "contactPhone": "+994125104420",
+      "whatsapp": true,
+      "phoneHidden": false,
+      "plant": {
+        "species": "Quercus ilex",
+        "heightCm": {
+          "min": 180,
+          "max": 200
+        },
+        "ageYears": 6,
+        "rootSystem": "rootball",
+        "sun": "full-sun",
+        "water": "low",
+        "frostHardinessC": -15,
+        "foliage": "evergreen",
+        "plantingMonths": [
+          3,
+          4,
+          10,
+          11
+        ]
+      },
+      "attributes": {
+        "species": "Quercus ilex",
+        "heightMin": "180",
+        "heightMax": "200",
+        "age": "6",
+        "rootSystem": "rootball",
+        "sun": "full-sun",
+        "water": "low",
+        "frost": "-15",
+        "foliage": "evergreen",
+        "plantingMonths": "3,4,10,11"
+      },
+      "careTips": [],
+      "promoted": false,
+      "views": 0,
+      "submittedAt": "2026-10-08T12:00:00Z",
+      "publishedAt": "2026-10-08T12:00:00Z",
+      "photos": [
+        "/images/listings/placeholder-agaclar.webp"
+      ]
+    },
+    {
+      "key": "berberis",
+      "number": 10445,
+      "status": "active",
+      "owner": "owner-quba-fidan",
+      "seller": "quba-fidan",
+      "title": "Bərbəris — Berberis thunbergii 'Atropurpurea'",
+      "description": [],
+      "categoryId": "kollar",
+      "subcategoryId": "kollar-yarpaqtoken",
+      "cityId": "quba",
+      "priceType": "fixed",
+      "price": 14,
+      "priceUnit": "piece",
+      "deliveryAvailable": true,
+      "deliveryAreas": "Bütün Azərbaycan",
+      "plantingAvailable": false,
+      "contactName": "Quba Fidan",
+      "contactPhone": "+994233351208",
+      "whatsapp": true,
+      "phoneHidden": false,
+      "plant": {
+        "species": "Berberis thunbergii 'Atropurpurea'",
+        "heightCm": {
+          "min": 40,
+          "max": 60
+        },
+        "ageYears": 2,
+        "rootSystem": "container",
+        "potLitres": 5,
+        "sun": "full-sun",
+        "water": "low",
+        "frostHardinessC": -30,
+        "foliage": "deciduous",
+        "plantingMonths": [
+          3,
+          4,
+          10,
+          11
+        ]
+      },
+      "attributes": {
+        "species": "Berberis thunbergii 'Atropurpurea'",
+        "heightMin": "40",
+        "heightMax": "60",
+        "age": "2",
+        "rootSystem": "container",
+        "potLitres": "5",
+        "sun": "full-sun",
+        "water": "low",
+        "frost": "-30",
+        "foliage": "deciduous",
+        "plantingMonths": "3,4,10,11"
+      },
+      "careTips": [],
+      "promoted": false,
+      "views": 0,
+      "submittedAt": "2026-10-11T11:00:00Z",
+      "publishedAt": "2026-10-11T11:00:00Z",
+      "photos": [
+        "/images/listings/placeholder-kollar.webp"
+      ]
+    },
+    {
+      "key": "hortenziya",
+      "number": 10446,
+      "status": "active",
+      "owner": "owner-yasil-bag-merkezi",
+      "seller": "yasil-bag-merkezi",
+      "title": "Hortenziya — Hydrangea macrophylla",
+      "description": [],
+      "categoryId": "kollar",
+      "subcategoryId": "kollar-yarpaqtoken",
+      "cityId": "baki",
+      "priceType": "fixed",
+      "price": 35,
+      "priceUnit": "piece",
+      "deliveryAvailable": true,
+      "deliveryAreas": "Bakı daxilində",
+      "plantingAvailable": false,
+      "contactName": "Yaşıl Bağ Mərkəzi",
+      "contactPhone": "+994125104420",
+      "whatsapp": true,
+      "phoneHidden": false,
+      "plant": {
+        "species": "Hydrangea macrophylla",
+        "heightCm": {
+          "min": 50,
+          "max": 70
+        },
+        "ageYears": 3,
+        "rootSystem": "container",
+        "potLitres": 10,
+        "sun": "part-shade",
+        "water": "high",
+        "frostHardinessC": -15,
+        "foliage": "deciduous",
+        "plantingMonths": [
+          3,
+          4,
+          5,
+          9,
+          10
+        ]
+      },
+      "attributes": {
+        "species": "Hydrangea macrophylla",
+        "heightMin": "50",
+        "heightMax": "70",
+        "age": "3",
+        "rootSystem": "container",
+        "potLitres": "10",
+        "sun": "part-shade",
+        "water": "high",
+        "frost": "-15",
+        "foliage": "deciduous",
+        "plantingMonths": "3,4,5,9,10"
+      },
+      "careTips": [],
+      "promoted": false,
+      "views": 0,
+      "submittedAt": "2026-10-10T11:00:00Z",
+      "publishedAt": "2026-10-10T11:00:00Z",
+      "photos": [
+        "/images/listings/placeholder-kollar.webp"
+      ]
+    },
+    {
+      "key": "spireya",
+      "number": 10447,
+      "status": "active",
+      "owner": "contact-552386190",
+      "title": "Spireya — Spiraea × vanhouttei",
+      "description": [],
+      "categoryId": "kollar",
+      "subcategoryId": "kollar-yarpaqtoken",
+      "cityId": "gence",
+      "priceType": "fixed",
+      "price": 12,
+      "priceUnit": "piece",
+      "deliveryAvailable": false,
+      "plantingAvailable": false,
+      "contactName": "Nərgiz",
+      "contactPhone": "+994552386190",
+      "whatsapp": true,
+      "phoneHidden": false,
+      "plant": {
+        "species": "Spiraea × vanhouttei",
+        "heightCm": {
+          "min": 60,
+          "max": 80
+        },
+        "ageYears": 2,
+        "rootSystem": "bare-root",
+        "sun": "full-sun",
+        "water": "medium",
+        "frostHardinessC": -30,
+        "foliage": "deciduous",
+        "plantingMonths": [
+          3,
+          4,
+          10,
+          11
+        ]
+      },
+      "attributes": {
+        "species": "Spiraea × vanhouttei",
+        "heightMin": "60",
+        "heightMax": "80",
+        "age": "2",
+        "rootSystem": "bare-root",
+        "sun": "full-sun",
+        "water": "medium",
+        "frost": "-30",
+        "foliage": "deciduous",
+        "plantingMonths": "3,4,10,11"
+      },
+      "careTips": [],
+      "promoted": false,
+      "views": 0,
+      "submittedAt": "2026-10-07T11:00:00Z",
+      "publishedAt": "2026-10-07T11:00:00Z",
+      "photos": [
+        "/images/listings/placeholder-kollar.webp"
+      ]
+    },
+    {
+      "key": "yasemen",
+      "number": 10448,
+      "status": "active",
+      "owner": "contact-705128346",
+      "title": "Yasəmən — Syringa vulgaris",
+      "description": [],
+      "categoryId": "kollar",
+      "subcategoryId": "kollar-yarpaqtoken",
+      "cityId": "seki",
+      "priceType": "fixed",
+      "price": 22,
+      "priceUnit": "piece",
+      "deliveryAvailable": false,
+      "plantingAvailable": false,
+      "contactName": "Səbinə",
+      "contactPhone": "+994705128346",
+      "whatsapp": true,
+      "phoneHidden": false,
+      "plant": {
+        "species": "Syringa vulgaris",
+        "heightCm": {
+          "min": 80,
+          "max": 100
+        },
+        "ageYears": 3,
+        "rootSystem": "rootball",
+        "sun": "full-sun",
+        "water": "medium",
+        "frostHardinessC": -35,
+        "foliage": "deciduous",
+        "plantingMonths": [
+          3,
+          4,
+          10,
+          11
+        ]
+      },
+      "attributes": {
+        "species": "Syringa vulgaris",
+        "heightMin": "80",
+        "heightMax": "100",
+        "age": "3",
+        "rootSystem": "rootball",
+        "sun": "full-sun",
+        "water": "medium",
+        "frost": "-35",
+        "foliage": "deciduous",
+        "plantingMonths": "3,4,10,11"
+      },
+      "careTips": [],
+      "promoted": false,
+      "views": 0,
+      "submittedAt": "2026-10-06T11:00:00Z",
+      "publishedAt": "2026-10-06T11:00:00Z",
+      "photos": [
+        "/images/listings/placeholder-kollar.webp"
+      ]
+    },
+    {
+      "key": "sumsad",
+      "number": 10449,
+      "status": "active",
+      "owner": "contact-503910764",
+      "title": "Şümşad — Buxus sempervirens",
+      "description": [],
+      "categoryId": "kollar",
+      "subcategoryId": "kollar-hemiseyasil",
+      "cityId": "sumqayit",
+      "priceType": "fixed",
+      "price": 18,
+      "priceUnit": "piece",
+      "deliveryAvailable": false,
+      "plantingAvailable": false,
+      "contactName": "Vüqar",
+      "contactPhone": "+994503910764",
+      "whatsapp": true,
+      "phoneHidden": false,
+      "plant": {
+        "species": "Buxus sempervirens",
+        "heightCm": {
+          "min": 30,
+          "max": 40
+        },
+        "ageYears": 3,
+        "rootSystem": "rootball",
+        "sun": "part-shade",
+        "water": "medium",
+        "frostHardinessC": -20,
+        "foliage": "evergreen",
+        "plantingMonths": [
+          3,
+          4,
+          10,
+          11
+        ]
+      },
+      "attributes": {
+        "species": "Buxus sempervirens",
+        "heightMin": "30",
+        "heightMax": "40",
+        "age": "3",
+        "rootSystem": "rootball",
+        "sun": "part-shade",
+        "water": "medium",
+        "frost": "-20",
+        "foliage": "evergreen",
+        "plantingMonths": "3,4,10,11"
+      },
+      "careTips": [],
+      "promoted": false,
+      "views": 0,
+      "submittedAt": "2026-10-09T11:00:00Z",
+      "publishedAt": "2026-10-09T11:00:00Z",
+      "photos": [
+        "/images/listings/placeholder-kollar.webp"
+      ]
+    },
+    {
+      "key": "fotiniya",
+      "number": 10450,
+      "status": "active",
+      "owner": "owner-yasil-bag-merkezi",
+      "seller": "yasil-bag-merkezi",
+      "title": "Fotiniya — Photinia × fraseri 'Red Robin'",
+      "description": [],
+      "categoryId": "kollar",
+      "subcategoryId": "kollar-hemiseyasil",
+      "cityId": "baki",
+      "priceType": "fixed",
+      "price": 25,
+      "priceUnit": "piece",
+      "deliveryAvailable": true,
+      "deliveryAreas": "Bakı daxilində",
+      "plantingAvailable": false,
+      "contactName": "Yaşıl Bağ Mərkəzi",
+      "contactPhone": "+994125104420",
+      "whatsapp": true,
+      "phoneHidden": false,
+      "plant": {
+        "species": "Photinia × fraseri 'Red Robin'",
+        "heightCm": {
+          "min": 80,
+          "max": 100
+        },
+        "ageYears": 3,
+        "rootSystem": "container",
+        "potLitres": 10,
+        "sun": "full-sun",
+        "water": "medium",
+        "frostHardinessC": -15,
+        "foliage": "evergreen",
+        "plantingMonths": [
+          3,
+          4,
+          10,
+          11
+        ]
+      },
+      "attributes": {
+        "species": "Photinia × fraseri 'Red Robin'",
+        "heightMin": "80",
+        "heightMax": "100",
+        "age": "3",
+        "rootSystem": "container",
+        "potLitres": "10",
+        "sun": "full-sun",
+        "water": "medium",
+        "frost": "-15",
+        "foliage": "evergreen",
+        "plantingMonths": "3,4,10,11"
+      },
+      "careTips": [],
+      "promoted": false,
+      "views": 0,
+      "submittedAt": "2026-10-08T11:00:00Z",
+      "publishedAt": "2026-10-08T11:00:00Z",
+      "photos": [
+        "/images/listings/placeholder-kollar.webp"
+      ]
+    },
+    {
+      "key": "lavanda",
+      "number": 10451,
+      "status": "active",
+      "owner": "contact-704551962",
+      "title": "Lavanda — Lavandula angustifolia",
+      "description": [],
+      "categoryId": "kollar",
+      "subcategoryId": "kollar-hemiseyasil",
+      "cityId": "abseron",
+      "priceType": "fixed",
+      "price": 6,
+      "priceUnit": "piece",
+      "deliveryAvailable": false,
+      "plantingAvailable": false,
+      "contactName": "Aynur",
+      "contactPhone": "+994704551962",
+      "whatsapp": true,
+      "phoneHidden": false,
+      "plant": {
+        "species": "Lavandula angustifolia",
+        "heightCm": {
+          "min": 25,
+          "max": 35
+        },
+        "ageYears": 2,
+        "rootSystem": "container",
+        "potLitres": 2,
+        "sun": "full-sun",
+        "water": "low",
+        "frostHardinessC": -20,
+        "foliage": "evergreen",
+        "plantingMonths": [
+          3,
+          4,
+          5,
+          9,
+          10
+        ]
+      },
+      "attributes": {
+        "species": "Lavandula angustifolia",
+        "heightMin": "25",
+        "heightMax": "35",
+        "age": "2",
+        "rootSystem": "container",
+        "potLitres": "2",
+        "sun": "full-sun",
+        "water": "low",
+        "frost": "-20",
+        "foliage": "evergreen",
+        "plantingMonths": "3,4,5,9,10"
+      },
+      "careTips": [],
+      "promoted": false,
+      "views": 0,
+      "submittedAt": "2026-10-05T11:00:00Z",
+      "publishedAt": "2026-10-05T11:00:00Z",
+      "photos": [
+        "/images/listings/placeholder-kollar.webp"
+      ]
+    },
+    {
+      "key": "petuniya",
+      "number": 10452,
+      "status": "active",
+      "owner": "owner-yasil-bag-merkezi",
+      "seller": "yasil-bag-merkezi",
+      "title": "Petuniya — Petunia × hybrida",
+      "description": [],
+      "categoryId": "guller",
+      "subcategoryId": "guller-movsumi",
+      "cityId": "baki",
+      "priceType": "fixed",
+      "price": 2,
+      "priceUnit": "piece",
+      "deliveryAvailable": true,
+      "deliveryAreas": "Bakı daxilində",
+      "plantingAvailable": false,
+      "contactName": "Yaşıl Bağ Mərkəzi",
+      "contactPhone": "+994125104420",
+      "whatsapp": true,
+      "phoneHidden": false,
+      "plant": {
+        "species": "Petunia × hybrida",
+        "heightCm": {
+          "min": 20,
+          "max": 25
+        },
+        "rootSystem": "container",
+        "potLitres": 0.5,
+        "sun": "full-sun",
+        "water": "medium",
+        "frostHardinessC": 2,
+        "plantingMonths": [
+          4,
+          5
+        ]
+      },
+      "attributes": {
+        "species": "Petunia × hybrida",
+        "heightMin": "20",
+        "heightMax": "25",
+        "rootSystem": "container",
+        "potLitres": "0.5",
+        "sun": "full-sun",
+        "water": "medium",
+        "frost": "2",
+        "plantingMonths": "4,5"
+      },
+      "careTips": [],
+      "promoted": false,
+      "views": 0,
+      "submittedAt": "2026-10-11T10:00:00Z",
+      "publishedAt": "2026-10-11T10:00:00Z",
+      "photos": [
+        "/images/listings/placeholder-guller.webp"
+      ]
+    },
+    {
+      "key": "benovse",
+      "number": 10453,
+      "status": "active",
+      "owner": "contact-222564011",
+      "title": "Bənövşə — Viola × wittrockiana",
+      "description": [],
+      "categoryId": "guller",
+      "subcategoryId": "guller-movsumi",
+      "cityId": "gence",
+      "priceType": "fixed",
+      "price": 2,
+      "priceUnit": "piece",
+      "deliveryAvailable": false,
+      "plantingAvailable": false,
+      "contactName": "Gəncə Gül Evi",
+      "contactPhone": "+994222564011",
+      "whatsapp": true,
+      "phoneHidden": false,
+      "plant": {
+        "species": "Viola × wittrockiana",
+        "heightCm": {
+          "min": 15,
+          "max": 20
+        },
+        "rootSystem": "container",
+        "potLitres": 0.5,
+        "sun": "part-shade",
+        "water": "medium",
+        "frostHardinessC": -15,
+        "plantingMonths": [
+          3,
+          4,
+          9,
+          10
+        ]
+      },
+      "attributes": {
+        "species": "Viola × wittrockiana",
+        "heightMin": "15",
+        "heightMax": "20",
+        "rootSystem": "container",
+        "potLitres": "0.5",
+        "sun": "part-shade",
+        "water": "medium",
+        "frost": "-15",
+        "plantingMonths": "3,4,9,10"
+      },
+      "careTips": [],
+      "promoted": false,
+      "views": 0,
+      "submittedAt": "2026-10-09T10:00:00Z",
+      "publishedAt": "2026-10-09T10:00:00Z",
+      "photos": [
+        "/images/listings/placeholder-guller.webp"
+      ]
+    },
+    {
+      "key": "mexmergul",
+      "number": 10454,
+      "status": "active",
+      "owner": "contact-503910764",
+      "title": "Məxmərgül — Tagetes patula",
+      "description": [],
+      "categoryId": "guller",
+      "subcategoryId": "guller-movsumi",
+      "cityId": "sumqayit",
+      "priceType": "fixed",
+      "price": 2,
+      "priceUnit": "piece",
+      "deliveryAvailable": false,
+      "plantingAvailable": false,
+      "contactName": "Vüqar",
+      "contactPhone": "+994503910764",
+      "whatsapp": true,
+      "phoneHidden": false,
+      "plant": {
+        "species": "Tagetes patula",
+        "heightCm": {
+          "min": 20,
+          "max": 30
+        },
+        "rootSystem": "container",
+        "potLitres": 0.5,
+        "sun": "full-sun",
+        "water": "low",
+        "frostHardinessC": 0,
+        "plantingMonths": [
+          4,
+          5,
+          6
+        ]
+      },
+      "attributes": {
+        "species": "Tagetes patula",
+        "heightMin": "20",
+        "heightMax": "30",
+        "rootSystem": "container",
+        "potLitres": "0.5",
+        "sun": "full-sun",
+        "water": "low",
+        "frost": "0",
+        "plantingMonths": "4,5,6"
+      },
+      "careTips": [],
+      "promoted": false,
+      "views": 0,
+      "submittedAt": "2026-10-08T10:00:00Z",
+      "publishedAt": "2026-10-08T10:00:00Z",
+      "photos": [
+        "/images/listings/placeholder-guller.webp"
+      ]
+    },
+    {
+      "key": "begoniya",
+      "number": 10455,
+      "status": "active",
+      "owner": "owner-yasil-bag-merkezi",
+      "seller": "yasil-bag-merkezi",
+      "title": "Begoniya — Begonia semperflorens",
+      "description": [],
+      "categoryId": "guller",
+      "subcategoryId": "guller-movsumi",
+      "cityId": "baki",
+      "priceType": "fixed",
+      "price": 3,
+      "priceUnit": "piece",
+      "deliveryAvailable": true,
+      "deliveryAreas": "Bakı daxilində",
+      "plantingAvailable": false,
+      "contactName": "Yaşıl Bağ Mərkəzi",
+      "contactPhone": "+994125104420",
+      "whatsapp": true,
+      "phoneHidden": false,
+      "plant": {
+        "species": "Begonia semperflorens",
+        "heightCm": {
+          "min": 15,
+          "max": 20
+        },
+        "rootSystem": "container",
+        "potLitres": 0.5,
+        "sun": "part-shade",
+        "water": "medium",
+        "frostHardinessC": 2,
+        "plantingMonths": [
+          5,
+          6
+        ]
+      },
+      "attributes": {
+        "species": "Begonia semperflorens",
+        "heightMin": "15",
+        "heightMax": "20",
+        "rootSystem": "container",
+        "potLitres": "0.5",
+        "sun": "part-shade",
+        "water": "medium",
+        "frost": "2",
+        "plantingMonths": "5,6"
+      },
+      "careTips": [],
+      "promoted": false,
+      "views": 0,
+      "submittedAt": "2026-10-07T10:00:00Z",
+      "publishedAt": "2026-10-07T10:00:00Z",
+      "photos": [
+        "/images/listings/placeholder-guller.webp"
+      ]
+    },
+    {
+      "key": "saqayiq",
+      "number": 10456,
+      "status": "active",
+      "owner": "owner-quba-fidan",
+      "seller": "quba-fidan",
+      "title": "Şaqayıq — Paeonia lactiflora",
+      "description": [],
+      "categoryId": "guller",
+      "subcategoryId": "guller-coxillik",
+      "cityId": "quba",
+      "priceType": "fixed",
+      "price": 15,
+      "priceUnit": "piece",
+      "deliveryAvailable": true,
+      "deliveryAreas": "Bütün Azərbaycan",
+      "plantingAvailable": false,
+      "contactName": "Quba Fidan",
+      "contactPhone": "+994233351208",
+      "whatsapp": true,
+      "phoneHidden": false,
+      "plant": {
+        "species": "Paeonia lactiflora",
+        "heightCm": {
+          "min": 60,
+          "max": 80
+        },
+        "ageYears": 3,
+        "rootSystem": "bare-root",
+        "sun": "full-sun",
+        "water": "medium",
+        "frostHardinessC": -35,
+        "plantingMonths": [
+          9,
+          10
+        ]
+      },
+      "attributes": {
+        "species": "Paeonia lactiflora",
+        "heightMin": "60",
+        "heightMax": "80",
+        "age": "3",
+        "rootSystem": "bare-root",
+        "sun": "full-sun",
+        "water": "medium",
+        "frost": "-35",
+        "plantingMonths": "9,10"
+      },
+      "careTips": [],
+      "promoted": false,
+      "views": 0,
+      "submittedAt": "2026-10-10T10:00:00Z",
+      "publishedAt": "2026-10-10T10:00:00Z",
+      "photos": [
+        "/images/listings/placeholder-guller.webp"
+      ]
+    },
+    {
+      "key": "zanbaq",
+      "number": 10457,
+      "status": "active",
+      "owner": "contact-513307246",
+      "title": "Zanbaq — Lilium regale",
+      "description": [],
+      "categoryId": "guller",
+      "subcategoryId": "guller-coxillik",
+      "cityId": "lenkeran",
+      "priceType": "fixed",
+      "price": 4,
+      "priceUnit": "piece",
+      "deliveryAvailable": false,
+      "plantingAvailable": false,
+      "contactName": "Lalə",
+      "contactPhone": "+994513307246",
+      "whatsapp": true,
+      "phoneHidden": false,
+      "plant": {
+        "species": "Lilium regale",
+        "heightCm": {
+          "min": 80,
+          "max": 120
+        },
+        "rootSystem": "container",
+        "potLitres": 2,
+        "sun": "full-sun",
+        "water": "medium",
+        "frostHardinessC": -25,
+        "plantingMonths": [
+          3,
+          4,
+          10
+        ]
+      },
+      "attributes": {
+        "species": "Lilium regale",
+        "heightMin": "80",
+        "heightMax": "120",
+        "rootSystem": "container",
+        "potLitres": "2",
+        "sun": "full-sun",
+        "water": "medium",
+        "frost": "-25",
+        "plantingMonths": "3,4,10"
+      },
+      "careTips": [],
+      "promoted": false,
+      "views": 0,
+      "submittedAt": "2026-10-06T10:00:00Z",
+      "publishedAt": "2026-10-06T10:00:00Z",
+      "photos": [
+        "/images/listings/placeholder-guller.webp"
+      ]
+    },
+    {
+      "key": "adi-sarmasiq",
+      "number": 10458,
+      "status": "active",
+      "owner": "owner-yasil-bag-merkezi",
+      "seller": "yasil-bag-merkezi",
+      "title": "Adi sarmaşıq — Hedera helix",
+      "description": [],
+      "categoryId": "sarmasiqlar",
+      "subcategoryId": "sarmasiqlar-hemiseyasil",
+      "cityId": "baki",
+      "priceType": "fixed",
+      "price": 8,
+      "priceUnit": "piece",
+      "deliveryAvailable": true,
+      "deliveryAreas": "Bakı daxilində",
+      "plantingAvailable": false,
+      "contactName": "Yaşıl Bağ Mərkəzi",
+      "contactPhone": "+994125104420",
+      "whatsapp": true,
+      "phoneHidden": false,
+      "plant": {
+        "species": "Hedera helix",
+        "heightCm": {
+          "min": 60,
+          "max": 80
+        },
+        "rootSystem": "container",
+        "potLitres": 2,
+        "sun": "shade",
+        "water": "medium",
+        "frostHardinessC": -20,
+        "foliage": "evergreen",
+        "plantingMonths": [
+          3,
+          4,
+          5,
+          9,
+          10
+        ]
+      },
+      "attributes": {
+        "species": "Hedera helix",
+        "heightMin": "60",
+        "heightMax": "80",
+        "rootSystem": "container",
+        "potLitres": "2",
+        "sun": "shade",
+        "water": "medium",
+        "frost": "-20",
+        "foliage": "evergreen",
+        "plantingMonths": "3,4,5,9,10"
+      },
+      "careTips": [],
+      "promoted": false,
+      "views": 0,
+      "submittedAt": "2026-10-11T09:00:00Z",
+      "publishedAt": "2026-10-11T09:00:00Z",
+      "photos": [
+        "/images/listings/placeholder-sarmasiqlar.webp"
+      ]
+    },
+    {
+      "key": "ulduz-jasmini",
+      "number": 10459,
+      "status": "active",
+      "owner": "contact-704551962",
+      "title": "Ulduz jasmini — Trachelospermum jasminoides",
+      "description": [],
+      "categoryId": "sarmasiqlar",
+      "subcategoryId": "sarmasiqlar-hemiseyasil",
+      "cityId": "abseron",
+      "priceType": "fixed",
+      "price": 28,
+      "priceUnit": "piece",
+      "deliveryAvailable": false,
+      "plantingAvailable": false,
+      "contactName": "Aynur",
+      "contactPhone": "+994704551962",
+      "whatsapp": true,
+      "phoneHidden": false,
+      "plant": {
+        "species": "Trachelospermum jasminoides",
+        "heightCm": {
+          "min": 100,
+          "max": 120
+        },
+        "ageYears": 2,
+        "rootSystem": "container",
+        "potLitres": 5,
+        "sun": "full-sun",
+        "water": "medium",
+        "frostHardinessC": -10,
+        "foliage": "evergreen",
+        "plantingMonths": [
+          4,
+          5,
+          9
+        ]
+      },
+      "attributes": {
+        "species": "Trachelospermum jasminoides",
+        "heightMin": "100",
+        "heightMax": "120",
+        "age": "2",
+        "rootSystem": "container",
+        "potLitres": "5",
+        "sun": "full-sun",
+        "water": "medium",
+        "frost": "-10",
+        "foliage": "evergreen",
+        "plantingMonths": "4,5,9"
+      },
+      "careTips": [],
+      "promoted": false,
+      "views": 0,
+      "submittedAt": "2026-10-07T09:00:00Z",
+      "publishedAt": "2026-10-07T09:00:00Z",
+      "photos": [
+        "/images/listings/placeholder-sarmasiqlar.webp"
+      ]
+    },
+    {
+      "key": "bugenvilleya",
+      "number": 10460,
+      "status": "active",
+      "owner": "contact-513307246",
+      "title": "Bugenvilleya — Bougainvillea glabra",
+      "description": [],
+      "categoryId": "sarmasiqlar",
+      "subcategoryId": "sarmasiqlar-cicekli",
+      "cityId": "lenkeran",
+      "priceType": "fixed",
+      "price": 35,
+      "priceUnit": "piece",
+      "deliveryAvailable": false,
+      "plantingAvailable": false,
+      "contactName": "Lalə",
+      "contactPhone": "+994513307246",
+      "whatsapp": true,
+      "phoneHidden": false,
+      "plant": {
+        "species": "Bougainvillea glabra",
+        "heightCm": {
+          "min": 80,
+          "max": 100
+        },
+        "ageYears": 2,
+        "rootSystem": "container",
+        "potLitres": 5,
+        "sun": "full-sun",
+        "water": "low",
+        "frostHardinessC": -1,
+        "foliage": "evergreen",
+        "plantingMonths": [
+          4,
+          5
+        ]
+      },
+      "attributes": {
+        "species": "Bougainvillea glabra",
+        "heightMin": "80",
+        "heightMax": "100",
+        "age": "2",
+        "rootSystem": "container",
+        "potLitres": "5",
+        "sun": "full-sun",
+        "water": "low",
+        "frost": "-1",
+        "foliage": "evergreen",
+        "plantingMonths": "4,5"
+      },
+      "careTips": [],
+      "promoted": false,
+      "views": 0,
+      "submittedAt": "2026-10-10T09:00:00Z",
+      "publishedAt": "2026-10-10T09:00:00Z",
+      "photos": [
+        "/images/listings/placeholder-sarmasiqlar.webp"
+      ]
+    },
+    {
+      "key": "vistariya",
+      "number": 10461,
+      "status": "active",
+      "owner": "contact-552386190",
+      "title": "Vistariya — Wisteria sinensis",
+      "description": [],
+      "categoryId": "sarmasiqlar",
+      "subcategoryId": "sarmasiqlar-cicekli",
+      "cityId": "gence",
+      "priceType": "fixed",
+      "price": 45,
+      "priceUnit": "piece",
+      "deliveryAvailable": false,
+      "plantingAvailable": false,
+      "contactName": "Nərgiz",
+      "contactPhone": "+994552386190",
+      "whatsapp": true,
+      "phoneHidden": false,
+      "plant": {
+        "species": "Wisteria sinensis",
+        "heightCm": {
+          "min": 150,
+          "max": 200
+        },
+        "ageYears": 4,
+        "rootSystem": "container",
+        "potLitres": 10,
+        "sun": "full-sun",
+        "water": "medium",
+        "frostHardinessC": -25,
+        "foliage": "deciduous",
+        "plantingMonths": [
+          3,
+          4,
+          10
+        ]
+      },
+      "attributes": {
+        "species": "Wisteria sinensis",
+        "heightMin": "150",
+        "heightMax": "200",
+        "age": "4",
+        "rootSystem": "container",
+        "potLitres": "10",
+        "sun": "full-sun",
+        "water": "medium",
+        "frost": "-25",
+        "foliage": "deciduous",
+        "plantingMonths": "3,4,10"
+      },
+      "careTips": [],
+      "promoted": false,
+      "views": 0,
+      "submittedAt": "2026-10-09T09:00:00Z",
+      "publishedAt": "2026-10-09T09:00:00Z",
+      "photos": [
+        "/images/listings/placeholder-sarmasiqlar.webp"
+      ]
+    },
+    {
+      "key": "klematis",
+      "number": 10462,
+      "status": "active",
+      "owner": "owner-yasil-bag-merkezi",
+      "seller": "yasil-bag-merkezi",
+      "title": "Klematis — Clematis × jackmanii",
+      "description": [],
+      "categoryId": "sarmasiqlar",
+      "subcategoryId": "sarmasiqlar-cicekli",
+      "cityId": "baki",
+      "priceType": "fixed",
+      "price": 18,
+      "priceUnit": "piece",
+      "deliveryAvailable": true,
+      "deliveryAreas": "Bakı daxilində",
+      "plantingAvailable": false,
+      "contactName": "Yaşıl Bağ Mərkəzi",
+      "contactPhone": "+994125104420",
+      "whatsapp": true,
+      "phoneHidden": false,
+      "plant": {
+        "species": "Clematis × jackmanii",
+        "heightCm": {
+          "min": 60,
+          "max": 80
+        },
+        "ageYears": 2,
+        "rootSystem": "container",
+        "potLitres": 2,
+        "sun": "full-sun",
+        "water": "medium",
+        "frostHardinessC": -30,
+        "foliage": "deciduous",
+        "plantingMonths": [
+          4,
+          5,
+          9
+        ]
+      },
+      "attributes": {
+        "species": "Clematis × jackmanii",
+        "heightMin": "60",
+        "heightMax": "80",
+        "age": "2",
+        "rootSystem": "container",
+        "potLitres": "2",
+        "sun": "full-sun",
+        "water": "medium",
+        "frost": "-30",
+        "foliage": "deciduous",
+        "plantingMonths": "4,5,9"
+      },
+      "careTips": [],
+      "promoted": false,
+      "views": 0,
+      "submittedAt": "2026-10-06T09:00:00Z",
+      "publishedAt": "2026-10-06T09:00:00Z",
+      "photos": [
+        "/images/listings/placeholder-sarmasiqlar.webp"
+      ]
+    },
+    {
+      "key": "qiz-uzumu",
+      "number": 10463,
+      "status": "active",
+      "owner": "contact-503910764",
+      "title": "Qız üzümü — Parthenocissus quinquefolia",
+      "description": [],
+      "categoryId": "sarmasiqlar",
+      "subcategoryId": "sarmasiqlar-yarpaqtoken",
+      "cityId": "sumqayit",
+      "priceType": "fixed",
+      "price": 10,
+      "priceUnit": "piece",
+      "deliveryAvailable": false,
+      "plantingAvailable": false,
+      "contactName": "Vüqar",
+      "contactPhone": "+994503910764",
+      "whatsapp": true,
+      "phoneHidden": false,
+      "plant": {
+        "species": "Parthenocissus quinquefolia",
+        "heightCm": {
+          "min": 100,
+          "max": 150
+        },
+        "rootSystem": "container",
+        "potLitres": 3,
+        "sun": "part-shade",
+        "water": "low",
+        "frostHardinessC": -35,
+        "foliage": "deciduous",
+        "plantingMonths": [
+          3,
+          4,
+          10
+        ]
+      },
+      "attributes": {
+        "species": "Parthenocissus quinquefolia",
+        "heightMin": "100",
+        "heightMax": "150",
+        "rootSystem": "container",
+        "potLitres": "3",
+        "sun": "part-shade",
+        "water": "low",
+        "frost": "-35",
+        "foliage": "deciduous",
+        "plantingMonths": "3,4,10"
+      },
+      "careTips": [],
+      "promoted": false,
+      "views": 0,
+      "submittedAt": "2026-10-08T09:00:00Z",
+      "publishedAt": "2026-10-08T09:00:00Z",
+      "photos": [
+        "/images/listings/placeholder-sarmasiqlar.webp"
+      ]
+    },
+    {
+      "key": "kampsis",
+      "number": 10464,
+      "status": "active",
+      "owner": "contact-705128346",
+      "title": "Kampsis — Campsis radicans",
+      "description": [],
+      "categoryId": "sarmasiqlar",
+      "subcategoryId": "sarmasiqlar-yarpaqtoken",
+      "cityId": "seki",
+      "priceType": "fixed",
+      "price": 16,
+      "priceUnit": "piece",
+      "deliveryAvailable": false,
+      "plantingAvailable": false,
+      "contactName": "Səbinə",
+      "contactPhone": "+994705128346",
+      "whatsapp": true,
+      "phoneHidden": false,
+      "plant": {
+        "species": "Campsis radicans",
+        "heightCm": {
+          "min": 100,
+          "max": 120
+        },
+        "ageYears": 2,
+        "rootSystem": "container",
+        "potLitres": 3,
+        "sun": "full-sun",
+        "water": "low",
+        "frostHardinessC": -25,
+        "foliage": "deciduous",
+        "plantingMonths": [
+          3,
+          4,
+          5
+        ]
+      },
+      "attributes": {
+        "species": "Campsis radicans",
+        "heightMin": "100",
+        "heightMax": "120",
+        "age": "2",
+        "rootSystem": "container",
+        "potLitres": "3",
+        "sun": "full-sun",
+        "water": "low",
+        "frost": "-25",
+        "foliage": "deciduous",
+        "plantingMonths": "3,4,5"
+      },
+      "careTips": [],
+      "promoted": false,
+      "views": 0,
+      "submittedAt": "2026-10-05T09:00:00Z",
+      "publishedAt": "2026-10-05T09:00:00Z",
+      "photos": [
+        "/images/listings/placeholder-sarmasiqlar.webp"
+      ]
+    },
+    {
+      "key": "vinka",
+      "number": 10465,
+      "status": "active",
+      "owner": "owner-yasil-bag-merkezi",
+      "seller": "yasil-bag-merkezi",
+      "title": "Vinka — Vinca minor",
+      "description": [],
+      "categoryId": "yer-ortucu-bitkiler",
+      "subcategoryId": "yer-ortucu-bitkiler-hemiseyasil",
+      "cityId": "baki",
+      "priceType": "fixed",
+      "price": 3,
+      "priceUnit": "piece",
+      "deliveryAvailable": true,
+      "deliveryAreas": "Bakı daxilində",
+      "plantingAvailable": false,
+      "contactName": "Yaşıl Bağ Mərkəzi",
+      "contactPhone": "+994125104420",
+      "whatsapp": true,
+      "phoneHidden": false,
+      "plant": {
+        "species": "Vinca minor",
+        "heightCm": {
+          "min": 10,
+          "max": 15
+        },
+        "rootSystem": "container",
+        "potLitres": 0.5,
+        "sun": "shade",
+        "water": "medium",
+        "frostHardinessC": -25,
+        "foliage": "evergreen",
+        "plantingMonths": [
+          3,
+          4,
+          10,
+          11
+        ]
+      },
+      "attributes": {
+        "species": "Vinca minor",
+        "heightMin": "10",
+        "heightMax": "15",
+        "rootSystem": "container",
+        "potLitres": "0.5",
+        "sun": "shade",
+        "water": "medium",
+        "frost": "-25",
+        "foliage": "evergreen",
+        "plantingMonths": "3,4,10,11"
+      },
+      "careTips": [],
+      "promoted": false,
+      "views": 0,
+      "submittedAt": "2026-10-11T08:00:00Z",
+      "publishedAt": "2026-10-11T08:00:00Z",
+      "photos": [
+        "/images/listings/placeholder-yer-ortucu-bitkiler.webp"
+      ]
+    },
+    {
+      "key": "vinka-variegata",
+      "number": 10466,
+      "status": "active",
+      "owner": "contact-508182703",
+      "title": "Vinka — Vinca major 'Variegata'",
+      "description": [],
+      "categoryId": "yer-ortucu-bitkiler",
+      "subcategoryId": "yer-ortucu-bitkiler-hemiseyasil",
+      "cityId": "quba",
+      "priceType": "fixed",
+      "price": 4,
+      "priceUnit": "piece",
+      "deliveryAvailable": false,
+      "plantingAvailable": false,
+      "contactName": "Kamil",
+      "contactPhone": "+994508182703",
+      "whatsapp": true,
+      "phoneHidden": false,
+      "plant": {
+        "species": "Vinca major 'Variegata'",
+        "heightCm": {
+          "min": 15,
+          "max": 20
+        },
+        "rootSystem": "container",
+        "potLitres": 1,
+        "sun": "part-shade",
+        "water": "medium",
+        "frostHardinessC": -15,
+        "foliage": "evergreen",
+        "plantingMonths": [
+          3,
+          4,
+          10,
+          11
+        ]
+      },
+      "attributes": {
+        "species": "Vinca major 'Variegata'",
+        "heightMin": "15",
+        "heightMax": "20",
+        "rootSystem": "container",
+        "potLitres": "1",
+        "sun": "part-shade",
+        "water": "medium",
+        "frost": "-15",
+        "foliage": "evergreen",
+        "plantingMonths": "3,4,10,11"
+      },
+      "careTips": [],
+      "promoted": false,
+      "views": 0,
+      "submittedAt": "2026-10-04T08:00:00Z",
+      "publishedAt": "2026-10-04T08:00:00Z",
+      "photos": [
+        "/images/listings/placeholder-yer-ortucu-bitkiler.webp"
+      ]
+    },
+    {
+      "key": "surunen-floks",
+      "number": 10467,
+      "status": "active",
+      "owner": "contact-552386190",
+      "title": "Sürünən floks — Phlox subulata",
+      "description": [],
+      "categoryId": "yer-ortucu-bitkiler",
+      "subcategoryId": "yer-ortucu-bitkiler-cicekli",
+      "cityId": "gence",
+      "priceType": "fixed",
+      "price": 4,
+      "priceUnit": "piece",
+      "deliveryAvailable": false,
+      "plantingAvailable": false,
+      "contactName": "Nərgiz",
+      "contactPhone": "+994552386190",
+      "whatsapp": true,
+      "phoneHidden": false,
+      "plant": {
+        "species": "Phlox subulata",
+        "heightCm": {
+          "min": 10,
+          "max": 15
+        },
+        "rootSystem": "container",
+        "potLitres": 0.5,
+        "sun": "full-sun",
+        "water": "low",
+        "frostHardinessC": -30,
+        "foliage": "evergreen",
+        "plantingMonths": [
+          3,
+          4,
+          9
+        ]
+      },
+      "attributes": {
+        "species": "Phlox subulata",
+        "heightMin": "10",
+        "heightMax": "15",
+        "rootSystem": "container",
+        "potLitres": "0.5",
+        "sun": "full-sun",
+        "water": "low",
+        "frost": "-30",
+        "foliage": "evergreen",
+        "plantingMonths": "3,4,9"
+      },
+      "careTips": [],
+      "promoted": false,
+      "views": 0,
+      "submittedAt": "2026-10-10T08:00:00Z",
+      "publishedAt": "2026-10-10T08:00:00Z",
+      "photos": [
+        "/images/listings/placeholder-yer-ortucu-bitkiler.webp"
+      ]
+    },
+    {
+      "key": "gazaniya",
+      "number": 10468,
+      "status": "active",
+      "owner": "contact-704551962",
+      "title": "Gazaniya — Gazania rigens",
+      "description": [],
+      "categoryId": "yer-ortucu-bitkiler",
+      "subcategoryId": "yer-ortucu-bitkiler-cicekli",
+      "cityId": "abseron",
+      "priceType": "fixed",
+      "price": 3,
+      "priceUnit": "piece",
+      "deliveryAvailable": false,
+      "plantingAvailable": false,
+      "contactName": "Aynur",
+      "contactPhone": "+994704551962",
+      "whatsapp": true,
+      "phoneHidden": false,
+      "plant": {
+        "species": "Gazania rigens",
+        "heightCm": {
+          "min": 20,
+          "max": 25
+        },
+        "rootSystem": "container",
+        "potLitres": 0.5,
+        "sun": "full-sun",
+        "water": "low",
+        "frostHardinessC": -5,
+        "foliage": "evergreen",
+        "plantingMonths": [
+          4,
+          5
+        ]
+      },
+      "attributes": {
+        "species": "Gazania rigens",
+        "heightMin": "20",
+        "heightMax": "25",
+        "rootSystem": "container",
+        "potLitres": "0.5",
+        "sun": "full-sun",
+        "water": "low",
+        "frost": "-5",
+        "foliage": "evergreen",
+        "plantingMonths": "4,5"
+      },
+      "careTips": [],
+      "promoted": false,
+      "views": 0,
+      "submittedAt": "2026-10-05T08:00:00Z",
+      "publishedAt": "2026-10-05T08:00:00Z",
+      "photos": [
+        "/images/listings/placeholder-yer-ortucu-bitkiler.webp"
+      ]
+    },
+    {
+      "key": "surunen-ardic-blue-chip",
+      "number": 10469,
+      "status": "active",
+      "owner": "owner-quba-fidan",
+      "seller": "quba-fidan",
+      "title": "Sürünən ardıc — Juniperus horizontalis 'Blue Chip'",
+      "description": [],
+      "categoryId": "yer-ortucu-bitkiler",
+      "subcategoryId": "yer-ortucu-bitkiler-iyneyarpaqli",
+      "cityId": "quba",
+      "priceType": "fixed",
+      "price": 22,
+      "priceUnit": "piece",
+      "deliveryAvailable": true,
+      "deliveryAreas": "Bütün Azərbaycan",
+      "plantingAvailable": false,
+      "contactName": "Quba Fidan",
+      "contactPhone": "+994233351208",
+      "whatsapp": true,
+      "phoneHidden": false,
+      "plant": {
+        "species": "Juniperus horizontalis 'Blue Chip'",
+        "heightCm": {
+          "min": 15,
+          "max": 20
+        },
+        "ageYears": 3,
+        "rootSystem": "container",
+        "potLitres": 3,
+        "sun": "full-sun",
+        "water": "low",
+        "frostHardinessC": -35,
+        "foliage": "evergreen",
+        "plantingMonths": [
+          3,
+          4,
+          10,
+          11
+        ]
+      },
+      "attributes": {
+        "species": "Juniperus horizontalis 'Blue Chip'",
+        "heightMin": "15",
+        "heightMax": "20",
+        "age": "3",
+        "rootSystem": "container",
+        "potLitres": "3",
+        "sun": "full-sun",
+        "water": "low",
+        "frost": "-35",
+        "foliage": "evergreen",
+        "plantingMonths": "3,4,10,11"
+      },
+      "careTips": [],
+      "promoted": false,
+      "views": 0,
+      "submittedAt": "2026-10-09T08:00:00Z",
+      "publishedAt": "2026-10-09T08:00:00Z",
+      "photos": [
+        "/images/listings/placeholder-yer-ortucu-bitkiler.webp"
+      ]
+    },
+    {
+      "key": "surunen-ardic-nana",
+      "number": 10470,
+      "status": "active",
+      "owner": "owner-yasil-bag-merkezi",
+      "seller": "yasil-bag-merkezi",
+      "title": "Sürünən ardıc — Juniperus procumbens 'Nana'",
+      "description": [],
+      "categoryId": "yer-ortucu-bitkiler",
+      "subcategoryId": "yer-ortucu-bitkiler-iyneyarpaqli",
+      "cityId": "baki",
+      "priceType": "fixed",
+      "price": 26,
+      "priceUnit": "piece",
+      "deliveryAvailable": true,
+      "deliveryAreas": "Bakı daxilində",
+      "plantingAvailable": false,
+      "contactName": "Yaşıl Bağ Mərkəzi",
+      "contactPhone": "+994125104420",
+      "whatsapp": true,
+      "phoneHidden": false,
+      "plant": {
+        "species": "Juniperus procumbens 'Nana'",
+        "heightCm": {
+          "min": 20,
+          "max": 25
+        },
+        "ageYears": 4,
+        "rootSystem": "container",
+        "potLitres": 5,
+        "sun": "full-sun",
+        "water": "low",
+        "frostHardinessC": -30,
+        "foliage": "evergreen",
+        "plantingMonths": [
+          3,
+          4,
+          10,
+          11
+        ]
+      },
+      "attributes": {
+        "species": "Juniperus procumbens 'Nana'",
+        "heightMin": "20",
+        "heightMax": "25",
+        "age": "4",
+        "rootSystem": "container",
+        "potLitres": "5",
+        "sun": "full-sun",
+        "water": "low",
+        "frost": "-30",
+        "foliage": "evergreen",
+        "plantingMonths": "3,4,10,11"
+      },
+      "careTips": [],
+      "promoted": false,
+      "views": 0,
+      "submittedAt": "2026-10-04T07:00:00Z",
+      "publishedAt": "2026-10-04T07:00:00Z",
+      "photos": [
+        "/images/listings/placeholder-yer-ortucu-bitkiler.webp"
+      ]
+    },
+    {
+      "key": "sedum",
+      "number": 10471,
+      "status": "active",
+      "owner": "contact-503910764",
+      "title": "Sedum — Sedum spurium",
+      "description": [],
+      "categoryId": "yer-ortucu-bitkiler",
+      "subcategoryId": "yer-ortucu-bitkiler-sukkulentler",
+      "cityId": "sumqayit",
+      "priceType": "fixed",
+      "price": 3,
+      "priceUnit": "piece",
+      "deliveryAvailable": false,
+      "plantingAvailable": false,
+      "contactName": "Vüqar",
+      "contactPhone": "+994503910764",
+      "whatsapp": true,
+      "phoneHidden": false,
+      "plant": {
+        "species": "Sedum spurium",
+        "heightCm": {
+          "min": 10,
+          "max": 15
+        },
+        "rootSystem": "container",
+        "potLitres": 0.5,
+        "sun": "full-sun",
+        "water": "low",
+        "frostHardinessC": -30,
+        "foliage": "evergreen",
+        "plantingMonths": [
+          4,
+          5,
+          9
+        ]
+      },
+      "attributes": {
+        "species": "Sedum spurium",
+        "heightMin": "10",
+        "heightMax": "15",
+        "rootSystem": "container",
+        "potLitres": "0.5",
+        "sun": "full-sun",
+        "water": "low",
+        "frost": "-30",
+        "foliage": "evergreen",
+        "plantingMonths": "4,5,9"
+      },
+      "careTips": [],
+      "promoted": false,
+      "views": 0,
+      "submittedAt": "2026-10-08T08:00:00Z",
+      "publishedAt": "2026-10-08T08:00:00Z",
+      "photos": [
+        "/images/listings/placeholder-yer-ortucu-bitkiler.webp"
+      ]
+    },
+    {
+      "key": "delosperma",
+      "number": 10472,
+      "status": "active",
+      "owner": "contact-704551962",
+      "title": "Delosperma — Delosperma cooperi",
+      "description": [],
+      "categoryId": "yer-ortucu-bitkiler",
+      "subcategoryId": "yer-ortucu-bitkiler-sukkulentler",
+      "cityId": "abseron",
+      "priceType": "fixed",
+      "price": 4,
+      "priceUnit": "piece",
+      "deliveryAvailable": false,
+      "plantingAvailable": false,
+      "contactName": "Aynur",
+      "contactPhone": "+994704551962",
+      "whatsapp": true,
+      "phoneHidden": false,
+      "plant": {
+        "species": "Delosperma cooperi",
+        "heightCm": {
+          "min": 5,
+          "max": 10
+        },
+        "rootSystem": "container",
+        "potLitres": 0.5,
+        "sun": "full-sun",
+        "water": "low",
+        "frostHardinessC": -15,
+        "foliage": "evergreen",
+        "plantingMonths": [
+          4,
+          5
+        ]
+      },
+      "attributes": {
+        "species": "Delosperma cooperi",
+        "heightMin": "5",
+        "heightMax": "10",
+        "rootSystem": "container",
+        "potLitres": "0.5",
+        "sun": "full-sun",
+        "water": "low",
+        "frost": "-15",
+        "foliage": "evergreen",
+        "plantingMonths": "4,5"
+      },
+      "careTips": [],
+      "promoted": false,
+      "views": 0,
+      "submittedAt": "2026-10-06T08:00:00Z",
+      "publishedAt": "2026-10-06T08:00:00Z",
+      "photos": [
+        "/images/listings/placeholder-yer-ortucu-bitkiler.webp"
+      ]
+    },
+    {
+      "key": "festuka",
+      "number": 10473,
+      "status": "active",
+      "owner": "owner-yasil-bag-merkezi",
+      "seller": "yasil-bag-merkezi",
+      "title": "Festuka — Festuca glauca",
+      "description": [],
+      "categoryId": "yer-ortucu-bitkiler",
+      "subcategoryId": "yer-ortucu-bitkiler-ot-tipli",
+      "cityId": "baki",
+      "priceType": "fixed",
+      "price": 5,
+      "priceUnit": "piece",
+      "deliveryAvailable": true,
+      "deliveryAreas": "Bakı daxilində",
+      "plantingAvailable": false,
+      "contactName": "Yaşıl Bağ Mərkəzi",
+      "contactPhone": "+994125104420",
+      "whatsapp": true,
+      "phoneHidden": false,
+      "plant": {
+        "species": "Festuca glauca",
+        "heightCm": {
+          "min": 20,
+          "max": 30
+        },
+        "rootSystem": "container",
+        "potLitres": 1,
+        "sun": "full-sun",
+        "water": "low",
+        "frostHardinessC": -30,
+        "foliage": "evergreen",
+        "plantingMonths": [
+          3,
+          4,
+          10,
+          11
+        ]
+      },
+      "attributes": {
+        "species": "Festuca glauca",
+        "heightMin": "20",
+        "heightMax": "30",
+        "rootSystem": "container",
+        "potLitres": "1",
+        "sun": "full-sun",
+        "water": "low",
+        "frost": "-30",
+        "foliage": "evergreen",
+        "plantingMonths": "3,4,10,11"
+      },
+      "careTips": [],
+      "promoted": false,
+      "views": 0,
+      "submittedAt": "2026-10-07T08:00:00Z",
+      "publishedAt": "2026-10-07T08:00:00Z",
+      "photos": [
+        "/images/listings/placeholder-yer-ortucu-bitkiler.webp"
+      ]
+    },
+    {
+      "key": "ofiopoqon",
+      "number": 10474,
+      "status": "active",
+      "owner": "contact-513307246",
+      "title": "Ofiopoqon — Ophiopogon japonicus",
+      "description": [],
+      "categoryId": "yer-ortucu-bitkiler",
+      "subcategoryId": "yer-ortucu-bitkiler-ot-tipli",
+      "cityId": "lenkeran",
+      "priceType": "fixed",
+      "price": 6,
+      "priceUnit": "piece",
+      "deliveryAvailable": false,
+      "plantingAvailable": false,
+      "contactName": "Lalə",
+      "contactPhone": "+994513307246",
+      "whatsapp": true,
+      "phoneHidden": false,
+      "plant": {
+        "species": "Ophiopogon japonicus",
+        "heightCm": {
+          "min": 10,
+          "max": 15
+        },
+        "rootSystem": "container",
+        "potLitres": 1,
+        "sun": "shade",
+        "water": "medium",
+        "frostHardinessC": -15,
+        "foliage": "evergreen",
+        "plantingMonths": [
+          3,
+          4,
+          9,
+          10
+        ]
+      },
+      "attributes": {
+        "species": "Ophiopogon japonicus",
+        "heightMin": "10",
+        "heightMax": "15",
+        "rootSystem": "container",
+        "potLitres": "1",
+        "sun": "shade",
+        "water": "medium",
+        "frost": "-15",
+        "foliage": "evergreen",
+        "plantingMonths": "3,4,9,10"
+      },
+      "careTips": [],
+      "promoted": false,
+      "views": 0,
+      "submittedAt": "2026-10-05T08:00:00Z",
+      "publishedAt": "2026-10-05T08:00:00Z",
+      "photos": [
+        "/images/listings/placeholder-yer-ortucu-bitkiler.webp"
+      ]
+    },
+    {
+      "key": "lizimaxiya",
+      "number": 10475,
+      "status": "active",
+      "owner": "contact-508182703",
+      "title": "Lizimaxiya — Lysimachia nummularia 'Aurea'",
+      "description": [],
+      "categoryId": "yer-ortucu-bitkiler",
+      "subcategoryId": "yer-ortucu-bitkiler-surunen-yarpaqli",
+      "cityId": "quba",
+      "priceType": "fixed",
+      "price": 3,
+      "priceUnit": "piece",
+      "deliveryAvailable": false,
+      "plantingAvailable": false,
+      "contactName": "Kamil",
+      "contactPhone": "+994508182703",
+      "whatsapp": true,
+      "phoneHidden": false,
+      "plant": {
+        "species": "Lysimachia nummularia 'Aurea'",
+        "heightCm": {
+          "min": 5,
+          "max": 10
+        },
+        "rootSystem": "container",
+        "potLitres": 0.5,
+        "sun": "part-shade",
+        "water": "high",
+        "frostHardinessC": -30,
+        "foliage": "evergreen",
+        "plantingMonths": [
+          4,
+          5,
+          9
+        ]
+      },
+      "attributes": {
+        "species": "Lysimachia nummularia 'Aurea'",
+        "heightMin": "5",
+        "heightMax": "10",
+        "rootSystem": "container",
+        "potLitres": "0.5",
+        "sun": "part-shade",
+        "water": "high",
+        "frost": "-30",
+        "foliage": "evergreen",
+        "plantingMonths": "4,5,9"
+      },
+      "careTips": [],
+      "promoted": false,
+      "views": 0,
+      "submittedAt": "2026-10-06T07:00:00Z",
+      "publishedAt": "2026-10-06T07:00:00Z",
+      "photos": [
+        "/images/listings/placeholder-yer-ortucu-bitkiler.webp"
+      ]
+    },
+    {
+      "key": "dixondra",
+      "number": 10476,
+      "status": "active",
+      "owner": "owner-yasil-bag-merkezi",
+      "seller": "yasil-bag-merkezi",
+      "title": "Dixondra — Dichondra argentea 'Silver Falls'",
+      "description": [],
+      "categoryId": "yer-ortucu-bitkiler",
+      "subcategoryId": "yer-ortucu-bitkiler-surunen-yarpaqli",
+      "cityId": "baki",
+      "priceType": "fixed",
+      "price": 4,
+      "priceUnit": "piece",
+      "deliveryAvailable": true,
+      "deliveryAreas": "Bakı daxilində",
+      "plantingAvailable": false,
+      "contactName": "Yaşıl Bağ Mərkəzi",
+      "contactPhone": "+994125104420",
+      "whatsapp": true,
+      "phoneHidden": false,
+      "plant": {
+        "species": "Dichondra argentea 'Silver Falls'",
+        "heightCm": {
+          "min": 5,
+          "max": 10
+        },
+        "rootSystem": "container",
+        "potLitres": 0.5,
+        "sun": "full-sun",
+        "water": "medium",
+        "frostHardinessC": -3,
+        "foliage": "evergreen",
+        "plantingMonths": [
+          4,
+          5
+        ]
+      },
+      "attributes": {
+        "species": "Dichondra argentea 'Silver Falls'",
+        "heightMin": "5",
+        "heightMax": "10",
+        "rootSystem": "container",
+        "potLitres": "0.5",
+        "sun": "full-sun",
+        "water": "medium",
+        "frost": "-3",
+        "foliage": "evergreen",
+        "plantingMonths": "4,5"
+      },
+      "careTips": [],
+      "promoted": false,
+      "views": 0,
+      "submittedAt": "2026-10-04T06:00:00Z",
+      "publishedAt": "2026-10-04T06:00:00Z",
+      "photos": [
+        "/images/listings/placeholder-yer-ortucu-bitkiler.webp"
+      ]
+    }
+  ]
+}

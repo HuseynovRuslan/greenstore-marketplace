@@ -7,6 +7,7 @@ import { JsonLd } from '@/seo/StructuredData'
 import { crumbsJsonLd, sellerJsonLd } from '@/seo/jsonld'
 import { describe, pageMetadata } from '@/seo/metadata'
 import { toSearchParams, type RawSearchParams } from '@/lib/searchParams'
+import { loadSellerListings } from '@/features/seller/sellerListingQuery'
 import SellerPage, { sellerCrumbs } from '@/views/SellerPage'
 
 type Props = { params: Promise<{ slug: string }>; searchParams: Promise<RawSearchParams> }
@@ -26,26 +27,25 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
     description: describe(seller.about ? `${summary}. ${seller.about}` : summary),
     canonical: filtered ? undefined : withPage(`/saticilar/${seller.slug}`, page),
     index: !filtered,
-    images: [{ url: seller.coverImage ?? seller.image, alt: seller.name }],
+    // A new business has no photo yet ("" from the API): the site's default image then.
+    images: seller.coverImage || seller.image ? [{ url: seller.coverImage || seller.image, alt: seller.name }] : undefined,
   })
 }
 
 /** /saticilar/[slug] — public seller profile. Unknown sellers are a 404 ("Satıcı tapılmadı", see not-found.tsx). */
 export default async function Page({ params, searchParams }: Props) {
   const { slug } = await params
-  const seller = await getRepository().getSeller(slug)
-  if (!seller) notFound()
   const repo = getRepository()
-  // The services a business publishes: its own list, or those of the provider linked to this page.
-  const services = (await repo.listServices()).filter(
-    (s) => seller.serviceIds?.includes(s.id) || s.providerId === seller.id,
-  )
+  const seller = await repo.getSeller(slug)
+  if (!seller) notFound()
+  // The services this business publishes, and its listings (narrowed and paged in the browser).
+  const [services, listings] = await Promise.all([repo.listProviderServices(seller.id), loadSellerListings(repo, seller.id)])
   const business = sellerJsonLd(seller)
   const crumbs = sellerCrumbs(seller)
   return (
     <>
       <JsonLd data={[crumbsJsonLd(crumbs), ...(business ? [business] : [])]} />
-      <SellerPage seller={seller} listingQuery={toSearchParams(await searchParams).toString()} services={services} />
+      <SellerPage seller={seller} listings={listings} listingQuery={toSearchParams(await searchParams).toString()} services={services} />
     </>
   )
 }

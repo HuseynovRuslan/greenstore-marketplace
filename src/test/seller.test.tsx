@@ -1,9 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import { render, screen, within } from '@testing-library/react'
-import { sellers } from '@/data/sellers'
+import { loadSellerDirectory } from '@/features/seller/directory'
 import { atTime, bakuClock, groupHours, openStatus } from '@/features/seller/hours'
+import { mockRepository } from '@/services/mockRepository'
 import SellersDirectoryPage, { parseDirectoryQuery } from '@/views/SellersDirectoryPage'
-import type { OpeningHours } from '@/types'
+import type { BusinessKind, OpeningHours } from '@/types'
 
 const weekdays: OpeningHours[] = [1, 2, 3, 4, 5].map((day) => ({ day: day as OpeningHours['day'], open: '09:00', close: '17:00' }))
 const quba: OpeningHours[] = [...weekdays, { day: 6, open: '09:00', close: '14:00' }, { day: 7, closed: true }]
@@ -41,23 +42,24 @@ describe('opening hours', () => {
 })
 
 describe('seller directory', () => {
-  const business = sellers.filter((s) => s.type === 'business')
+  const renderDirectory = async (kind: BusinessKind | '', city: string) =>
+    render(<SellersDirectoryPage {...await loadSellerDirectory(mockRepository, { kind, city, page: 1 })} kind={kind} city={city} />)
 
   it('parses the kind and city from the URL and ignores unknown values', () => {
     expect(parseDirectoryQuery(new URLSearchParams('nov=landsaft&seher=baki'))).toEqual({ kind: 'landscaping', city: 'baki' })
     expect(parseDirectoryQuery(new URLSearchParams('nov=x&seher=paris'))).toEqual({ kind: '', city: '' })
   })
 
-  it('counts each kind in the chosen city and lists the matching businesses', () => {
-    render(<SellersDirectoryPage sellers={business} kind="nursery" city="" />)
+  it('counts each kind in the chosen city and lists the matching businesses', async () => {
+    await renderDirectory('nursery', '')
     const tabs = screen.getByRole('navigation', { name: 'Biznesin növü' })
     expect(within(tabs).getByRole('link', { name: /Tingçiliklər 2/ })).toHaveAttribute('aria-current', 'page')
     expect(screen.getByRole('link', { name: 'Abşeron Tingçilik' })).toHaveAttribute('href', '/saticilar/abseron-tingcilik')
     expect(screen.queryByRole('link', { name: 'Yaşıl Bağ Mərkəzi' })).not.toBeInTheDocument()
   })
 
-  it('shows the empty state when nothing matches', () => {
-    render(<SellersDirectoryPage sellers={business} kind="landscaping" city="quba" />)
+  it('shows the empty state when nothing matches', async () => {
+    await renderDirectory('landscaping', 'quba')
     expect(screen.getByText('Bu seçimlə satıcı tapılmadı')).toBeInTheDocument()
   })
 })

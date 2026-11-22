@@ -1,0 +1,39 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+    <RootNamespace>GreenStore.Api.Tests</RootNamespace>
+    <!-- Run through VSTest (xunit.runner.visualstudio), so "dotnet test" works from any directory with any .NET 10
+         SDK. xunit.v3 4.x would otherwise be a Microsoft.Testing.Platform app, which the .NET 10 SDK runs only when
+         the global.json of the current directory opts in. -->
+    <IsTestingPlatformApplication>false</IsTestingPlatformApplication>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit.v3" />
+    <PackageReference Include="xunit.runner.visualstudio">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../src/GreenStore.Api/GreenStore.Api.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Shared with the frontend: search-normalization.json (src/test/searchNormalizationParity.test.ts), and the files
+         backend/seed/export.mjs writes from src/ (frontend-types.json, *-search-parity.json; src/test/backendSeed.test.ts
+         checks they are current). -->
+    <None Include="../../contracts/*.json" LinkBase="contracts" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>

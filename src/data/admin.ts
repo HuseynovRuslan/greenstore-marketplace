@@ -1,4 +1,4 @@
-import type { IconName } from '@/types'
+import type { IconName, ModerationKind, ModerationStatus } from '@/types'
 
 /**
  * Moderation tools data ("İdarəetmə" frames: Moderasiya, Kateqoriyalar, Şikayətlər · 1440).
@@ -13,10 +13,8 @@ import type { IconName } from '@/types'
 /** Moderator signed in to the admin tools (header "İdarəetmə · Aysel Həsənova"). */
 export const moderatorName = 'Aysel Həsənova'
 
-export type ModerationStatus = 'pending' | 'approved' | 'rejected'
-
-/** "Yoxlamada" = first review, "Təkrar yoxlama" = re-submitted after a rejection. */
-export type ModerationKind = 'new' | 'recheck'
+/** "Yoxlamada" = first review, "Təkrar yoxlama" = re-submitted (backend-contract.md 3.5: the contract's types now). */
+export type { ModerationKind, ModerationStatus }
 
 export interface ModerationReview {
   /** Large photo on the review panel */

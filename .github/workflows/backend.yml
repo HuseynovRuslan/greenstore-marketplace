@@ -1,0 +1,70 @@
+name: Backend
+
+# The ASP.NET Core API in backend/: formatting, build and tests against a real PostgreSQL (backend/ARCHITECTURE.md §15).
+# Runs only when the backend or this workflow changes; the frontend has its own workflow (ci.yml). Like ci.yml: on
+# pull requests and on pushes to main, so a pull request's branch is checked once, not once per trigger.
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend.yml'
+  pull_request:
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: backend-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Format, build, test
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: greenstore
+          POSTGRES_PASSWORD: greenstore_dev
+          POSTGRES_DB: greenstore
+          POSTGRES_INITDB_ARGS: --encoding=UTF8 --locale=C.UTF-8
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U greenstore -d greenstore"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      DOTNET_NOLOGO: 'true'
+      DOTNET_CLI_TELEMETRY_OPTOUT: 'true'
+      # The tests create (and drop) their own database on this server.
+      GREENSTORE_TEST_DB: Host=localhost;Port=5432;Database=postgres;Username=greenstore;Password=greenstore_dev
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Restore
+        run: dotnet restore
+
+      - name: Format
+        run: dotnet format --verify-no-changes --no-restore
+
+      - name: Build
+        run: dotnet build --no-restore --configuration Release
+
+      - name: Test
+        run: dotnet test --no-build --configuration Release

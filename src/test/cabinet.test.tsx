@@ -7,7 +7,9 @@ import { listingToDraft } from '@/features/posting/fromListing'
 import { filterQuery, searchSummary, suggestedName } from '@/features/saved-searches/useSavedSearches'
 import { firstInvalidStep } from '@/features/posting/validation'
 import { AppStoreProvider } from '@/state/store'
-import { ListingRowCard } from '@/features/cabinet/ListingRows'
+import { ToastProvider } from '@/components/ui/Toast'
+import { ListingRowCard, type RowHandlers } from '@/features/cabinet/ListingRows'
+import type { RowResult } from '@/features/cabinet/useCabinet'
 import SavedSearchesPage from '@/views/account/SavedSearchesPage'
 import type { Listing } from '@/types'
 
@@ -109,12 +111,16 @@ describe('saved searches', () => {
 describe('a listing row (design critique, Nov 2026)', () => {
   it('keeps three actions on the row and tucks «Deaktiv et» and «Sil» under «Daha çox»', async () => {
     const user = userEvent.setup()
-    const handlers = { renew: vi.fn(), deactivate: vi.fn(), activate: vi.fn(), remove: vi.fn(), startEdit: vi.fn(async () => {}) }
+    // Each status action answers a RowResult, as useCabinet's do: the row awaits it and says what happened.
+    const done = async (): Promise<RowResult> => ({ ok: true })
+    const handlers = { renew: vi.fn(done), deactivate: vi.fn(done), activate: vi.fn(done), remove: vi.fn(done), startEdit: vi.fn(async () => {}) } satisfies RowHandlers
     render(
       <AppStoreProvider>
-        <ul>
-          <ListingRowCard listing={own('tuya-smaragd', { status: 'active' })} now={Date.parse('2026-11-07T10:00:00Z')} handlers={handlers} />
-        </ul>
+        <ToastProvider>
+          <ul>
+            <ListingRowCard listing={own('tuya-smaragd', { status: 'active' })} now={Date.parse('2026-11-07T10:00:00Z')} handlers={handlers} />
+          </ul>
+        </ToastProvider>
       </AppStoreProvider>,
     )
     expect(screen.getByRole('link', { name: /Önə çıxar/ })).toBeInTheDocument()
@@ -131,6 +137,7 @@ describe('a listing row (design critique, Nov 2026)', () => {
     await user.click(more)
     await user.click(screen.getByRole('button', { name: /Deaktiv et/ }))
     expect(handlers.deactivate).toHaveBeenCalledWith('tuya-smaragd')
+    expect(await screen.findByText('Elan axtarışdan gizlədildi')).toBeInTheDocument()
     expect(more).toHaveFocus()
   })
 })

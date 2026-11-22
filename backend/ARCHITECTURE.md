@@ -1,6 +1,6 @@
 # GreenStore backend: arxitektura
 
-**Status:** təsdiqlənib (22 noyabr 2026). Kod hələ yazılmayıb.
+**Status:** təsdiqlənib (22 noyabr 2026). Faza 0 (skelet) və faza 1 (kataloq cədvəlləri, seed, oxuma endpoint-ləri və saytın `DATA_SOURCE=api` rejimi, `src/services/apiRepository.ts`) yazılıb. Faza 2-nin API tərəfi də hazırdır: SMS kodu, qeydiyyat (biznes hesabı «mağaza»nı da açır), şifrə və SMS ilə giriş, sessiyalar və «Aktiv cihazlar», `/me`, `/me/seller`, seçilmişlər, yadda saxlanılan axtarışlar. Faza 3 həm API, həm sayt tərəfində yazılıb: şəkil yükləmə və emalı (brauzerdən birbaşa API-yə), elan yerləşdirmə (`Idempotency-Key` ilə), «Elanlarım» və qaralamalar, moderasiya (`/idareetme/moderasiya`, `AdminRepository`), müddət, statistika, baxış sayğacı, «Nömrəni göstər», keşin yenilənməsi (`POST /api/revalidate`) və fon işləri. İşə salmaq üçün: [README.md](README.md).
 **Müqavilə dəyişiklikləri:** [`docs/handoff/backend-contract.md`](../docs/handoff/backend-contract.md). `repository.ts` və `src/types` hər fazada ayrıca razılıqla dəyişir.
 
 ## 1. Tələblər
@@ -91,6 +91,7 @@ backend/
       Engagement/               seçilmişlər, axtarışlar, şikayətlər, «Usta çağır», dəstək
       Promotion/                paketlər, sifarişlər, ödəniş, «İrəli çək» cədvəli
       Admin/                    moderasiya, kateqoriyaların idarəsi, şikayətlərə baxış
+      Platform/                 outbox, audit_log, Idempotency-Key (modulların ortaq cədvəlləri)
     Jobs/                       fon işləri
   tests/GreenStore.Api.Tests/   unit və inteqrasiya testləri (real PostgreSQL)
   seed/                         dev və staging üçün nümunə məlumat (src/data-dan ixrac)
@@ -268,6 +269,7 @@ Tətbiq 1 il ərzində gələcək. Onun üçün indi edilən və sonraya qalan i
 
 **Real IP.** Rate limit üçün API-yə müştərinin real IP-si lazımdır.
 - Sayt sorğuları Next serverindən gəlir. Next real IP-ni `X-Client-IP` başlığı ilə göndərir, API ona yalnız `X-Internal-Key` açarı düzgün olanda inanır.
+  - Next IP-ni yalnız hostinqin proxy-sinin yazdığından götürür: `CLIENT_IP_HEADER` (hostinqin yenidən yazdığı başlıq) və ya `X-Forwarded-For`-un sağdan `TRUSTED_PROXY_HOPS`-cu elementi (standart 1, sonuncu). Brauzerin göndərdiyi birinci element heç vaxt götürülmür. `next start` internetə proxy-siz açılmır (README.md, «Visitor IP behind the hosting's proxy»).
 - Mobil sorğular API-yə birbaşa gəlir. IP bağlantıdan götürülür (etibarlı reverse proxy arxasında `X-Forwarded-For`).
 
 ## 10. Frontend (sayt) ilə inteqrasiya
@@ -281,7 +283,7 @@ Tətbiq 1 il ərzində gələcək. Onun üçün indi edilən və sonraya qalan i
 - **Sessiya.** Giriş və qeydiyyat Server Action-ları `gs_session` cookie-sini yazır: httpOnly, Secure, SameSite=Lax, 30 gün. `localStorage`-dakı demo sessiya (`src/state/store.tsx`) çıxır.
   - Statik səhifələrdə (məsələn ana səhifə) server cookie oxumur. Başlıq ilk kadrda düzgün görünsün deyə ikinci cookie da yazılır: httpOnly olmayan, həssas olmayan `gs_hint` (yalnız «daxil olub» və adın baş hərfləri). `bootstrap.ts` indiki kimi işləyir, sadəcə `localStorage` əvəzinə bu cookie-ni oxuyur.
 - **Keş.** Public oxumalar belə gedir: `fetch(…, { next: { revalidate: 60, tags: ['listing:<id>'] } })`.
-  - Moderasiya, redaktə və müddətin bitməsindən sonra API outbox vasitəsilə Next-in `POST /api/revalidate` ünvanına (gizli açarla) xəbər verir. Next `revalidateTag(tag, 'max')` çağırır.
+  - Moderasiya, redaktə və müddətin bitməsindən sonra API outbox vasitəsilə Next-in `POST /api/revalidate` ünvanına (gizli açarla) xəbər verir. Next `revalidateTag(tag, 'max')` çağırır (yazılan kodda `{ expire: 0 }`, backend-contract.md 3.6). Bir xəbərdə ən çox 64 tag olur; çox elanın müddəti birlikdə bitəndə tag-lar bir neçə xəbərə bölünür.
   - Elan səhifələrindəki `generateStaticParams` çıxır: səhifə ilk sorğuda yaranır və keşlənir.
 - **CSP** iki yerdə genişlənir: `connect-src`-yə API-nin ünvanı (yalnız şəkil yükləmə üçün), `img-src`-yə şəkil CDN-i. `next/image` üçün `remotePatterns` əlavə olunur.
 
@@ -300,11 +302,11 @@ Tətbiq 1 il ərzində gələcək. Onun üçün indi edilən və sonraya qalan i
 
 | İş | Nə vaxt | Nə edir |
 |---|---|---|
-| `ExpireListings` | 10 dəqiqədən bir | `active` elan `expires_at`-dan keçibsə, `expired` olur |
+| `ExpireListings` | 10 dəqiqədən bir | `active` elan `expires_at`-dan keçibsə, `expired` olur (bir dəfədə ən çox 500). Həmin anda sahibi və ya moderator dəyişdirən elan növbəti dəfəyə qalır, qalanları indi bitir |
 | `Promotions` | 10 dəqiqədən bir | müddəti bitən «Önə çıxar»ı söndürür; «İrəli çək» paketində növbəti qaldırmanı edir (`bumped_at = indi`) |
-| `Outbox` | 5 saniyədən bir | SMS, push, keş yeniləmə, e-poçt göndərir; uğursuz olanda getdikcə uzanan fasilə ilə təkrar edir |
-| `PhotoProcessing` | növbə ilə | şəkil variantlarını yaradır (320, 640, 1280 px WebP), EXIF-i silir |
-| `Cleanup` | gündə bir | 24 saatda elana bağlanmayan şəkilləri, köhnə sessiyaları və SMS kodlarını silir |
+| `Outbox` | 5 saniyədən bir | SMS, push, keş yeniləmə, e-poçt göndərir; uğursuz olanda getdikcə uzanan fasilə ilə təkrar edir. Faza 3-də yalnız keş yeniləmə var (`revalidate`, backend-contract.md 3.6) |
+| `PhotoProcessing` | yükləmə zamanı | şəkil variantlarını yaradır (320, 640, 1280 px WebP), EXIF-i silir. Faza 3-də ayrıca növbə yoxdur: emal `PUT` sorğusunun içində gedir (10 MB-lıq şəkil bir saniyədən az çəkir), ona görə cavab şəklin hazır olub-olmadığını dərhal deyir. Yük artsa, növbəyə köçürmək asandır (`PhotoService.ProcessAsync`) |
+| `Cleanup` | gündə bir | 24 saatda elana bağlanmayan şəkilləri (faylları ilə), köhnə sessiyaları, SMS kodlarını, `listing_seen`, `idempotency_keys`, göndərilmiş outbox, köhnə gündəlik statistika, `audit_log` və `moderation_decisions` sətirlərini DATABASE.md §5-in müddətləri ilə silir (`Jobs/Cleanup.cs`) |
 
 ## 13. Həcm və resurslar (təxmini)
 
@@ -338,7 +340,7 @@ Tətbiq 1 il ərzində gələcək. Onun üçün indi edilən və sonraya qalan i
   - CI: GitHub Actions servis konteyneri.
   - Hər test işi təmiz bazada başlayır.
 - **Müqavilə testləri:** JSON cavabları `docs/handoff/contract-additions.md`-dəki formalarla müqayisə olunur. Bir sahənin adı dəyişsə, test qırılır.
-- **CI.** `.github/workflows/ci.yml`-ə yeni `backend` işi əlavə olunur: `dotnet format --verify-no-changes`, `dotnet build`, `dotnet test`. Yalnız `backend/**` dəyişəndə işləyir.
+- **CI.** Ayrıca iş axını `.github/workflows/backend.yml`: `dotnet format --verify-no-changes`, `dotnet build`, `dotnet test`, PostgreSQL 16 servis konteyneri ilə. Yalnız `backend/**` dəyişəndə işləyir.
 
 ## 16. Mühitlər və deploy
 
@@ -353,7 +355,7 @@ Tətbiq 1 il ərzində gələcək. Onun üçün indi edilən və sonraya qalan i
 > **Diqqət.** `src/seo/env.ts` `DATA_SOURCE` `mock` olmayan kimi indeksləməyə icazə verir. Staging API-də nümunə məlumat olacaq, ona görə orada `SEO_INDEXABLE=false` mütləq saxlanmalıdır.
 
 - **Docker image:** multi-stage build, `mcr.microsoft.com/dotnet/aspnet:10.0` əsasında.
-- **Miqrasiyalar** EF migrations bundle ilə, deploy-un ayrıca addımı kimi işləyir. Tətbiq başlayanda işləmir.
+- **Miqrasiyalar** deploy-un ayrıca addımıdır: API-nin öz `migrate` əmri (image-də `dotnet GreenStore.Api.dll migrate`, lokalda `dotnet run -- migrate`) miqrasiyaları tətbiq edir və çıxır. Əmr eyni image-də olduğu üçün ayrıca EF migrations bundle lazım deyil. Staging və Prod-da tətbiq başlayanda miqrasiya işləmir, yalnız Development-də rahatlıq üçün başlanğıcda işləyir (`Database:MigrateOnStartup`).
 - **Sağlamlıq yoxlaması:** `/health/live` və `/health/ready` (sonuncu bazanı da yoxlayır).
 - **Loqlar** JSON formatında konsola yazılır. OpenTelemetry (trace və metrikalar) qoşulur, exporter sonra seçilir.
 - **Region.** Hər səhifə render-i API-ni çağırır, ona görə API və baza Vercel regionuna yaxın olmalıdır (məsələn, Frankfurt).

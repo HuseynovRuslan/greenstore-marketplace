@@ -30,7 +30,8 @@ const STEPS = ['Hesab növü', 'Məlumatlar', 'Telefonun təsdiqi'] as const
  * /qeydiyyat — three steps: account type (individual, or a business and its kind: nursery, garden centre,
  * landscaping company), details (name, phone, optional e-mail, password with live rules, terms), then the SMS code.
  * Back keeps everything. On success the account is signed in and the visitor goes on to `next` (default: cabinet).
- * DEMO: the SMS is not sent (the code is on screen) and nothing is stored on a server.
+ * DEMO (DATA_SOURCE=mock): the SMS is not sent (the code is on screen) and nothing is stored on a server. With the API
+ * the account is created there; a business gets its public page /saticilar/<slug> at once.
  */
 export default function RegisterPage({ next, accountType }: { next?: string; accountType?: SellerType }) {
   const router = useRouter()
@@ -103,6 +104,13 @@ export default function RegisterPage({ next, accountType }: { next?: string; acc
     if (!result.ok) {
       setFormError(result.error)
       setStep(1)
+      return
+    }
+    // DATA_SOURCE=api: the account the API created (a business with its «mağaza», signed in by the session cookie).
+    if (result.account) {
+      signIn(result.account)
+      toast('Hesab yaradıldı. Xoş gəldiniz!')
+      router.replace(safeNext(next))
       return
     }
     const business = type === 'business'

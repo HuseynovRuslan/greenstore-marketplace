@@ -8,7 +8,7 @@ import { Logo } from '@/components/ui/Logo'
 import { ButtonLink } from '@/components/ui/Button'
 import { useSession } from '@/state/store'
 import { preHydrationClass } from '@/state/bootstrap'
-import { useHydrated } from './ClientGate'
+import { useSessionKnown } from './ClientGate'
 import { ProfileMenu } from './ProfileMenu'
 import { cn } from '@/lib/format'
 import { usePageScrolled, useScrolledPast } from '@/hooks/useHeaderState'
@@ -68,12 +68,13 @@ export function SiteHeader({
   const menuOpen = menuPath === pathname
   const closeMenu = () => setMenuPath(null)
   const handleSignOut = () => {
-    signOut()
+    void signOut()
     closeMenu()
     router.push('/')
   }
-  // The session is only known in the browser: until hydration render both variants (CSS picks one, see bootstrap.ts).
-  const hydrated = useHydrated()
+  // The session is only known in the browser (and, with the API, once the server has said): until then render both
+  // variants (CSS picks one, see bootstrap.ts).
+  const hydrated = useSessionKnown()
   const showUser = !hydrated || Boolean(user)
   const showGuest = !hydrated || !user
   const preClass = (variant: 'user' | 'guest') => (hydrated ? undefined : preHydrationClass(variant))

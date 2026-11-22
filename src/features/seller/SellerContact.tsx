@@ -7,38 +7,54 @@ import { useReveal } from '@/features/contact/RevealContext'
 import { localPhone } from '@/features/listing/ListingContact'
 import { cn } from '@/lib/format'
 import type { OpeningHours, Seller } from '@/types'
-import { telHref, whatsappHref } from './contact'
+import { chatHref, openChat, telHref } from './contact'
 import { groupHours, openStatus } from './hours'
 
-/** Call (after «Nömrəni göstər»), WhatsApp, Instagram and the website of a business. */
+/**
+ * Call (after «Nömrəni göstər»), WhatsApp, Instagram and the website of a business. The page knows only whether there
+ * is a number (`phoneMasked`); the first «Nömrəni göstər» or «WhatsApp-a yaz» asks for it (RevealContext).
+ */
 export function SellerContactButtons({ seller }: { seller: Seller }) {
-  const { revealed, reveal } = useReveal()
-  const phone = seller.phone
+  const { revealed, pending, contact, reveal } = useReveal({ kind: 'seller', id: seller.id })
+  const hasPhone = Boolean(seller.phoneMasked)
+  const chatText = `Salam! GreenStore-da «${seller.name}» səhifənizi gördüm.`
+  const onChat = async () => {
+    if (pending) return
+    const found = await reveal()
+    if (found?.whatsappUrl) openChat(chatHref(found.whatsappUrl, chatText))
+  }
+  const phone = contact.phone
   return (
     <div className="flex flex-col gap-2.5">
-      {phone &&
-        (revealed ? (
-          <a href={telHref(phone)} aria-label={`Zəng et: ${localPhone(phone)}`} className={buttonClass('primary', 'w-full text-base tabular-nums')}>
-            <Phone aria-hidden size={18} strokeWidth={1.8} />
-            {localPhone(phone)}
-          </a>
-        ) : (
-          <Button fullWidth onClick={reveal} icon={<Phone aria-hidden size={18} strokeWidth={1.8} />}>
+      {hasPhone &&
+        (!revealed ? (
+          <Button fullWidth onClick={() => !pending && void reveal()} aria-busy={pending || undefined} icon={<Phone aria-hidden size={18} strokeWidth={1.8} />}>
             Nömrəni göstər
           </Button>
+        ) : (
+          phone && (
+            <a href={telHref(phone)} aria-label={`Zəng et: ${localPhone(phone)}`} className={buttonClass('primary', 'w-full text-base tabular-nums')}>
+              <Phone aria-hidden size={18} strokeWidth={1.8} />
+              {localPhone(phone)}
+            </a>
+          )
         ))}
-      {phone && seller.whatsapp && (
-        <a
-          href={`${whatsappHref(phone)}?text=${encodeURIComponent(`Salam! GreenStore-da «${seller.name}» səhifənizi gördüm.`)}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className={buttonClass('secondary', 'w-full')}
-        >
-          <MessageCircle aria-hidden size={18} strokeWidth={1.8} />
-          WhatsApp-a yaz
-        </a>
-      )}
-      {!phone && <p className="text-sm leading-[1.5] text-muted">Əlaqə nömrəsi göstərilmir.</p>}
+      {hasPhone &&
+        seller.whatsapp &&
+        (!revealed ? (
+          <button type="button" onClick={onChat} aria-busy={pending || undefined} className={buttonClass('secondary', 'w-full')}>
+            <MessageCircle aria-hidden size={18} strokeWidth={1.8} />
+            WhatsApp-a yaz
+          </button>
+        ) : (
+          contact.whatsappUrl && (
+            <a href={chatHref(contact.whatsappUrl, chatText)} target="_blank" rel="noopener noreferrer" className={buttonClass('secondary', 'w-full')}>
+              <MessageCircle aria-hidden size={18} strokeWidth={1.8} />
+              WhatsApp-a yaz
+            </a>
+          )
+        ))}
+      {!hasPhone && <p className="text-sm leading-[1.5] text-muted">Əlaqə nömrəsi göstərilmir.</p>}
       {(seller.instagram || seller.website) && (
         // A long handle or address breaks anywhere rather than running out of the card (break-ui, Nov 2026).
         <div className="flex min-w-0 flex-wrap gap-x-4">

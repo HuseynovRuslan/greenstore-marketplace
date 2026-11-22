@@ -6,12 +6,12 @@ import '@fontsource/inter/600.css'
 import '@fontsource/inter/700.css'
 import '@/styles/index.css'
 import { AppStoreProvider } from '@/state/store'
-import { PRE_HYDRATION_SCRIPT } from '@/state/bootstrap'
+import { preHydrationScript } from '@/state/bootstrap'
 import { InlineScript } from '@/components/layout/InlineScript'
 import { SkipLink } from '@/components/layout/SkipLink'
 import { MotionProvider } from '@/components/motion/MotionProvider'
 import { ToastProvider } from '@/components/ui/Toast'
-import { siteUrl } from '@/seo/env'
+import { dataSource, siteUrl } from '@/seo/env'
 import { robotsFor } from '@/seo/metadata'
 import { DEFAULT_OG_IMAGE, SITE_DESCRIPTION, SITE_LOCALE, SITE_NAME, SITE_TITLE } from '@/seo/site'
 
@@ -41,18 +41,21 @@ export const viewport: Viewport = {
 }
 
 export default function RootLayout({ children }: { children: ReactNode }) {
+  // Where the session lives (localStorage for the demo, the server's cookie with the API): the store and the
+  // pre-hydration script follow it. Read from the server's environment, never from a NEXT_PUBLIC_ variable.
+  const source = dataSource()
   return (
     // suppressHydrationWarning: the pre-hydration script sets data-auth / data-banner / --gs-user-initials on <html>.
     // data-scroll-behavior: Next.js 16 keeps CSS smooth scrolling during route changes unless asked to reset it,
     // so in-page jumps stay smooth while a new page opens at the top instantly.
     <html lang="az" data-scroll-behavior="smooth" suppressHydrationWarning>
       <head>
-        <InlineScript html={PRE_HYDRATION_SCRIPT} />
+        <InlineScript html={preHydrationScript(source)} />
       </head>
       <body>
         {/* First Tab stop of every page; each frame's <main id="main"> is its target. */}
         <SkipLink />
-        <AppStoreProvider>
+        <AppStoreProvider dataSource={source}>
           <MotionProvider>
             <ToastProvider>{children}</ToastProvider>
           </MotionProvider>

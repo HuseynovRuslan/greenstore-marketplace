@@ -15,7 +15,7 @@ import { Portfolio } from '@/features/services/Portfolio'
 import { ServiceContact } from '@/features/services/ServiceContact'
 import { ServiceTile } from '@/features/services/ServiceTile'
 import { cn } from '@/lib/format'
-import type { Service, ServiceProvider } from '@/types'
+import type { Seller, Service, ServiceProvider } from '@/types'
 
 export function serviceCrumbs(service: Service) {
   const category = serviceCategories.find((c) => c.id === service.categoryId)
@@ -40,10 +40,14 @@ function Section({ title, id, children, className }: { title: string; id: string
 interface ServiceDetailProps {
   service: Service
   provider?: ServiceProvider
+  /** The provider's business page, when the provider is a business */
+  seller?: Seller
   /** The provider's other services */
   others: Service[]
   /** Same kind of work by other providers */
   similar: Service[]
+  /** Who provides each of `others` and `similar`, by provider id (`loadProviderNames`) */
+  providerNames?: Record<string, string>
 }
 
 /**
@@ -52,15 +56,15 @@ interface ServiceDetailProps {
  * includes, areas and the process, completed projects, the listing facts with «Xidmətdən şikayət et», the provider's
  * other services and similar ones. Phones get «Usta çağır» and «Zəng et» in a bar above the bottom navigation.
  */
-export default function ServiceDetailPage({ service, provider, others, similar }: ServiceDetailProps) {
-  const contact = providerContact(provider)
+export default function ServiceDetailPage({ service, provider, seller, others, similar, providerNames }: ServiceDetailProps) {
+  const contact = providerContact(provider, seller)
   const details = serviceDetails[service.id]
   const priceNote =
     details?.priceNote ?? (service.priceFrom != null ? 'Başlanğıc qiymət: yekun təklif işin həcminə görə verilir.' : 'Qiymət işə baxandan sonra razılaşdırılır.')
   const who = provider ? { id: provider.id, name: provider.name } : { id: service.providerId, name: 'Usta' }
 
   return (
-    <RevealProvider>
+    <RevealProvider target={{ kind: 'listing', id: service.id }}>
       <div className="page-x mx-auto flex w-full max-w-[1440px] flex-col gap-4 pt-3 pb-12 md:gap-5 md:pt-5">
         <Breadcrumb items={[...serviceCrumbs(service), { label: service.title }]} />
 
@@ -82,7 +86,7 @@ export default function ServiceDetailPage({ service, provider, others, similar }
                   <p className="text-[13px] leading-[1.5] text-ink-soft">{priceNote}</p>
                 </div>
                 <div className="max-md:hidden">
-                  <ServiceContact phone={contact.phone} title={service.title} provider={who} serviceId={service.id} categoryId={service.categoryId} />
+                  <ServiceContact title={service.title} provider={who} serviceId={service.id} categoryId={service.categoryId} />
                 </div>
                 <div className="flex gap-2.5">
                   <FavoriteToggle id={service.id} kind="service" />
@@ -188,7 +192,7 @@ export default function ServiceDetailPage({ service, provider, others, similar }
             <ul className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-5 xl:grid-cols-4">
               {others.map((s) => (
                 <li key={s.id} className="flex">
-                  <ServiceTile service={s} />
+                  <ServiceTile service={s} providerName={providerNames?.[s.providerId]} />
                 </li>
               ))}
             </ul>
@@ -202,7 +206,7 @@ export default function ServiceDetailPage({ service, provider, others, similar }
             <ul className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-5 xl:grid-cols-4">
               {similar.map((s) => (
                 <li key={s.id} className="flex">
-                  <ServiceTile service={s} />
+                  <ServiceTile service={s} providerName={providerNames?.[s.providerId]} />
                 </li>
               ))}
             </ul>
@@ -217,7 +221,7 @@ export default function ServiceDetailPage({ service, provider, others, similar }
         // No backdrop-filter here: it would make the bar the containing block of the request dialog (position: fixed).
         className="gs-keyboard-aside sticky bottom-[calc(86px+env(safe-area-inset-bottom,0px))] z-30 flex w-full items-center gap-3 border-t border-line bg-surface px-5 py-2.5 md:hidden"
       >
-        <ServiceContact phone={contact.phone} title={service.title} provider={who} serviceId={service.id} categoryId={service.categoryId} layout="bar" />
+        <ServiceContact title={service.title} provider={who} serviceId={service.id} categoryId={service.categoryId} layout="bar" />
       </div>
     </RevealProvider>
   )

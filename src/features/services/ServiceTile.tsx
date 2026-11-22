@@ -3,15 +3,18 @@ import { BadgeCheck } from 'lucide-react'
 import { CardImage } from '@/components/cards/CardImage'
 import { FavoriteButton } from '@/components/cards/FavoriteButton'
 import { cardFocusClass, stretchedLinkClass } from '@/components/cards/ListingCard'
-import { providerName } from '@/data/services'
+import { providerName as demoProviderName } from '@/data/services'
 import { cn } from '@/lib/format'
 import type { Service } from '@/types'
 
 /**
  * Service card in the catalogue's card language (Variant 2 ListingCard): photo 4:3, price in forest, title on two
  * lines, provider and areas, a verified mark; the title link covers the card and the heart sits on the photo.
+ * `providerName` comes from the page (`loadProviderNames`); without it the demo data names the provider.
  */
-export function ServiceTile({ service, className }: { service: Service; className?: string }) {
+export function ServiceTile({ service, providerName, className }: { service: Service; providerName?: string; className?: string }) {
+  const provider = providerName ?? demoProviderName(service.providerId)
+  const line = [provider, service.areas.join(', ')].filter(Boolean).join(' · ')
   return (
     <article
       className={cn(
@@ -33,8 +36,8 @@ export function ServiceTile({ service, className }: { service: Service; classNam
           </Link>
         </h3>
         <p className="mt-auto flex min-w-0 items-center gap-1 pt-0.5 text-xs leading-[1.4] text-muted md:text-[13px]">
-          <span className="truncate" title={`${providerName(service.providerId)} · ${service.areas.join(', ')}`}>
-            {providerName(service.providerId)} · {service.areas.join(', ')}
+          <span className="truncate" title={line}>
+            {line}
           </span>
           {service.verified && <BadgeCheck aria-label="Təsdiqlənmiş" role="img" size={15} strokeWidth={2} className="shrink-0 text-success" />}
         </p>

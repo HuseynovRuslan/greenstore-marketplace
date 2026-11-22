@@ -10,7 +10,7 @@ import { optionClass } from '@/features/search/filterStyles'
 import { categoryById } from '@/data/categories'
 import { cn } from '@/lib/format'
 import { listingSortOptions, type ListingSort } from '@/services/listingSort'
-import type { Seller } from '@/types'
+import type { Listing, Seller } from '@/types'
 import { wideCardImages, withCardImage } from '@/features/listing/cardImages'
 import { paginate, sellerListings } from './sellerListingQuery'
 import { sellerStatsFor, type SellerTabStat } from './sellerStats'
@@ -19,18 +19,19 @@ const icon = { size: 18, strokeWidth: 1.8, absoluteStrokeWidth: true, 'aria-hidd
 
 /**
  * Figma "Satıcının aktiv elanları": category tabs, in-seller search, sort, 3-column grid (6 per page), pagination.
+ * `listings` are the seller's public listings, loaded by the server page (sellerListingQuery.ts).
  * State lives in the URL: ?kateqoriya= · q= · siralama= · sehife=
  * The server page passes the query it rendered with; later changes update the address bar in place
  * (`history.replaceState`, which the App Router keeps in sync) without a server round trip per keystroke.
  */
-export function SellerListings({ seller, initialQuery = '' }: { seller: Seller; initialQuery?: string }) {
+export function SellerListings({ seller, listings, initialQuery = '' }: { seller: Seller; listings: Listing[]; initialQuery?: string }) {
   const [state, setState] = useState({ from: initialQuery, query: initialQuery })
   if (state.from !== initialQuery) setState({ from: initialQuery, query: initialQuery })
   const params = new URLSearchParams(state.query)
   const sectionRef = useRef<HTMLElement>(null)
   const panelId = useId()
   const stats = sellerStatsFor(seller.id)
-  const available = sellerListings(seller.id)
+  const available = sellerListings(listings, seller.id)
 
   // Tabs: the seller's stated totals when known (Figma), otherwise counted from the listings in the data.
   const categoryTabs: SellerTabStat[] =
@@ -50,7 +51,7 @@ export function SellerListings({ seller, initialQuery = '' }: { seller: Seller; 
   const sort: ListingSort = listingSortOptions.find((o) => o.value === rawSort)?.value ?? 'newest'
   const requestedPage = Math.floor(Number(params.get('sehife') ?? '1')) || 1
 
-  const results = sellerListings(seller.id, { categoryId, q, sort })
+  const results = sellerListings(listings, seller.id, { categoryId, q, sort })
   const { page, pageCount, items } = paginate(results, requestedPage)
 
   const update = (patch: Record<string, string | undefined>, keepPage = false) => {

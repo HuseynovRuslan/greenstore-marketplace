@@ -4,15 +4,14 @@
  * (GET /api/listings?q=&categoryId=&cityIds=&minPrice=&maxPrice=&vip=&delivery=&sellerType=&rootSystem=&sort=).
  */
 import { ageYears, heightRange, publicListings } from '@/data/listings'
-import { cityName } from '@/data/cities'
-import { categoryById } from '@/data/categories'
 import { sellerById } from '@/data/sellers'
-import { normalizeSearch } from '@/lib/format'
 import type { Listing, RootSystem, SellerType } from '@/types'
 
+import { matchesListingQuery, sortListings } from './listingMatch'
 import type { ListingSort } from './listingSort'
 
 export { listingSortOptions, type ListingSort } from './listingSort'
+export { sortListings } from './listingMatch'
 
 export interface ListingFilters {
   q?: string
@@ -32,18 +31,9 @@ export interface ListingFilters {
   rootSystem?: RootSystem
 }
 
-function matchesQuery(listing: Listing, q: string): boolean {
-  const needle = normalizeSearch(q)
-  if (!needle) return true
-  const haystack = normalizeSearch(
-    [listing.title, ...listing.attributes, cityName(listing.cityId), categoryById(listing.categoryId)?.name ?? '', listing.subcategory ?? ''].join(' '),
-  )
-  return needle.split(/\s+/).every((word) => haystack.includes(word))
-}
-
 export function filterListings(source: Listing[], f: ListingFilters): Listing[] {
   return source.filter((l) => {
-    if (f.q && !matchesQuery(l, f.q)) return false
+    if (f.q && !matchesListingQuery(l, f.q)) return false
     if (f.categoryId && l.categoryId !== f.categoryId) return false
     if (f.cityIds?.length && !f.cityIds.includes(l.cityId)) return false
     if (f.minPrice != null && l.price < f.minPrice) return false
@@ -70,19 +60,6 @@ export function filterListings(source: Listing[], f: ListingFilters): Listing[] 
     if (f.rootSystem && l.plant?.rootSystem !== f.rootSystem) return false
     return true
   })
-}
-
-export function sortListings(source: Listing[], sort: ListingSort): Listing[] {
-  const copy = [...source]
-  switch (sort) {
-    case 'price-asc':
-      return copy.sort((a, b) => a.price - b.price)
-    case 'price-desc':
-      return copy.sort((a, b) => b.price - a.price)
-    default:
-      // VIP listings stay on top of "Ən yenilər", like the Figma search results.
-      return copy.sort((a, b) => Number(b.vip) - Number(a.vip) || b.publishedAt.localeCompare(a.publishedAt))
-  }
 }
 
 export function searchListings(filters: ListingFilters, sort: ListingSort = 'newest'): Listing[] {

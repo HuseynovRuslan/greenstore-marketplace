@@ -70,6 +70,11 @@ export interface Listing {
   categoryId: string
   /** Sub-category name, e.g. "Meyvə ağacları" (detail page breadcrumb/specs; ids: src/data/categories.ts) */
   subcategory?: string
+  /**
+   * Sub-category id, e.g. "agaclar-meyve" (backend-contract.md 1.3): stays right when the sub-category is renamed.
+   * Sent by the API; the mock derives it from `subcategory`.
+   */
+  subcategoryId?: string
   sellerId?: string
   /** Image used on listing cards (path under /public) — the photo of the 1440 desktop frames */
   cover: string
@@ -106,7 +111,13 @@ export interface Seller {
   image: string
   /** Wide cover photo on the public seller page */
   coverImage?: string
+  /**
+   * The business's number. Never in public reads (backend-contract.md 3.1, decision 4): pages get `phoneMasked` and
+   * the number itself only from `revealSellerPhone` after «Nömrəni göstər». Admin data and the demo data keep it.
+   */
   phone?: string
+  /** "+994 50 *** ** 34" when the seller has a number (public reads, backend-contract.md 3.1) */
+  phoneMasked?: string
   email?: string
   about?: string
   /** Second paragraph on the public seller page (delivery / visiting hours) */
@@ -125,7 +136,10 @@ export interface ServiceProvider {
   /** "Landşaft şirkəti · 2018-ci ildən fəaliyyət göstərir · Bakı, Nərimanov rayonu" */
   summary?: string
   workingHours?: string
+  /** Never in public reads (backend-contract.md 3.1): the number comes from `revealPhone` of one of the services. */
   phone?: string
+  /** "+994 50 *** ** 34" (public reads, backend-contract.md 3.1) */
+  phoneMasked?: string
   kind?: 'company' | 'individual'
 }
 
@@ -139,6 +153,12 @@ export interface Service {
   priceLabel: string
   /** Numeric lower bound in AZN when the design specifies one (for sorting/filtering) */
   priceFrom?: number
+  /**
+   * How the price is meant and what it buys (backend-contract.md 1.7), so the UI can word the price in any language.
+   * Until it does, `priceLabel` is the ready text.
+   */
+  priceType?: PriceType
+  priceUnit?: PriceUnit
   providerId: string
   /** Service areas, e.g. ["Bakı", "Abşeron"] */
   areas: string[]
@@ -156,10 +176,75 @@ export interface Service {
 export interface UserProfile {
   id: string
   fullName: string
+  /** "" when the account has none */
   email: string
+  /** "+994 50 555 12 34" (the API's E.164 is shown in the site's spacing) */
   phone: string
   accountType: SellerType
+  /** The business profile («mağaza») of a business account */
   sellerId?: string
+  /** Who may open /idareetme (backend-contract.md 2.1) */
+  role: UserRole
+  /** The language of SMS and e-mail (backend-contract.md 2.1) */
+  locale: Locale
+}
+
+/** backend-contract.md 2.1. */
+export type UserRole = 'user' | 'moderator' | 'admin'
+
+/** The site's languages; ru and en come with the translations. */
+export type Locale = 'az' | 'ru' | 'en'
+
+/** Why a sign-in was refused (backend-contract.md 2.1). `locked`: too many wrong passwords, try later or by SMS code. */
+export type LoginError = 'wrong-credentials' | 'locked' | 'blocked'
+
+/** Sign-in and registration (backend-contract.md 2.1): the account is signed in at once. */
+export type LoginResult = { ok: true; user: UserProfile } | { ok: false; error: LoginError; retryAfterSec?: number }
+
+/** `PATCH /me`: what is sent changes; `email: ""` removes the e-mail. */
+export interface ProfilePatch {
+  fullName?: string
+  email?: string
+  locale?: Locale
+}
+
+/**
+ * The signed-in business's own profile, «mağaza» (`GET /me/seller`, backend-contract.md 2.1): the public `Seller` with
+ * the business's own `phone` and the `version` to send back with a change.
+ */
+export interface OwnSeller extends Seller {
+  version: string
+}
+
+/**
+ * `PATCH /me/seller`: what is sent changes, what is not stays; `""` (or `[]`) removes a value. The name, kind and city
+ * cannot be removed. The slug (the page's address) stays when the name changes. `version`: refuse the change when the
+ * profile changed since it was read.
+ */
+export interface SellerProfilePatch {
+  name?: string
+  businessKind?: BusinessKind
+  cityId?: string
+  contactPerson?: string
+  address?: string
+  about?: string
+  terms?: string
+  hours?: OpeningHours[]
+  offers?: SellerOffer[]
+  phone?: string
+  whatsapp?: boolean
+  email?: string
+  instagram?: string
+  website?: string
+  responseMinutes?: number
+  location?: { lat: number; lng: number }
+  version?: string
+}
+
+/** «Seçilmişlər» as cards (`GET /me/favorites/items`), in the order they were saved; listings no longer for sale have none. */
+export interface FavoriteItems {
+  listings: Listing[]
+  services: Service[]
 }
 
 /* ======================================================================================================== *
@@ -246,13 +331,19 @@ export interface Listing {
   deliveryAreas?: string
   /** Contact for listings without a seller profile (individuals) */
   contactName?: string
+  /**
+   * The listing's number. Never in public reads (backend-contract.md 3.1, decision 4): pages get `phoneMasked` and
+   * the number itself only from `revealPhone` after «Nömrəni göstər». The owner's own listings and admin data keep it.
+   */
   contactPhone?: string
+  /** "+994 50 *** ** 34": the listing has a callable number (not sent when `phoneHidden`) */
+  phoneMasked?: string
   /** The phone number also takes WhatsApp messages */
   whatsapp?: boolean
   /** The seller asked to hide the number: buyers write on WhatsApp only */
   phoneHidden?: boolean
   promotion?: ListingPromotion
-  /** Moderator's reason, for status "rejected" */
+  /** Moderator's reason as text, for status "rejected" (the demo data; the API sends `OwnListing.rejectionReasonCode`) */
   rejectionReason?: string
   /** Owner-only statistics (never sent on public endpoints) */
   stats?: ListingStats
@@ -360,6 +451,168 @@ export interface ListingSubmitResult {
   status: 'pending'
 }
 
+/* ---------- The owner's listings («Elanlarım», backend-contract.md 2.2, 3.3) ---------- */
+
+/** Why a moderator refused a listing (backend-contract.md 3.5). The UI words it in its language (features/cabinet/rejection.ts). */
+export type RejectionReasonCode = 'wrong-category' | 'wrong-price' | 'unverified-contact' | 'bad-photos' | 'duplicate' | 'other'
+
+/**
+ * One of the signed-in owner's listings, any status but deleted (`GET /me/listings`, `GET /me/listings/{id}`): the
+ * public `Listing` with the owner's own fields (`contactPhone` too). Moderators see listings in this shape as well.
+ */
+export interface OwnListing extends Listing {
+  kind: CategoryKind
+  /** The number is the account's own (SMS-verified) one */
+  contactPhoneVerified: boolean
+  /** Only for status `rejected` */
+  rejectionReasonCode?: RejectionReasonCode
+  /** The moderator's own words, only for status `rejected` */
+  rejectionNote?: string
+  /** ISO time it last went to the moderator */
+  submittedAt?: string
+  /** The row's version: sent back with an edit (an older one answers 409 `concurrency-conflict`) */
+  version: string
+  /** The photos' ids in gallery order (the same order as `images`): an edit keeps them without uploading again */
+  photoIds: string[]
+}
+
+/* ---------- Photo upload (backend-contract.md 3.2) ---------- */
+
+/** What the site's server asks for before the browser sends a photo. */
+export interface PhotoUploadRequest {
+  fileName: string
+  /** `image/jpeg`, `image/png` or `image/webp` */
+  contentType: string
+  bytes: number
+}
+
+/** Where the browser sends the file (`PUT uploadUrl`, one use, 10 minutes); `photoId` goes into `ListingInput.photoIds`. */
+export interface PhotoUpload {
+  photoId: string
+  uploadUrl: string
+  expiresAt: string
+}
+
+/** The answer of the `PUT`: the photo is processed and ready to attach. */
+export interface UploadedPhoto {
+  photoId: string
+  status: 'ready'
+  width: number
+  height: number
+  url: string
+}
+
+/* ---------- Moderation (backend-contract.md 3.5, AdminRepository) ---------- */
+
+/** `approved`: on the site, or was (active, expired, deactivated). */
+export type ModerationStatus = 'pending' | 'approved' | 'rejected'
+
+/** `new`: the listing's first version; `recheck`: a later one (an edit, a fix after a rejection). */
+export type ModerationKind = 'new' | 'recheck'
+
+export type ModerationSort = 'newest' | 'oldest'
+
+export interface ModerationQuery {
+  status?: ModerationStatus
+  kind?: ModerationKind
+  sort?: ModerationSort
+  /** A listing number or words of the title */
+  q?: string
+  page: number
+  pageSize?: number
+}
+
+/** The account behind a queue item. */
+export interface ModerationSeller {
+  userId: string
+  sellerId?: string
+  name: string
+  accountType: SellerType
+  verified: boolean
+  /** The business's active listings; 0 for an individual */
+  activeListings: number
+  memberSince?: number
+}
+
+/** One field that changed since the last approved version (`ListingInput` paths: `price`, `plant.heightCm`, `photos`, …). */
+export interface ModerationChange {
+  field: string
+  before?: string
+  after?: string
+}
+
+export interface ModerationDecisionRecord {
+  decision: 'approve' | 'reject'
+  reasonCode?: RejectionReasonCode
+  note?: string
+  createdAt: string
+}
+
+/** A listing in the moderation queue, with what the review panel needs (the UI words it). */
+export interface ModerationItem {
+  /** The listing's id */
+  id: string
+  listingId: string
+  number: number
+  title: string
+  sellerName: string
+  submittedAt: string
+  categoryId: string
+  kind: ModerationKind
+  status: ModerationStatus
+  /** The version sent last (1, 2, …) */
+  revision: number
+  /** Sent back with the decision */
+  version: string
+  /** `false`: «Əlaqə nömrəsi təsdiqlənməyib» */
+  contactPhoneVerified: boolean
+  photoCount: number
+  seller: ModerationSeller
+  /** The listing as its owner sees it, the number included */
+  listing: OwnListing
+  /** Empty for a first version */
+  changes: ModerationChange[]
+  lastDecision?: ModerationDecisionRecord
+}
+
+/** A queue page with the header's and the chips' totals. */
+export interface ModerationQueue {
+  items: ModerationItem[]
+  total: number
+  page: number
+  pageCount: number
+  totals: { pending: number; recheck: number; approved: number; rejected: number }
+}
+
+/** A moderator's decision; `version` is the item's, so a listing changed meanwhile is not decided blind. */
+export interface ModerationDecisionInput {
+  decision: 'approve' | 'reject'
+  reasonCode?: RejectionReasonCode
+  /** Required for `other`; at most 500 characters */
+  note?: string
+  version: string
+}
+
+export interface ModerationDecisionResult {
+  listingId: string
+  decision: 'approve' | 'reject'
+  status: ListingStatus
+  version: string
+}
+
+/* ---------- «Nömrəni göstər» ---------- */
+
+/**
+ * What «Nömrəni göstər» returns (backend-contract.md 3.1): the number, and a WhatsApp chat link when the number takes
+ * messages. A listing whose seller hid the number gets the WhatsApp link only; neither when there is no way to reach
+ * the seller.
+ */
+export interface ContactReveal {
+  phone?: string
+  /** https://wa.me/<digits> */
+  whatsappUrl?: string
+}
+
 /* ---------- Phone verification (SMS code) ---------- */
 
 export type OtpPurpose = 'register' | 'login' | 'reset-password' | 'change-phone'
@@ -438,6 +691,13 @@ export interface SavedSearch {
   createdAt: string
   /** New matches since the user last opened it (computed by the API) */
   newCount?: number
+}
+
+/** «Axtarışı yadda saxla» (backend-contract.md 2.3); saving the same filters again updates that search. */
+export interface SavedSearchInput {
+  name: string
+  query: string
+  alerts: boolean
 }
 
 /** «Bizimlə əlaqə» form (support). `contact` is a phone or an e-mail. */

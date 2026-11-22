@@ -1,0 +1,317 @@
+{
+  "$comment": "Categories (kind, form, icon) with their sub-categories. ru/en are DRAFT translations. Generated from src/data by backend/seed/export.mjs: do not edit by hand.",
+  "items": [
+    {
+      "id": "agaclar",
+      "kind": "product",
+      "form": "plant",
+      "icon": "trees",
+      "name": {
+        "az": "Ağaclar",
+        "ru": "Деревья",
+        "en": "Trees"
+      },
+      "description": {
+        "az": "Dekorativ və meyvə ağacları, iynəyarpaqlılar",
+        "ru": "Декоративные и плодовые деревья, хвойные",
+        "en": "Ornamental and fruit trees, conifers"
+      },
+      "filters": [
+        {
+          "id": "rootSystem",
+          "enabled": true
+        }
+      ],
+      "sortOrder": 10,
+      "subcategories": [
+        {
+          "id": "agaclar-meyve",
+          "name": {
+            "az": "Meyvə ağacları",
+            "ru": "Плодовые деревья",
+            "en": "Fruit trees"
+          },
+          "sortOrder": 10
+        },
+        {
+          "id": "agaclar-enliyarpaqli-yarpaqtoken",
+          "name": {
+            "az": "Enliyarpaqlı yarpaqtökən ağaclar",
+            "ru": "Листопадные лиственные деревья",
+            "en": "Deciduous broadleaf trees"
+          },
+          "sortOrder": 20
+        },
+        {
+          "id": "agaclar-enliyarpaqli-hemiseyasil",
+          "name": {
+            "az": "Enliyarpaqlı həmişəyaşıl ağaclar",
+            "ru": "Вечнозелёные лиственные деревья",
+            "en": "Evergreen broadleaf trees"
+          },
+          "sortOrder": 30
+        },
+        {
+          "id": "agaclar-iyneyarpaqli",
+          "name": {
+            "az": "İynəyarpaqlı ağaclar",
+            "ru": "Хвойные деревья",
+            "en": "Coniferous trees"
+          },
+          "sortOrder": 40
+        }
+      ]
+    },
+    {
+      "id": "kollar",
+      "kind": "product",
+      "form": "plant",
+      "icon": "shrub",
+      "name": {
+        "az": "Kollar",
+        "ru": "Кустарники",
+        "en": "Shrubs"
+      },
+      "filters": [
+        {
+          "id": "rootSystem",
+          "enabled": true
+        }
+      ],
+      "sortOrder": 20,
+      "subcategories": [
+        {
+          "id": "kollar-yarpaqtoken",
+          "name": {
+            "az": "Yarpaqtökən kollar",
+            "ru": "Листопадные кустарники",
+            "en": "Deciduous shrubs"
+          },
+          "sortOrder": 10
+        },
+        {
+          "id": "kollar-hemiseyasil",
+          "name": {
+            "az": "Həmişəyaşıl kollar",
+            "ru": "Вечнозелёные кустарники",
+            "en": "Evergreen shrubs"
+          },
+          "sortOrder": 20
+        }
+      ]
+    },
+    {
+      "id": "guller",
+      "kind": "product",
+      "form": "plant",
+      "icon": "flower",
+      "name": {
+        "az": "Güllər",
+        "ru": "Цветы",
+        "en": "Flowers"
+      },
+      "filters": [],
+      "sortOrder": 30,
+      "subcategories": [
+        {
+          "id": "guller-movsumi",
+          "name": {
+            "az": "Mövsümi güllər",
+            "ru": "Сезонные цветы",
+            "en": "Seasonal flowers"
+          },
+          "sortOrder": 10
+        },
+        {
+          "id": "guller-coxillik",
+          "name": {
+            "az": "Çoxillik güllər",
+            "ru": "Многолетние цветы",
+            "en": "Perennial flowers"
+          },
+          "sortOrder": 20
+        }
+      ]
+    },
+    {
+      "id": "sarmasiqlar",
+      "kind": "product",
+      "form": "plant",
+      "icon": "grape",
+      "name": {
+        "az": "Sarmaşıqlar",
+        "ru": "Вьющиеся растения",
+        "en": "Climbing plants"
+      },
+      "filters": [],
+      "sortOrder": 40,
+      "subcategories": [
+        {
+          "id": "sarmasiqlar-hemiseyasil",
+          "name": {
+            "az": "Həmişəyaşıl sarmaşıqlar",
+            "ru": "Вечнозелёные вьющиеся растения",
+            "en": "Evergreen climbers"
+          },
+          "sortOrder": 10
+        },
+        {
+          "id": "sarmasiqlar-cicekli",
+          "name": {
+            "az": "Çiçəkli sarmaşıqlar",
+            "ru": "Цветущие вьющиеся растения",
+            "en": "Flowering climbers"
+          },
+          "sortOrder": 20
+        },
+        {
+          "id": "sarmasiqlar-yarpaqtoken",
+          "name": {
+            "az": "Yarpaqtökən sarmaşıqlar",
+            "ru": "Листопадные вьющиеся растения",
+            "en": "Deciduous climbers"
+          },
+          "sortOrder": 30
+        }
+      ]
+    },
+    {
+      "id": "yer-ortucu-bitkiler",
+      "kind": "product",
+      "form": "plant",
+      "icon": "clover",
+      "name": {
+        "az": "Yer örtücü bitkilər",
+        "ru": "Почвопокровные растения",
+        "en": "Ground cover plants"
+      },
+      "filters": [],
+      "sortOrder": 50,
+      "subcategories": [
+        {
+          "id": "yer-ortucu-bitkiler-hemiseyasil",
+          "name": {
+            "az": "Həmişəyaşıl",
+            "ru": "Вечнозелёные",
+            "en": "Evergreen"
+          },
+          "sortOrder": 10
+        },
+        {
+          "id": "yer-ortucu-bitkiler-cicekli",
+          "name": {
+            "az": "Çiçəkli",
+            "ru": "Цветущие",
+            "en": "Flowering"
+          },
+          "sortOrder": 20
+        },
+        {
+          "id": "yer-ortucu-bitkiler-iyneyarpaqli",
+          "name": {
+            "az": "İynəyarpaqlı",
+            "ru": "Хвойные",
+            "en": "Coniferous"
+          },
+          "sortOrder": 30
+        },
+        {
+          "id": "yer-ortucu-bitkiler-sukkulentler",
+          "name": {
+            "az": "Sukkulentlər",
+            "ru": "Суккуленты",
+            "en": "Succulents"
+          },
+          "sortOrder": 40
+        },
+        {
+          "id": "yer-ortucu-bitkiler-ot-tipli",
+          "name": {
+            "az": "Ot tipli",
+            "ru": "Травянистые",
+            "en": "Grass-like"
+          },
+          "sortOrder": 50
+        },
+        {
+          "id": "yer-ortucu-bitkiler-surunen-yarpaqli",
+          "name": {
+            "az": "Sürünən yarpaqlı",
+            "ru": "Стелющиеся",
+            "en": "Trailing"
+          },
+          "sortOrder": 60
+        }
+      ]
+    },
+    {
+      "id": "landsaft-xidmetleri",
+      "kind": "service",
+      "form": "service",
+      "icon": "fence",
+      "name": {
+        "az": "Bağ xidmətləri",
+        "ru": "Садовые услуги",
+        "en": "Garden services"
+      },
+      "filters": [],
+      "sortOrder": 60,
+      "subcategories": [
+        {
+          "id": "landsaft-dizayni",
+          "name": {
+            "az": "Landşaft dizaynı",
+            "ru": "Ландшафтный дизайн",
+            "en": "Landscape design"
+          },
+          "sortOrder": 10
+        },
+        {
+          "id": "heyetyani-yasillasdirma",
+          "name": {
+            "az": "Həyətyanı sahələrin yaşıllaşdırılması",
+            "ru": "Озеленение придомовых участков",
+            "en": "Yard landscaping"
+          },
+          "sortOrder": 20
+        },
+        {
+          "id": "agac-ekilmesi",
+          "name": {
+            "az": "Ağac əkilməsi",
+            "ru": "Посадка деревьев",
+            "en": "Tree planting"
+          },
+          "sortOrder": 30
+        },
+        {
+          "id": "avtomatik-suvarma",
+          "name": {
+            "az": "Avtomatik suvarma sistemləri",
+            "ru": "Системы автоматического полива",
+            "en": "Automatic irrigation systems"
+          },
+          "sortOrder": 40
+        },
+        {
+          "id": "cim-salinmasi",
+          "name": {
+            "az": "Qazon salınması",
+            "ru": "Укладка газона",
+            "en": "Lawn installation"
+          },
+          "sortOrder": 50
+        },
+        {
+          "id": "bag-baximi",
+          "name": {
+            "az": "Bağ baxımı",
+            "ru": "Уход за садом",
+            "en": "Garden care"
+          },
+          "sortOrder": 60
+        }
+      ]
+    }
+  ]
+}

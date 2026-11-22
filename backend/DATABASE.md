@@ -1,6 +1,6 @@
 # GreenStore: verilənlər bazası
 
-**Status:** təsdiqlənib (22 noyabr 2026). Hələ heç bir cədvəl yaradılmayıb.
+**Status:** təsdiqlənib (22 noyabr 2026). Faza 1-in cədvəlləri yaradılıb (miqrasiya `AddCatalogueTables`): `categories`, `cities`, `users`, `photos`, `sellers`, `listings` (`pending_promotion_option_id` faza 5-də, `promotion_options` ilə birlikdə), `listing_photos`, `listing_counters` və `listing_number_seq`. Faza 2-də (miqrasiya `AddAccounts`, sonra `AddOtpCreatedIndex`) `sessions`, `otp_challenges`, `favorites` və `saved_searches` gəlib; `users` faza 1-dən tamdır. Faza 3-də (miqrasiya `AddListingLifecycle`) `listing_drafts`, `listing_revisions`, `moderation_decisions`, `listing_daily_stats`, `listing_seen` (UNLOGGED), `outbox`, `audit_log` və `idempotency_keys` gəlib. `devices` mobil tətbiqi gözləyir. Qalanları (şikayətlər, «Usta çağır», dəstək, reklam və ödəniş) öz fazalarında gəlir.
 **Əlaqəli sənədlər:** [ARCHITECTURE.md](ARCHITECTURE.md) (ümumi arxitektura), [backend-contract.md](../docs/handoff/backend-contract.md) (frontend müqaviləsi).
 
 Aşağıdakı SQL hədəf sxemdir. Real cədvəllər EF Core miqrasiyaları ilə yaradılacaq, amma nəticə bu sxemlə eyni olmalıdır. Hər miqrasiyanın SQL-i bu sənədlə müqayisə olunur.
@@ -141,6 +141,7 @@ CREATE TABLE otp_challenges (
 );
 CREATE INDEX ix_otp_phone ON otp_challenges (phone, created_at DESC);   -- «saatda 5, gündə 10» limitləri
 CREATE INDEX ix_otp_ip    ON otp_challenges (ip_hash, created_at DESC);
+CREATE INDEX ix_otp_created ON otp_challenges (created_at);             -- bütün saytın gündəlik limiti və 7 günlük təmizləmə
 
 -- Mobil tətbiq gələndə (ARCHITECTURE.md §9)
 CREATE TABLE devices (
@@ -367,6 +368,8 @@ CREATE INDEX ix_decisions_listing ON moderation_decisions (listing_id, created_a
   - turbo.az tətbiqindəki qiymət tarixçəsi sonra əlavə iş tələb etmədən buradan gəlir.
 - **Admin-dəki `ModerationKind`** buradan hesablanır: `revision = 1` olanda `new` («Yoxlamada»), yoxsa `recheck` («Təkrar yoxlama»).
 - **Şəkillərin sırası** dəyişəndə elanın `listing_photos` sətirləri bir tranzaksiyada silinib yenidən yazılır.
+- **Versiyası (revision) olmayan köhnə elanlar** (seed-in demo elanları): redaktə olunanda və ya moderator qərar verəndə onların cari məzmunu əvvəlcə versiya 1 kimi yazılır. Beləcə qərar həmişə mövcud versiyaya bağlanır (FK), moderator da fərqi görür.
+- **Elandan çıxarılan şəkil** silinmir: köhnə versiyalar ona istinad edir. Silinmiş elanın şəkilləri 6 aylıq saxlamadan sonra (§5) silinəcək; bu təmizləmə hələ yazılmayıb.
 
 ### 3.6 Sayğaclar və statistika
 
@@ -403,7 +406,7 @@ CREATE UNLOGGED TABLE listing_seen (
 2. Sətir yazılıbsa (bu gün ilk dəfədir), `listing_counters.views + 1` və `listing_daily_stats`-da günün sətrinə upsert edilir (`views + 1`).
 3. Yazılmayıbsa, heç nə dəyişmir.
 
-«Nömrəni göstər» də eyni yolla, `action = 'reveal'` ilə sayılır. Seçilmişlər sayğacı `favorites`-ə yazan tranzaksiyanın içində dəyişir.
+«Nömrəni göstər» də eyni yolla, `action = 'reveal'` ilə sayılır. Seçilmişlər sayğacı `favorites`-ə yazan tranzaksiyanın içində dəyişir. Günün `favourites` sütunu həmin gün əlavə olunan seçilmişləri sayır (silinmə onu azaltmır). Satıcı səhifəsində «Nömrəni göstər» sayılmır: onun üçün cədvəl yoxdur. Kod: `Modules/Listings/ListingCountersEndpoints.cs`, bir SQL ifadəsi (CTE) ilə.
 
 ### 3.7 Seçilmişlər, axtarışlar, şikayətlər
 
@@ -665,7 +668,7 @@ Müddətləri hüquqşünas təsdiqləməlidir (Azərbaycanın şəxsi məlumatl
 ## 6. Miqrasiyalar, rollar, backup
 
 **Miqrasiyalar.**
-- EF Core miqrasiyaları `Data/Migrations`-dadır. Hər PR-da `dotnet ef migrations script` ilə SQL-ə baxılır.
+- EF Core miqrasiyaları `Data/Migrations`-dadır. Hər PR-da `dotnet ef migrations script` ilə SQL-ə baxılır. Tarixçə cədvəli `__ef_migrations_history`-dir (snake_case, digər cədvəllər kimi).
 - Tətbiq olunmuş miqrasiya heç vaxt dəyişdirilmir, yeni miqrasiya yazılır.
 - Qıran dəyişiklik üç addımla edilir:
   1. yeni sütun boş ola bilən kimi əlavə olunur;
@@ -673,7 +676,7 @@ Müddətləri hüquqşünas təsdiqləməlidir (Azərbaycanın şəxsi məlumatl
   3. sonra məcburi edilir, köhnə sütun silinir.
 
   Beləcə deploy zamanı köhnə və yeni kod eyni bazada işləyə bilir.
-- Miqrasiya deploy-un ayrıca addımıdır (EF migrations bundle). Tətbiq başlayanda işləmir.
+- Miqrasiya deploy-un ayrıca addımıdır: `dotnet GreenStore.Api.dll migrate`, lokalda `dotnet run -- migrate` (ARCHITECTURE.md §16). Staging və Prod-da tətbiq başlayanda işləmir.
 
 **Baza rolları** (ən az icazə prinsipi):
 

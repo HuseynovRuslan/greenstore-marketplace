@@ -1,5 +1,7 @@
 /**
- * DEMO MODE — this frontend has no backend yet.
+ * DEMO MODE — the sample data and, with DATA_SOURCE=mock (the default), a simulated backend. What follows describes
+ * the mock; with DATA_SOURCE=api accounts, favourites and saved searches are the GreenStore API's (README.md,
+ * "Backend integration"), while the listings are still the seeded samples.
  *
  * - Every listing, seller, service, user, statistic and admin record in `src/data/*` is sample data copied from the
  *   approved Figma design. None of it is real.

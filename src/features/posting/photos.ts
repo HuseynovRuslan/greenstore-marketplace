@@ -3,7 +3,8 @@ import { MAX_PHOTO_MB, MAX_PHOTOS, type DraftPhoto } from './draft'
 /*
  * Photos of «Elan yerləşdir»: checks with a message per file, gallery order helpers, and the browser side —
  * decoding, scaling down to 2000 px (camera photos are 4–8 MB) and keeping the result in IndexedDB so the draft's
- * photos survive a reload. Nothing is uploaded in the demo (docs/handoff/contract-additions.md: POST /api/photos).
+ * photos survive a reload. Nothing is uploaded in the demo; with DATA_SOURCE=api the photos go to the API when the
+ * listing is sent (upload.ts, backend-contract.md 3.2).
  */
 
 export const ACCEPTED_TYPES = ['image/jpeg', 'image/png', 'image/webp']
@@ -62,7 +63,8 @@ export async function processFile(file: File, id: string): Promise<ProcessedPhot
     bitmap.close()
     return { error: tooSmall }
   }
-  const scale = Math.min(1, MAX_SIDE / Math.max(bitmap.width, bitmap.height))
+  // Never below 600 px on the shorter side (a wide panorama): the API refuses smaller photos too.
+  const scale = Math.min(1, Math.max(MAX_SIDE / Math.max(bitmap.width, bitmap.height), MIN_SIDE / Math.min(bitmap.width, bitmap.height)))
   const width = Math.round(bitmap.width * scale)
   const height = Math.round(bitmap.height * scale)
   const canvas = document.createElement('canvas')

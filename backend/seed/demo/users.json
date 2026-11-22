@@ -1,0 +1,167 @@
+{
+  "$comment": "Demo accounts (sample people and numbers, not real). They cannot sign in with a password. Generated from src/data by backend/seed/export.mjs: do not edit by hand.",
+  "items": [
+    {
+      "key": "owner-abseron-tingcilik",
+      "fullName": "Elvin Əliyev",
+      "phone": "+994505551234",
+      "accountType": "business",
+      "email": "info@absheronting.az",
+      "createdAt": "2021-03-01T08:00:00Z"
+    },
+    {
+      "key": "owner-yasil-bag-merkezi",
+      "fullName": "Yaşıl Bağ Mərkəzi",
+      "phone": "+994125104420",
+      "accountType": "business",
+      "createdAt": "2019-03-01T08:00:00Z"
+    },
+    {
+      "key": "owner-quba-fidan",
+      "fullName": "Quba Fidan",
+      "phone": "+994233351208",
+      "accountType": "business",
+      "createdAt": "2022-03-01T08:00:00Z"
+    },
+    {
+      "key": "owner-yasil-mekan-landsaft",
+      "fullName": "Rauf Həsənli",
+      "phone": "+994502124418",
+      "accountType": "business",
+      "createdAt": "2018-03-01T08:00:00Z"
+    },
+    {
+      "key": "contact-554102287",
+      "fullName": "Rəşad",
+      "phone": "+994554102287",
+      "accountType": "individual",
+      "createdAt": "2025-06-01T08:00:00Z"
+    },
+    {
+      "key": "contact-703184509",
+      "fullName": "Nərmin",
+      "phone": "+994703184509",
+      "accountType": "individual",
+      "createdAt": "2025-06-01T08:00:00Z"
+    },
+    {
+      "key": "contact-517023314",
+      "fullName": "Tural",
+      "phone": "+994517023314",
+      "accountType": "individual",
+      "createdAt": "2025-06-01T08:00:00Z"
+    },
+    {
+      "key": "contact-502331840",
+      "fullName": "Sumqayıt Yaşıllıq",
+      "phone": "+994502331840",
+      "accountType": "individual",
+      "createdAt": "2025-06-01T08:00:00Z"
+    },
+    {
+      "key": "contact-222564011",
+      "fullName": "Gəncə Gül Evi",
+      "phone": "+994222564011",
+      "accountType": "individual",
+      "createdAt": "2025-06-01T08:00:00Z"
+    },
+    {
+      "key": "contact-242441870",
+      "fullName": "Şəki Fidanlığı",
+      "phone": "+994242441870",
+      "accountType": "individual",
+      "createdAt": "2025-06-01T08:00:00Z"
+    },
+    {
+      "key": "contact-775206413",
+      "fullName": "Kamran",
+      "phone": "+994775206413",
+      "accountType": "individual",
+      "createdAt": "2025-06-01T08:00:00Z"
+    },
+    {
+      "key": "contact-503779021",
+      "fullName": "Bağban Ramil",
+      "phone": "+994503779021",
+      "accountType": "individual",
+      "createdAt": "2025-06-01T08:00:00Z"
+    },
+    {
+      "key": "contact-507124018",
+      "fullName": "Elçin",
+      "phone": "+994507124018",
+      "accountType": "individual",
+      "createdAt": "2025-06-01T08:00:00Z"
+    },
+    {
+      "key": "contact-516042875",
+      "fullName": "Fərid",
+      "phone": "+994516042875",
+      "accountType": "individual",
+      "createdAt": "2025-06-01T08:00:00Z"
+    },
+    {
+      "key": "contact-552386190",
+      "fullName": "Nərgiz",
+      "phone": "+994552386190",
+      "accountType": "individual",
+      "createdAt": "2025-06-01T08:00:00Z"
+    },
+    {
+      "key": "contact-705128346",
+      "fullName": "Səbinə",
+      "phone": "+994705128346",
+      "accountType": "individual",
+      "createdAt": "2025-06-01T08:00:00Z"
+    },
+    {
+      "key": "contact-503910764",
+      "fullName": "Vüqar",
+      "phone": "+994503910764",
+      "accountType": "individual",
+      "createdAt": "2025-06-01T08:00:00Z"
+    },
+    {
+      "key": "contact-704551962",
+      "fullName": "Aynur",
+      "phone": "+994704551962",
+      "accountType": "individual",
+      "createdAt": "2025-06-01T08:00:00Z"
+    },
+    {
+      "key": "contact-513307246",
+      "fullName": "Lalə",
+      "phone": "+994513307246",
+      "accountType": "individual",
+      "createdAt": "2025-06-01T08:00:00Z"
+    },
+    {
+      "key": "contact-508182703",
+      "fullName": "Kamil",
+      "phone": "+994508182703",
+      "accountType": "individual",
+      "createdAt": "2025-06-01T08:00:00Z"
+    },
+    {
+      "key": "provider-aquabag",
+      "fullName": "AquaBağ",
+      "phone": "+994500000101",
+      "accountType": "individual",
+      "createdAt": "2025-06-01T08:00:00Z"
+    },
+    {
+      "key": "provider-bag-ustasi",
+      "fullName": "Bağ Ustası",
+      "phone": "+994500000102",
+      "accountType": "individual",
+      "createdAt": "2025-06-01T08:00:00Z"
+    },
+    {
+      "key": "provider-quba-bag",
+      "fullName": "Quba Bağ",
+      "phone": "+994500000103",
+      "accountType": "individual",
+      "createdAt": "2025-06-01T08:00:00Z"
+    }
+  ]
+}
