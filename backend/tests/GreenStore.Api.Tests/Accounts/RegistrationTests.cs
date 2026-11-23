@@ -62,6 +62,8 @@ public sealed class RegistrationTests(AccountsApi api)
     [Fact]
     public async Task A_business_account_opens_its_shop_at_once()
     {
+        // The collection shares one clock and other tests move it weeks ahead, so the year is read, not assumed.
+        var year = api.Clock.GetUtcNow().Year;
         var account = await api.RegisterAsync(accountType: "business", companyName: "  Gəncə Bağ Evi ", businessKind: "garden-centre", fullName: "Nihad Quliyev");
         var user = account.Response.GetProperty("user");
         var sellerId = user.GetProperty("sellerId").GetString()!;
@@ -80,7 +82,7 @@ public sealed class RegistrationTests(AccountsApi api)
         Assert.Equal("Nihad Quliyev", page.GetProperty("contactPerson").GetString());
         Assert.Equal(0, page.GetProperty("activeListings").GetInt32());
         Assert.False(page.GetProperty("verified").GetBoolean());
-        Assert.Equal(2026, page.GetProperty("memberSince").GetInt32());
+        Assert.Equal(year, page.GetProperty("memberSince").GetInt32());
         Assert.Equal($"+994 55 *** ** {account.Phone[^2..]}", page.GetProperty("phoneMasked").GetString());
         Assert.Contains(Json.Slugs(directory.GetProperty("items")), s => s == slug);
         Assert.Empty(Contract.Check(page, "Seller"));
