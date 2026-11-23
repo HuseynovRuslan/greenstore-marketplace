@@ -1,14 +1,7 @@
 import { sellerById } from '@/data/sellers'
-import type { ServiceProvider } from '@/types'
-
-/**
- * Figma never shows a phone number for service providers. The revealed contact state in the components frame
- * ("Nömrə göstərilib · +994 50 555 12 34") is used as a demo number for the "Nömrəni göstər" interaction.
- */
-export const DEMO_CONTACT_PHONE = '+994 50 555 12 34'
+import type { Seller, ServiceProvider } from '@/types'
 
 export interface ProviderContact {
-  phone: string
   summary?: string
   hours?: string
   sellerSlug?: string
@@ -16,12 +9,14 @@ export interface ProviderContact {
   badge?: string
 }
 
-/** Provider data + the linked public seller profile (Abşeron Tingçilik) when there is one. */
-export function providerContact(provider: ServiceProvider | undefined): ProviderContact {
-  const seller = sellerById(provider?.sellerId)
+/**
+ * Provider data + the linked public seller profile (Abşeron Tingçilik) when there is one: from the page, else the
+ * demo data. No number: «Nömrəni göstər» asks for it (backend-contract.md 3.1).
+ */
+export function providerContact(provider: ServiceProvider | undefined, linked?: Seller): ProviderContact {
+  const seller = linked ?? sellerById(provider?.sellerId)
   const sellerSummary = seller?.kind ? [seller.kind, seller.memberSince && `${seller.memberSince}-dən GreenStore-da`].filter(Boolean).join(' · ') : undefined
   return {
-    phone: provider?.phone ?? seller?.phone ?? DEMO_CONTACT_PHONE,
     summary: provider?.summary ?? sellerSummary,
     hours: provider?.workingHours ?? seller?.workingHours,
     sellerSlug: seller?.slug,

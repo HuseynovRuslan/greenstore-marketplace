@@ -1,0 +1,130 @@
+{
+  "$comment": "Services catalogue queries run against the mock (searchServices, 6 per page) with the service numbers of the page asked for (page 1 unless the query says otherwise; a page past the end is the last page), in order. Run by ServiceSearchParityTests. Generated from src/data by backend/seed/export.mjs: do not edit by hand.",
+  "queries": [
+    {
+      "name": "everything, newest first",
+      "query": "sort=newest&page=1&pageSize=6",
+      "total": 6,
+      "items": [
+        20316,
+        20317,
+        20318,
+        20319,
+        20320,
+        20321
+      ]
+    },
+    {
+      "name": "cheapest first, by agreement last",
+      "query": "sort=price-asc&page=1&pageSize=6",
+      "total": 6,
+      "items": [
+        20318,
+        20321,
+        20316,
+        20319,
+        20317,
+        20320
+      ]
+    },
+    {
+      "name": "dearest first",
+      "query": "sort=price-desc&page=1&pageSize=6",
+      "total": 6,
+      "items": [
+        20317,
+        20319,
+        20316,
+        20321,
+        20318,
+        20320
+      ]
+    },
+    {
+      "name": "service type",
+      "query": "categoryId=landsaft-dizayni&sort=newest&page=1&pageSize=6",
+      "total": 1,
+      "items": [
+        20316
+      ]
+    },
+    {
+      "name": "service area",
+      "query": "cityId=quba&sort=newest&page=1&pageSize=6",
+      "total": 1,
+      "items": [
+        20321
+      ]
+    },
+    {
+      "name": "search word",
+      "query": "q=suvarma&sort=newest&page=1&pageSize=6",
+      "total": 2,
+      "items": [
+        20316,
+        20317
+      ]
+    },
+    {
+      "name": "search word in the checklist",
+      "query": "q=3D&sort=newest&page=1&pageSize=6",
+      "total": 1,
+      "items": [
+        20316
+      ]
+    },
+    {
+      "name": "provider name",
+      "query": "q=Ba%C4%9F+Ustas%C4%B1&sort=newest&page=1&pageSize=6",
+      "total": 1,
+      "items": [
+        20319
+      ]
+    },
+    {
+      "name": "verified companies",
+      "query": "providerKind=company&sort=newest&page=1&pageSize=6",
+      "total": 3,
+      "items": [
+        20316,
+        20318,
+        20320
+      ]
+    },
+    {
+      "name": "price range",
+      "query": "minPrice=10&maxPrice=200&sort=newest&page=1&pageSize=6",
+      "total": 3,
+      "items": [
+        20316,
+        20319,
+        20321
+      ]
+    },
+    {
+      "name": "a maximum price above every possible price",
+      "query": "maxPrice=99999999.99&sort=newest&page=1&pageSize=6",
+      "total": 5,
+      "items": [
+        20316,
+        20317,
+        20318,
+        20319,
+        20321
+      ]
+    },
+    {
+      "name": "a page past the end",
+      "query": "sort=newest&page=2147483647&pageSize=6",
+      "total": 6,
+      "items": [
+        20316,
+        20317,
+        20318,
+        20319,
+        20320,
+        20321
+      ]
+    }
+  ]
+}

@@ -3,7 +3,8 @@
  * code. Nothing here sends an SMS or stores anything durable; module state lives as long as the server process.
  * DEMO ONLY — the real API replaces all of it (docs/handoff/contract-additions.md).
  */
-import type { Listing, ListingStats, OtpChallenge, OtpVerifyResult } from '@/types'
+import { currentUser, DEMO_ACCOUNT_FAVORITES, DEMO_SAVED_SEARCHES } from '@/data/user'
+import type { Listing, ListingStats, OtpChallenge, OtpVerifyResult, SavedSearch, Seller, UserProfile } from '@/types'
 
 const counters = new Map<string, number>()
 
@@ -97,4 +98,50 @@ export const mockOtp = {
     const challenge = parseChallenge(challengeId)
     return Boolean(challenge && now - challenge.issuedAt <= VERIFIED_TTL_SEC * 1000)
   },
+}
+
+/* ---------- The signed-in demo account ---------- */
+
+/**
+ * DATA_SOURCE=mock has no server session: the demo signs in in the browser (src/state/store.tsx), so the account
+ * methods of the repository answer for the demo account, kept in memory as long as the server process lives. Pages in
+ * mock mode keep using the browser's copy; these exist so the contract is the same in both modes (and for tests).
+ */
+export interface MockAccountState {
+  profile: UserProfile
+  /** Changes made through `updateOwnSeller`, laid over the demo seller. */
+  seller: Partial<Seller>
+  sellerVersion: number
+  favorites: string[]
+  searches: SavedSearch[]
+}
+
+export function newMockAccount(): MockAccountState {
+  const { id, fullName, email, phone, accountType, sellerId, role, locale } = currentUser
+  return {
+    profile: { id, fullName, email, phone, accountType, sellerId, role, locale },
+    seller: {},
+    sellerVersion: 1,
+    favorites: [...DEMO_ACCOUNT_FAVORITES],
+    searches: DEMO_SAVED_SEARCHES.map((s) => ({ ...s })),
+  }
+}
+
+export const mockAccount: { state: MockAccountState; reset: () => void } = {
+  state: newMockAccount(),
+  reset() {
+    this.state = newMockAccount()
+  },
+}
+
+/** "+994 50 555 12 34" from any common shape (the mock's stored format). */
+export const displayPhone = (phone: string) => {
+  const d = digitsOf(phone)
+  return d.length === 9 ? `+994 ${d.slice(0, 2)} ${d.slice(2, 5)} ${d.slice(5, 7)} ${d.slice(7)}` : phone.trim()
+}
+
+/** The number a mock challenge was sent to (the id carries it). */
+export function mockChallengePhone(challengeId: string): string | undefined {
+  const m = /^otp\.(\d{9})\.\d{10,}$/.exec(challengeId)
+  return m ? displayPhone(m[1]) : undefined
 }

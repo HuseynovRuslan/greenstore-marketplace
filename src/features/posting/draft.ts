@@ -1,4 +1,4 @@
-import { categoryById, subcategoriesOf } from '@/data/categories'
+import { categoryById, subcategoriesOf, subcategoryIdOf } from '@/data/categories'
 import { serviceCategories } from '@/data/services'
 import { normalizeSearch } from '@/lib/format'
 import { phoneValue } from '@/lib/phone'
@@ -31,10 +31,18 @@ export const MAX_PHOTOS = 12
 export const MAX_PHOTO_MB = 10
 
 export interface DraftPhoto {
+  /** This browser's id (the image data in IndexedDB, photoStore) */
   id: string
   name: string
   width: number
   height: number
+  /**
+   * DATA_SOURCE=api: the photo's id on the API once it is uploaded (or the photo of the listing an edit opened). It goes
+   * into `ListingInput.photoIds`; a retry does not upload the photo again.
+   */
+  remoteId?: string
+  /** The uploaded photo's address: an edit's photos are shown from it (they have no copy in this browser). */
+  url?: string
 }
 
 export interface PostingDraft {
@@ -71,8 +79,16 @@ export interface PostingDraft {
   reachedStep: StepNumber
   /** ISO time of the last change («Qaralama saxlanıldı · 14:32») */
   savedAt: string
-  /** Set when the draft edits a published listing («Redaktə et»): the category is locked and the number kept */
-  editing?: { id: string; number?: number; slug: string }
+  /**
+   * Set when the draft edits a published listing («Redaktə et»): the category is locked and the number kept. `version`
+   * (DATA_SOURCE=api) is the listing's as it was opened: the API refuses the edit when it changed since.
+   */
+  editing?: { id: string; number?: number; slug: string; version?: string }
+  /**
+   * DATA_SOURCE=api: the `Idempotency-Key` of this draft's «Elanı göndər», made on the first try and kept until the
+   * draft is sent, so a retry after a lost answer finds the listing already sent instead of making a second one.
+   */
+  sendKey?: string
 }
 
 export function createDraft(contact?: { name?: string; phone?: string }): PostingDraft {
@@ -153,6 +169,16 @@ const paragraphs = (text: string) =>
 
 const amount = (value: string) => parseNumberValue(value)
 
+/**
+ * The sub-category's id for the name the wizard keeps (a service's type for a service): sent with the name, it is what
+ * the API goes by (backend-contract.md 1.3), so an admin's renaming of the sub-category does not refuse new listings.
+ */
+export function subcategoryIdOfDraft(d: Pick<PostingDraft, 'kind' | 'categoryId' | 'subcategory'>): string | undefined {
+  if (!d.subcategory) return undefined
+  if (d.kind === 'service' || d.categoryId === SERVICE_CATEGORY) return serviceCategories.find((c) => c.name === d.subcategory)?.id
+  return subcategoryIdOf(d.categoryId, d.subcategory)
+}
+
 /** What «Elan yerləşdir» sends (`photoIds` are the uploaded photo ids, cover first). */
 export function toListingInput(d: PostingDraft): ListingInput {
   const priced = d.priceType !== 'agreement'
@@ -161,6 +187,7 @@ export function toListingInput(d: PostingDraft): ListingInput {
     kind: d.kind || 'product',
     categoryId: d.categoryId,
     subcategory: d.subcategory || undefined,
+    subcategoryId: subcategoryIdOfDraft(d),
     title: d.title.trim(),
     description: d.description.trim(),
     attributes: Object.fromEntries(Object.entries(d.attrs).filter(([, v]) => v.trim() !== '')),
@@ -179,7 +206,7 @@ export function toListingInput(d: PostingDraft): ListingInput {
     contactPhone: digits ? `+${digits}` : '',
     whatsapp: d.whatsapp,
     phoneHidden: d.hidePhone,
-    photoIds: d.photos.map((p) => p.id),
+    photoIds: d.photos.map((p) => p.remoteId ?? p.id),
     promotion: d.promotion ?? undefined,
   }
 }

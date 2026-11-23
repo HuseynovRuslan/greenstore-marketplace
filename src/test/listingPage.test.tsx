@@ -2,21 +2,24 @@ import { describe, expect, it, vi, beforeEach } from 'vitest'
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { listingById } from '@/data/listings'
-import { sellerById } from '@/data/sellers'
 import { careItems, factRows, frostLabel, listingPrice, monthsLabel, stockLabel, wholesaleLabel } from '@/features/listing/facts'
 import { responseLabel } from '@/features/listing/SellerSummary'
 import { initials } from '@/lib/format'
+import { mockRepository } from '@/services/mockRepository'
 import { AppStoreProvider } from '@/state/store'
 import { ListingDetail } from '@/views/ListingDetailPage'
 
-const recordPhoneReveal = vi.fn(async (id: string) => void id)
+const revealListingContact = vi.fn(async (id: string) => ({ ok: true as const, contact: await mockRepository.revealPhone(id) }))
 const sendReport = vi.fn(async (input: unknown) => (void input, { ok: true as const, id: 'rep-1' }))
 // Long user-event flows: give them room when the whole suite runs in parallel.
 vi.setConfig({ testTimeout: 20_000 })
 
 vi.mock('@/features/listing/actions', () => ({
-  recordPhoneReveal: (id: string) => recordPhoneReveal(id),
   sendReport: (input: unknown) => sendReport(input),
+}))
+vi.mock('@/features/contact/actions', () => ({
+  revealListingContact: (id: string) => revealListingContact(id),
+  revealSellerContact: vi.fn(),
 }))
 vi.mock('next/navigation', () => ({
   useRouter: () => ({ push: vi.fn(), replace: vi.fn(), back: vi.fn(), prefetch: vi.fn(), refresh: vi.fn() }),
@@ -77,32 +80,34 @@ describe('listing facts', () => {
 
 describe('listing page', () => {
   beforeEach(() => {
-    recordPhoneReveal.mockClear()
+    revealListingContact.mockClear()
     sendReport.mockClear()
   })
 
-  const renderPage = (id: string) => {
-    const listing = listingById(id)!
+  // What the page renders with: the repository's public reads, which carry no phone numbers.
+  const renderPage = async (id: string) => {
+    const listing = (await mockRepository.getPublicListing(listingById(id)!.slug))!
+    const seller = listing.sellerId ? await mockRepository.getSellerById(listing.sellerId) : undefined
     return render(
       <AppStoreProvider>
-        <ListingDetail listing={listing} seller={sellerById(listing.sellerId)} others={[]} similar={[]} />
+        <ListingDetail listing={listing} seller={seller} others={[]} similar={[]} />
       </AppStoreProvider>,
     )
   }
 
   it('reveals the number as a call link and counts the reveal', async () => {
     const user = userEvent.setup()
-    renderPage('zeytun-agaci')
+    await renderPage('zeytun-agaci')
     const panel = screen.getByRole('complementary', { name: 'Qiymət və əlaqə' })
     await user.click(within(panel).getByRole('button', { name: 'Nömrəni göstər' }))
-    expect(within(panel).getByRole('link', { name: 'Zəng et: 050 555 12 34' })).toHaveAttribute('href', 'tel:+994505551234')
-    expect(recordPhoneReveal).toHaveBeenCalledWith('zeytun-agaci')
+    expect(await within(panel).findByRole('link', { name: 'Zəng et: 050 555 12 34' })).toHaveAttribute('href', 'tel:+994505551234')
+    expect(revealListingContact).toHaveBeenCalledWith('zeytun-agaci')
     const whatsapp = within(panel).getByRole('link', { name: 'WhatsApp-a yaz' })
     expect(whatsapp.getAttribute('href')).toMatch(/^https:\/\/wa\.me\/994505551234\?text=/)
   })
 
-  it('offers WhatsApp only when the seller hid the number', () => {
-    renderPage('limon-agaci')
+  it('offers WhatsApp only when the seller hid the number', async () => {
+    await renderPage('limon-agaci')
     const panel = screen.getByRole('complementary', { name: 'Qiymət və əlaqə' })
     expect(within(panel).queryByRole('button', { name: 'Nömrəni göstər' })).not.toBeInTheDocument()
     expect(within(panel).getByText(/zəng qəbul etmir/)).toBeInTheDocument()
@@ -110,7 +115,7 @@ describe('listing page', () => {
 
   it('moves the gallery with the thumbnails and opens the viewer', async () => {
     const user = userEvent.setup()
-    renderPage('zeytun-agaci')
+    await renderPage('zeytun-agaci')
     const gallery = screen.getByRole('region', { name: /şəkillər/ })
     await user.click(within(gallery).getByRole('button', { name: 'Şəkil 3' }))
     expect(within(gallery).getByRole('button', { name: 'Şəkil 3' })).toHaveAttribute('aria-current', 'true')
@@ -122,7 +127,7 @@ describe('listing page', () => {
 
   it('sends a report with a reason and confirms it', async () => {
     const user = userEvent.setup()
-    renderPage('zeytun-agaci')
+    await renderPage('zeytun-agaci')
     await user.click(screen.getByRole('button', { name: 'Elandan şikayət et' }))
     const dialog = screen.getByRole('dialog', { name: 'Elandan şikayət et' })
     await user.click(within(dialog).getByRole('button', { name: 'Şikayəti göndər' }))
@@ -132,7 +137,8 @@ describe('listing page', () => {
     expect(within(dialog).getByText(/ən azı 10 simvol/)).toBeInTheDocument()
     await user.click(within(dialog).getByRole('radio', { name: 'Qiymət düzgün deyil' }))
     await user.click(within(dialog).getByRole('button', { name: 'Şikayəti göndər' }))
-    expect(sendReport).toHaveBeenCalledWith({ target: 'listing', targetId: 'zeytun-agaci', reason: 'Qiymət düzgün deyil', comment: '' })
+    // The dialog shows the words and sends the code (backend-contract.md 4.1).
+    expect(sendReport).toHaveBeenCalledWith({ target: 'listing', targetId: 'zeytun-agaci', reason: 'wrong-price', comment: '' })
     expect(await within(dialog).findByText('Şikayətiniz göndərildi')).toBeInTheDocument()
   })
 })

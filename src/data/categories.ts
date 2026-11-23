@@ -1,4 +1,4 @@
-import type { Category } from '@/types'
+import type { Category, CategoryForm } from '@/types'
 
 /*
  * Category structure: management's preliminary list of November 2026 («hələlik belə olsun»), from
@@ -25,8 +25,8 @@ export interface Subcategory {
   name: string
 }
 
-/** The «Elan yerləşdir» attribute set a category uses (features/posting/attributes.ts). */
-export type CategoryForm = 'plant' | 'pack' | 'goods' | 'grass' | 'service'
+/** The «Elan yerləşdir» attribute set a category uses: a contract type now (the admin's categories carry it). */
+export type { CategoryForm }
 
 /** A row of the «Xüsusiyyətlər» sheet for one category: a filter on /elanlar, a required field when posting. */
 export interface AttributeRule {

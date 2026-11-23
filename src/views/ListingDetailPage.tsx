@@ -11,6 +11,7 @@ import { PromotedBadge } from '@/components/ui/PromotedBadge'
 import { ShareButton } from '@/components/ui/ShareButton'
 import { RevealProvider } from '@/features/contact/RevealContext'
 import { ComplaintButton } from '@/features/seller/ComplaintButton'
+import { whatsappHref } from '@/features/seller/contact'
 import { Breadcrumb } from '@/features/seller/ui'
 import { Gallery } from '@/features/listing/Gallery'
 import { narrowCardImages, withCardImage } from '@/features/listing/cardImages'
@@ -18,6 +19,7 @@ import { ContactButtons, FavoriteToggle, MobileContactBar, type ContactInfo } fr
 import { SellerSummary } from '@/features/listing/SellerSummary'
 import { OwnerStrip } from '@/features/listing/OwnerStrip'
 import { listingGallery, shortTitle, statusInfo } from '@/features/listing/detail'
+import { rejectionText } from '@/features/listing/rejection'
 import { careItems, factRows, listingPrice, placeLabel, stockLabel, wholesaleLabel, type CareItem } from '@/features/listing/facts'
 import { cn, formatFullDate, formatNumber } from '@/lib/format'
 import { categoryPath } from '@/seo/catalog'
@@ -99,18 +101,22 @@ export function ListingDetail({ listing, seller, category, others, similar, mode
   const stock = stockLabel(listing)
   const facts = factRows(listing)
   const care = careItems(listing.plant)
+  // The number is not part of the page (backend-contract.md 3.1): «Nömrəni göstər» asks for it. Only the owner's own
+  // views (their listing's preview, the posting flow) already hold it.
+  const ownNumber = mode === 'public' ? undefined : (listing.contactPhone ?? seller?.phone)
   const contact: ContactInfo = {
     listingId: listing.id,
     title: listing.title,
-    phone: listing.contactPhone ?? seller?.phone,
+    callable: Boolean(listing.phoneMasked ?? ownNumber),
     whatsapp: listing.whatsapp ?? seller?.whatsapp ?? false,
     phoneHidden: listing.phoneHidden ?? false,
   }
+  const known = ownNumber ? { phone: ownNumber, whatsappUrl: whatsappHref(ownNumber) } : undefined
   const delivery = listing.deliveryAvailable || listing.deliveryAreas
   const images = listingGallery(listing)
 
   return (
-    <RevealProvider>
+    <RevealProvider target={{ kind: 'listing', id: listing.id }} known={known}>
       <div className={cn('page-x mx-auto flex w-full max-w-[1440px] flex-col gap-4 pb-12 md:gap-5', preview ? 'pt-0' : 'pt-3 md:pt-5')}>
         {!preview && <Breadcrumb items={listingCrumbs(listing, category)} />}
 
@@ -118,7 +124,7 @@ export function ListingDetail({ listing, seller, category, others, similar, mode
 
         {mode === 'owner' && status.notice && (
           <Notice tone={status.notice.tone} title={status.notice.title}>
-            {listing.status === 'rejected' && listing.rejectionReason ? listing.rejectionReason : status.notice.text}
+            {(listing.status === 'rejected' && rejectionText(listing)) || status.notice.text}
           </Notice>
         )}
 

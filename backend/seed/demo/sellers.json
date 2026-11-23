@@ -1,0 +1,252 @@
+{
+  "$comment": "Demo business profiles. `owner` is a key in users.json; photos are paths under /public. Generated from src/data by backend/seed/export.mjs: do not edit by hand.",
+  "items": [
+    {
+      "key": "abseron-tingcilik",
+      "slug": "abseron-tingcilik",
+      "owner": "owner-abseron-tingcilik",
+      "name": "Abşeron Tingçilik",
+      "businessKind": "nursery",
+      "cityId": "abseron",
+      "address": "Abşeron, Məhəmmədi qəsəbəsi",
+      "location": {
+        "lat": 40.5281,
+        "lng": 49.9215
+      },
+      "about": "Abşeron iqliminə uyğun dekorativ ağaclar və meyvə fidanları yetişdiririk. Təsərrüfatımızda zeytun, sərv, tuya və mövsümi bitkiləri yerində seçə bilərsiniz. Sağlam kök sistemi və düzgün əkin üzrə məsləhətlərə xüsusi diqqət yetiririk.",
+      "terms": "Bakı və Abşerona çatdırılma razılaşma ilə. Hər gün 09:00–18:00. Təsərrüfata gəlməzdən əvvəl əlaqə saxlamağınız tövsiyə olunur.",
+      "hours": [
+        {
+          "day": 1,
+          "open": "09:00",
+          "close": "18:00"
+        },
+        {
+          "day": 2,
+          "open": "09:00",
+          "close": "18:00"
+        },
+        {
+          "day": 3,
+          "open": "09:00",
+          "close": "18:00"
+        },
+        {
+          "day": 4,
+          "open": "09:00",
+          "close": "18:00"
+        },
+        {
+          "day": 5,
+          "open": "09:00",
+          "close": "18:00"
+        },
+        {
+          "day": 6,
+          "open": "09:00",
+          "close": "18:00"
+        },
+        {
+          "day": 7,
+          "open": "09:00",
+          "close": "18:00"
+        }
+      ],
+      "offers": [
+        "delivery",
+        "planting",
+        "wholesale",
+        "care"
+      ],
+      "phone": "+994505551234",
+      "whatsapp": true,
+      "email": "info@absheronting.az",
+      "contactPerson": "Elvin Əliyev",
+      "instagram": "absheron.tingcilik",
+      "responseMinutes": 60,
+      "cover": "/images/sellers/abseron-tingcilik-cover.webp",
+      "verified": true,
+      "createdAt": "2021-03-01T08:00:00Z"
+    },
+    {
+      "key": "yasil-bag-merkezi",
+      "slug": "yasil-bag-merkezi",
+      "owner": "owner-yasil-bag-merkezi",
+      "name": "Yaşıl Bağ Mərkəzi",
+      "businessKind": "garden-centre",
+      "cityId": "baki",
+      "address": "Bakı, Xətai rayonu, Babək prospekti 42",
+      "about": "Otaq bitkiləri, güllər, dibçəklər, torpaq və bağ alətləri bir yerdə. Bitki seçimi və qulluq üzrə pulsuz məsləhət veririk.",
+      "terms": "Bakı daxilində 50 ₼-dan yuxarı sifarişlərə çatdırılma pulsuzdur.",
+      "hours": [
+        {
+          "day": 1,
+          "open": "10:00",
+          "close": "20:00"
+        },
+        {
+          "day": 2,
+          "open": "10:00",
+          "close": "20:00"
+        },
+        {
+          "day": 3,
+          "open": "10:00",
+          "close": "20:00"
+        },
+        {
+          "day": 4,
+          "open": "10:00",
+          "close": "20:00"
+        },
+        {
+          "day": 5,
+          "open": "10:00",
+          "close": "20:00"
+        },
+        {
+          "day": 6,
+          "open": "10:00",
+          "close": "20:00"
+        },
+        {
+          "day": 7,
+          "open": "11:00",
+          "close": "18:00"
+        }
+      ],
+      "offers": [
+        "delivery",
+        "care"
+      ],
+      "phone": "+994125104420",
+      "whatsapp": true,
+      "responseMinutes": 30,
+      "cover": "/images/sellers/yasil-bag-merkezi-1.webp",
+      "verified": true,
+      "createdAt": "2019-03-01T08:00:00Z"
+    },
+    {
+      "key": "quba-fidan",
+      "slug": "quba-fidan",
+      "owner": "owner-quba-fidan",
+      "name": "Quba Fidan",
+      "businessKind": "nursery",
+      "cityId": "quba",
+      "address": "Quba rayonu, Qırmızı Qəsəbə yolu",
+      "about": "Quba iqlimində yetişdirilmiş alma, armud, gilas və qoz fidanları. Topdan sifarişlər və bağ salınması üzrə məsləhət.",
+      "terms": "Fidanlar payızda və yazda açıq köklə, il boyu dibçəkdə satılır.",
+      "hours": [
+        {
+          "day": 1,
+          "open": "09:00",
+          "close": "17:00"
+        },
+        {
+          "day": 2,
+          "open": "09:00",
+          "close": "17:00"
+        },
+        {
+          "day": 3,
+          "open": "09:00",
+          "close": "17:00"
+        },
+        {
+          "day": 4,
+          "open": "09:00",
+          "close": "17:00"
+        },
+        {
+          "day": 5,
+          "open": "09:00",
+          "close": "17:00"
+        },
+        {
+          "day": 6,
+          "open": "09:00",
+          "close": "14:00"
+        },
+        {
+          "day": 7,
+          "closed": true
+        }
+      ],
+      "offers": [
+        "wholesale",
+        "delivery"
+      ],
+      "phone": "+994233351208",
+      "whatsapp": false,
+      "responseMinutes": 180,
+      "cover": "/images/sellers/quba-fidan-1.webp",
+      "verified": true,
+      "createdAt": "2022-03-01T08:00:00Z"
+    },
+    {
+      "key": "yasil-mekan-landsaft",
+      "slug": "yasil-mekan-landsaft",
+      "owner": "owner-yasil-mekan-landsaft",
+      "name": "Yaşıl Məkan Landşaft",
+      "businessKind": "landscaping",
+      "cityId": "baki",
+      "address": "Bakı, Nərimanov rayonu, Təbriz küçəsi 18",
+      "location": {
+        "lat": 40.4093,
+        "lng": 49.8671
+      },
+      "about": "Həyətlər, villalar və kommersiya məkanları üçün landşaft layihələri hazırlayırıq: ölçü, 3D konsepsiya, bitki seçimi, əkin, qazon və avtomatik suvarma bir komandadan.",
+      "terms": "İlk baxış Bakı daxilində pulsuzdur. Layihənin qiyməti sahəyə və materiallara görə razılaşdırılır.",
+      "hours": [
+        {
+          "day": 1,
+          "open": "09:00",
+          "close": "18:00"
+        },
+        {
+          "day": 2,
+          "open": "09:00",
+          "close": "18:00"
+        },
+        {
+          "day": 3,
+          "open": "09:00",
+          "close": "18:00"
+        },
+        {
+          "day": 4,
+          "open": "09:00",
+          "close": "18:00"
+        },
+        {
+          "day": 5,
+          "open": "09:00",
+          "close": "18:00"
+        },
+        {
+          "day": 6,
+          "open": "09:00",
+          "close": "18:00"
+        },
+        {
+          "day": 7,
+          "closed": true
+        }
+      ],
+      "offers": [
+        "design",
+        "planting",
+        "care"
+      ],
+      "phone": "+994502124418",
+      "whatsapp": true,
+      "contactPerson": "Rauf Həsənli",
+      "instagram": "yasilmekan.landsaft",
+      "website": "https://yasilmekan.az",
+      "responseMinutes": 120,
+      "cover": "/images/services/landsaft-dizayni-gallery-1.webp",
+      "verified": true,
+      "createdAt": "2018-03-01T08:00:00Z"
+    }
+  ]
+}

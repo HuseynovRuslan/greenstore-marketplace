@@ -1,4 +1,4 @@
-import type { UserProfile } from '@/types'
+import type { BusinessKind, SavedSearch, UserProfile } from '@/types'
 
 /**
  * Account details shown/edited in "Profil məlumatları" that are not part of the shared `UserProfile` DTO.
@@ -21,6 +21,28 @@ export interface AccountProfile extends UserProfile {
   phoneVerified?: boolean
   /** "Bildiriş seçimləri" */
   notifications?: NotificationSettings
+  /*
+   * DATA_SOURCE=api: the business profile as the API has it (GET /me/seller), for «İctimai profilə bax» and the
+   * profile form. The demo account's come from src/data/sellers instead.
+   */
+  /** The public page: /saticilar/<sellerSlug> */
+  sellerSlug?: string
+  /** The profile's card photo; "" when it has none yet */
+  sellerImage?: string
+  /** `OwnSeller.version`, sent back with a change so another device's newer edit is not overwritten */
+  sellerVersion?: string
+}
+
+/** The business kinds as the forms name them (the order of `businessTypes`). */
+export const businessKindLabels: Record<BusinessKind, string> = {
+  nursery: 'Tingçilik təsərrüfatı',
+  'garden-centre': 'Bağ mərkəzi',
+  landscaping: 'Landşaft şirkəti',
+}
+
+/** «Biznesin növü» label → kind (the profile form keeps the label). */
+export function businessKindOf(label: string | undefined): BusinessKind | undefined {
+  return (Object.keys(businessKindLabels) as BusinessKind[]).find((k) => businessKindLabels[k] === label)
 }
 
 export interface NotificationSettings {
@@ -36,6 +58,18 @@ export interface NotificationSettings {
 export const businessTypes = ['Tingçilik təsərrüfatı', 'Bağ mərkəzi', 'Landşaft şirkəti']
 
 /**
+ * The demo account's «Seçilmişlər», as if loaded from the server on sign-in (Figma "Seçilmişlər · 390"). Figma had the
+ * terracotta pot and the Monstera here; they left with their categories (Nov 2026).
+ */
+export const DEMO_ACCOUNT_FAVORITES = ['listing:limon-agaci', 'listing:qizilgul-fidani', 'listing:mavi-kuknar', 'listing:zeytun-agaci', 'service:landsaft-dizayni']
+
+/** The demo account's saved searches, so «Axtarışlarım» shows what it looks like. */
+export const DEMO_SAVED_SEARCHES: SavedSearch[] = [
+  { id: 'ss-demo-1', name: 'Bakıda ağaclar', query: 'kateqoriya=agaclar&seher=baki', alerts: true, createdAt: '2026-10-20T09:00:00', newCount: 3 },
+  { id: 'ss-demo-2', name: 'Tuya, 50 ₼-a qədər', query: 'q=tuya&max=50', alerts: false, createdAt: '2026-10-28T18:30:00', newCount: 0 },
+]
+
+/**
  * Signed-in demo account (Figma "Şəxsi kabinet", "Profil məlumatları", "Qeydiyyat" and the workflow header
  * "Elvin Əliyev · Şəxsi kabinet"). Values are copied verbatim from the profile form.
  */
@@ -46,6 +80,8 @@ export const currentUser: AccountProfile = {
   phone: '+994 50 555 12 34',
   accountType: 'business',
   sellerId: 'abseron-tingcilik',
+  role: 'user',
+  locale: 'az',
   companyName: 'Abşeron Tingçilik',
   businessType: 'Tingçilik təsərrüfatı',
   cityId: 'abseron',

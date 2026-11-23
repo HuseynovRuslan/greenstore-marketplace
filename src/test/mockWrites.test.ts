@@ -47,7 +47,7 @@ describe('mock listing statistics', () => {
 
 describe('mock repository additions', () => {
   it('lists every status of the demo seller', async () => {
-    const own = await mockRepository.listOwnListings('abseron-tingcilik')
+    const own = await mockRepository.listOwnListings()
     expect(new Set(own.map((l) => l.status))).toEqual(new Set(['active', 'pending', 'expired', 'rejected', 'inactive']))
     expect(own.find((l) => l.status === 'rejected')?.rejectionReason).toBeTruthy()
   })
@@ -57,13 +57,24 @@ describe('mock repository additions', () => {
   })
 
   it('prices a promotion option and refuses an unknown one', async () => {
-    const order = await mockRepository.createPromotionOrder({ listingId: 'zeytun-agaci', packageId: 'one-cixar', optionId: 'one-cixar-7' })
-    expect(order).toMatchObject({ amount: 9, status: 'paid', packageId: 'one-cixar' })
+    const checkout = await mockRepository.createPromotionOrder({ listingId: 'zeytun-agaci', packageId: 'one-cixar', optionId: 'one-cixar-7' })
+    // The demo pays at once: no payment page (backend-contract.md 5.1).
+    expect(checkout.paymentUrl).toBeUndefined()
+    expect(checkout.order).toMatchObject({ amount: 9, status: 'paid', packageId: 'one-cixar', number: expect.any(Number), paidAt: expect.any(String) })
+    expect(await mockRepository.getPromotionOrder(checkout.order.id)).toEqual(checkout.order)
     await expect(mockRepository.createPromotionOrder({ listingId: 'zeytun-agaci', packageId: 'ireli-cek', optionId: 'one-cixar-7' })).rejects.toThrow()
   })
 
-  it('keeps a hidden number hidden', async () => {
-    expect(await mockRepository.revealPhone('limon-agaci')).toEqual({})
-    expect((await mockRepository.revealPhone('zeytun-agaci')).phone).toBe('+994 50 555 12 34')
+  it('answers the same promotion order for the same Idempotency-Key', async () => {
+    const input = { listingId: 'zeytun-agaci', packageId: 'ireli-cek' as const, optionId: 'ireli-cek-1' }
+    const first = await mockRepository.createPromotionOrder(input, 'sifaris-1')
+    expect(await mockRepository.createPromotionOrder(input, 'sifaris-1')).toEqual(first)
+    expect((await mockRepository.createPromotionOrder(input, 'sifaris-2')).order.number).toBeGreaterThan(first.order.number)
+    expect(await mockRepository.getPromotionOrder('ord-unknown')).toBeUndefined()
+  })
+
+  it('keeps a hidden number hidden: WhatsApp only (backend-contract.md 3.1)', async () => {
+    expect(await mockRepository.revealPhone('limon-agaci')).toEqual({ whatsappUrl: 'https://wa.me/994517023314' })
+    expect(await mockRepository.revealPhone('zeytun-agaci')).toEqual({ phone: '+994 50 555 12 34', whatsappUrl: 'https://wa.me/994505551234' })
   })
 })

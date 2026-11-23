@@ -1,0 +1,68 @@
+{
+  "$comment": "Cities. ru/en are DRAFT translations. Generated from src/data by backend/seed/export.mjs: do not edit by hand.",
+  "items": [
+    {
+      "id": "baki",
+      "name": {
+        "az": "Bakı",
+        "ru": "Баку",
+        "en": "Baku"
+      },
+      "sortOrder": 10
+    },
+    {
+      "id": "abseron",
+      "name": {
+        "az": "Abşeron",
+        "ru": "Апшерон",
+        "en": "Absheron"
+      },
+      "sortOrder": 20
+    },
+    {
+      "id": "sumqayit",
+      "name": {
+        "az": "Sumqayıt",
+        "ru": "Сумгайыт",
+        "en": "Sumgayit"
+      },
+      "sortOrder": 30
+    },
+    {
+      "id": "gence",
+      "name": {
+        "az": "Gəncə",
+        "ru": "Гянджа",
+        "en": "Ganja"
+      },
+      "sortOrder": 40
+    },
+    {
+      "id": "seki",
+      "name": {
+        "az": "Şəki",
+        "ru": "Шеки",
+        "en": "Shaki"
+      },
+      "sortOrder": 50
+    },
+    {
+      "id": "quba",
+      "name": {
+        "az": "Quba",
+        "ru": "Губа",
+        "en": "Guba"
+      },
+      "sortOrder": 60
+    },
+    {
+      "id": "lenkeran",
+      "name": {
+        "az": "Lənkəran",
+        "ru": "Ленкорань",
+        "en": "Lankaran"
+      },
+      "sortOrder": 70
+    }
+  ]
+}

@@ -190,7 +190,8 @@ function BuyingGuide() {
 }
 
 /** "/" — Figma "Ana səhifə" 1440 / 768 / 390. Server-rendered; the data comes from the repository (route file). */
-export default function HomePage({ content, hero }: { content: HomeContent; hero: HeroCounts }) {
+/** `providerNames`: who provides the showcased services, by provider id (`loadProviderNames`). */
+export default function HomePage({ content, hero, providerNames }: { content: HomeContent; hero: HeroCounts; providerNames?: Record<string, string> }) {
   const { vip, latest, sellers } = content
 
   return (
@@ -227,7 +228,7 @@ export default function HomePage({ content, hero }: { content: HomeContent; hero
         <HomeHeading title="Bağınıza peşəkar toxunuş" subtitle="Landşaft və bağçılıq xidmətləri" action={{ label: 'Bütün xidmətlər', to: '/xidmetler' }} />
         <div className="grid w-full grid-cols-1 gap-5 md:grid-cols-3">
           {content.services.map(({ service, image }) => (
-            <ServiceCard key={service.id} service={service} image={image} />
+            <ServiceCard key={service.id} service={service} image={image} providerName={providerNames?.[service.providerId]} />
           ))}
         </div>
         <MobileMore to="/xidmetler" label="Bütün xidmətlər" />

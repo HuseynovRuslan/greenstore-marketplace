@@ -75,7 +75,7 @@ export function sellerJsonLd(seller: Seller): Thing | undefined {
     '@type': seller.address ? 'LocalBusiness' : 'Organization',
     name: seller.name,
     url: absoluteUrl(`/saticilar/${seller.slug}`),
-    image: absoluteUrl(seller.coverImage ?? seller.image),
+    ...(seller.coverImage || seller.image ? { image: absoluteUrl(seller.coverImage || seller.image) } : {}),
     ...(seller.about ? { description: seller.about } : {}),
     ...(seller.phone ? { telephone: seller.phone } : {}),
     ...(seller.email ? { email: seller.email } : {}),

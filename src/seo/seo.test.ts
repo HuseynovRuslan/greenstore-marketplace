@@ -20,6 +20,8 @@ describe('indexing switch', () => {
     expect(isIndexable({ SEO_INDEXABLE: 'true' })).toBe(false)
     expect(isIndexable({ SEO_INDEXABLE: 'true', DATA_SOURCE: 'mock' })).toBe(false)
     expect(isIndexable({ SEO_INDEXABLE: 'false', DATA_SOURCE: 'api' })).toBe(false)
+    // The API on the seeded demo data (dev, staging) is still sample inventory: only an explicit opt-in indexes.
+    expect(isIndexable({ DATA_SOURCE: 'api', API_BASE_URL: 'http://localhost:5080' })).toBe(false)
     expect(isIndexable({ SEO_INDEXABLE: 'true', DATA_SOURCE: 'api' })).toBe(true)
     expect(dataSource({ DATA_SOURCE: 'something' })).toBe('mock')
   })

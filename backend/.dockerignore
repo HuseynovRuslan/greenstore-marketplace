@@ -1,0 +1,7 @@
+**/bin/
+**/obj/
+**/.media/
+**/TestResults/
+**/*.user
+tests/
+.config/

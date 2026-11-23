@@ -4,13 +4,16 @@ import { useRouter } from 'next/navigation'
 import { BadgeCheck, LogOut } from 'lucide-react'
 import { UnderlineTabs } from '@/components/ui/UnderlineTabs'
 import { useAccount, firstName } from '@/features/account/useAccount'
+import { useDataSource } from '@/state/store'
 
-export type CabinetSection = 'listings' | 'favorites' | 'searches' | 'profile'
+export type CabinetSection = 'listings' | 'favorites' | 'searches' | 'requests' | 'profile'
 
-const sections: Array<{ key: CabinetSection; label: string; href: string }> = [
+const sections: Array<{ key: CabinetSection; label: string; href: string; apiOnly?: boolean }> = [
   { key: 'listings', label: 'Elanlarım', href: '/kabinet' },
   { key: 'favorites', label: 'Seçilmişlər', href: '/secilmisler' },
   { key: 'searches', label: 'Axtarışlarım', href: '/kabinet/axtarislar' },
+  // «Usta çağır» requests are stored by the API only: the demo has none to show.
+  { key: 'requests', label: 'Gələn sorğular', href: '/kabinet/sorgular', apiOnly: true },
   { key: 'profile', label: 'Profil', href: '/kabinet/profil' },
 ]
 
@@ -21,6 +24,7 @@ const sections: Array<{ key: CabinetSection; label: string; href: string }> = [
  */
 export function CabinetHeader({ active, counts }: { active: CabinetSection; counts?: Partial<Record<CabinetSection, number>> }) {
   const { account, signOut } = useAccount()
+  const api = useDataSource() === 'api'
   const router = useRouter()
   if (!account) return null
   const business = account.accountType === 'business'
@@ -43,7 +47,7 @@ export function CabinetHeader({ active, counts }: { active: CabinetSection; coun
           <button
             type="button"
             onClick={() => {
-              signOut()
+              void signOut()
               router.push('/')
             }}
             className="inline-flex min-h-11 items-center gap-2 rounded-lg px-3 text-sm leading-[normal] font-medium text-muted transition-colors duration-(--dur-fast) hover:bg-mint hover:text-forest"
@@ -55,7 +59,7 @@ export function CabinetHeader({ active, counts }: { active: CabinetSection; coun
       </div>
       <UnderlineTabs
         label="Şəxsi kabinet"
-        tabs={sections.map((s) => ({ key: s.key, label: s.label, href: s.href, active: s.key === active, count: counts?.[s.key] }))}
+        tabs={sections.filter((s) => api || !s.apiOnly).map((s) => ({ key: s.key, label: s.label, href: s.href, active: s.key === active, count: counts?.[s.key] }))}
       />
     </header>
   )

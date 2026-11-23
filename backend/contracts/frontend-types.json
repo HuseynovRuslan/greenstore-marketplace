@@ -1,0 +1,2253 @@
+{
+  "interfaces": {
+    "AdminCategory": {
+      "createdAt": {
+        "optional": false,
+        "type": "string"
+      },
+      "descriptions": {
+        "optional": true,
+        "type": "LocalizedText"
+      },
+      "filters": {
+        "optional": false,
+        "type": "CategoryFilterSetting[]"
+      },
+      "form": {
+        "optional": true,
+        "type": "CategoryForm"
+      },
+      "icon": {
+        "optional": true,
+        "type": "IconName"
+      },
+      "id": {
+        "optional": false,
+        "type": "string"
+      },
+      "isActive": {
+        "optional": false,
+        "type": "boolean"
+      },
+      "kind": {
+        "optional": false,
+        "type": "CategoryKind"
+      },
+      "listingCount": {
+        "optional": false,
+        "type": "number"
+      },
+      "names": {
+        "optional": false,
+        "type": "LocalizedText"
+      },
+      "parentId": {
+        "optional": true,
+        "type": "string"
+      },
+      "sortOrder": {
+        "optional": false,
+        "type": "number"
+      },
+      "subcategories": {
+        "optional": true,
+        "type": "AdminCategory[]"
+      },
+      "updatedAt": {
+        "optional": false,
+        "type": "string"
+      },
+      "version": {
+        "optional": false,
+        "type": "string"
+      }
+    },
+    "AdminCategoryInput": {
+      "descriptions": {
+        "optional": true,
+        "type": "LocalizedText"
+      },
+      "filters": {
+        "optional": true,
+        "type": "CategoryFilterSetting[]"
+      },
+      "form": {
+        "optional": true,
+        "type": "CategoryForm"
+      },
+      "icon": {
+        "optional": true,
+        "type": "IconName"
+      },
+      "id": {
+        "optional": true,
+        "type": "string"
+      },
+      "isActive": {
+        "optional": true,
+        "type": "boolean"
+      },
+      "kind": {
+        "optional": true,
+        "type": "CategoryKind"
+      },
+      "names": {
+        "optional": false,
+        "type": "LocalizedText"
+      },
+      "parentId": {
+        "optional": true,
+        "type": "string"
+      },
+      "sortOrder": {
+        "optional": true,
+        "type": "number"
+      }
+    },
+    "AdminCategoryPatch": {
+      "descriptions": {
+        "optional": true,
+        "type": "LocalizedText | null"
+      },
+      "filters": {
+        "optional": true,
+        "type": "CategoryFilterSetting[]"
+      },
+      "icon": {
+        "optional": true,
+        "type": "IconName"
+      },
+      "isActive": {
+        "optional": true,
+        "type": "boolean"
+      },
+      "names": {
+        "optional": true,
+        "type": "LocalizedText"
+      },
+      "sortOrder": {
+        "optional": true,
+        "type": "number"
+      },
+      "version": {
+        "optional": true,
+        "type": "string"
+      }
+    },
+    "AdminOverview": {
+      "categories": {
+        "optional": false,
+        "type": "{ total: number; active: number; subcategories: number }"
+      },
+      "listings": {
+        "optional": false,
+        "type": "{ active: number; pending: number; rejected: number; expired: number; inactive: number }"
+      },
+      "moderation": {
+        "optional": false,
+        "type": "{ pending: number; recheck: number; approved: number; rejected: number }"
+      },
+      "reports": {
+        "optional": false,
+        "type": "ReportTotals"
+      },
+      "sellers": {
+        "optional": false,
+        "type": "{ total: number; verified: number }"
+      },
+      "serviceRequests": {
+        "optional": false,
+        "type": "{ total: number; thisWeek: number; unrouted: number }"
+      },
+      "support": {
+        "optional": false,
+        "type": "{ new: number; answered: number; closed: number }"
+      },
+      "users": {
+        "optional": false,
+        "type": "{ total: number; individual: number; business: number; blocked: number; staff: number; newThisWeek: number }"
+      }
+    },
+    "BlockResult": {
+      "listingsHidden": {
+        "optional": false,
+        "type": "number"
+      },
+      "listingsRestored": {
+        "optional": false,
+        "type": "number"
+      },
+      "sessionsRevoked": {
+        "optional": false,
+        "type": "number"
+      },
+      "status": {
+        "optional": false,
+        "type": "AccountStatus"
+      },
+      "userId": {
+        "optional": false,
+        "type": "string"
+      }
+    },
+    "Category": {
+      "description": {
+        "optional": true,
+        "type": "string"
+      },
+      "icon": {
+        "optional": false,
+        "type": "IconName"
+      },
+      "id": {
+        "optional": false,
+        "type": "string"
+      },
+      "kind": {
+        "optional": false,
+        "type": "CategoryKind"
+      },
+      "listingCount": {
+        "optional": false,
+        "type": "number"
+      },
+      "name": {
+        "optional": false,
+        "type": "string"
+      },
+      "slug": {
+        "optional": false,
+        "type": "string"
+      }
+    },
+    "CategoryFilterSetting": {
+      "enabled": {
+        "optional": false,
+        "type": "boolean"
+      },
+      "id": {
+        "optional": false,
+        "type": "string"
+      }
+    },
+    "City": {
+      "id": {
+        "optional": false,
+        "type": "string"
+      },
+      "name": {
+        "optional": false,
+        "type": "string"
+      }
+    },
+    "ContactReveal": {
+      "phone": {
+        "optional": true,
+        "type": "string"
+      },
+      "whatsappUrl": {
+        "optional": true,
+        "type": "string"
+      }
+    },
+    "FacetCounts": {
+      "categories": {
+        "optional": false,
+        "type": "{ all: number; byId: Record<string, number> }"
+      },
+      "cities": {
+        "optional": false,
+        "type": "{ all: number; byCity: Record<string, number> }"
+      },
+      "subcategories": {
+        "optional": false,
+        "type": "Record<string, number>"
+      }
+    },
+    "FavoriteItems": {
+      "listings": {
+        "optional": false,
+        "type": "Listing[]"
+      },
+      "services": {
+        "optional": false,
+        "type": "Service[]"
+      }
+    },
+    "HomeContent": {
+      "latest": {
+        "optional": false,
+        "type": "Listing[]"
+      },
+      "sellers": {
+        "optional": false,
+        "type": "Seller[]"
+      },
+      "services": {
+        "optional": false,
+        "type": "Array<{ service: Service; image: string }>"
+      },
+      "vip": {
+        "optional": false,
+        "type": "Listing[]"
+      }
+    },
+    "IncomingServiceRequest": {
+      "area": {
+        "optional": true,
+        "type": "string"
+      },
+      "category": {
+        "optional": false,
+        "type": "string"
+      },
+      "categoryId": {
+        "optional": false,
+        "type": "string"
+      },
+      "city": {
+        "optional": false,
+        "type": "string"
+      },
+      "cityId": {
+        "optional": false,
+        "type": "string"
+      },
+      "createdAt": {
+        "optional": false,
+        "type": "string"
+      },
+      "customerName": {
+        "optional": false,
+        "type": "string"
+      },
+      "customerPhone": {
+        "optional": false,
+        "type": "string"
+      },
+      "description": {
+        "optional": false,
+        "type": "string"
+      },
+      "id": {
+        "optional": false,
+        "type": "string"
+      },
+      "notifiedAt": {
+        "optional": true,
+        "type": "string"
+      },
+      "number": {
+        "optional": false,
+        "type": "number"
+      },
+      "preferredDate": {
+        "optional": true,
+        "type": "string"
+      },
+      "recipientCount": {
+        "optional": false,
+        "type": "number"
+      },
+      "seenAt": {
+        "optional": true,
+        "type": "string"
+      },
+      "service": {
+        "optional": true,
+        "type": "{ id: string; slug: string; title: string }"
+      },
+      "size": {
+        "optional": true,
+        "type": "string"
+      }
+    },
+    "IncomingServiceRequestPage": {
+      "items": {
+        "optional": false,
+        "type": "IncomingServiceRequest[]"
+      },
+      "page": {
+        "optional": false,
+        "type": "number"
+      },
+      "pageCount": {
+        "optional": false,
+        "type": "number"
+      },
+      "total": {
+        "optional": false,
+        "type": "number"
+      },
+      "unseen": {
+        "optional": false,
+        "type": "number"
+      }
+    },
+    "Listing": {
+      "area": {
+        "optional": true,
+        "type": "string"
+      },
+      "attributes": {
+        "optional": false,
+        "type": "string[]"
+      },
+      "bumpedAt": {
+        "optional": true,
+        "type": "string"
+      },
+      "careTips": {
+        "optional": true,
+        "type": "string[]"
+      },
+      "categoryId": {
+        "optional": false,
+        "type": "string"
+      },
+      "cityId": {
+        "optional": false,
+        "type": "string"
+      },
+      "contactName": {
+        "optional": true,
+        "type": "string"
+      },
+      "contactPhone": {
+        "optional": true,
+        "type": "string"
+      },
+      "cover": {
+        "optional": false,
+        "type": "string"
+      },
+      "coverMobile": {
+        "optional": true,
+        "type": "string"
+      },
+      "coverTablet": {
+        "optional": true,
+        "type": "string"
+      },
+      "deliveryAreas": {
+        "optional": true,
+        "type": "string"
+      },
+      "deliveryAvailable": {
+        "optional": true,
+        "type": "boolean"
+      },
+      "description": {
+        "optional": true,
+        "type": "string[]"
+      },
+      "expiresAt": {
+        "optional": true,
+        "type": "string"
+      },
+      "id": {
+        "optional": false,
+        "type": "string"
+      },
+      "images": {
+        "optional": false,
+        "type": "string[]"
+      },
+      "number": {
+        "optional": true,
+        "type": "number"
+      },
+      "phoneHidden": {
+        "optional": true,
+        "type": "boolean"
+      },
+      "phoneMasked": {
+        "optional": true,
+        "type": "string"
+      },
+      "plant": {
+        "optional": true,
+        "type": "PlantFacts"
+      },
+      "plantingAvailable": {
+        "optional": true,
+        "type": "boolean"
+      },
+      "price": {
+        "optional": false,
+        "type": "number"
+      },
+      "priceNote": {
+        "optional": true,
+        "type": "string"
+      },
+      "priceType": {
+        "optional": true,
+        "type": "PriceType"
+      },
+      "priceUnit": {
+        "optional": true,
+        "type": "PriceUnit"
+      },
+      "promotion": {
+        "optional": true,
+        "type": "ListingPromotion"
+      },
+      "publishedAt": {
+        "optional": false,
+        "type": "string"
+      },
+      "quantityAvailable": {
+        "optional": true,
+        "type": "number"
+      },
+      "rejectionReason": {
+        "optional": true,
+        "type": "string"
+      },
+      "sellerId": {
+        "optional": true,
+        "type": "string"
+      },
+      "slug": {
+        "optional": false,
+        "type": "string"
+      },
+      "specs": {
+        "optional": true,
+        "type": "Spec[]"
+      },
+      "stats": {
+        "optional": true,
+        "type": "ListingStats"
+      },
+      "status": {
+        "optional": false,
+        "type": "ListingStatus"
+      },
+      "subcategory": {
+        "optional": true,
+        "type": "string"
+      },
+      "subcategoryId": {
+        "optional": true,
+        "type": "string"
+      },
+      "thumbnail": {
+        "optional": true,
+        "type": "string"
+      },
+      "title": {
+        "optional": false,
+        "type": "string"
+      },
+      "updatedAt": {
+        "optional": true,
+        "type": "string"
+      },
+      "views": {
+        "optional": true,
+        "type": "number"
+      },
+      "vip": {
+        "optional": false,
+        "type": "boolean"
+      },
+      "whatsapp": {
+        "optional": true,
+        "type": "boolean"
+      },
+      "wholesale": {
+        "optional": true,
+        "type": "WholesalePrice"
+      }
+    },
+    "ListingInput": {
+      "area": {
+        "optional": true,
+        "type": "string"
+      },
+      "attributes": {
+        "optional": false,
+        "type": "Record<string, string>"
+      },
+      "categoryId": {
+        "optional": false,
+        "type": "string"
+      },
+      "cityId": {
+        "optional": false,
+        "type": "string"
+      },
+      "contactName": {
+        "optional": false,
+        "type": "string"
+      },
+      "contactPhone": {
+        "optional": false,
+        "type": "string"
+      },
+      "deliveryAreas": {
+        "optional": true,
+        "type": "string"
+      },
+      "deliveryAvailable": {
+        "optional": false,
+        "type": "boolean"
+      },
+      "description": {
+        "optional": false,
+        "type": "string"
+      },
+      "kind": {
+        "optional": false,
+        "type": "CategoryKind"
+      },
+      "phoneHidden": {
+        "optional": false,
+        "type": "boolean"
+      },
+      "photoIds": {
+        "optional": false,
+        "type": "string[]"
+      },
+      "plant": {
+        "optional": true,
+        "type": "PlantFacts"
+      },
+      "plantingAvailable": {
+        "optional": false,
+        "type": "boolean"
+      },
+      "price": {
+        "optional": true,
+        "type": "number"
+      },
+      "priceType": {
+        "optional": false,
+        "type": "PriceType"
+      },
+      "priceUnit": {
+        "optional": true,
+        "type": "PriceUnit"
+      },
+      "promotion": {
+        "optional": true,
+        "type": "{ packageId: PromotionPackageId; optionId: string }"
+      },
+      "quantityAvailable": {
+        "optional": true,
+        "type": "number"
+      },
+      "subcategory": {
+        "optional": true,
+        "type": "string"
+      },
+      "subcategoryId": {
+        "optional": true,
+        "type": "string"
+      },
+      "title": {
+        "optional": false,
+        "type": "string"
+      },
+      "whatsapp": {
+        "optional": false,
+        "type": "boolean"
+      },
+      "wholesale": {
+        "optional": true,
+        "type": "WholesalePrice"
+      }
+    },
+    "ListingPromotion": {
+      "packageId": {
+        "optional": false,
+        "type": "PromotionPackageId"
+      },
+      "until": {
+        "optional": false,
+        "type": "string"
+      }
+    },
+    "ListingSearchQuery": {
+      "page": {
+        "optional": false,
+        "type": "number"
+      },
+      "pageSize": {
+        "optional": false,
+        "type": "number"
+      },
+      "sellerId": {
+        "optional": true,
+        "type": "string"
+      },
+      "sort": {
+        "optional": false,
+        "type": "ListingSort"
+      },
+      "state": {
+        "optional": false,
+        "type": "SearchState"
+      }
+    },
+    "ListingStats": {
+      "favourites": {
+        "optional": false,
+        "type": "number"
+      },
+      "phoneReveals": {
+        "optional": false,
+        "type": "number"
+      },
+      "views": {
+        "optional": false,
+        "type": "number"
+      },
+      "viewsByDay": {
+        "optional": false,
+        "type": "Array<{ date: string; views: number }>"
+      }
+    },
+    "ListingSubmitResult": {
+      "id": {
+        "optional": false,
+        "type": "string"
+      },
+      "number": {
+        "optional": false,
+        "type": "number"
+      },
+      "slug": {
+        "optional": false,
+        "type": "string"
+      },
+      "status": {
+        "optional": false,
+        "type": "'pending'"
+      }
+    },
+    "LocalizedText": {
+      "az": {
+        "optional": false,
+        "type": "string"
+      },
+      "en": {
+        "optional": true,
+        "type": "string"
+      },
+      "ru": {
+        "optional": true,
+        "type": "string"
+      }
+    },
+    "ModerationChange": {
+      "after": {
+        "optional": true,
+        "type": "string"
+      },
+      "before": {
+        "optional": true,
+        "type": "string"
+      },
+      "field": {
+        "optional": false,
+        "type": "string"
+      }
+    },
+    "ModerationDecisionInput": {
+      "decision": {
+        "optional": false,
+        "type": "'approve' | 'reject'"
+      },
+      "note": {
+        "optional": true,
+        "type": "string"
+      },
+      "reasonCode": {
+        "optional": true,
+        "type": "RejectionReasonCode"
+      },
+      "version": {
+        "optional": false,
+        "type": "string"
+      }
+    },
+    "ModerationDecisionRecord": {
+      "createdAt": {
+        "optional": false,
+        "type": "string"
+      },
+      "decision": {
+        "optional": false,
+        "type": "'approve' | 'reject'"
+      },
+      "note": {
+        "optional": true,
+        "type": "string"
+      },
+      "reasonCode": {
+        "optional": true,
+        "type": "RejectionReasonCode"
+      }
+    },
+    "ModerationDecisionResult": {
+      "decision": {
+        "optional": false,
+        "type": "'approve' | 'reject'"
+      },
+      "listingId": {
+        "optional": false,
+        "type": "string"
+      },
+      "status": {
+        "optional": false,
+        "type": "ListingStatus"
+      },
+      "version": {
+        "optional": false,
+        "type": "string"
+      }
+    },
+    "ModerationItem": {
+      "categoryId": {
+        "optional": false,
+        "type": "string"
+      },
+      "changes": {
+        "optional": false,
+        "type": "ModerationChange[]"
+      },
+      "contactPhoneVerified": {
+        "optional": false,
+        "type": "boolean"
+      },
+      "id": {
+        "optional": false,
+        "type": "string"
+      },
+      "kind": {
+        "optional": false,
+        "type": "ModerationKind"
+      },
+      "lastDecision": {
+        "optional": true,
+        "type": "ModerationDecisionRecord"
+      },
+      "listing": {
+        "optional": false,
+        "type": "OwnListing"
+      },
+      "listingId": {
+        "optional": false,
+        "type": "string"
+      },
+      "number": {
+        "optional": false,
+        "type": "number"
+      },
+      "photoCount": {
+        "optional": false,
+        "type": "number"
+      },
+      "revision": {
+        "optional": false,
+        "type": "number"
+      },
+      "seller": {
+        "optional": false,
+        "type": "ModerationSeller"
+      },
+      "sellerName": {
+        "optional": false,
+        "type": "string"
+      },
+      "status": {
+        "optional": false,
+        "type": "ModerationStatus"
+      },
+      "submittedAt": {
+        "optional": false,
+        "type": "string"
+      },
+      "title": {
+        "optional": false,
+        "type": "string"
+      },
+      "version": {
+        "optional": false,
+        "type": "string"
+      }
+    },
+    "ModerationQuery": {
+      "kind": {
+        "optional": true,
+        "type": "ModerationKind"
+      },
+      "page": {
+        "optional": false,
+        "type": "number"
+      },
+      "pageSize": {
+        "optional": true,
+        "type": "number"
+      },
+      "q": {
+        "optional": true,
+        "type": "string"
+      },
+      "sort": {
+        "optional": true,
+        "type": "ModerationSort"
+      },
+      "status": {
+        "optional": true,
+        "type": "ModerationStatus"
+      }
+    },
+    "ModerationQueue": {
+      "items": {
+        "optional": false,
+        "type": "ModerationItem[]"
+      },
+      "page": {
+        "optional": false,
+        "type": "number"
+      },
+      "pageCount": {
+        "optional": false,
+        "type": "number"
+      },
+      "total": {
+        "optional": false,
+        "type": "number"
+      },
+      "totals": {
+        "optional": false,
+        "type": "{ pending: number; recheck: number; approved: number; rejected: number }"
+      }
+    },
+    "ModerationSeller": {
+      "accountType": {
+        "optional": false,
+        "type": "SellerType"
+      },
+      "activeListings": {
+        "optional": false,
+        "type": "number"
+      },
+      "memberSince": {
+        "optional": true,
+        "type": "number"
+      },
+      "name": {
+        "optional": false,
+        "type": "string"
+      },
+      "sellerId": {
+        "optional": true,
+        "type": "string"
+      },
+      "userId": {
+        "optional": false,
+        "type": "string"
+      },
+      "verified": {
+        "optional": false,
+        "type": "boolean"
+      }
+    },
+    "OpeningHours": {
+      "close": {
+        "optional": true,
+        "type": "string"
+      },
+      "closed": {
+        "optional": true,
+        "type": "boolean"
+      },
+      "day": {
+        "optional": false,
+        "type": "1 | 2 | 3 | 4 | 5 | 6 | 7"
+      },
+      "open": {
+        "optional": true,
+        "type": "string"
+      }
+    },
+    "OtpChallenge": {
+      "challengeId": {
+        "optional": false,
+        "type": "string"
+      },
+      "demoCode": {
+        "optional": true,
+        "type": "string"
+      },
+      "expiresInSec": {
+        "optional": false,
+        "type": "number"
+      },
+      "phoneMasked": {
+        "optional": false,
+        "type": "string"
+      },
+      "resendInSec": {
+        "optional": false,
+        "type": "number"
+      }
+    },
+    "OtpVerifyResult": {
+      "attemptsLeft": {
+        "optional": true,
+        "type": "number"
+      },
+      "error": {
+        "optional": true,
+        "type": "'wrong-code' | 'expired' | 'too-many-attempts'"
+      },
+      "ok": {
+        "optional": false,
+        "type": "boolean"
+      }
+    },
+    "OwnListing": {
+      "contactPhoneVerified": {
+        "optional": false,
+        "type": "boolean"
+      },
+      "kind": {
+        "optional": false,
+        "type": "CategoryKind"
+      },
+      "pendingPromotion": {
+        "optional": true,
+        "type": "{ packageId: PromotionPackageId; optionId: string }"
+      },
+      "photoIds": {
+        "optional": false,
+        "type": "string[]"
+      },
+      "rejectionNote": {
+        "optional": true,
+        "type": "string"
+      },
+      "rejectionReasonCode": {
+        "optional": true,
+        "type": "RejectionReasonCode"
+      },
+      "submittedAt": {
+        "optional": true,
+        "type": "string"
+      },
+      "version": {
+        "optional": false,
+        "type": "string"
+      }
+    },
+    "OwnSeller": {
+      "version": {
+        "optional": false,
+        "type": "string"
+      }
+    },
+    "PageResult": {
+      "items": {
+        "optional": false,
+        "type": "T[]"
+      },
+      "page": {
+        "optional": false,
+        "type": "number"
+      },
+      "pageCount": {
+        "optional": false,
+        "type": "number"
+      },
+      "total": {
+        "optional": false,
+        "type": "number"
+      }
+    },
+    "PhotoUpload": {
+      "expiresAt": {
+        "optional": false,
+        "type": "string"
+      },
+      "photoId": {
+        "optional": false,
+        "type": "string"
+      },
+      "uploadUrl": {
+        "optional": false,
+        "type": "string"
+      }
+    },
+    "PhotoUploadRequest": {
+      "bytes": {
+        "optional": false,
+        "type": "number"
+      },
+      "contentType": {
+        "optional": false,
+        "type": "string"
+      },
+      "fileName": {
+        "optional": false,
+        "type": "string"
+      }
+    },
+    "PlantFacts": {
+      "ageYears": {
+        "optional": true,
+        "type": "number"
+      },
+      "foliage": {
+        "optional": true,
+        "type": "Foliage"
+      },
+      "frostHardinessC": {
+        "optional": true,
+        "type": "number"
+      },
+      "heightCm": {
+        "optional": true,
+        "type": "{ min: number; max?: number }"
+      },
+      "plantingMonths": {
+        "optional": true,
+        "type": "number[]"
+      },
+      "potLitres": {
+        "optional": true,
+        "type": "number"
+      },
+      "rootSystem": {
+        "optional": true,
+        "type": "RootSystem"
+      },
+      "species": {
+        "optional": true,
+        "type": "string"
+      },
+      "sun": {
+        "optional": true,
+        "type": "SunNeed"
+      },
+      "water": {
+        "optional": true,
+        "type": "WaterNeed"
+      }
+    },
+    "ProfilePatch": {
+      "email": {
+        "optional": true,
+        "type": "string"
+      },
+      "fullName": {
+        "optional": true,
+        "type": "string"
+      },
+      "locale": {
+        "optional": true,
+        "type": "Locale"
+      }
+    },
+    "PromotionCheckout": {
+      "order": {
+        "optional": false,
+        "type": "PromotionOrder"
+      },
+      "paymentUrl": {
+        "optional": true,
+        "type": "string"
+      }
+    },
+    "PromotionOption": {
+      "bumps": {
+        "optional": true,
+        "type": "number"
+      },
+      "days": {
+        "optional": true,
+        "type": "number"
+      },
+      "id": {
+        "optional": false,
+        "type": "string"
+      },
+      "label": {
+        "optional": false,
+        "type": "string"
+      },
+      "price": {
+        "optional": false,
+        "type": "number"
+      }
+    },
+    "PromotionOrder": {
+      "amount": {
+        "optional": false,
+        "type": "number"
+      },
+      "createdAt": {
+        "optional": false,
+        "type": "string"
+      },
+      "id": {
+        "optional": false,
+        "type": "string"
+      },
+      "listingId": {
+        "optional": false,
+        "type": "string"
+      },
+      "number": {
+        "optional": false,
+        "type": "number"
+      },
+      "optionId": {
+        "optional": false,
+        "type": "string"
+      },
+      "packageId": {
+        "optional": false,
+        "type": "PromotionPackageId"
+      },
+      "paidAt": {
+        "optional": true,
+        "type": "string"
+      },
+      "status": {
+        "optional": false,
+        "type": "'paid' | 'pending' | 'failed'"
+      }
+    },
+    "PromotionOrderInput": {
+      "listingId": {
+        "optional": false,
+        "type": "string"
+      },
+      "optionId": {
+        "optional": false,
+        "type": "string"
+      },
+      "packageId": {
+        "optional": false,
+        "type": "PromotionPackageId"
+      },
+      "returnPath": {
+        "optional": true,
+        "type": "string"
+      }
+    },
+    "PromotionPackage": {
+      "benefits": {
+        "optional": false,
+        "type": "string[]"
+      },
+      "id": {
+        "optional": false,
+        "type": "PromotionPackageId"
+      },
+      "name": {
+        "optional": false,
+        "type": "string"
+      },
+      "options": {
+        "optional": false,
+        "type": "PromotionOption[]"
+      },
+      "summary": {
+        "optional": false,
+        "type": "string"
+      }
+    },
+    "RegistrationInput": {
+      "accountType": {
+        "optional": false,
+        "type": "SellerType"
+      },
+      "businessKind": {
+        "optional": true,
+        "type": "BusinessKind"
+      },
+      "companyName": {
+        "optional": true,
+        "type": "string"
+      },
+      "email": {
+        "optional": true,
+        "type": "string"
+      },
+      "fullName": {
+        "optional": false,
+        "type": "string"
+      },
+      "otpChallengeId": {
+        "optional": false,
+        "type": "string"
+      },
+      "password": {
+        "optional": false,
+        "type": "string"
+      },
+      "phone": {
+        "optional": false,
+        "type": "string"
+      }
+    },
+    "ReportHistoryEntry": {
+      "at": {
+        "optional": false,
+        "type": "string"
+      },
+      "by": {
+        "optional": true,
+        "type": "StaffRef"
+      },
+      "note": {
+        "optional": true,
+        "type": "string"
+      },
+      "resolution": {
+        "optional": true,
+        "type": "ReportResolution"
+      },
+      "status": {
+        "optional": false,
+        "type": "ComplaintStatus"
+      }
+    },
+    "ReportInput": {
+      "comment": {
+        "optional": true,
+        "type": "string"
+      },
+      "reason": {
+        "optional": false,
+        "type": "ReportReason"
+      },
+      "target": {
+        "optional": false,
+        "type": "ReportTarget"
+      },
+      "targetId": {
+        "optional": false,
+        "type": "string"
+      }
+    },
+    "ReportItem": {
+      "comment": {
+        "optional": true,
+        "type": "string"
+      },
+      "createdAt": {
+        "optional": false,
+        "type": "string"
+      },
+      "handledAt": {
+        "optional": true,
+        "type": "string"
+      },
+      "handledBy": {
+        "optional": true,
+        "type": "StaffRef"
+      },
+      "history": {
+        "optional": false,
+        "type": "ReportHistoryEntry[]"
+      },
+      "id": {
+        "optional": false,
+        "type": "string"
+      },
+      "listing": {
+        "optional": true,
+        "type": "OwnListing"
+      },
+      "note": {
+        "optional": true,
+        "type": "string"
+      },
+      "openReportsOnTarget": {
+        "optional": false,
+        "type": "number"
+      },
+      "owner": {
+        "optional": true,
+        "type": "ReportOwner"
+      },
+      "reason": {
+        "optional": false,
+        "type": "ReportReason"
+      },
+      "reporter": {
+        "optional": true,
+        "type": "StaffRef"
+      },
+      "resolution": {
+        "optional": true,
+        "type": "ReportResolution"
+      },
+      "seller": {
+        "optional": true,
+        "type": "ReportSeller"
+      },
+      "status": {
+        "optional": false,
+        "type": "ComplaintStatus"
+      },
+      "target": {
+        "optional": false,
+        "type": "ReportTarget"
+      },
+      "targetDeleted": {
+        "optional": false,
+        "type": "boolean"
+      },
+      "targetId": {
+        "optional": false,
+        "type": "string"
+      }
+    },
+    "ReportOwner": {
+      "accountType": {
+        "optional": false,
+        "type": "SellerType"
+      },
+      "name": {
+        "optional": false,
+        "type": "string"
+      },
+      "status": {
+        "optional": false,
+        "type": "AccountStatus"
+      },
+      "userId": {
+        "optional": false,
+        "type": "string"
+      }
+    },
+    "ReportQuery": {
+      "page": {
+        "optional": false,
+        "type": "number"
+      },
+      "pageSize": {
+        "optional": true,
+        "type": "number"
+      },
+      "reason": {
+        "optional": true,
+        "type": "ReportReason"
+      },
+      "sort": {
+        "optional": true,
+        "type": "ModerationSort"
+      },
+      "status": {
+        "optional": true,
+        "type": "ComplaintStatus"
+      },
+      "target": {
+        "optional": true,
+        "type": "ReportTarget"
+      }
+    },
+    "ReportQueue": {
+      "items": {
+        "optional": false,
+        "type": "ReportItem[]"
+      },
+      "page": {
+        "optional": false,
+        "type": "number"
+      },
+      "pageCount": {
+        "optional": false,
+        "type": "number"
+      },
+      "total": {
+        "optional": false,
+        "type": "number"
+      },
+      "totals": {
+        "optional": false,
+        "type": "ReportTotals"
+      }
+    },
+    "ReportSeller": {
+      "id": {
+        "optional": false,
+        "type": "string"
+      },
+      "name": {
+        "optional": false,
+        "type": "string"
+      },
+      "slug": {
+        "optional": false,
+        "type": "string"
+      },
+      "verified": {
+        "optional": false,
+        "type": "boolean"
+      }
+    },
+    "ReportTotals": {
+      "investigating": {
+        "optional": false,
+        "type": "number"
+      },
+      "open": {
+        "optional": false,
+        "type": "number"
+      },
+      "resolved": {
+        "optional": false,
+        "type": "number"
+      }
+    },
+    "ReportUpdate": {
+      "note": {
+        "optional": true,
+        "type": "string"
+      },
+      "resolution": {
+        "optional": true,
+        "type": "ReportResolution"
+      },
+      "status": {
+        "optional": true,
+        "type": "ComplaintStatus"
+      }
+    },
+    "SavedSearch": {
+      "alerts": {
+        "optional": false,
+        "type": "boolean"
+      },
+      "createdAt": {
+        "optional": false,
+        "type": "string"
+      },
+      "id": {
+        "optional": false,
+        "type": "string"
+      },
+      "name": {
+        "optional": false,
+        "type": "string"
+      },
+      "newCount": {
+        "optional": true,
+        "type": "number"
+      },
+      "query": {
+        "optional": false,
+        "type": "string"
+      }
+    },
+    "SavedSearchInput": {
+      "alerts": {
+        "optional": false,
+        "type": "boolean"
+      },
+      "name": {
+        "optional": false,
+        "type": "string"
+      },
+      "query": {
+        "optional": false,
+        "type": "string"
+      }
+    },
+    "Seller": {
+      "about": {
+        "optional": true,
+        "type": "string"
+      },
+      "activeListings": {
+        "optional": false,
+        "type": "number"
+      },
+      "address": {
+        "optional": true,
+        "type": "string"
+      },
+      "businessKind": {
+        "optional": true,
+        "type": "BusinessKind"
+      },
+      "cityId": {
+        "optional": false,
+        "type": "string"
+      },
+      "contactPerson": {
+        "optional": true,
+        "type": "string"
+      },
+      "coverImage": {
+        "optional": true,
+        "type": "string"
+      },
+      "email": {
+        "optional": true,
+        "type": "string"
+      },
+      "hours": {
+        "optional": true,
+        "type": "OpeningHours[]"
+      },
+      "id": {
+        "optional": false,
+        "type": "string"
+      },
+      "image": {
+        "optional": false,
+        "type": "string"
+      },
+      "instagram": {
+        "optional": true,
+        "type": "string"
+      },
+      "kind": {
+        "optional": true,
+        "type": "string"
+      },
+      "location": {
+        "optional": true,
+        "type": "{ lat: number; lng: number }"
+      },
+      "logo": {
+        "optional": true,
+        "type": "string"
+      },
+      "memberSince": {
+        "optional": true,
+        "type": "number"
+      },
+      "name": {
+        "optional": false,
+        "type": "string"
+      },
+      "offers": {
+        "optional": true,
+        "type": "SellerOffer[]"
+      },
+      "phone": {
+        "optional": true,
+        "type": "string"
+      },
+      "phoneMasked": {
+        "optional": true,
+        "type": "string"
+      },
+      "responseMinutes": {
+        "optional": true,
+        "type": "number"
+      },
+      "serviceIds": {
+        "optional": true,
+        "type": "string[]"
+      },
+      "slug": {
+        "optional": false,
+        "type": "string"
+      },
+      "terms": {
+        "optional": true,
+        "type": "string"
+      },
+      "type": {
+        "optional": false,
+        "type": "SellerType"
+      },
+      "verified": {
+        "optional": false,
+        "type": "boolean"
+      },
+      "website": {
+        "optional": true,
+        "type": "string"
+      },
+      "whatsapp": {
+        "optional": true,
+        "type": "boolean"
+      },
+      "workingHours": {
+        "optional": true,
+        "type": "string"
+      }
+    },
+    "SellerProfilePatch": {
+      "about": {
+        "optional": true,
+        "type": "string"
+      },
+      "address": {
+        "optional": true,
+        "type": "string"
+      },
+      "businessKind": {
+        "optional": true,
+        "type": "BusinessKind"
+      },
+      "cityId": {
+        "optional": true,
+        "type": "string"
+      },
+      "contactPerson": {
+        "optional": true,
+        "type": "string"
+      },
+      "email": {
+        "optional": true,
+        "type": "string"
+      },
+      "hours": {
+        "optional": true,
+        "type": "OpeningHours[]"
+      },
+      "instagram": {
+        "optional": true,
+        "type": "string"
+      },
+      "location": {
+        "optional": true,
+        "type": "{ lat: number; lng: number }"
+      },
+      "name": {
+        "optional": true,
+        "type": "string"
+      },
+      "offers": {
+        "optional": true,
+        "type": "SellerOffer[]"
+      },
+      "phone": {
+        "optional": true,
+        "type": "string"
+      },
+      "responseMinutes": {
+        "optional": true,
+        "type": "number"
+      },
+      "terms": {
+        "optional": true,
+        "type": "string"
+      },
+      "version": {
+        "optional": true,
+        "type": "string"
+      },
+      "website": {
+        "optional": true,
+        "type": "string"
+      },
+      "whatsapp": {
+        "optional": true,
+        "type": "boolean"
+      }
+    },
+    "SellerQuery": {
+      "businessKind": {
+        "optional": true,
+        "type": "BusinessKind"
+      },
+      "cityId": {
+        "optional": true,
+        "type": "string"
+      },
+      "page": {
+        "optional": false,
+        "type": "number"
+      },
+      "pageSize": {
+        "optional": true,
+        "type": "number"
+      }
+    },
+    "SellerVerification": {
+      "sellerId": {
+        "optional": false,
+        "type": "string"
+      },
+      "verified": {
+        "optional": false,
+        "type": "boolean"
+      },
+      "verifiedAt": {
+        "optional": true,
+        "type": "string"
+      }
+    },
+    "Service": {
+      "areas": {
+        "optional": false,
+        "type": "string[]"
+      },
+      "categoryId": {
+        "optional": false,
+        "type": "string"
+      },
+      "cover": {
+        "optional": false,
+        "type": "string"
+      },
+      "description": {
+        "optional": true,
+        "type": "string[]"
+      },
+      "homeTitle": {
+        "optional": true,
+        "type": "string"
+      },
+      "id": {
+        "optional": false,
+        "type": "string"
+      },
+      "images": {
+        "optional": false,
+        "type": "string[]"
+      },
+      "includes": {
+        "optional": true,
+        "type": "string[]"
+      },
+      "number": {
+        "optional": true,
+        "type": "number"
+      },
+      "priceFrom": {
+        "optional": true,
+        "type": "number"
+      },
+      "priceLabel": {
+        "optional": false,
+        "type": "string"
+      },
+      "priceType": {
+        "optional": true,
+        "type": "PriceType"
+      },
+      "priceUnit": {
+        "optional": true,
+        "type": "PriceUnit"
+      },
+      "providerId": {
+        "optional": false,
+        "type": "string"
+      },
+      "slug": {
+        "optional": false,
+        "type": "string"
+      },
+      "title": {
+        "optional": false,
+        "type": "string"
+      },
+      "verified": {
+        "optional": false,
+        "type": "boolean"
+      }
+    },
+    "ServiceProvider": {
+      "id": {
+        "optional": false,
+        "type": "string"
+      },
+      "kind": {
+        "optional": true,
+        "type": "'company' | 'individual'"
+      },
+      "name": {
+        "optional": false,
+        "type": "string"
+      },
+      "phone": {
+        "optional": true,
+        "type": "string"
+      },
+      "phoneMasked": {
+        "optional": true,
+        "type": "string"
+      },
+      "sellerId": {
+        "optional": true,
+        "type": "string"
+      },
+      "summary": {
+        "optional": true,
+        "type": "string"
+      },
+      "verified": {
+        "optional": false,
+        "type": "boolean"
+      },
+      "workingHours": {
+        "optional": true,
+        "type": "string"
+      }
+    },
+    "ServiceRequestInput": {
+      "area": {
+        "optional": true,
+        "type": "string"
+      },
+      "categoryId": {
+        "optional": false,
+        "type": "string"
+      },
+      "cityId": {
+        "optional": false,
+        "type": "string"
+      },
+      "description": {
+        "optional": false,
+        "type": "string"
+      },
+      "name": {
+        "optional": false,
+        "type": "string"
+      },
+      "phone": {
+        "optional": false,
+        "type": "string"
+      },
+      "preferredDate": {
+        "optional": true,
+        "type": "string"
+      },
+      "providerId": {
+        "optional": true,
+        "type": "string"
+      },
+      "serviceId": {
+        "optional": true,
+        "type": "string"
+      },
+      "size": {
+        "optional": true,
+        "type": "string"
+      }
+    },
+    "ServiceRequestResult": {
+      "id": {
+        "optional": false,
+        "type": "string"
+      },
+      "number": {
+        "optional": false,
+        "type": "number"
+      }
+    },
+    "ServiceSearchResult": {
+      "displayTotal": {
+        "optional": false,
+        "type": "number"
+      }
+    },
+    "SitemapEntry": {
+      "slug": {
+        "optional": false,
+        "type": "string"
+      },
+      "updatedAt": {
+        "optional": true,
+        "type": "string"
+      }
+    },
+    "SitemapPage": {
+      "items": {
+        "optional": false,
+        "type": "SitemapEntry[]"
+      },
+      "nextCursor": {
+        "optional": true,
+        "type": "string"
+      }
+    },
+    "Spec": {
+      "label": {
+        "optional": false,
+        "type": "string"
+      },
+      "value": {
+        "optional": false,
+        "type": "string"
+      }
+    },
+    "StaffRef": {
+      "name": {
+        "optional": false,
+        "type": "string"
+      },
+      "userId": {
+        "optional": false,
+        "type": "string"
+      }
+    },
+    "SupportMessageInput": {
+      "contact": {
+        "optional": false,
+        "type": "string"
+      },
+      "listingNumber": {
+        "optional": true,
+        "type": "number"
+      },
+      "message": {
+        "optional": false,
+        "type": "string"
+      },
+      "name": {
+        "optional": false,
+        "type": "string"
+      },
+      "topic": {
+        "optional": false,
+        "type": "'listing' | 'account' | 'payment' | 'complaint' | 'other'"
+      }
+    },
+    "UploadedPhoto": {
+      "height": {
+        "optional": false,
+        "type": "number"
+      },
+      "photoId": {
+        "optional": false,
+        "type": "string"
+      },
+      "status": {
+        "optional": false,
+        "type": "'ready'"
+      },
+      "url": {
+        "optional": false,
+        "type": "string"
+      },
+      "width": {
+        "optional": false,
+        "type": "number"
+      }
+    },
+    "UserProfile": {
+      "accountType": {
+        "optional": false,
+        "type": "SellerType"
+      },
+      "email": {
+        "optional": false,
+        "type": "string"
+      },
+      "fullName": {
+        "optional": false,
+        "type": "string"
+      },
+      "id": {
+        "optional": false,
+        "type": "string"
+      },
+      "locale": {
+        "optional": false,
+        "type": "Locale"
+      },
+      "phone": {
+        "optional": false,
+        "type": "string"
+      },
+      "role": {
+        "optional": false,
+        "type": "UserRole"
+      },
+      "sellerId": {
+        "optional": true,
+        "type": "string"
+      }
+    },
+    "WholesalePrice": {
+      "minQuantity": {
+        "optional": false,
+        "type": "number"
+      },
+      "price": {
+        "optional": false,
+        "type": "number"
+      }
+    }
+  },
+  "unions": {
+    "AccountStatus": [
+      "active",
+      "blocked",
+      "deleted"
+    ],
+    "BusinessKind": [
+      "nursery",
+      "garden-centre",
+      "landscaping"
+    ],
+    "CategoryForm": [
+      "plant",
+      "pack",
+      "goods",
+      "grass",
+      "service"
+    ],
+    "CategoryKind": [
+      "product",
+      "service"
+    ],
+    "ComplaintStatus": [
+      "open",
+      "investigating",
+      "resolved"
+    ],
+    "Foliage": [
+      "evergreen",
+      "deciduous"
+    ],
+    "IconName": [
+      "trees",
+      "shrub",
+      "flower-2",
+      "flower",
+      "grape",
+      "clover",
+      "sprout",
+      "wheat",
+      "shovel",
+      "amphora",
+      "droplets",
+      "scissors",
+      "fence"
+    ],
+    "ListingStatus": [
+      "active",
+      "pending",
+      "rejected",
+      "expired",
+      "inactive",
+      "draft"
+    ],
+    "Locale": [
+      "az",
+      "ru",
+      "en"
+    ],
+    "LoginError": [
+      "wrong-credentials",
+      "locked",
+      "blocked"
+    ],
+    "ModerationKind": [
+      "new",
+      "recheck"
+    ],
+    "ModerationSort": [
+      "newest",
+      "oldest"
+    ],
+    "ModerationStatus": [
+      "pending",
+      "approved",
+      "rejected"
+    ],
+    "OtpPurpose": [
+      "register",
+      "login",
+      "reset-password",
+      "change-phone"
+    ],
+    "PriceType": [
+      "fixed",
+      "negotiable",
+      "agreement"
+    ],
+    "PriceUnit": [
+      "piece",
+      "kg",
+      "litre",
+      "sqm",
+      "bag",
+      "set",
+      "metre",
+      "hour",
+      "job"
+    ],
+    "PromotionPackageId": [
+      "one-cixar",
+      "ireli-cek",
+      "paket"
+    ],
+    "RejectionReasonCode": [
+      "wrong-category",
+      "wrong-price",
+      "unverified-contact",
+      "bad-photos",
+      "duplicate",
+      "other"
+    ],
+    "ReportReason": [
+      "sold",
+      "wrong-price",
+      "wrong-photos",
+      "wrong-info",
+      "unreachable",
+      "duplicate",
+      "fraud",
+      "misconduct",
+      "not-provided",
+      "stolen-photos",
+      "other"
+    ],
+    "ReportResolution": [
+      "action-taken",
+      "no-violation"
+    ],
+    "ReportTarget": [
+      "listing",
+      "seller",
+      "service"
+    ],
+    "RootSystem": [
+      "container",
+      "rootball",
+      "bare-root"
+    ],
+    "SellerOffer": [
+      "delivery",
+      "planting",
+      "design",
+      "wholesale",
+      "care"
+    ],
+    "SellerType": [
+      "business",
+      "individual"
+    ],
+    "SitemapKind": [
+      "listing",
+      "seller",
+      "service"
+    ],
+    "SunNeed": [
+      "full-sun",
+      "part-shade",
+      "shade"
+    ],
+    "UserRole": [
+      "user",
+      "moderator",
+      "admin"
+    ],
+    "WaterNeed": [
+      "low",
+      "medium",
+      "high"
+    ]
+  }
+}

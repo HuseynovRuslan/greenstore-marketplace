@@ -1,0 +1,73 @@
+{
+  "$comment": "Saved searches store the catalogue query as the site's filterQuery writes it (src/features/saved-searches/useSavedSearches.ts: URLSearchParams without sehife, siralama, gorunus, sorted). Generated with Node's URLSearchParams; CatalogueQueryStringTests checks the C# port against it.",
+  "items": [
+    {
+      "input": "",
+      "normalized": ""
+    },
+    {
+      "input": "kateqoriya=agaclar&seher=baki",
+      "normalized": "kateqoriya=agaclar&seher=baki"
+    },
+    {
+      "input": "seher=baki&kateqoriya=agaclar",
+      "normalized": "kateqoriya=agaclar&seher=baki"
+    },
+    {
+      "input": "?q=tuya&max=50",
+      "normalized": "max=50&q=tuya"
+    },
+    {
+      "input": "q=zeytun+a%C4%9Facı&sehife=3&siralama=ucuz&gorunus=siyahi",
+      "normalized": "q=zeytun+a%C4%9Fac%C4%B1"
+    },
+    {
+      "input": "q=G%C3%BCll%C9%99r",
+      "normalized": "q=G%C3%BCll%C9%99r"
+    },
+    {
+      "input": "q=Güllər & qızılgül",
+      "normalized": "+q%C4%B1z%C4%B1lg%C3%BCl=&q=G%C3%BCll%C9%99r+"
+    },
+    {
+      "input": "q=розы",
+      "normalized": "q=%D1%80%D0%BE%D0%B7%D1%8B"
+    },
+    {
+      "input": "q=🌳 ağac",
+      "normalized": "q=%F0%9F%8C%B3+a%C4%9Fac"
+    },
+    {
+      "input": "b=2&a=1&b=1&a=2",
+      "normalized": "a=1&a=2&b=2&b=1"
+    },
+    {
+      "input": "min=50&max=150&vip=1&catdirilma=1&saticiNovu=biznes",
+      "normalized": "catdirilma=1&max=150&min=50&saticiNovu=biznes&vip=1"
+    },
+    {
+      "input": "hundurluk=100-200&yas=-5&kok=dibcek",
+      "normalized": "hundurluk=100-200&kok=dibcek&yas=-5"
+    },
+    {
+      "input": "q=50%25 endirim&x=a+b",
+      "normalized": "q=50%25+endirim&x=a+b"
+    },
+    {
+      "input": "q=%zz&y=%E2%82",
+      "normalized": "q=%25zz&y=%EF%BF%BD"
+    },
+    {
+      "input": "q=*-._~!'()",
+      "normalized": "q=*-._%7E%21%27%28%29"
+    },
+    {
+      "input": "&&q=&=x&kateqoriya",
+      "normalized": "=x&kateqoriya=&q="
+    },
+    {
+      "input": "seher=baki,abseron&alt=agaclar-meyve&kateqoriya=agaclar",
+      "normalized": "alt=agaclar-meyve&kateqoriya=agaclar&seher=baki%2Cabseron"
+    }
+  ]
+}

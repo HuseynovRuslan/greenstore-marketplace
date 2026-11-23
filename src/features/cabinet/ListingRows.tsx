@@ -24,16 +24,21 @@ import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { Dialog } from '@/components/ui/Dialog'
 import { Popover } from '@/components/ui/Popover'
+import { PromotedBadge } from '@/components/ui/PromotedBadge'
 import { useToast } from '@/components/ui/Toast'
 import { cityName } from '@/data/cities'
 import { promotionPackage } from '@/data/promotions'
 import { listingPrice } from '@/features/listing/facts'
 import { ownerPreviewPath } from '@/features/listing/ownerPreview'
+import { findOption } from '@/features/promotion/checkout'
+import { usePromotionPackages } from '@/features/promotion/usePromotionPackages'
+import { rejectionText } from '@/features/listing/rejection'
 import { STEPS, type PostingDraft } from '@/features/posting/draft'
 import { cn, formatDayMonth, formatNumber } from '@/lib/format'
 import { useBrokenImage } from '@/lib/useBrokenImage'
 import type { Listing, ListingStats } from '@/types'
-import { actionsFor, daysLeft, expiryLabel, statusBadges, type CabinetAction } from './model'
+import { actionsFor, daysLeft, expiryLabel, isFeatured, pendingPromotionOf, statusBadges, type CabinetAction } from './model'
+import type { RowResult } from './useCabinet'
 
 const actionClass =
   'inline-flex h-9 shrink-0 items-center justify-center gap-1.5 rounded-lg border px-3 text-[13px] leading-[normal] font-semibold whitespace-nowrap transition-[background-color,border-color,color,scale] duration-(--dur-fast) ease-out active:scale-[0.97] pointer-coarse:h-11 motion-reduce:active:scale-100'
@@ -59,13 +64,16 @@ function Thumb({ src }: { src?: string }) {
   )
 }
 
+/** The owner's actions on a row; each answers whether it was done (DATA_SOURCE=api asks the API first). */
 export interface RowHandlers {
-  renew: (id: string) => void
-  deactivate: (id: string) => void
-  activate: (id: string) => void
-  remove: (id: string) => void
+  renew: (id: string) => Promise<RowResult>
+  deactivate: (id: string) => Promise<RowResult>
+  activate: (id: string) => Promise<RowResult>
+  remove: (id: string) => Promise<RowResult>
   startEdit: (listing: Listing) => Promise<void>
 }
+
+type StatusAction = 'renew' | 'deactivate' | 'activate' | 'remove'
 
 /** One of the owner's listings: photo, status and promotion, title, price, meta, expiry or rejection reason, numbers, actions. */
 export function ListingRowCard({ listing, stats, now, handlers }: { listing: Listing; stats?: ListingStats; now: number; handlers: RowHandlers }) {
@@ -74,10 +82,18 @@ export function ListingRowCard({ listing, stats, now, handlers }: { listing: Lis
   const [dialog, setDialog] = useState<'stats' | 'remove' | null>(null)
   const [moreOpen, setMoreOpen] = useState(false)
   const [busy, setBusy] = useState(false)
+  // The action on its way (the API answers in a moment): its button says so, the others wait.
+  const [running, setRunning] = useState<StatusAction | null>(null)
   const badge = statusBadges[listing.status]
   const price = listingPrice(listing)
   const expiry = listing.status === 'active' ? expiryLabel(daysLeft(listing, now)) : undefined
   const promo = listing.promotion && Date.parse(listing.promotion.until) > now ? listing.promotion : undefined
+  // «Önə çıxan» as buyers see it (`vip`); a running «İrəli çək» alone keeps its own name.
+  const featured = isFeatured(listing, now)
+  const pending = pendingPromotionOf(listing)
+  // The choice made while posting, while it is on sale (DATA_SOURCE=api: the API's packages, so its name and price).
+  const packages = usePromotionPackages()
+  const pendingOffer = pending && packages && (listing.status === 'active' || listing.status === 'pending') ? findOption(packages, pending.optionId) : undefined
   const href = listing.status === 'active' ? `/elanlar/${listing.slug}` : ownerPreviewPath(listing.slug)
 
   const edit = async () => {
@@ -85,6 +101,17 @@ export function ListingRowCard({ listing, stats, now, handlers }: { listing: Lis
     await handlers.startEdit(listing)
     router.push('/elan-yerlesdir/2')
   }
+
+  /** Runs one of the status actions; the toast says what happened (or why not). */
+  const run = async (action: StatusAction, done: string) => {
+    if (running) return false
+    setRunning(action)
+    const result = await handlers[action](listing.id)
+    setRunning(null)
+    toast(result.ok ? done : result.error, result.ok ? undefined : 'error')
+    return result.ok
+  }
+  const waiting = running !== null
 
   const buttons: Record<CabinetAction, ReactNode> = {
     promote: (
@@ -98,13 +125,12 @@ export function ListingRowCard({ listing, stats, now, handlers }: { listing: Lis
         key="renew"
         type="button"
         className={strong}
-        onClick={() => {
-          handlers.renew(listing.id)
-          toast('Elan yeniləndi: daha 30 gün saytda')
-        }}
+        disabled={waiting}
+        aria-busy={running === 'renew'}
+        onClick={() => void run('renew', 'Elan yeniləndi: daha 30 gün saytda')}
       >
         <RefreshCw aria-hidden size={15} strokeWidth={2} />
-        Yenilə (pulsuz)
+        {running === 'renew' ? 'Yenilənir…' : 'Yenilə (pulsuz)'}
       </button>
     ),
     fix: (
@@ -118,13 +144,12 @@ export function ListingRowCard({ listing, stats, now, handlers }: { listing: Lis
         key="activate"
         type="button"
         className={strong}
-        onClick={() => {
-          handlers.activate(listing.id)
-          toast('Elan yenidən saytdadır')
-        }}
+        disabled={waiting}
+        aria-busy={running === 'activate'}
+        onClick={() => void run('activate', 'Elan yenidən saytdadır')}
       >
         <Play aria-hidden size={15} strokeWidth={2} />
-        Aktiv et
+        {running === 'activate' ? 'Aktiv edilir…' : 'Aktiv et'}
       </button>
     ),
     preview: (
@@ -150,13 +175,12 @@ export function ListingRowCard({ listing, stats, now, handlers }: { listing: Lis
         key="deactivate"
         type="button"
         className={quiet}
-        onClick={() => {
-          handlers.deactivate(listing.id)
-          toast('Elan axtarışdan gizlədildi')
-        }}
+        disabled={waiting}
+        aria-busy={running === 'deactivate'}
+        onClick={() => void run('deactivate', 'Elan axtarışdan gizlədildi')}
       >
         <EyeOff aria-hidden size={15} strokeWidth={2} />
-        Deaktiv et
+        {running === 'deactivate' ? 'Gizlədilir…' : 'Deaktiv et'}
       </button>
     ),
     remove: (
@@ -182,11 +206,15 @@ export function ListingRowCard({ listing, stats, now, handlers }: { listing: Lis
         <div className="flex min-w-0 flex-1 flex-col gap-1">
           <div className="flex flex-wrap items-center gap-1.5">
             <Badge tone={badge.tone}>{badge.label}</Badge>
-            {promo && (
-              <span className="inline-flex items-center gap-1 rounded-[5px] bg-vip px-2 py-[5px] text-xs leading-[normal] font-semibold whitespace-nowrap text-olive-text">
-                <Rocket aria-hidden size={12} strokeWidth={2.2} />
-                {promotionPackage(promo.packageId)?.name}
-              </span>
+            {featured ? (
+              <PromotedBadge />
+            ) : (
+              promo && (
+                <span className="inline-flex items-center gap-1 rounded-[5px] bg-vip px-2 py-[5px] text-xs leading-[normal] font-semibold whitespace-nowrap text-olive-text">
+                  <Rocket aria-hidden size={12} strokeWidth={2.2} />
+                  {(packages?.find((p) => p.id === promo.packageId) ?? promotionPackage(promo.packageId))?.name}
+                </span>
+              )
             )}
           </div>
           <h3 className="line-clamp-2 text-[15px] leading-[1.35] font-semibold break-words text-ink" title={listing.title}>
@@ -209,7 +237,7 @@ export function ListingRowCard({ listing, stats, now, handlers }: { listing: Lis
           <CircleAlert aria-hidden size={16} strokeWidth={2} className="mt-0.5 shrink-0 text-danger" />
           <span>
             <span className="font-semibold">Səbəb: </span>
-            {listing.rejectionReason ?? 'Elan qaydalara uyğun deyil. Düzəldib yenidən göndərin.'}
+            {rejectionText(listing) ?? 'Elan qaydalara uyğun deyil. Düzəldib yenidən göndərin.'}
           </span>
         </p>
       )}
@@ -218,6 +246,26 @@ export function ListingRowCard({ listing, stats, now, handlers }: { listing: Lis
           <Clock3 aria-hidden size={15} strokeWidth={2} />
           Moderator adətən 1 saat ərzində yoxlayır.
         </p>
+      )}
+      {pending && pendingOffer && (
+        <div className="flex flex-col gap-2 rounded-lg bg-vip px-3 py-2.5 text-[13px] leading-[1.5] text-ink sm:flex-row sm:items-center sm:justify-between">
+          <p className="flex gap-2">
+            <Rocket aria-hidden size={16} strokeWidth={2} className="mt-0.5 shrink-0 text-olive" />
+            <span>
+              Elan yerləşdirəndə{' '}
+              <span className="font-semibold">
+                «{pendingOffer.pkg.name} · {pendingOffer.option.label}»
+              </span>{' '}
+              seçmisiniz.{listing.status === 'pending' ? ' Elan yoxlamadan keçəndən sonra burada ödəyib işə sala bilərsiniz.' : ''}
+            </span>
+          </p>
+          {listing.status === 'active' && (
+            <Link href={`/reklam?${new URLSearchParams({ elan: listing.id, secim: pending.optionId })}`} className={cn(quiet, 'self-start sm:self-auto')}>
+              <Rocket aria-hidden size={15} strokeWidth={2} />
+              Ödə və işə sal
+            </Link>
+          )}
+        </div>
       )}
 
       <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 border-t border-line pt-3">
@@ -263,10 +311,10 @@ export function ListingRowCard({ listing, stats, now, handlers }: { listing: Lis
                     <button
                       type="button"
                       className={cn(menuItem, 'text-forest')}
+                      disabled={waiting}
                       onClick={() => {
                         close()
-                        handlers.deactivate(listing.id)
-                        toast('Elan axtarışdan gizlədildi')
+                        void run('deactivate', 'Elan axtarışdan gizlədildi')
                       }}
                     >
                       <EyeOff aria-hidden size={16} strokeWidth={2} />
@@ -308,13 +356,13 @@ export function ListingRowCard({ listing, stats, now, handlers }: { listing: Lis
           </Button>
           <Button
             variant="danger"
-            onClick={() => {
-              handlers.remove(listing.id)
-              setDialog(null)
-              toast('Elan silindi')
+            disabled={waiting}
+            aria-busy={running === 'remove'}
+            onClick={async () => {
+              if (await run('remove', 'Elan silindi')) setDialog(null)
             }}
           >
-            Elanı sil
+            {running === 'remove' ? 'Silinir…' : 'Elanı sil'}
           </Button>
         </div>
       </Dialog>

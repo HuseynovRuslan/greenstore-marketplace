@@ -8,7 +8,7 @@ import { CharCount, SelectField, TextAreaField, TextField } from '@/components/u
 import { Notice } from '@/components/ui/Notice'
 import { emailError } from '@/features/auth/validation'
 import { phoneFieldError } from '@/lib/phone'
-import { useSession } from '@/state/store'
+import { useDataSource, useSession } from '@/state/store'
 import type { SupportMessageInput } from '@/types'
 import { sendSupportMessage } from './actions'
 import { contactTopics, topicFromParam, type ContactTopic } from './contactTopics'
@@ -21,6 +21,7 @@ const topics: Array<{ value: ContactTopic | ''; label: string }> = [{ value: '',
  */
 export function ContactForm({ initialTopic }: { initialTopic?: ContactTopic }) {
   const { user } = useSession()
+  const demo = useDataSource() === 'mock'
   const [form, setForm] = useState({ topic: initialTopic ?? '', name: user?.fullName ?? '', contact: user?.phone ?? '', listing: '', message: '' })
   const [errors, setErrors] = useState<Record<string, string | undefined>>({})
   const [busy, setBusy] = useState(false)
@@ -49,7 +50,7 @@ export function ContactForm({ initialTopic }: { initialTopic?: ContactTopic }) {
       contact,
       message: form.message.trim(),
       listingNumber: form.listing ? Number(form.listing) : undefined,
-    })
+    }).catch(() => ({ ok: false as const, error: 'Mesajı göndərmək alınmadı. İnternet bağlantısını yoxlayın.' }))
     setBusy(false)
     if (!result.ok) return setFailure(result.error)
     setTicket(result.ticket)
@@ -60,7 +61,9 @@ export function ContactForm({ initialTopic }: { initialTopic?: ContactTopic }) {
       <div role="status" className="flex flex-col items-center gap-3 rounded-2xl border border-line bg-surface p-6 text-center">
         <CircleCheck aria-hidden size={40} strokeWidth={1.8} className="text-success" />
         <p className="text-lg font-semibold text-forest">Müraciət № {ticket} qəbul olundu</p>
-        <p className="max-w-[44ch] text-sm leading-[1.5] text-ink-soft">İş saatlarında 2 saat ərzində cavab veririk. Demo: müraciət heç yerə göndərilmir.</p>
+        <p className="max-w-[44ch] text-sm leading-[1.5] text-ink-soft">
+          İş saatlarında 2 saat ərzində cavab veririk.{demo && ' Demo: müraciət heç yerə göndərilmir.'}
+        </p>
       </div>
     )
   }

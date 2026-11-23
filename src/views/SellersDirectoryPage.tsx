@@ -3,6 +3,7 @@ import { BadgeCheck, Check, Store } from 'lucide-react'
 import { cardFocusClass, stretchedLinkClass } from '@/components/cards/ListingCard'
 import { ButtonLink } from '@/components/ui/Button'
 import { EmptyState } from '@/components/ui/EmptyState'
+import { PaginationLinks } from '@/components/ui/PaginationLinks'
 import { UnderlineTabs } from '@/components/ui/UnderlineTabs'
 import { cities, cityName } from '@/data/cities'
 import { ordinal } from '@/features/listing/detail'
@@ -11,6 +12,7 @@ import { offerLabels } from '@/features/seller/hours'
 import { Breadcrumb } from '@/features/seller/ui'
 import { optionClass } from '@/features/search/filterStyles'
 import { cn, formatNumber } from '@/lib/format'
+import type { PageResult } from '@/services/repository'
 import type { BusinessKind, Seller } from '@/types'
 
 export const kindTabs: Array<{ value: BusinessKind | ''; label: string; param: string }> = [
@@ -26,12 +28,17 @@ export function parseDirectoryQuery(params: URLSearchParams) {
   return { kind, city }
 }
 
-const hrefFor = (kind: BusinessKind | '', city: string) => {
+/** The directory's URL query (`nov`, `seher`) for a kind and a city. */
+function directoryQuery(kind: BusinessKind | '', city: string): string {
   const q = new URLSearchParams()
   const param = kindTabs.find((k) => k.value === kind)?.param
   if (param) q.set('nov', param)
   if (city) q.set('seher', city)
-  const s = q.toString()
+  return q.toString()
+}
+
+const hrefFor = (kind: BusinessKind | '', city: string) => {
+  const s = directoryQuery(kind, city)
   return s ? `/saticilar?${s}` : '/saticilar'
 }
 
@@ -84,15 +91,23 @@ function SellerTile({ seller }: { seller: Seller }) {
   )
 }
 
+interface SellersDirectoryProps {
+  /** One page of the businesses of the chosen kind and city */
+  result: PageResult<Seller>
+  /** Businesses in the chosen city per kind tab ('' = «Hamısı») */
+  counts: Record<BusinessKind | '', number>
+  kind: BusinessKind | ''
+  city: string
+}
+
 /**
  * /saticilar — the businesses on GreenStore (turbo.az's dealer directory, for plants): tabs by kind (nurseries,
- * garden centres, landscaping companies) with counts, city chips, cards linking to each business page. Filters live
- * in the URL (?nov=, ?seher=); server-rendered.
+ * garden centres, landscaping companies) with counts, city chips, cards linking to each business page, page links
+ * when there are more than one page. Filters live in the URL (?nov=, ?seher=, ?sehife=); server-rendered.
  */
-export default function SellersDirectoryPage({ sellers, kind, city }: { sellers: Seller[]; kind: BusinessKind | ''; city: string }) {
-  const inCity = sellers.filter((s) => !city || s.cityId === city)
-  const shown = inCity.filter((s) => !kind || s.businessKind === kind)
-  const countOf = (k: BusinessKind | '') => inCity.filter((s) => !k || s.businessKind === k).length
+export default function SellersDirectoryPage({ result, counts, kind, city }: SellersDirectoryProps) {
+  const shown = result.items
+  const countOf = (k: BusinessKind | '') => counts[k] ?? 0
 
   return (
     <div className="page-x mx-auto flex w-full max-w-[1440px] flex-col gap-5 pt-3 pb-14 md:pt-5">
@@ -127,13 +142,18 @@ export default function SellersDirectoryPage({ sellers, kind, city }: { sellers:
       </nav>
 
       {shown.length > 0 ? (
-        <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {shown.map((s) => (
-            <li key={s.id}>
-              <SellerTile seller={s} />
-            </li>
-          ))}
-        </ul>
+        <>
+          <ul id="satici-siyahisi" className="grid scroll-mt-24 grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {shown.map((s) => (
+              <li key={s.id}>
+                <SellerTile seller={s} />
+              </li>
+            ))}
+          </ul>
+          {result.pageCount > 1 && (
+            <PaginationLinks page={result.page} pageCount={result.pageCount} basePath="/saticilar" query={directoryQuery(kind, city)} scrollTargetId="satici-siyahisi" />
+          )}
+        </>
       ) : (
         <div className="flex justify-center py-6">
           <EmptyState

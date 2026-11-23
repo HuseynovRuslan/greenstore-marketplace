@@ -4,9 +4,10 @@ import { X } from 'lucide-react'
 import { DEMO_MODE } from '@/config/demo'
 import { useStoredState } from '@/hooks/useLocalStorage'
 import { BANNER_DISMISSED_KEY } from '@/state/bootstrap'
+import { useDataSource } from '@/state/store'
 
 /**
- * Staging notice: the site runs on sample data and a simulated login (see src/config/demo.ts).
+ * Staging notice: the site runs on sample data and (DATA_SOURCE=mock) a simulated login (see src/config/demo.ts).
  * Not part of the Figma design — it sits above the header and can be dismissed for the browser session.
  * A top-level <aside> (complementary landmark), so the notice is in a landmark of its own: inside the sticky header
  * it would stay pinned on scroll and change the header height the scroll behaviour measures.
@@ -15,6 +16,8 @@ import { BANNER_DISMISSED_KEY } from '@/state/bootstrap'
  */
 export function DemoBanner() {
   const [dismissed, setDismissed] = useStoredState(BANNER_DISMISSED_KEY, false, 'session')
+  // With the API the listings are still the seeded samples, but accounts are real (backend/seed/README.md).
+  const api = useDataSource() === 'api'
   if (!DEMO_MODE || dismissed) return null
 
   return (
@@ -22,11 +25,22 @@ export function DemoBanner() {
       <div className="page-x mx-auto flex w-full max-w-[1440px] items-start gap-3 py-2 text-xs leading-[1.5]">
         <p className="min-w-0 flex-1">
           <span className="font-semibold text-olive-text">Demo versiya.</span>{' '}
-          <span className="md:hidden">Məlumatlar nümunədir, giriş sınaq üçündür.</span>
-          <span className="hidden md:inline">
-            Elanlar, satıcılar və hesablar nümunə məlumatlardır. Giriş və qeydiyyat sınaq üçündür, real hesab yaradılmır;
-            etdiyiniz dəyişikliklər yalnız bu brauzerdə saxlanılır.
-          </span>
+          {api ? (
+            <>
+              <span className="md:hidden">Elanlar nümunədir, hesablar realdır.</span>
+              <span className="hidden md:inline">
+                Elanlar və satıcılar nümunə məlumatlardır. Hesabınız, profiliniz və seçilmişləriniz serverdə saxlanılır.
+              </span>
+            </>
+          ) : (
+            <>
+              <span className="md:hidden">Məlumatlar nümunədir, giriş sınaq üçündür.</span>
+              <span className="hidden md:inline">
+                Elanlar, satıcılar və hesablar nümunə məlumatlardır. Giriş və qeydiyyat sınaq üçündür, real hesab yaradılmır;
+                etdiyiniz dəyişikliklər yalnız bu brauzerdə saxlanılır.
+              </span>
+            </>
+          )}
         </p>
         <button
           type="button"

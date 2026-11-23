@@ -20,7 +20,7 @@ vi.mock('@/features/cabinet/actions', () => ({
 }))
 const buyPromotion = vi.fn(async (input: { listingId: string; packageId: string; optionId: string }) => ({
   ok: true as const,
-  order: { id: 'ord-5100', listingId: input.listingId, packageId: input.packageId as 'one-cixar', optionId: input.optionId, amount: 9, status: 'paid' as const, createdAt: '' },
+  order: { id: 'ord-5100', number: 5100, listingId: input.listingId, packageId: input.packageId as 'one-cixar', optionId: input.optionId, amount: 9, status: 'paid' as const, createdAt: '' },
 }))
 vi.mock('@/features/promotion/actions', () => ({ buyPromotion: (input: { listingId: string; packageId: string; optionId: string }) => buyPromotion(input) }))
 
@@ -72,6 +72,7 @@ describe('promotion planner', () => {
     await user.click(within(dialog).getByRole('button', { name: /ödə/ }))
     expect(buyPromotion).toHaveBeenCalledWith({ listingId: 'tuya-smaragd', packageId: 'one-cixar', optionId: 'one-cixar-3' })
     expect(await within(dialog).findByText('Paket aktivdir')).toBeInTheDocument()
+    expect(within(dialog).getByText(/Sifariş № 5100/)).toBeInTheDocument()
     const changes = JSON.parse(localStorage.getItem('greenstore:cabinet:changes') ?? '{}')
     expect(changes['tuya-smaragd'].promotion.packageId).toBe('one-cixar')
   })

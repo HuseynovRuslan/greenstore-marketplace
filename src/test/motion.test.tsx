@@ -4,6 +4,8 @@ import userEvent from '@testing-library/user-event'
 import { Reveal } from '@/components/ui/Reveal'
 import { FavoriteButton } from '@/components/cards/FavoriteButton'
 import { MotionProvider } from '@/components/motion/MotionProvider'
+import { MotionFeatures } from '@/components/motion/MotionFeatures'
+import domAnimation from '@/components/motion/features'
 import { AppStoreProvider } from '@/state/store'
 import { loadHeroCounts } from '@/features/home/heroCounts'
 import { mockRepository } from '@/services/mockRepository'
@@ -169,5 +171,51 @@ describe('MotionProvider', () => {
       </MotionProvider>,
     )
     expect(screen.getByRole('heading', { level: 1, name: 'Bağ elanları' })).toBeInTheDocument()
+  })
+})
+
+describe('a motion bundle that arrives after the page is gone (a test run tears jsdom down while a chunk loads)', () => {
+  /** Lets the bundle arrive with no window, as after jsdom's teardown; returns what failed meanwhile. */
+  async function withoutWindow(arrive: () => void) {
+    const failures: unknown[] = []
+    const onFailure = (reason: unknown) => failures.push(reason)
+    process.on('unhandledRejection', onFailure)
+    process.on('uncaughtException', onFailure)
+    vi.stubGlobal('window', undefined)
+    try {
+      arrive()
+      await new Promise((resolve) => setTimeout(resolve, 10))
+    } finally {
+      vi.unstubAllGlobals()
+      process.off('unhandledRejection', onFailure)
+      process.off('uncaughtException', onFailure)
+    }
+    return failures
+  }
+
+  it('is dropped by MotionFeatures', async () => {
+    let arrive: (bundle: typeof domAnimation) => void = () => {}
+    const load = vi.fn(() => new Promise<typeof domAnimation>((resolve) => (arrive = resolve)))
+    const { unmount } = render(
+      <MotionFeatures load={load}>
+        <p>Bağ elanları</p>
+      </MotionFeatures>,
+    )
+    expect(load).toHaveBeenCalledTimes(1)
+    unmount()
+
+    expect(await withoutWindow(() => arrive(domAnimation))).toEqual([])
+  })
+
+  it('is dropped by MotionProvider', async () => {
+    const { unmount } = render(
+      <MotionProvider>
+        <p>Bağ elanları</p>
+      </MotionProvider>,
+    )
+    unmount()
+
+    // Its chunk is an import(), which settles no earlier than the next microtask: after the window has gone.
+    expect(await withoutWindow(() => {})).toEqual([])
   })
 })

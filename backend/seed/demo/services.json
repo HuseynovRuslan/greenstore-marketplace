@@ -1,0 +1,207 @@
+{
+  "$comment": "Demo services: listings of kind \"service\" under «Bağ xidmətləri»; `subcategoryId` is the service type. Generated from src/data by backend/seed/export.mjs: do not edit by hand.",
+  "items": [
+    {
+      "key": "landsaft-dizayni",
+      "number": 20316,
+      "status": "active",
+      "owner": "owner-yasil-mekan-landsaft",
+      "seller": "yasil-mekan-landsaft",
+      "title": "Landşaft dizaynı və yaşıllaşdırma",
+      "description": [
+        "Həyətyanı sahələr, villalar və kommersiya məkanları üçün funksional və uzunömürlü bağlar hazırlayırıq. Hər layihədə sahənin işıqlanmasını, torpaq xüsusiyyətlərini və yerli iqlimi nəzərə alırıq. Layihələndirmədən əkinə qədər bütün mərhələlər bir komanda tərəfindən koordinasiya edilir."
+      ],
+      "categoryId": "landsaft-xidmetleri",
+      "subcategoryId": "landsaft-dizayni",
+      "cityId": "baki",
+      "priceType": "fixed",
+      "price": 25,
+      "priceUnit": "sqm",
+      "areas": [
+        "baki",
+        "abseron",
+        "sumqayit"
+      ],
+      "includes": [
+        "Sahəyə baxış və ölçülərin götürülməsi",
+        "Əkin planı və bitki seçimi",
+        "3D landşaft konsepsiyası",
+        "Yaşıllaşdırma və qazon salınması",
+        "Suvarma sisteminin planlaşdırılması",
+        "Mövsümi qulluq üzrə tövsiyələr"
+      ],
+      "contactName": "Rauf Həsənli",
+      "contactPhone": "+994502124418",
+      "whatsapp": true,
+      "phoneHidden": false,
+      "promoted": false,
+      "views": 0,
+      "submittedAt": "2026-10-12T14:00:00Z",
+      "publishedAt": "2026-10-12T14:00:00Z",
+      "photos": [
+        "/images/services/landsaft-dizayni-4.webp",
+        "/images/services/landsaft-dizayni-gallery-1.webp",
+        "/images/services/landsaft-dizayni-gallery-2.webp",
+        "/images/services/landsaft-dizayni-gallery-3.webp",
+        "/images/services/landsaft-dizayni-gallery-4.webp",
+        "/images/services/landsaft-dizayni-1.webp",
+        "/images/services/landsaft-dizayni-2.webp",
+        "/images/services/landsaft-dizayni-3.webp"
+      ]
+    },
+    {
+      "key": "avtomatik-suvarma",
+      "number": 20317,
+      "status": "active",
+      "owner": "provider-aquabag",
+      "title": "Avtomatik suvarma quraşdırılması",
+      "description": [],
+      "categoryId": "landsaft-xidmetleri",
+      "subcategoryId": "avtomatik-suvarma",
+      "cityId": "baki",
+      "priceType": "fixed",
+      "price": 350,
+      "areas": [
+        "baki",
+        "abseron"
+      ],
+      "includes": [],
+      "contactName": "AquaBağ",
+      "contactPhone": "+994500000101",
+      "whatsapp": false,
+      "phoneHidden": false,
+      "promoted": false,
+      "views": 0,
+      "submittedAt": "2026-10-12T13:00:00Z",
+      "publishedAt": "2026-10-12T13:00:00Z",
+      "photos": [
+        "/images/services/avtomatik-suvarma-4.webp",
+        "/images/services/avtomatik-suvarma-1.webp",
+        "/images/services/avtomatik-suvarma-2.webp",
+        "/images/services/avtomatik-suvarma-3.webp"
+      ]
+    },
+    {
+      "key": "cim-salinmasi",
+      "number": 20318,
+      "status": "active",
+      "owner": "owner-yasil-mekan-landsaft",
+      "seller": "yasil-mekan-landsaft",
+      "title": "Qazon salınması və qulluq",
+      "description": [],
+      "categoryId": "landsaft-xidmetleri",
+      "subcategoryId": "cim-salinmasi",
+      "cityId": "baki",
+      "priceType": "fixed",
+      "price": 8,
+      "priceUnit": "sqm",
+      "areas": [
+        "baki",
+        "sumqayit"
+      ],
+      "includes": [],
+      "contactName": "Rauf Həsənli",
+      "contactPhone": "+994502124418",
+      "whatsapp": true,
+      "phoneHidden": false,
+      "promoted": false,
+      "views": 0,
+      "submittedAt": "2026-10-12T12:00:00Z",
+      "publishedAt": "2026-10-12T12:00:00Z",
+      "photos": [
+        "/images/services/cim-salinmasi-1.webp"
+      ]
+    },
+    {
+      "key": "movsumi-bag-baximi",
+      "number": 20319,
+      "status": "active",
+      "owner": "provider-bag-ustasi",
+      "title": "Mövsümi bağ baxımı",
+      "description": [],
+      "categoryId": "landsaft-xidmetleri",
+      "subcategoryId": "bag-baximi",
+      "cityId": "baki",
+      "priceType": "fixed",
+      "price": 150,
+      "areas": [
+        "baki",
+        "abseron"
+      ],
+      "includes": [],
+      "contactName": "Bağ Ustası",
+      "contactPhone": "+994500000102",
+      "whatsapp": false,
+      "phoneHidden": false,
+      "promoted": false,
+      "views": 0,
+      "submittedAt": "2026-10-12T11:00:00Z",
+      "publishedAt": "2026-10-12T11:00:00Z",
+      "photos": [
+        "/images/services/movsumi-bag-baximi-4.webp",
+        "/images/services/movsumi-bag-baximi-1.webp",
+        "/images/services/movsumi-bag-baximi-2.webp",
+        "/images/services/movsumi-bag-baximi-3.webp"
+      ]
+    },
+    {
+      "key": "agac-ekilmesi",
+      "number": 20320,
+      "status": "active",
+      "owner": "owner-abseron-tingcilik",
+      "seller": "abseron-tingcilik",
+      "title": "Ağac əkilməsi",
+      "description": [],
+      "categoryId": "landsaft-xidmetleri",
+      "subcategoryId": "agac-ekilmesi",
+      "cityId": "abseron",
+      "priceType": "agreement",
+      "areas": [
+        "abseron",
+        "baki"
+      ],
+      "includes": [],
+      "contactName": "Elvin Əliyev",
+      "contactPhone": "+994505551234",
+      "whatsapp": true,
+      "phoneHidden": false,
+      "promoted": false,
+      "views": 0,
+      "submittedAt": "2026-10-12T10:00:00Z",
+      "publishedAt": "2026-10-12T10:00:00Z",
+      "photos": [
+        "/images/services/agac-ekilmesi-1.webp"
+      ]
+    },
+    {
+      "key": "heyetyani-yasillasdirma",
+      "number": 20321,
+      "status": "active",
+      "owner": "provider-quba-bag",
+      "title": "Həyətyanı sahələrin yaşıllaşdırılması",
+      "description": [],
+      "categoryId": "landsaft-xidmetleri",
+      "subcategoryId": "heyetyani-yasillasdirma",
+      "cityId": "quba",
+      "priceType": "fixed",
+      "price": 20,
+      "priceUnit": "sqm",
+      "areas": [
+        "quba",
+        "seki"
+      ],
+      "includes": [],
+      "contactName": "Quba Bağ",
+      "contactPhone": "+994500000103",
+      "whatsapp": false,
+      "phoneHidden": false,
+      "promoted": false,
+      "views": 0,
+      "submittedAt": "2026-10-12T09:00:00Z",
+      "publishedAt": "2026-10-12T09:00:00Z",
+      "photos": [
+        "/images/services/heyetyani-yasillasdirma-1.webp"
+      ]
+    }
+  ]
+}

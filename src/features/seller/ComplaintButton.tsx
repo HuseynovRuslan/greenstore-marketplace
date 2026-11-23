@@ -54,7 +54,7 @@ export function ComplaintButton({ kind, targetId, fullWidth, appearance = 'butto
           {label}
         </Button>
       )}
-      <ComplaintDialog open={open} onClose={close} title={label} reasons={[...reasons]} target={kind} targetId={targetId} />
+      <ComplaintDialog open={open} onClose={close} title={label} reasons={reasons} target={kind} targetId={targetId} />
     </>
   )
 }

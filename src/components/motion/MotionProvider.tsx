@@ -2,9 +2,10 @@
 
 import type { ReactNode } from 'react'
 import { LazyMotion, MotionConfig } from 'motion/react'
+import { unlessPageGone } from './MotionFeatures'
 
 /** domAnimation arrives in its own chunk once the page is interactive; `m` components render statically until then. */
-const loadFeatures = () => import('./features').then((bundle) => bundle.default)
+const loadFeatures = () => import('./features').then((bundle) => unlessPageGone(bundle.default))
 
 /**
  * App-wide motion setup (root layout). MotionConfig reducedMotion="user": with the OS "reduce motion" setting, Motion

@@ -8,8 +8,8 @@ import { FieldGroup } from '@/components/ui/FormControls'
 import { Notice } from '@/components/ui/Notice'
 import { optionClass } from '@/features/search/filterStyles'
 import { sendReport } from '@/features/listing/actions'
-import type { ReportTarget } from '@/types'
-import { OTHER_REASON } from './complaintReasons'
+import type { ReportReason, ReportTarget } from '@/types'
+import { OTHER_REASON, type ComplaintReason } from './complaintReasons'
 
 const MAX_LENGTH = 500
 const MIN_OTHER = 10
@@ -19,7 +19,8 @@ interface ComplaintDialogProps {
   onClose: () => void
   /** «Elandan şikayət et» / «Satıcıdan şikayət et» */
   title: string
-  reasons: string[]
+  /** Shown by their words, sent by their codes */
+  reasons: ComplaintReason[]
   target: ReportTarget
   targetId: string
 }
@@ -39,7 +40,7 @@ export function ComplaintDialog({ open, onClose, title, reasons, target, targetI
 }
 
 function ComplaintForm({ reasons, onClose, target, targetId }: Omit<ComplaintDialogProps, 'open' | 'title'>) {
-  const [reason, setReason] = useState('')
+  const [reason, setReason] = useState<ReportReason | ''>('')
   const [text, setText] = useState('')
   const [errors, setErrors] = useState<{ reason?: string; text?: string; form?: string }>({})
   const [status, setStatus] = useState<'idle' | 'sending' | 'sent'>('idle')
@@ -49,7 +50,7 @@ function ComplaintForm({ reasons, onClose, target, targetId }: Omit<ComplaintDia
     if (status === 'sent') closeRef.current?.focus()
   }, [status])
 
-  const validate = (r: string, t: string) => ({
+  const validate = (r: ReportReason | '', t: string) => ({
     reason: r ? undefined : 'Səbəbi seçin.',
     text: r === OTHER_REASON && t.trim().length < MIN_OTHER ? `Nə baş verdiyini qısaca yazın (ən azı ${MIN_OTHER} simvol).` : undefined,
   })
@@ -60,7 +61,11 @@ function ComplaintForm({ reasons, onClose, target, targetId }: Omit<ComplaintDia
     setErrors(next)
     if (next.reason || next.text) return
     setStatus('sending')
-    const result = await sendReport({ target, targetId, reason, comment: text })
+    if (!reason) return
+    const result = await sendReport({ target, targetId, reason, comment: text }).catch(() => ({
+      ok: false as const,
+      error: 'Şikayəti göndərmək alınmadı. İnternet bağlantısını yoxlayın.',
+    }))
     if (result.ok) setStatus('sent')
     else {
       setStatus('idle')
@@ -85,20 +90,20 @@ function ComplaintForm({ reasons, onClose, target, targetId }: Omit<ComplaintDia
     <form onSubmit={submit} noValidate className="flex w-full flex-col gap-5">
       <FieldGroup legend="Səbəb" error={errors.reason}>
         <div className="flex flex-wrap gap-2">
-          {reasons.map((r) => (
-            <label key={r} className={optionClass(r === reason, true) + ' inline-flex cursor-pointer items-center has-[input:focus-visible]:outline-2 has-[input:focus-visible]:outline-offset-2 has-[input:focus-visible]:outline-olive'}>
+          {reasons.map(({ code, label }) => (
+            <label key={code} className={optionClass(code === reason, true) + ' inline-flex cursor-pointer items-center has-[input:focus-visible]:outline-2 has-[input:focus-visible]:outline-offset-2 has-[input:focus-visible]:outline-olive'}>
               <input
                 type="radio"
                 name="reason"
-                value={r}
-                checked={r === reason}
+                value={code}
+                checked={code === reason}
                 onChange={() => {
-                  setReason(r)
-                  if (errors.reason || errors.text) setErrors(validate(r, text))
+                  setReason(code)
+                  if (errors.reason || errors.text) setErrors(validate(code, text))
                 }}
                 className="sr-only"
               />
-              {r}
+              {label}
             </label>
           ))}
         </div>

@@ -5,7 +5,8 @@ import { DraftCard } from '@/features/posting/ui'
 import type { PostingDraft } from '@/features/posting/draft'
 import type { Listing, ListingStats } from '@/types'
 
-const noop: RowHandlers = { renew: () => {}, deactivate: () => {}, activate: () => {}, remove: () => {}, startEdit: async () => {} }
+const done = async () => ({ ok: true }) as const
+const noop: RowHandlers = { renew: done, deactivate: done, activate: done, remove: done, startEdit: async () => {} }
 
 /** The cabinet rows of /dev/worst-case/sehifeler with fixture data; the actions do nothing. */
 export function WorstCaseRows({ rows, draft, now }: { rows: Array<{ listing: Listing; stats?: ListingStats }>; draft?: PostingDraft; now: number }) {

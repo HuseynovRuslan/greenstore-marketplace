@@ -1,6 +1,7 @@
 'use client'
 
 import { useSyncExternalStore, type ReactNode } from 'react'
+import { useSessionStatus } from '@/state/store'
 
 const subscribe = () => () => {}
 
@@ -14,11 +15,21 @@ export function useHydrated(): boolean {
 }
 
 /**
- * Renders `children` only in the browser. Used for the private pages whose content depends entirely on
- * `localStorage` (demo session, favourites, wizard draft): until then the server HTML shows `fallback`, a loading
- * skeleton shaped like the page (see SessionFallback for frames that differ for guests). These pages are `noindex`,
- * so nothing is lost for SEO.
+ * Whether React knows the session: hydrated, and (DATA_SOURCE=api) the server has said who is signed in. Until then
+ * session-dependent UI renders both variants and CSS shows the one the pre-hydration script chose (bootstrap.ts).
+ */
+export function useSessionKnown(): boolean {
+  const hydrated = useHydrated()
+  const status = useSessionStatus()
+  return hydrated && status === 'ready'
+}
+
+/**
+ * Renders `children` only in the browser, once the session is known. Used for the private pages whose content depends
+ * on the session and browser storage (session, favourites, wizard draft): until then the server HTML shows
+ * `fallback`, a loading skeleton shaped like the page (see SessionFallback for frames that differ for guests). These
+ * pages are `noindex`, so nothing is lost for SEO.
  */
 export function ClientGate({ children, fallback }: { children: ReactNode; fallback: ReactNode }) {
-  return useHydrated() ? children : fallback
+  return useSessionKnown() ? children : fallback
 }

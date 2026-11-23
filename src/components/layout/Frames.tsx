@@ -3,6 +3,7 @@ import { SiteHeader } from './SiteHeader'
 import { CompactFooter } from './CompactFooter'
 import { MobileNav } from './MobileNav'
 import { WorkflowHeader } from './WorkflowHeader'
+import { dataSource } from '@/seo/env'
 import { DemoBanner } from './DemoBanner'
 import { MAIN_ID } from './ids'
 
@@ -66,7 +67,8 @@ export function AdminFrame({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-dvh flex-col">
       <DemoBanner />
-      <WorkflowHeader right={<span className="truncate text-sm text-ink-soft">İdarəetmə · Aysel Həsənova</span>} />
+      {/* The demo's moderator is Figma's; with the API the page names the signed-in one. */}
+      <WorkflowHeader right={<span className="truncate text-sm text-ink-soft">{dataSource() === 'api' ? 'İdarəetmə' : 'İdarəetmə · Aysel Həsənova'}</span>} />
       <Main>{children}</Main>
     </div>
   )

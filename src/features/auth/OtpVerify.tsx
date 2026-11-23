@@ -60,7 +60,7 @@ export function OtpVerify({ challenge: initial, phone, purpose, onVerified, onCh
     setBusy(false)
     if (result.ok) onVerified(challenge.challengeId)
     else {
-      setError(errorText(result.error, result.attemptsLeft))
+      setError('message' in result ? result.message : errorText(result.error, result.attemptsLeft))
       setCode('')
       fieldRef.current?.focus()
     }

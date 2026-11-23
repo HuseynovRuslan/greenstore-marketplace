@@ -5,15 +5,17 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/Button'
 import { TextField } from '@/components/ui/Field'
+import { Notice } from '@/components/ui/Notice'
 import { CheckboxField, PasswordField, PhoneField } from '@/components/ui/FormControls'
 import { useToast } from '@/components/ui/Toast'
 import { DEMO_LOGIN_PASSWORD } from '@/config/demo'
-import { requestCode } from '@/features/auth/actions'
+import { requestCode, signInWithCode, signInWithPassword } from '@/features/auth/actions'
 import { OtpVerify } from '@/features/auth/OtpVerify'
 import { AuthShell, DemoNote, FormCard, Segmented } from '@/features/auth/ui'
 import { emailError, safeNext } from '@/features/auth/validation'
 import { phoneFieldError, phoneValue } from '@/lib/phone'
 import { useSession } from '@/state/store'
+import type { AccountProfile } from '@/data/user'
 import type { OtpChallenge } from '@/types'
 
 type Method = 'password' | 'sms'
@@ -30,11 +32,14 @@ function identifierError(value: string) {
 
 /**
  * /daxil-ol — sign in with a password (phone or e-mail in one field, so the browser's saved login fills it) or with
- * an SMS code. «Şifrəni unutmusunuz?» leads to the reset flow. DEMO: any well-formed login and an 8-character
- * password sign in the demo account; the SMS code is shown on screen.
+ * an SMS code. «Şifrəni unutmusunuz?» leads to the reset flow.
+ * - DATA_SOURCE=mock (DEMO): any well-formed login and an 8-character password sign in the demo account in the
+ *   browser; the SMS code is shown on screen.
+ * - DATA_SOURCE=api: the Server Actions sign in with the API and set the session cookie; the page hands the account
+ *   they answer with to the store. Refusals (wrong password, lockout, blocked account) are shown above the form.
  */
 export default function LoginPage({ next }: { next?: string }) {
-  const { signIn } = useSession()
+  const { signIn, source } = useSession()
   const router = useRouter()
   const { toast } = useToast()
   const [method, setMethod] = useState<Method>('password')
@@ -46,6 +51,7 @@ export default function LoginPage({ next }: { next?: string }) {
     toast('Xoş gəldiniz!')
     router.replace(target)
   }
+  const api = source === 'api'
 
   return (
     <AuthShell title="Daxil olun" lead="Elanlarınız, seçilmişləriniz və yadda saxladığınız axtarışlar sizi gözləyir.">
@@ -60,7 +66,7 @@ export default function LoginPage({ next }: { next?: string }) {
             { value: 'sms', label: 'SMS kodu ilə' },
           ]}
         />
-        {method === 'password' ? <PasswordLogin onDone={done} /> : <SmsLogin onDone={done} />}
+        {method === 'password' ? <PasswordLogin api={api} onDone={done} /> : <SmsLogin api={api} onDone={done} />}
       </FormCard>
       <p className="text-center text-[15px] leading-[1.5] text-ink">
         Hesabınız yoxdur?{' '}
@@ -72,14 +78,26 @@ export default function LoginPage({ next }: { next?: string }) {
   )
 }
 
-function PasswordLogin({ onDone }: { onDone: (patch: { email?: string; phone?: string }) => void }) {
+/** A refusal of the API (wrong password, lockout, a spent code), above the form it belongs to. */
+function FormError({ message }: { message?: string }) {
+  return message ? (
+    <Notice tone="danger" title="Daxil olmaq alınmadı">
+      {message}
+    </Notice>
+  ) : null
+}
+
+type Done = (patch: Partial<AccountProfile>) => void
+
+function PasswordLogin({ api, onDone }: { api: boolean; onDone: Done }) {
   const [login, setLogin] = useState('')
   const [password, setPassword] = useState('')
   const [remember, setRemember] = useState(true)
   const [errors, setErrors] = useState<{ login?: string; password?: string }>({})
   const [busy, setBusy] = useState(false)
+  const [formError, setFormError] = useState<string>()
 
-  const submit = (e: FormEvent) => {
+  const submit = async (e: FormEvent) => {
     e.preventDefault()
     const next = { login: identifierError(login), password: password.length >= 8 ? undefined : password ? 'Şifrə ən azı 8 simvol olur.' : 'Şifrəni yazın.' }
     setErrors(next)
@@ -88,12 +106,26 @@ function PasswordLogin({ onDone }: { onDone: (patch: { email?: string; phone?: s
       return
     }
     setBusy(true)
-    // DEMO: no server checks the password.
-    window.setTimeout(() => onDone(looksLikeEmail(login) ? { email: login.trim() } : { phone: phoneValue(login) }), 350)
+    if (!api) {
+      // DEMO: no server checks the password.
+      window.setTimeout(() => onDone(looksLikeEmail(login) ? { email: login.trim() } : { phone: phoneValue(login) }), 350)
+      return
+    }
+    const result = await signInWithPassword(looksLikeEmail(login) ? login.trim() : phoneValue(login), password)
+    setBusy(false)
+    if (!result.ok) {
+      setFormError(result.error)
+      setPassword('')
+      document.getElementById('sifre')?.focus()
+      return
+    }
+    setFormError(undefined)
+    onDone(result.account)
   }
 
   return (
     <form onSubmit={submit} noValidate className="flex flex-col gap-5">
+      <FormError message={formError} />
       <TextField
         id="giris"
         label="Telefon və ya e-poçt"
@@ -120,7 +152,7 @@ function PasswordLogin({ onDone }: { onDone: (patch: { email?: string; phone?: s
         }
       />
       <CheckboxField label="Bu cihazda məni xatırla" checked={remember} onChange={(e) => setRemember(e.target.checked)} />
-      <DemoNote>istənilən düzgün nömrə və ya e-poçt, şifrə üçün 8 simvol (məsələn, «{DEMO_LOGIN_PASSWORD}»).</DemoNote>
+      {!api && <DemoNote>istənilən düzgün nömrə və ya e-poçt, şifrə üçün 8 simvol (məsələn, «{DEMO_LOGIN_PASSWORD}»).</DemoNote>}
       <Button type="submit" fullWidth disabled={busy} aria-busy={busy}>
         {busy ? 'Daxil olunur…' : 'Daxil ol'}
       </Button>
@@ -128,11 +160,21 @@ function PasswordLogin({ onDone }: { onDone: (patch: { email?: string; phone?: s
   )
 }
 
-function SmsLogin({ onDone }: { onDone: (patch: { phone: string }) => void }) {
+function SmsLogin({ api, onDone }: { api: boolean; onDone: Done }) {
   const [phone, setPhone] = useState('')
   const [error, setError] = useState<string>()
   const [busy, setBusy] = useState(false)
   const [challenge, setChallenge] = useState<OtpChallenge>()
+  const [formError, setFormError] = useState<string>()
+
+  /** The code is right: the demo signs in in the browser; the API opens the session with the verified code. */
+  const verified = async (challengeId: string) => {
+    if (!api) return onDone({ phone })
+    const result = await signInWithCode(challengeId)
+    if (result.ok) return onDone(result.account)
+    setFormError(result.error)
+    setChallenge(undefined)
+  }
 
   const send = async (e: FormEvent) => {
     e.preventDefault()
@@ -147,10 +189,11 @@ function SmsLogin({ onDone }: { onDone: (patch: { phone: string }) => void }) {
   }
 
   if (challenge) {
-    return <OtpVerify challenge={challenge} phone={phone} purpose="login" submitLabel="Daxil ol" onVerified={() => onDone({ phone })} onChangePhone={() => setChallenge(undefined)} />
+    return <OtpVerify challenge={challenge} phone={phone} purpose="login" submitLabel="Daxil ol" onVerified={verified} onChangePhone={() => setChallenge(undefined)} />
   }
   return (
     <form onSubmit={send} noValidate className="flex flex-col gap-5">
+      <FormError message={formError} />
       <PhoneField id="sms-telefon" value={phone} onValueChange={setPhone} error={error} hint="Hesabınıza bağlı nömrə. Kodu SMS ilə göndərəcəyik." />
       <Button type="submit" fullWidth disabled={busy} aria-busy={busy}>
         {busy ? 'Göndərilir…' : 'Kod göndər'}
