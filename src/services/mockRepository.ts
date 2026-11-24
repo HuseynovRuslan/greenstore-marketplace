@@ -11,9 +11,10 @@ import { searchServices } from '@/features/services/query'
 import { filterListings } from './marketplace'
 import { displayPhone, maskPhone, mockAccount, mockChallengePhone, mockListingStats, mockOtp, mockSequence } from './mockWrites'
 import { filterQuery, MAX_SAVED_SEARCHES } from '@/features/saved-searches/query'
+import { businessKindsLabel, orderedKinds } from '@/features/seller/businessKinds'
 import { isReasonFor } from '@/features/seller/complaintReasons'
 import type { FacetCounts, MarketplaceRepository, PageResult, SitemapEntry } from './repository'
-import type { Category, ContactReveal, Listing, ListingInput, ListingSubmitResult, LoginResult, OwnListing, OwnSeller, PromotionOrder, SavedSearch, Seller, Service, ServiceProvider } from '@/types'
+import type { Category, ContactReveal, Listing, ListingInput, ListingSubmitResult, LoginResult, OwnListing, OwnSeller, PromotionOrder, SavedSearch, Seller, SellerProfilePatch, Service, ServiceProvider } from '@/types'
 import type { CategoryDef } from '@/data/categories'
 
 /** A category with its number of public listings (the sample data has no separate counts). */
@@ -157,7 +158,8 @@ export const mockRepository: MarketplaceRepository = {
   },
 
   async listSellers({ businessKind, cityId, page: requested, pageSize = 24 }) {
-    const found = sellers.filter((s) => s.type === 'business' && (!businessKind || s.businessKind === businessKind) && (!cityId || s.cityId === cityId))
+    // A business with several kinds is listed under each, as in the API.
+    const found = sellers.filter((s) => s.type === 'business' && (!businessKind || s.businessKinds?.includes(businessKind)) && (!cityId || s.cityId === cityId))
     return page(found.map(publicSeller), requested, pageSize)
   },
   async getSeller(slug) {
@@ -349,11 +351,16 @@ export const mockRepository: MarketplaceRepository = {
   async updateOwnSeller(patch) {
     const seller = sellerById(mockAccount.state.profile.sellerId)
     if (!seller) throw new Error('not a business account')
-    const { version, businessKind, ...fields } = patch
+    const { version, businessKinds, ...rest } = patch
+    // DEMO: the profile's photos stay in the browser (the profile page keeps them in the session), not here.
+    const fields: Partial<SellerProfilePatch> = { ...rest }
+    delete fields.logoPhotoId
+    delete fields.coverPhotoId
     if (version && version !== String(mockAccount.state.sellerVersion)) throw new Error('the profile changed meanwhile')
     // "" and [] remove a value, as in the API.
     const cleared = Object.fromEntries(Object.entries(fields).map(([k, v]) => [k, v === '' || (Array.isArray(v) && v.length === 0) ? undefined : v]))
-    mockAccount.state.seller = { ...mockAccount.state.seller, ...cleared, ...(businessKind ? { businessKind } : {}) }
+    const kinds = orderedKinds(businessKinds)
+    mockAccount.state.seller = { ...mockAccount.state.seller, ...cleared, ...(kinds.length > 0 ? { businessKinds: kinds, kind: businessKindsLabel(kinds) } : {}) }
     mockAccount.state.sellerVersion++
     return ownSeller(seller)
   },

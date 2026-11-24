@@ -31,6 +31,8 @@ public sealed class CatalogueSchemaTests(CatalogueApi api)
     [InlineData("UPDATE categories SET name = '{\"ru\": \"Деревья\"}' WHERE id = 'agaclar'", "ck_categories_name")]
     [InlineData("UPDATE cities SET name = '\"Bakı\"' WHERE id = 'baki'", "ck_cities_name")]
     [InlineData("UPDATE sellers SET offers = '{delivery,massage}' WHERE slug = 'quba-fidan'", "ck_sellers_offers")]
+    [InlineData("UPDATE sellers SET business_kinds = '{}' WHERE slug = 'quba-fidan'", "ck_sellers_business_kinds")]
+    [InlineData("UPDATE sellers SET business_kinds = '{nursery,shop}' WHERE slug = 'quba-fidan'", "ck_sellers_business_kinds")]
     [InlineData("UPDATE sellers SET lat = NULL WHERE slug = 'abseron-tingcilik'", "ck_sellers_location")]
     [InlineData("UPDATE users SET phone = NULL WHERE full_name = 'Elvin Əliyev'", "ck_users_credentials")]
     [InlineData("UPDATE listing_photos SET position = 12 WHERE position = 0 AND listing_id = (SELECT id FROM listings WHERE number = 10482)", "ck_listing_photos_position")]

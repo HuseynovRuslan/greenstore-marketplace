@@ -21,7 +21,8 @@ public sealed class PhotoRejectedException(string code) : Exception(code)
 
 /// <summary>
 /// What an uploaded photo must be (ARCHITECTURE.md §11): JPEG, PNG or WebP by its magic bytes, at most 10 MB, at
-/// least 600 px on the shorter side and at most <see cref="PhotoLimits.MaxPixels"/> pixels. Pure rules, no libvips.
+/// least 600 px on the shorter side and at most <see cref="PhotoLimits.MaxPixels"/> pixels. A business's logo and
+/// cover have their own sizes and shapes (<see cref="CheckDimensions"/>). Pure rules, no libvips.
 /// </summary>
 public static class PhotoRules
 {
@@ -33,8 +34,31 @@ public static class PhotoRules
     /// <summary>413: over 10 MB.</summary>
     public const string TooLarge = "photo.too-large";
 
-    /// <summary>422: the shorter side is under 600 px.</summary>
+    /// <summary>422: the shorter side is under 600 px (a logo under 400 px, a cover under 1200 × 300 px).</summary>
     public const string TooSmall = "photo.too-small";
+
+    /// <summary>422: a logo that is not near square, or a cover that is not near 4:1 (the site crops both before upload).</summary>
+    public const string WrongShape = "photo.wrong-shape";
+
+    /* The profile photos of a business (PATCH /me/seller logoPhotoId, coverPhotoId) */
+
+    /// <summary>A logo's shorter side, at least.</summary>
+    public const int LogoMinSide = 400;
+
+    /// <summary>A cover's width and height, at least (4:1).</summary>
+    public const int CoverMinWidth = 1200;
+
+    public const int CoverMinHeight = 300;
+
+    /// <summary>Width over height a logo may have: square, give or take a fifth.</summary>
+    public const double LogoMinRatio = 0.8;
+
+    public const double LogoMaxRatio = 1.25;
+
+    /// <summary>Width over height a cover may have: 4:1, give or take a little (3.5:1 to 4.5:1).</summary>
+    public const double CoverMinRatio = 3.5;
+
+    public const double CoverMaxRatio = 4.5;
 
     /// <summary>422: more pixels than allowed (a decompression bomb, or a giant panorama).</summary>
     public const string TooManyPixels = "photo.too-many-pixels";
@@ -66,8 +90,22 @@ public static class PhotoRules
     /// <summary>The widths of the stored copies, WebP each: a card, a gallery on a phone, a gallery on a desktop.</summary>
     public static readonly IReadOnlyList<int> VariantWidths = [320, 640, 1280];
 
-    /// <summary>The copy whose address the API sends (<c>cover</c>, <c>images</c>): the largest.</summary>
+    /// <summary>A logo's copies: a card avatar, the seller page, a sharp seller page on a dense screen.</summary>
+    public static readonly IReadOnlyList<int> LogoVariantWidths = [160, 320, 640];
+
+    /// <summary>A cover's copies: a phone, a laptop, a wide screen (the seller page's banner is up to 1440 px wide).</summary>
+    public static readonly IReadOnlyList<int> CoverVariantWidths = [640, 1280, 1920];
+
+    /// <summary>The copy whose address the API sends for a listing photo (<c>cover</c>, <c>images</c>): the largest.</summary>
     public static int DisplayWidth => VariantWidths[^1];
+
+    /// <summary>The widths of the stored copies of a photo of this purpose.</summary>
+    public static IReadOnlyList<int> VariantWidthsFor(PhotoPurpose purpose) => purpose switch
+    {
+        PhotoPurpose.SellerLogo => LogoVariantWidths,
+        PhotoPurpose.SellerCover => CoverVariantWidths,
+        _ => VariantWidths,
+    };
 
     /// <summary>The format the first bytes say, or null.</summary>
     public static ImageFormat? Sniff(ReadOnlySpan<byte> head)
@@ -106,15 +144,29 @@ public static class PhotoRules
         };
     }
 
-    /// <summary>The size rules of the decoded header (the orientation does not matter: the shorter side is the shorter side).</summary>
-    public static string? CheckDimensions(int width, int height, PhotoLimits limits)
+    /// <summary>
+    /// The size rules of the decoded header. A listing photo: the shorter side (its orientation does not matter). A
+    /// logo: at least <see cref="LogoMinSide"/> and near square. A cover: at least <see cref="CoverMinWidth"/> ×
+    /// <see cref="CoverMinHeight"/> and near 4:1.
+    /// </summary>
+    public static string? CheckDimensions(int width, int height, PhotoLimits limits, PhotoPurpose purpose = PhotoPurpose.Listing)
     {
         if ((long)width * height > limits.MaxPixels)
         {
             return TooManyPixels;
         }
 
-        return Math.Min(width, height) < limits.MinSide ? TooSmall : null;
+        var ratio = height > 0 ? (double)width / height : 0;
+        return purpose switch
+        {
+            PhotoPurpose.SellerLogo when Math.Min(width, height) < LogoMinSide => TooSmall,
+            PhotoPurpose.SellerLogo when ratio is < LogoMinRatio or > LogoMaxRatio => WrongShape,
+            PhotoPurpose.SellerLogo => null,
+            PhotoPurpose.SellerCover when width < CoverMinWidth || height < CoverMinHeight => TooSmall,
+            PhotoPurpose.SellerCover when ratio is < CoverMinRatio or > CoverMaxRatio => WrongShape,
+            PhotoPurpose.SellerCover => null,
+            _ => Math.Min(width, height) < limits.MinSide ? TooSmall : null,
+        };
     }
 
     /// <summary>Where a photo's files go: <c>p/2026/11/&lt;id&gt;</c>, then <c>/320.webp</c> and the other widths.</summary>

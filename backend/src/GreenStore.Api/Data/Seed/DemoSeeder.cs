@@ -87,7 +87,7 @@ public static class DemoSeeder
                     OwnerUserId = owner.Id,
                     Slug = seed.Slug,
                     Name = seed.Name,
-                    BusinessKind = seed.BusinessKind,
+                    BusinessKinds = BusinessKindCodes.From(seed.BusinessKinds),
                     CityId = seed.CityId,
                     Address = seed.Address,
                     Lat = seed.Location?.Lat,

@@ -120,7 +120,7 @@ export function worstSeller(demo: Seller, mode: WorstCaseMode): Seller {
     return {
       ...demo,
       kind: undefined,
-      businessKind: undefined,
+      businessKinds: undefined,
       verified: false,
       memberSince: undefined,
       coverImage: undefined,
@@ -141,7 +141,9 @@ export function worstSeller(demo: Seller, mode: WorstCaseMode): Seller {
   return {
     ...demo,
     name: 'Abşeron Tingçilik və Landşaft Dizayn Mərkəzi MMC',
-    kind: 'Tingçilik təsərrüfatı, bağ mərkəzi və landşaft şirkəti',
+    // All three kinds: the longest «kind» line a business can have.
+    kind: 'Tingçilik təsərrüfatı · Bağ mərkəzi · Landşaft şirkəti',
+    businessKinds: ['nursery', 'garden-centre', 'landscaping'],
     memberSince: 2026,
     activeListings: 12_345,
     logo: '/logo-yoxdur.png',

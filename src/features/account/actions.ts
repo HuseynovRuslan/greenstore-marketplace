@@ -2,14 +2,15 @@
 
 import { cookies } from 'next/headers'
 import { updateTag } from 'next/cache'
-import { businessKindOf, type AccountProfile } from '@/data/user'
+import type { AccountProfile } from '@/data/user'
 import { ApiError, isApiError } from '@/services/apiRepository'
 import { getRepository } from '@/services/repository'
 import { clearSession, refreshSession } from '@/services/session'
 import { SESSION_COOKIE, SESSION_HINT_COOKIE } from '@/state/bootstrap'
-import type { FavoriteItems, OwnSeller, SellerProfilePatch } from '@/types'
+import type { BusinessKind, FavoriteItems, OwnSeller, PhotoUpload, SellerProfilePatch } from '@/types'
 import { waitText } from '@/features/auth/messages'
 import { isValidEmail, messages } from '@/features/auth/validation'
+import { orderedKinds } from '@/features/seller/businessKinds'
 import { accountOf } from './profile'
 
 /*
@@ -62,7 +63,8 @@ export interface ProfileInput {
   email: string
   /** Business accounts: their «mağaza» */
   companyName?: string
-  businessType?: string
+  /** One or more; left out, the shop's kinds stay */
+  businessKinds?: BusinessKind[]
   cityId?: string
   address?: string
   about?: string
@@ -73,14 +75,15 @@ export interface ProfileInput {
   sellerVersion?: string
 }
 
-export type ProfileField = 'company' | 'contact' | 'email' | 'address' | 'about'
+export type ProfileField = 'company' | 'kinds' | 'contact' | 'email' | 'address' | 'about'
 
-const FIELD_OF: Record<string, ProfileField> = { fullName: 'contact', contactPerson: 'contact', email: 'email', name: 'company', address: 'address', about: 'about' }
+const FIELD_OF: Record<string, ProfileField> = { fullName: 'contact', contactPerson: 'contact', email: 'email', name: 'company', businessKinds: 'kinds', address: 'address', about: 'about' }
 
 const FIELD_TEXT: Record<ProfileField, (code: string) => string> = {
   contact: (code) => (code === 'too-long' ? 'Ad ən çox 60 simvol olsun.' : messages.nameRequired),
   email: () => messages.emailFormat,
   company: (code) => (code === 'too-long' ? 'Şirkətin adı ən çox 80 simvol olsun.' : code === 'too-short' ? 'Şirkətin adı ən azı 2 simvol olsun.' : messages.companyRequired),
+  kinds: () => 'Ən azı bir biznes növü seçin.',
   address: () => 'Ünvan ən çox 200 simvol olsun.',
   about: () => 'Mətn ən çox 2000 simvol olsun.',
 }
@@ -90,7 +93,7 @@ const LIMITS = { fullName: 60, email: 254, companyMin: 2, company: 80, address: 
 
 const text = (value: unknown, max: number) => (typeof value === 'string' ? value.trim().slice(0, max) : '')
 
-type ProfileFields = { fullName: string; email: string; companyName: string; address: string; about: string }
+type ProfileFields = { fullName: string; email: string; companyName: string; businessKinds?: BusinessKind[]; address: string; about: string }
 
 /**
  * The API's field rules, checked before anything is sent: the account and its «mağaza» are two requests, and a shop
@@ -104,6 +107,7 @@ function profileFieldError(fields: ProfileFields, business: boolean): { field: P
   if (!fields.companyName) return { field: 'company', code: 'required' }
   if (fields.companyName.length < LIMITS.companyMin) return { field: 'company', code: 'too-short' }
   if (fields.companyName.length > LIMITS.company) return { field: 'company', code: 'too-long' }
+  if (fields.businessKinds?.length === 0) return { field: 'kinds', code: 'required' }
   if (fields.address.length > LIMITS.address) return { field: 'address', code: 'too-long' }
   if (fields.about.length > LIMITS.about) return { field: 'about', code: 'too-long' }
   return undefined
@@ -132,7 +136,7 @@ export type SaveProfileResult =
 
 /**
  * Saves the profile form: the account (`PATCH /me`: name, e-mail) and, for a business, its «mağaza» (`PATCH
- * /me/seller`: name, kind, city, address, about; the contact person is the account's name). Every field is checked
+ * /me/seller`: name, kinds, city, address, about; the contact person is the account's name). Every field is checked
  * against the API's rules first, and the shop's version against the one the form was loaded with, so in practice only
  * the API failing in between can stop the shop after the account was saved: `saved` then says what was. The public
  * seller page and the directory show the change at once (their cached reads are refreshed).
@@ -144,6 +148,7 @@ export async function saveProfile(input: ProfileInput): Promise<SaveProfileResul
     fullName: text(input.fullName, LIMITS.fullName + 1),
     email: text(input.email, LIMITS.email + 1),
     companyName: text(input.companyName, LIMITS.company + 1),
+    businessKinds: Array.isArray(input.businessKinds) ? orderedKinds(input.businessKinds) : undefined,
     address: text(input.address, LIMITS.address + 1),
     about: text(input.about, LIMITS.about + 1),
   }
@@ -174,7 +179,7 @@ export async function saveProfile(input: ProfileInput): Promise<SaveProfileResul
       contactPerson: fields.fullName,
       address: fields.address,
       about: fields.about,
-      ...(businessKindOf(input.businessType) ? { businessKind: businessKindOf(input.businessType) } : {}),
+      ...(fields.businessKinds?.length ? { businessKinds: fields.businessKinds } : {}),
       ...(typeof input.cityId === 'string' && input.cityId ? { cityId: input.cityId } : {}),
       ...(version ? { version } : {}),
     }
@@ -183,6 +188,63 @@ export async function saveProfile(input: ProfileInput): Promise<SaveProfileResul
     return { ok: true, account: accountOf(user, seller) }
   } catch (error) {
     return { ...saveFailure(error), saved: { fullName: user.fullName, email: user.email } }
+  }
+}
+
+/** Which of the «mağaza»'s photos: the logo or the cover («üz şəkli»). */
+export type ProfilePhotoSlot = 'logo' | 'cover'
+
+export type ProfilePhotoUpload = { ok: true; upload: PhotoUpload } | (Fail & { signedOut?: boolean })
+
+export type SaveProfilePhotoResult = { ok: true; account: AccountProfile } | (Fail & { signedOut?: boolean })
+
+const PHOTO_TYPES = ['image/jpeg', 'image/png', 'image/webp']
+const PHOTO_MAX_BYTES = 10 * 1024 * 1024
+const SIGNED_OUT = 'Sessiyanın vaxtı bitib. Yenidən daxil olun.'
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
+const slotOf = (value: unknown): ProfilePhotoSlot | undefined => (value === 'logo' || value === 'cover' ? value : undefined)
+
+/**
+ * DATA_SOURCE=api: an upload address for the «mağaza»'s logo or cover (`POST /photos`, purpose `seller-logo` or
+ * `seller-cover`). The browser crops the picture and sends it there itself, then `saveProfilePhoto` puts it on the
+ * profile.
+ */
+export async function startProfilePhotoUpload(input: { slot: ProfilePhotoSlot; contentType: string; bytes: number }): Promise<ProfilePhotoUpload> {
+  const slot = slotOf(input?.slot)
+  const contentType = typeof input?.contentType === 'string' ? input.contentType : ''
+  const bytes = typeof input?.bytes === 'number' && Number.isFinite(input.bytes) ? Math.floor(input.bytes) : 0
+  if (!slot) return { ok: false, error: 'Sorğu düzgün deyil.' }
+  if (!PHOTO_TYPES.includes(contentType)) return { ok: false, error: 'Yalnız JPG, PNG və ya WebP şəkil göndərmək olar.' }
+  if (bytes <= 0 || bytes > PHOTO_MAX_BYTES) return { ok: false, error: 'Şəkil 10 MB-dan böyük olmamalıdır.' }
+  const purpose = slot === 'logo' ? 'seller-logo' : 'seller-cover'
+  try {
+    return { ok: true, upload: await getRepository().createPhotoUpload({ fileName: `${purpose}.webp`, contentType, bytes, purpose }) }
+  } catch (error) {
+    if (isApiError(error) && error.status === 401) return { ok: false, error: SIGNED_OUT, signedOut: true }
+    if (isApiError(error, 'photo.too-many')) return { ok: false, error: 'Bu gün çox şəkil yükləmisiniz. Bir neçə saat sonra yenidən cəhd edin.' }
+    return { ok: false, error: 'Şəkli yükləmək alınmadı. İnternet bağlantısını yoxlayıb yenidən cəhd edin.' }
+  }
+}
+
+/**
+ * DATA_SOURCE=api: puts an uploaded photo on the «mağaza» as its logo or cover (`PATCH /me/seller`), or removes it
+ * (`null`). The public seller page and the directory show it at once (their cached reads are refreshed).
+ */
+export async function saveProfilePhoto(slot: ProfilePhotoSlot, photoId: string | null): Promise<SaveProfilePhotoResult> {
+  const which = slotOf(slot)
+  if (!which || (photoId !== null && (typeof photoId !== 'string' || !UUID_RE.test(photoId)))) return { ok: false, error: 'Sorğu düzgün deyil.' }
+  const repo = getRepository()
+  try {
+    const user = await repo.getMe()
+    if (!user) return { ok: false, error: SIGNED_OUT, signedOut: true }
+    const seller = await repo.updateOwnSeller(which === 'logo' ? { logoPhotoId: photoId } : { coverPhotoId: photoId })
+    updateTag('sellers')
+    return { ok: true, account: accountOf(user, seller) }
+  } catch (error) {
+    if (isApiError(error) && error.status === 401) return { ok: false, error: SIGNED_OUT, signedOut: true }
+    if (isApiError(error, 'validation')) return { ok: false, error: 'Şəkil hazır deyil və ya artıq silinib. Onu yenidən seçin.' }
+    return { ok: false, error: photoId ? 'Şəkli saxlamaq alınmadı. Bir az sonra yenidən cəhd edin.' : 'Şəkli silmək alınmadı. Bir az sonra yenidən cəhd edin.' }
   }
 }
 

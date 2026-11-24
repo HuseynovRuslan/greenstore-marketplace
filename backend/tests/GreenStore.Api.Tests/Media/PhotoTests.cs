@@ -46,6 +46,22 @@ public sealed class PhotoRulesTests
         Assert.Equal(expected, PhotoRules.CheckDimensions(width, height, Limits));
 
     [Theory]
+    [InlineData(PhotoPurpose.SellerLogo, 400, 400, null)]
+    [InlineData(PhotoPurpose.SellerLogo, 800, 700, null)]
+    [InlineData(PhotoPurpose.SellerLogo, 399, 399, PhotoRules.TooSmall)]
+    [InlineData(PhotoPurpose.SellerLogo, 1000, 600, PhotoRules.WrongShape)]
+    [InlineData(PhotoPurpose.SellerLogo, 600, 1000, PhotoRules.WrongShape)]
+    [InlineData(PhotoPurpose.SellerCover, 1200, 300, null)]
+    [InlineData(PhotoPurpose.SellerCover, 2400, 600, null)]
+    [InlineData(PhotoPurpose.SellerCover, 1199, 300, PhotoRules.TooSmall)]
+    [InlineData(PhotoPurpose.SellerCover, 1600, 299, PhotoRules.TooSmall)]
+    [InlineData(PhotoPurpose.SellerCover, 1600, 800, PhotoRules.WrongShape)]
+    [InlineData(PhotoPurpose.SellerCover, 3000, 600, PhotoRules.WrongShape)]
+    [InlineData(PhotoPurpose.SellerCover, 20_000, 5_000, PhotoRules.TooManyPixels)]
+    public void A_logo_and_a_cover_have_their_own_sizes_and_shapes(PhotoPurpose purpose, int width, int height, string? expected) =>
+        Assert.Equal(expected, PhotoRules.CheckDimensions(width, height, Limits, purpose));
+
+    [Theory]
     [InlineData("https://cdn.greenstore.az", "https://api.greenstore.az", 0)]
     [InlineData("http://localhost:5080/media", "http://localhost:5080", 0)]
     [InlineData("https://cdn.greenstore.az", "", 1)]
@@ -105,6 +121,19 @@ public sealed class PhotoProcessorTests
             Assert.Equal(width * 3 / 4, copy.Height);
             Assert.DoesNotContain(copy.GetFields(), f => f.StartsWith("exif", StringComparison.Ordinal) || f is "xmp-data" or "iptc-data" or "icc-profile-data");
         }
+    }
+
+    [Fact]
+    public void A_logo_and_a_cover_get_their_own_copies()
+    {
+        var logo = processor.Process(TestImages.Jpeg(800, 800), Limits, PhotoPurpose.SellerLogo);
+        var cover = processor.Process(TestImages.Jpeg(2400, 600), Limits, PhotoPurpose.SellerCover);
+
+        Assert.Equal([160, 320, 640], logo.Variants.Keys.Order());
+        Assert.Equal([640, 1280, 1920], cover.Variants.Keys.Order());
+        using var wide = Image.NewFromBuffer(cover.Variants[1920]);
+        Assert.Equal((1920, 480), (wide.Width, wide.Height));
+        Assert.Equal(PhotoRules.WrongShape, Assert.Throws<PhotoRejectedException>(() => processor.Process(TestImages.Jpeg(1600, 1200), Limits, PhotoPurpose.SellerCover)).Code);
     }
 
     [Fact]

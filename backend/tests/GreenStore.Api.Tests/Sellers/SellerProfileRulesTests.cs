@@ -13,7 +13,7 @@ public sealed class SellerProfileRulesTests
     {
         Slug = "abseron-tingcilik",
         Name = "Abşeron Tingçilik",
-        BusinessKind = BusinessKind.Nursery,
+        BusinessKinds = ["nursery"],
         CityId = "baki",
         About = "Köhnə mətn",
         Website = "https://absheronting.az",
@@ -69,7 +69,7 @@ public sealed class SellerProfileRulesTests
             seller,
             Patch("""
             {
-              "name": "Abşeron Bağ", "businessKind": "garden-centre", "cityId": "quba", "about": "Yeni", "terms": "Çatdırılma 2 günə",
+              "name": "Abşeron Bağ", "businessKinds": ["landscaping", "garden-centre", "landscaping"], "cityId": "quba", "about": "Yeni", "terms": "Çatdırılma 2 günə",
               "hours": [{ "day": 2, "open": "09:00", "close": "18:00" }, { "day": 1, "open": "09:00", "close": "18:00" }, { "day": 7, "closed": true }],
               "offers": ["planting", "delivery", "planting"], "phone": "012 440 50 60", "whatsapp": true, "email": "satis@bag.az",
               "instagram": "@abseronbag", "website": "https://bag.az/", "responseMinutes": 60, "location": { "lat": 40.5012347, "lng": 49.9 }
@@ -79,7 +79,7 @@ public sealed class SellerProfileRulesTests
 
         Assert.Equal("Abşeron Bağ", seller.Name);
         Assert.Equal("abseron-tingcilik", seller.Slug);
-        Assert.Equal(BusinessKind.GardenCentre, seller.BusinessKind);
+        Assert.Equal(["garden-centre", "landscaping"], seller.BusinessKinds);
         Assert.Equal("quba", seller.CityId);
         Assert.Equal("Çatdırılma 2 günə", seller.Terms);
         Assert.Equal([1, 2, 7], seller.Hours!.Select(h => h.Day));
@@ -117,11 +117,28 @@ public sealed class SellerProfileRulesTests
     [Fact]
     public void The_name_kind_and_city_cannot_be_removed()
     {
-        var errors = ErrorsOf(NewSeller(), """{ "name": " ", "businessKind": null, "cityId": "" }""");
+        var errors = ErrorsOf(NewSeller(), """{ "name": " ", "businessKinds": null, "cityId": "" }""");
 
         Assert.Equal(["required"], errors["name"]);
-        Assert.Equal(["required"], errors["businessKind"]);
+        Assert.Equal(["required"], errors["businessKinds"]);
         Assert.Equal(["required"], errors["cityId"]);
+    }
+
+    [Fact]
+    public void An_empty_list_of_kinds_is_required_and_keeps_the_old_kinds()
+    {
+        var seller = NewSeller();
+
+        var errors = ErrorsOf(seller, """{ "businessKinds": [] }""");
+
+        Assert.Equal(["required"], errors["businessKinds"]);
+        Assert.Equal(["nursery"], seller.BusinessKinds);
+    }
+
+    [Fact]
+    public void An_unknown_kind_does_not_read()
+    {
+        Assert.Throws<JsonException>(() => Patch("""{ "businessKinds": ["nursery", "shop"] }"""));
     }
 
     [Fact]

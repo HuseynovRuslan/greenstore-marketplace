@@ -1000,6 +1000,10 @@
       "fileName": {
         "optional": false,
         "type": "string"
+      },
+      "purpose": {
+        "optional": true,
+        "type": "PhotoPurpose"
       }
     },
     "PlantFacts": {
@@ -1173,9 +1177,9 @@
         "optional": false,
         "type": "SellerType"
       },
-      "businessKind": {
+      "businessKinds": {
         "optional": true,
-        "type": "BusinessKind"
+        "type": "BusinessKind[]"
       },
       "companyName": {
         "optional": true,
@@ -1481,9 +1485,9 @@
         "optional": true,
         "type": "string"
       },
-      "businessKind": {
+      "businessKinds": {
         "optional": true,
-        "type": "BusinessKind"
+        "type": "BusinessKind[]"
       },
       "cityId": {
         "optional": false,
@@ -1595,9 +1599,9 @@
         "optional": true,
         "type": "string"
       },
-      "businessKind": {
+      "businessKinds": {
         "optional": true,
-        "type": "BusinessKind"
+        "type": "BusinessKind[]"
       },
       "cityId": {
         "optional": true,
@@ -1606,6 +1610,10 @@
       "contactPerson": {
         "optional": true,
         "type": "string"
+      },
+      "coverPhotoId": {
+        "optional": true,
+        "type": "string | null"
       },
       "email": {
         "optional": true,
@@ -1622,6 +1630,10 @@
       "location": {
         "optional": true,
         "type": "{ lat: number; lng: number }"
+      },
+      "logoPhotoId": {
+        "optional": true,
+        "type": "string | null"
       },
       "name": {
         "optional": true,
@@ -2013,6 +2025,11 @@
       "login",
       "reset-password",
       "change-phone"
+    ],
+    "PhotoPurpose": [
+      "listing",
+      "seller-logo",
+      "seller-cover"
     ],
     "PriceType": [
       "fixed",

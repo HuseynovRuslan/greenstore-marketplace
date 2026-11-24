@@ -11,8 +11,8 @@ namespace GreenStore.Api.Modules.Sellers;
 
 /// <summary>
 /// A business profile (DATABASE.md §3.3): one per user (decision 1). Individuals have none; their listings carry the
-/// contact. <c>Seller.kind</c> («Tingçilik təsərrüfatı») is not stored: the API names <see cref="BusinessKind"/> in the
-/// request's language.
+/// contact. <c>Seller.kind</c> («Tingçilik təsərrüfatı · Bağ mərkəzi») is not stored: the API names the
+/// <see cref="BusinessKinds"/> in the request's language.
 /// </summary>
 public sealed class Seller : IHasUpdatedAt, IHasRowVersion
 {
@@ -26,7 +26,11 @@ public sealed class Seller : IHasUpdatedAt, IHasRowVersion
 
     public required string Name { get; set; }
 
-    public BusinessKind BusinessKind { get; set; }
+    /// <summary>
+    /// <see cref="BusinessKind"/> codes (kebab-case): one or more, each once, in the enum's order (<see cref="BusinessKindCodes"/>).
+    /// A nursery can be a garden centre too.
+    /// </summary>
+    public List<string> BusinessKinds { get; set; } = [];
 
     public required string CityId { get; set; }
 
@@ -84,12 +88,20 @@ public sealed class Seller : IHasUpdatedAt, IHasRowVersion
     public uint Version { get; set; }
 }
 
-/// <summary><c>BusinessKind</c> in src/types.</summary>
+/// <summary><c>BusinessKind</c> in src/types. The declaration order is the order a seller's kinds are kept and shown in.</summary>
 public enum BusinessKind
 {
     Nursery,
     GardenCentre,
     Landscaping,
+}
+
+/// <summary>A business's kinds as <see cref="Seller.BusinessKinds"/> stores them: kebab-case, each once, in the enum's order.</summary>
+public static class BusinessKindCodes
+{
+    public static List<string> From(IEnumerable<BusinessKind> kinds) => kinds.Distinct().Order().Select(k => KebabCase.Value(k)).ToList();
+
+    public static IReadOnlyList<BusinessKind> Parse(IEnumerable<string> codes) => codes.Select(KebabCase.Parse<BusinessKind>).Distinct().Order().ToList();
 }
 
 /// <summary><c>SellerOffer</c> in src/types.</summary>
@@ -120,7 +132,9 @@ internal sealed class SellerConfiguration : IEntityTypeConfiguration<Seller>
         {
             t.HasCheckConstraint("ck_sellers_slug", "slug ~ '^[a-z0-9-]{1,80}$'");
             t.HasCheckConstraint("ck_sellers_name", "char_length(name) BETWEEN 2 AND 80");
-            t.HasCheckConstraint("ck_sellers_business_kind", ColumnMapping.In<BusinessKind>("business_kind"));
+            t.HasCheckConstraint(
+                "ck_sellers_business_kinds",
+                $"cardinality(business_kinds) >= 1 AND business_kinds <@ ARRAY[{string.Join(", ", KebabCase.Values<BusinessKind>().Select(v => $"'{v}'"))}]::text[]");
             t.HasCheckConstraint("ck_sellers_address", "char_length(address) <= 200");
             t.HasCheckConstraint("ck_sellers_about", "char_length(about) <= 2000");
             t.HasCheckConstraint("ck_sellers_terms", "char_length(terms) <= 1000");
@@ -136,7 +150,7 @@ internal sealed class SellerConfiguration : IEntityTypeConfiguration<Seller>
         seller.HasOne(s => s.Owner).WithOne().HasForeignKey<Seller>(s => s.OwnerUserId).OnDelete(DeleteBehavior.NoAction);
         seller.HasIndex(s => s.OwnerUserId).IsUnique().HasDatabaseName("ux_sellers_owner_user_id");
         seller.HasIndex(s => s.Slug).IsUnique().HasDatabaseName("ux_sellers_slug");
-        seller.Property(s => s.BusinessKind).IsKebabCase();
+        seller.Property(s => s.BusinessKinds).HasColumnType("text[]");
         seller.HasOne(s => s.City).WithMany().HasForeignKey(s => s.CityId).OnDelete(DeleteBehavior.NoAction);
         seller.Property(s => s.Lat).HasPrecision(8, 6);
         seller.Property(s => s.Lng).HasPrecision(9, 6);

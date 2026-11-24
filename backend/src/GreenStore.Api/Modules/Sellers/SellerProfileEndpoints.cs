@@ -2,6 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 using GreenStore.Api.Common.Errors;
 using GreenStore.Api.Data;
 using GreenStore.Api.Modules.Accounts.Auth;
+using GreenStore.Api.Modules.Platform;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 
@@ -30,10 +31,18 @@ public static class SellerProfileEndpoints
     }
 
     /// <summary>
-    /// <c>PATCH /me/seller</c> → the same as <c>GET</c>. Changes show on the seller page and in the directory at once.
-    /// 400 <c>validation</c>; 409 <c>concurrency-conflict</c> when <c>version</c> was sent and the profile changed since.
+    /// <c>PATCH /me/seller</c> → the same as <c>GET</c>. Changes show on the seller page and in the directory at once
+    /// (a change notice to the site, <see cref="Revalidation.TagsFor(Seller)"/>). <c>logoPhotoId</c> and
+    /// <c>coverPhotoId</c> set or remove the profile's photos (<see cref="SellerPhotos"/>). 400 <c>validation</c>; 409
+    /// <c>concurrency-conflict</c> when <c>version</c> was sent and the profile changed since.
     /// </summary>
-    private static async Task<Ok<OwnSellerDto>> Update(SellerPatch body, CurrentUser me, HttpContext http, AppDbContext db, CancellationToken ct)
+    private static async Task<Ok<OwnSellerDto>> Update(
+        SellerPatch body,
+        CurrentUser me,
+        HttpContext http,
+        AppDbContext db,
+        TimeProvider clock,
+        CancellationToken ct)
     {
         var seller = await FindAsync(db, me, tracked: true, ct);
         if (body.Has(nameof(SellerPatch.Version)) && body.Version is not null)
@@ -47,7 +56,11 @@ public static class SellerProfileEndpoints
         }
 
         var cities = await db.Cities.Where(c => c.IsActive).Select(c => c.Id).ToListAsync(ct);
-        SellerProfileRules.Apply(seller, body, cities.ToHashSet(StringComparer.Ordinal)).ThrowIfAny();
+        var errors = SellerProfileRules.Apply(seller, body, cities.ToHashSet(StringComparer.Ordinal));
+        var now = clock.GetUtcNow();
+        await SellerPhotos.ApplyAsync(db, seller, body, now, errors, ct);
+        errors.ThrowIfAny();
+        Revalidation.Enqueue(db, Revalidation.TagsFor(seller), now);
         await db.SaveChangesAsync(ct);
         return TypedResults.Ok(await ToDtoAsync(db, seller, http, ct));
     }

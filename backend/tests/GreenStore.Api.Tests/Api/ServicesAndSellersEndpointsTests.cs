@@ -1,5 +1,8 @@
 using System.Net;
+using GreenStore.Api.Common;
+using GreenStore.Api.Modules.Sellers;
 using GreenStore.Api.Tests.Infrastructure;
+using Microsoft.EntityFrameworkCore;
 using static GreenStore.Api.Tests.Infrastructure.HttpAssert;
 
 namespace GreenStore.Api.Tests.Api;
@@ -162,6 +165,21 @@ public sealed class SellersEndpointsTests(CatalogueApi api)
             Json.Slugs((await api.GetAsync($"/api/v1/sellers?{query}")).GetProperty("items")));
 
     [Fact]
+    public async Task The_kind_filter_runs_in_sql_and_finds_a_business_under_each_of_its_kinds()
+    {
+        // In a transaction that is rolled back: the shared sample data stays as seeded.
+        await using var db = api.CreateDbContext();
+        await using var transaction = await db.Database.BeginTransactionAsync(Ct);
+        await db.Database.ExecuteSqlRawAsync("UPDATE sellers SET business_kinds = ARRAY['nursery', 'garden-centre'] WHERE slug = 'quba-fidan'", Ct);
+        var code = KebabCase.Value(BusinessKind.GardenCentre);
+        var query = db.Sellers.Where(s => s.BusinessKinds.Contains(code)).OrderBy(s => s.Slug).Select(s => s.Slug);
+
+        Assert.Contains("= ANY (s.business_kinds)", query.ToQueryString(), StringComparison.Ordinal);
+        Assert.Equal(["quba-fidan", "yasil-bag-merkezi"], await query.ToListAsync(Ct));
+        await transaction.RollbackAsync(Ct);
+    }
+
+    [Fact]
     public async Task A_bad_business_kind_is_a_validation_problem() =>
         await ProblemAsync(await api.Client().GetAsync("/api/v1/sellers?businessKind=garden_centre", Ct), HttpStatusCode.BadRequest, "validation");
 
@@ -174,7 +192,8 @@ public sealed class SellersEndpointsTests(CatalogueApi api)
 
         Assert.Equal(listings.GetProperty("total").GetInt32(), seller.GetProperty("activeListings").GetInt32());
         Assert.Equal(11, seller.GetProperty("activeListings").GetInt32());
-        Assert.Equal(("garden-centre", "Bağ mərkəzi", "baki"), (seller.GetProperty("businessKind").GetString(), seller.GetProperty("kind").GetString(), seller.GetProperty("cityId").GetString()));
+        Assert.Equal(["garden-centre"], Json.Strings(seller.GetProperty("businessKinds")));
+        Assert.Equal(("Bağ mərkəzi", "baki"), (seller.GetProperty("kind").GetString(), seller.GetProperty("cityId").GetString()));
         Assert.Equal(2, landscaper.GetProperty("serviceIds").GetArrayLength());
         Assert.Equal(0, landscaper.GetProperty("activeListings").GetInt32());
         Assert.False(seller.TryGetProperty("phone", out _));

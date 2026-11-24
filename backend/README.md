@@ -196,7 +196,7 @@ Konfiqurasiya `appsettings.json`-dadır, dev dəyərləri `appsettings.Developme
 | `GET /api/v1/services?q&categoryId&cityId&providerKind&minPrice&maxPrice&sort&page&pageSize` | `ServiceSearchResult`; `providerKind=company\|individual`, standart səhifə 6 |
 | `GET /api/v1/services/{slug}`, `GET /api/v1/services/{id}/related` | xidmət; `{ fromProvider, similar }` |
 | `GET /api/v1/providers/{id}`, `GET /api/v1/providers/{id}/services` | `ServiceProvider` (id hesabın id-sidir), onun xidmətləri; xidmətləri biznesin satıcı id-si ilə də vermək olur (satıcı səhifəsi belə soruşur) |
-| `GET /api/v1/sellers?businessKind&cityId&page&pageSize` | `PageResult<Seller>`: əvvəl təsdiqlənmişlər, sonra ada görə (Azərbaycan əlifbası) |
+| `GET /api/v1/sellers?businessKind&cityId&page&pageSize` | `PageResult<Seller>`: əvvəl təsdiqlənmişlər, sonra ada görə (Azərbaycan əlifbası). `businessKind`: bu növü olan bizneslər (bir neçə növü olan biznes hər birində çıxır) |
 | `GET /api/v1/sellers/{slug}`, `GET /api/v1/sellers/by-id/{id}` | satıcı |
 | `GET /api/v1/sitemap/{listing\|seller\|service}?cursor&limit` | `{ items: [{ slug, updatedAt }], nextCursor? }`, `limit` 1–5000 (standart 1000) |
 
@@ -218,7 +218,7 @@ Adlar (kateqoriya, şəhər, biznes növü, kartın atribut sətri, xidmətin qi
 | `GET`, `PATCH /api/v1/me` | profil (`role`, `locale` daxil) |
 | `POST /api/v1/me/password`, `POST /api/v1/me/phone` | şifrə (digər sessiyalar bağlanır), yeni nömrə (`change-phone` kodu ilə) |
 | `GET /api/v1/me/sessions`, `DELETE /api/v1/me/sessions/{id}` | «Aktiv cihazlar», cihazdan çıxış |
-| `GET`, `PATCH /api/v1/me/seller` | biznes profili («mağaza»): ad, növ, şəhər, əlaqə şəxsi, ünvan, haqqında, iş saatları, xidmətlər, nömrə, sosial şəbəkələr, `version` |
+| `GET`, `PATCH /api/v1/me/seller` | biznes profili («mağaza»): ad, növ, şəhər, əlaqə şəxsi, ünvan, haqqında, iş saatları, xidmətlər, nömrə, sosial şəbəkələr, loqo və üz şəkli (`logoPhotoId`, `coverPhotoId`: `seller-logo` / `seller-cover` şəklinin id-si, `null` silir), `version` |
 | `GET /api/v1/me/favorites`, `GET …/items`, `PUT`/`DELETE …/{listing\|service}/{id}`, `POST …/merge` | seçilmişlər |
 | `GET`, `POST /api/v1/me/saved-searches`, `PATCH`/`DELETE …/{id}`, `POST …/{id}/opened` | yadda saxlanılan axtarışlar, `newCount` ilə |
 
@@ -254,7 +254,7 @@ Yalnız Development-də (`Seed:DevAccounts=true`, `appsettings.Development.json`
 
 - Hər ikisi şifrə ilə (telefon və ya e-poçt) və SMS kodu ilə daxil ola bilər (Development-də kod `demoCode`-dadır).
 - **Demo satıcılar** (nümunə marketplace) şifrəsizdir, amma mobil nömrəsi olanlar SMS kodu ilə daxil ola bilər. Məsələn, «Abşeron Tingçilik»in sahibi Elvin Əliyev: `+994 50 555 12 34`. Belə hesabın «mağaza»sı `/me/seller`-dədir.
-- Yeni biznes hesabı: `POST /auth/otp` (`purpose: register`) → `demoCode` ilə `POST /auth/otp/verify` → `POST /accounts` (`accountType: business`, `businessKind`, `companyName`). Satıcı səhifəsi (`GET /sellers/{slug}`) dərhal açılır, 0 elanla.
+- Yeni biznes hesabı: `POST /auth/otp` (`purpose: register`) → `demoCode` ilə `POST /auth/otp/verify` → `POST /accounts` (`accountType: business`, `businessKinds`: bir və ya bir neçəsi, `companyName`). Satıcı səhifəsi (`GET /sellers/{slug}`) dərhal açılır, 0 elanla.
 
 ## 10. Struktur
 
@@ -305,7 +305,7 @@ DATA_SOURCE=api API_BASE_URL=http://localhost:5080 API_INTERNAL_KEY=dev-internal
 
 | Endpoint | Nə edir |
 |---|---|
-| `POST /api/v1/photos` `{ contentType, bytes }` | şəkil üçün birdəfəlik yükləmə ünvanı → 201 `{ photoId, uploadUrl, expiresAt }` (sessiya ilə) |
+| `POST /api/v1/photos` `{ contentType, bytes, purpose? }` | şəkil üçün birdəfəlik yükləmə ünvanı → 201 `{ photoId, uploadUrl, expiresAt }` (sessiya ilə). `purpose`: `listing` (standart), `seller-logo` (≥ 400 × 400, kvadrat), `seller-cover` (≥ 1200 × 300, 4:1); forması uyğun deyilsə 422 `photo.wrong-shape` |
 | `PUT /api/v1/photo-uploads/{token}` | brauzer faylı göndərir (sessiyasız, CORS) → `{ photoId, status: "ready", width, height, url }` |
 | `POST /api/v1/listings` | elanı göndərir → 201 `{ id, slug, number, status: "pending" }`; `Idempotency-Key` başlığı ilə |
 | `GET /api/v1/me/listings`, `GET …/{id}` | «Elanlarım»: hər statusda (silinmişdən başqa), sahibin sahələri ilə (`contactPhone`, `rejectionReasonCode`, `version`, `photoIds`, …) |

@@ -32,7 +32,7 @@ export const sellers: Seller[] = [
       'Abşeron iqliminə uyğun dekorativ ağaclar və meyvə fidanları yetişdiririk. Təsərrüfatımızda zeytun, sərv, tuya və mövsümi bitkiləri yerində seçə bilərsiniz. Sağlam kök sistemi və düzgün əkin üzrə məsləhətlərə xüsusi diqqət yetiririk.',
     terms: 'Bakı və Abşerona çatdırılma razılaşma ilə. Hər gün 09:00–18:00. Təsərrüfata gəlməzdən əvvəl əlaqə saxlamağınız tövsiyə olunur.',
     // Nov 2026 contract additions (sample data)
-    businessKind: 'nursery',
+    businessKinds: ['nursery'],
     hours: everyDay('09:00', '18:00'),
     whatsapp: true,
     instagram: 'absheron.tingcilik',
@@ -52,7 +52,7 @@ export const sellers: Seller[] = [
     image: img('yasil-bag-merkezi-1'),
     // Nov 2026 contract additions (sample data)
     kind: 'Bağ mərkəzi',
-    businessKind: 'garden-centre',
+    businessKinds: ['garden-centre'],
     memberSince: 2019,
     phone: '+994 12 510 44 20',
     address: 'Bakı, Xətai rayonu, Babək prospekti 42',
@@ -74,7 +74,7 @@ export const sellers: Seller[] = [
     image: img('quba-fidan-1'),
     // Nov 2026 contract additions (sample data)
     kind: 'Tingçilik təsərrüfatı',
-    businessKind: 'nursery',
+    businessKinds: ['nursery'],
     memberSince: 2022,
     phone: '+994 23 335 12 08',
     address: 'Quba rayonu, Qırmızı Qəsəbə yolu',
@@ -103,7 +103,7 @@ export const sellers: Seller[] = [
     about:
       'Həyətlər, villalar və kommersiya məkanları üçün landşaft layihələri hazırlayırıq: ölçü, 3D konsepsiya, bitki seçimi, əkin, qazon və avtomatik suvarma bir komandadan.',
     terms: 'İlk baxış Bakı daxilində pulsuzdur. Layihənin qiyməti sahəyə və materiallara görə razılaşdırılır.',
-    businessKind: 'landscaping',
+    businessKinds: ['landscaping'],
     hours: [...weekdays('09:00', '18:00'), { day: 6, open: '09:00', close: '18:00' }, { day: 7, closed: true }],
     whatsapp: true,
     instagram: 'yasilmekan.landsaft',

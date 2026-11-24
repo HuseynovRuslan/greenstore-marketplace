@@ -3,7 +3,7 @@
 import { useState, type FormEvent } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft, Building2, Fence, Store, Trees, UserRound } from 'lucide-react'
+import { ArrowLeft, Building2, UserRound } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { TextField } from '@/components/ui/Field'
 import { CheckboxField, ChoiceCard, FieldGroup, PasswordField, PhoneField } from '@/components/ui/FormControls'
@@ -13,22 +13,17 @@ import { registerAccount, requestCode } from '@/features/auth/actions'
 import { OtpVerify } from '@/features/auth/OtpVerify'
 import { AuthShell, FormCard, PasswordRules } from '@/features/auth/ui'
 import { emailError, newPasswordError, safeNext } from '@/features/auth/validation'
+import { BusinessKindsField } from '@/features/seller/BusinessKindsField'
 import { cn } from '@/lib/format'
 import { phoneFieldError } from '@/lib/phone'
 import { useSession } from '@/state/store'
 import type { BusinessKind, OtpChallenge, SellerType } from '@/types'
 
-const kinds: Array<{ value: BusinessKind; title: string; description: string; icon: typeof Trees; label: string }> = [
-  { value: 'nursery', title: 'Tingçilik təsərrüfatı', label: 'Tingçilik təsərrüfatı', description: 'Ağac, fidan və ting yetişdirirsiniz', icon: Trees },
-  { value: 'garden-centre', title: 'Bağ mərkəzi', label: 'Bağ mərkəzi', description: 'Bitki, dibçək, torpaq və alət satırsınız', icon: Store },
-  { value: 'landscaping', title: 'Landşaft şirkəti', label: 'Landşaft şirkəti', description: 'Layihə, əkin və bağ baxımı xidməti göstərirsiniz', icon: Fence },
-]
-
 const STEPS = ['Hesab növü', 'Məlumatlar', 'Telefonun təsdiqi'] as const
 
 /**
- * /qeydiyyat — three steps: account type (individual, or a business and its kind: nursery, garden centre,
- * landscaping company), details (name, phone, optional e-mail, password with live rules, terms), then the SMS code.
+ * /qeydiyyat — three steps: account type (individual, or a business and its kinds, one or more: nursery, garden
+ * centre, landscaping company), details (name, phone, optional e-mail, password with live rules, terms), then the SMS code.
  * Back keeps everything. On success the account is signed in and the visitor goes on to `next` (default: cabinet).
  * DEMO (DATA_SOURCE=mock): the SMS is not sent (the code is on screen) and nothing is stored on a server. With the API
  * the account is created there; a business gets its public page /saticilar/<slug> at once.
@@ -39,7 +34,7 @@ export default function RegisterPage({ next, accountType }: { next?: string; acc
   const { toast } = useToast()
   const [step, setStep] = useState(0)
   const [type, setType] = useState<SellerType | ''>(accountType ?? '')
-  const [kind, setKind] = useState<BusinessKind | ''>('')
+  const [kinds, setKinds] = useState<BusinessKind[]>([])
   const [company, setCompany] = useState('')
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
@@ -61,7 +56,7 @@ export default function RegisterPage({ next, accountType }: { next?: string; acc
     e.preventDefault()
     const found = {
       type: type ? undefined : 'Fərdi və ya biznes hesabı seçin.',
-      kind: type === 'business' && !kind ? 'Biznesinizin növünü seçin.' : undefined,
+      kind: type === 'business' && kinds.length === 0 ? 'Ən azı bir biznes növü seçin.' : undefined,
       company: type === 'business' && !company.trim() ? 'Biznesin adını yazın.' : undefined,
     }
     setErrors(found)
@@ -93,7 +88,7 @@ export default function RegisterPage({ next, accountType }: { next?: string; acc
     if (type !== 'business' && type !== 'individual') return
     const result = await registerAccount({
       accountType: type,
-      businessKind: type === 'business' ? (kind as BusinessKind) : undefined,
+      businessKinds: type === 'business' ? kinds : undefined,
       companyName: type === 'business' ? company.trim() : undefined,
       fullName: name.trim(),
       phone,
@@ -123,7 +118,7 @@ export default function RegisterPage({ next, accountType }: { next?: string; acc
       // A new account has no seller page or listings yet (the cabinet shows its empty state).
       sellerId: undefined,
       companyName: business ? company.trim() : undefined,
-      businessType: business ? kinds.find((k) => k.value === kind)?.label : undefined,
+      businessKinds: business ? kinds : undefined,
       cityId: undefined,
       address: undefined,
       about: undefined,
@@ -164,14 +159,7 @@ export default function RegisterPage({ next, accountType }: { next?: string; acc
             </FieldGroup>
             {type === 'business' && (
               <>
-                <FieldGroup legend="Biznesin növü" error={errors.kind} hint="Profil səhifəniz və axtarışdakı filtr buna görə qurulur.">
-                  <div className="flex flex-col gap-2.5">
-                    {kinds.map((k, i) => {
-                      const Icon = k.icon
-                      return <ChoiceCard key={k.value} id={i === 0 ? 'q-kind' : undefined} name="kind" value={k.value} checked={kind === k.value} onChange={() => setKind(k.value)} icon={<Icon size={20} strokeWidth={1.8} />} title={k.title} description={k.description} className="p-3.5" />
-                    })}
-                  </div>
-                </FieldGroup>
+                <BusinessKindsField id="q-kind" value={kinds} onChange={setKinds} error={errors.kind} hint="Bir və ya bir neçəsini seçin. Profil səhifəniz və axtarışdakı filtr buna görə qurulur." />
                 <TextField id="q-company" label="Biznesin adı" autoComplete="organization" placeholder="Məsələn: Abşeron Tingçilik" value={company} error={errors.company} maxLength={60} onChange={(e) => setCompany(e.target.value)} />
               </>
             )}

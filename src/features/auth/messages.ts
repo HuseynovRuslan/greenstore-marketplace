@@ -62,6 +62,7 @@ export function registerErrorText(code: string | undefined, errors: Record<strin
       if (errors.phone) return errors.phone[0] === 'not-mobile' ? 'Hesab üçün mobil nömrə lazımdır.' : 'Telefon nömrəsi düzgün deyil.'
       if (errors.email) return 'E-poçt ünvanını ad@poct.az kimi yazın.'
       if (errors.companyName) return 'Biznesin adı 2–80 simvol olmalıdır.'
+      if (errors.businessKinds) return 'Ən azı bir biznes növü seçin.'
       if (errors.fullName) return 'Adınızı yazın: ən çox 60 simvol.'
       return 'Məlumatları yoxlayın və yenidən göndərin.'
     }

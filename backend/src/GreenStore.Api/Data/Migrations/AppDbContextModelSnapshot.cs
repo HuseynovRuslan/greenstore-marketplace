@@ -1684,10 +1684,10 @@ namespace GreenStore.Api.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("address");
 
-                    b.Property<string>("BusinessKind")
+                    b.PrimitiveCollection<List<string>>("BusinessKinds")
                         .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("business_kind");
+                        .HasColumnType("text[]")
+                        .HasColumnName("business_kinds");
 
                     b.Property<string>("CityId")
                         .IsRequired()
@@ -1814,7 +1814,7 @@ namespace GreenStore.Api.Data.Migrations
 
                             t.HasCheckConstraint("ck_sellers_address", "char_length(address) <= 200");
 
-                            t.HasCheckConstraint("ck_sellers_business_kind", "business_kind IN ('nursery', 'garden-centre', 'landscaping')");
+                            t.HasCheckConstraint("ck_sellers_business_kinds", "cardinality(business_kinds) >= 1 AND business_kinds <@ ARRAY['nursery', 'garden-centre', 'landscaping']::text[]");
 
                             t.HasCheckConstraint("ck_sellers_location", "(lat IS NULL) = (lng IS NULL)");
 

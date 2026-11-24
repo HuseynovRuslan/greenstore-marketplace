@@ -147,6 +147,16 @@ describe('apiRepository: requests', () => {
     expect(params(last())).toEqual({ categoryId: 'agaclar', cityIds: 'baki' })
   })
 
+  it('reads a seller’s kinds from an API that still sends one kind (the change to several, Nov 2026)', async () => {
+    const seller = { id: 's-1', slug: 'quba-fidan', name: 'Quba Fidan', kind: 'Tingçilik təsərrüfatı', type: 'business', cityId: 'quba', activeListings: 3, verified: true, image: '' }
+    respond = (url) => (url.pathname === '/api/v1/sellers' ? { body: { items: [{ ...seller, businessKinds: ['nursery', 'garden-centre'] }], total: 1, page: 1, pageCount: 1 } } : { body: { ...seller, businessKind: 'nursery' } })
+
+    const old = await apiRepository.getSeller('quba-fidan')
+    expect(old?.businessKinds).toEqual(['nursery'])
+    expect(old).not.toHaveProperty('businessKind')
+    expect((await apiRepository.listSellers({ page: 1 })).items[0].businessKinds).toEqual(['nursery', 'garden-centre'])
+  })
+
   it('counts, pages sellers and services, and follows sitemap cursors', async () => {
     respond = (url) =>
       url.pathname.endsWith('/count')

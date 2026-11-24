@@ -186,7 +186,7 @@ active ──redaktə──► pending            istənilən status ──sil�
 | Xidmətlər | `GET /services` | `searchServices` |
 | | `GET /services/{slug}` | `getService` |
 | | `GET /providers/{id}`, `GET /providers/{id}/services` | `getServiceProvider`, `listProviderServices` |
-| Sellers | `GET /sellers?businessKind&cityId&page` | `listSellers` (★ səhifələnmiş) |
+| Sellers | `GET /sellers?businessKind&cityId&page` | `listSellers` (★ səhifələnmiş; `businessKind`: bu növü olanlar, biznesin bir neçə növü ola bilər) |
 | | `GET /sellers/{slug}`, `GET /sellers/by-id/{id}` | `getSeller`, `getSellerById` |
 | | `POST /sellers/{id}/phone-reveals` | ★ |
 | Accounts | `POST /auth/otp`, `POST /auth/otp/verify` | `requestOtp`, `verifyOtp` |

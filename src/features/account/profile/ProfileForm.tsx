@@ -6,16 +6,18 @@ import { Button } from '@/components/ui/Button'
 import { SelectField, TextAreaField, TextField } from '@/components/ui/Field'
 import { Notice } from '@/components/ui/Notice'
 import { cities } from '@/data/cities'
-import { businessTypes, type AccountProfile } from '@/data/user'
+import type { AccountProfile } from '@/data/user'
 import { saveProfile, confirmPhoneChange, type ProfileField } from '@/features/account/actions'
 import { requestCode } from '@/features/auth/actions'
 import { OtpVerify } from '@/features/auth/OtpVerify'
 import { emailError, formatPhone, hasErrors, messages, phoneError, requiredError, type Errors } from '@/features/auth/validation'
+import { orderedKinds } from '@/features/seller/businessKinds'
+import { BusinessKindsField } from '@/features/seller/BusinessKindsField'
 import { useSession } from '@/state/store'
-import type { OtpChallenge } from '@/types'
+import type { BusinessKind, OtpChallenge } from '@/types'
 import { Card, PanelTitle } from '../ui'
 
-type Field = 'company' | 'contact' | 'phone' | 'email'
+type Field = 'company' | 'kinds' | 'contact' | 'phone' | 'email'
 
 /** DATA_SOURCE=api: the API's rule for a shop's name (2–80 characters), so it is said before anything is saved. */
 function companyNameError(value: string): string | undefined {
@@ -26,11 +28,12 @@ function companyNameError(value: string): string | undefined {
 }
 
 /** The API's field (ProfileField) on this form; the address and «about» errors are said above the button. */
-const FORM_FIELD: Partial<Record<ProfileField, Field>> = { company: 'company', contact: 'contact', email: 'email' }
+const FORM_FIELD: Partial<Record<ProfileField, Field>> = { company: 'company', kinds: 'kinds', contact: 'contact', email: 'email' }
 
 /**
- * Figma "Şirkət və əlaqə məlumatları" panel (Profil məlumatları · 1440).
- * Saving shows the "Dəyişikliklər saxlanıldı" notice from the components frame.
+ * The profile form of /kabinet/profil, in cards: «Şirkət» (name, kinds, about; a business), «Əlaqə» and «Ünvan», with
+ * one «Dəyişiklikləri yadda saxla» under them. Saving shows the "Dəyişikliklər saxlanıldı" notice from the components
+ * frame. The logo and the cover are not here: ProfileHero saves them on their own.
  * - DATA_SOURCE=mock: patches the session profile in the browser (`onSave`).
  * - DATA_SOURCE=api: saves the account (`PATCH /me`) and, for a business, its «mağaza» (`PATCH /me/seller`: name,
  *   kind, city, address, about, and the contact person), which its public page /saticilar/<slug> shows at once; then
@@ -44,7 +47,6 @@ export function ProfileForm({ account, onSave }: { account: AccountProfile; onSa
   const isBusiness = account.accountType === 'business'
   const [values, setValues] = useState({
     company: account.companyName ?? '',
-    businessType: account.businessType || businessTypes[0],
     contact: account.fullName,
     phone: account.phone,
     email: account.email,
@@ -52,6 +54,7 @@ export function ProfileForm({ account, onSave }: { account: AccountProfile; onSa
     address: account.address ?? '',
     about: account.about ?? '',
   })
+  const [kinds, setKinds] = useState<BusinessKind[]>(orderedKinds(account.businessKinds))
   const [errors, setErrors] = useState<Errors<Field>>({})
   const [saved, setSaved] = useState(false)
   const [busy, setBusy] = useState(false)
@@ -74,6 +77,7 @@ export function ProfileForm({ account, onSave }: { account: AccountProfile; onSa
     e.preventDefault()
     const nextErrors: Errors<Field> = {
       company: isBusiness ? (api ? companyNameError(values.company) : requiredError(values.company, messages.companyRequired)) : undefined,
+      kinds: isBusiness && kinds.length === 0 ? 'Ən azı bir biznes növü seçin.' : undefined,
       contact: requiredError(values.contact, messages.nameRequired),
       // At least one contact is required (registration allows phone-only or e-mail-only accounts).
       phone: phoneError(values.phone, !values.email.trim()),
@@ -89,7 +93,7 @@ export function ProfileForm({ account, onSave }: { account: AccountProfile; onSa
     if (!api) {
       onSave({
         companyName: isBusiness ? values.company.trim() : account.companyName,
-        businessType: isBusiness ? values.businessType : account.businessType,
+        businessKinds: isBusiness ? kinds : account.businessKinds,
         fullName: values.contact.trim(),
         phone,
         phoneVerified: phone === account.phone ? account.phoneVerified : false,
@@ -108,7 +112,7 @@ export function ProfileForm({ account, onSave }: { account: AccountProfile; onSa
       fullName: values.contact.trim(),
       email: values.email.trim(),
       ...(isBusiness
-        ? { companyName: values.company.trim(), businessType: values.businessType, cityId: values.cityId, address: values.address.trim(), about: values.about.trim(), sellerVersion: account.sellerVersion }
+        ? { companyName: values.company.trim(), businessKinds: kinds, cityId: values.cityId, address: values.address.trim(), about: values.about.trim(), sellerVersion: account.sellerVersion }
         : {}),
     })
     if (!result.ok) {
@@ -144,12 +148,13 @@ export function ProfileForm({ account, onSave }: { account: AccountProfile; onSa
   }
 
   return (
-    <Card className="w-full gap-5">
-      <form noValidate onSubmit={submit} aria-labelledby="profile-form-title" className="flex w-full flex-col items-start gap-5">
-        <PanelTitle id="profile-form-title">{isBusiness ? 'Şirkət və əlaqə məlumatları' : 'Əlaqə məlumatları'}</PanelTitle>
+    <div className="flex w-full flex-col gap-6">
+      <form noValidate onSubmit={submit} aria-label="Profil məlumatları" className="flex w-full flex-col gap-6">
         {isBusiness && (
-          <>
+          <Card role="group" aria-labelledby="profile-company-title" className="w-full gap-5">
+            <PanelTitle id="profile-company-title">Şirkət</PanelTitle>
             <TextField
+              id="profile-company"
               label="Şirkətin adı"
               name="company"
               autoComplete="organization"
@@ -158,51 +163,68 @@ export function ProfileForm({ account, onSave }: { account: AccountProfile; onSa
               error={errors.company}
               containerClassName="w-full"
             />
-            <SelectField
-              label="Biznesin növü"
-              name="businessType"
-              value={values.businessType}
-              onChange={set('businessType')}
-              options={businessTypes.map((t) => ({ value: t, label: t }))}
+            <BusinessKindsField
+              id="profile-kinds"
+              value={kinds}
+              onChange={(next) => {
+                setKinds(next)
+                setSaved(false)
+                if (next.length > 0) setErrors((prev) => ({ ...prev, kinds: undefined }))
+              }}
+              error={errors.kinds}
+              className="w-full"
+            />
+            <TextAreaField
+              id="profile-about"
+              label="Şirkət haqqında"
+              name="about"
+              value={values.about}
+              onChange={set('about')}
+              hint="Nə yetişdirirsiniz, nə satırsınız, nə ilə fərqlənirsiniz: alıcı bunu səhifənizdə ilk oxuyur."
               containerClassName="w-full"
             />
-          </>
+          </Card>
         )}
-        <TextField
-          label={isBusiness ? 'Əlaqə şəxsi' : 'Ad və soyad'}
-          name="contact"
-          autoComplete="name"
-          value={values.contact}
-          onChange={set('contact')}
-          error={errors.contact}
-          containerClassName="w-full"
-        />
-        <TextField
-          label="Telefon nömrəsi"
-          name="phone"
-          type="tel"
-          inputMode="tel"
-          autoComplete="tel"
-          value={values.phone}
-          onChange={set('phone')}
-          hint="Nömrəni dəyişdikdə yenidən təsdiq tələb olunur."
-          error={errors.phone}
-          containerClassName="w-full"
-        />
-        {phoneVerified && <Badge tone="success">Telefon təsdiqlənib</Badge>}
-        <TextField
-          label="E-poçt ünvanı"
-          name="email"
-          type="email"
-          inputMode="email"
-          autoComplete="email"
-          value={values.email}
-          onChange={set('email')}
-          error={errors.email}
-          containerClassName="w-full"
-        />
+        <Card role="group" aria-labelledby="profile-contact-title" className="w-full gap-5">
+          <PanelTitle id="profile-contact-title">{isBusiness ? 'Əlaqə' : 'Əlaqə məlumatları'}</PanelTitle>
+          <TextField
+            label={isBusiness ? 'Əlaqə şəxsi' : 'Ad və soyad'}
+            name="contact"
+            autoComplete="name"
+            value={values.contact}
+            onChange={set('contact')}
+            error={errors.contact}
+            containerClassName="w-full"
+          />
+          <TextField
+            label="Telefon nömrəsi"
+            name="phone"
+            type="tel"
+            inputMode="tel"
+            autoComplete="tel"
+            value={values.phone}
+            onChange={set('phone')}
+            hint="Nömrəni dəyişdikdə yenidən təsdiq tələb olunur."
+            error={errors.phone}
+            containerClassName="w-full"
+          />
+          {phoneVerified && <Badge tone="success">Telefon təsdiqlənib</Badge>}
+          <TextField
+            id="profile-email"
+            label="E-poçt ünvanı"
+            name="email"
+            type="email"
+            inputMode="email"
+            autoComplete="email"
+            value={values.email}
+            onChange={set('email')}
+            error={errors.email}
+            containerClassName="w-full"
+          />
+        </Card>
         {showPlace && (
-          <>
+          <Card role="group" aria-labelledby="profile-place-title" className="w-full gap-5">
+            <PanelTitle id="profile-place-title">Ünvan</PanelTitle>
             <SelectField
               label="Şəhər"
               name="city"
@@ -212,6 +234,7 @@ export function ProfileForm({ account, onSave }: { account: AccountProfile; onSa
               containerClassName="w-full"
             />
             <TextField
+              id="profile-address"
               label="Ünvan"
               name="address"
               autoComplete="street-address"
@@ -219,27 +242,26 @@ export function ProfileForm({ account, onSave }: { account: AccountProfile; onSa
               onChange={set('address')}
               containerClassName="w-full"
             />
-          </>
+          </Card>
         )}
-        {isBusiness && (
-          <TextAreaField label="Şirkət haqqında" name="about" value={values.about} onChange={set('about')} containerClassName="w-full" />
-        )}
-        {formError && (
-          <Notice tone="danger" title={formError.title}>
-            {formError.text}
-          </Notice>
-        )}
-        <Button type="submit" disabled={busy} aria-busy={busy}>
-          {busy ? 'Saxlanılır…' : 'Dəyişiklikləri yadda saxla'}
-        </Button>
-        {saved && (
-          <Notice tone="success" title="Dəyişikliklər saxlanıldı">
-            {phoneChange ? 'Yeni nömrəni SMS kodu ilə təsdiqləyin: o vaxta qədər köhnə nömrə qalır.' : 'Profil məlumatlarınız yeniləndi.'}
-          </Notice>
-        )}
+        <Card className="w-full gap-4">
+          {formError && (
+            <Notice tone="danger" title={formError.title}>
+              {formError.text}
+            </Notice>
+          )}
+          {saved && (
+            <Notice tone="success" title="Dəyişikliklər saxlanıldı">
+              {phoneChange ? 'Yeni nömrəni SMS kodu ilə təsdiqləyin: o vaxta qədər köhnə nömrə qalır.' : 'Profil məlumatlarınız yeniləndi.'}
+            </Notice>
+          )}
+          <Button type="submit" disabled={busy} aria-busy={busy} className="max-sm:w-full">
+            {busy ? 'Saxlanılır…' : 'Dəyişiklikləri yadda saxla'}
+          </Button>
+        </Card>
       </form>
       {phoneChange && (
-        <div className="w-full border-t border-line pt-5">
+        <Card className="w-full gap-5">
           <OtpVerify
             challenge={phoneChange.challenge}
             phone={phoneChange.phone}
@@ -251,8 +273,8 @@ export function ProfileForm({ account, onSave }: { account: AccountProfile; onSa
               document.querySelector<HTMLInputElement>('input[name="phone"]')?.focus()
             }}
           />
-        </div>
+        </Card>
       )}
-    </Card>
+    </div>
   )
 }
