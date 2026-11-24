@@ -29,6 +29,12 @@ export interface AccountProfile extends UserProfile {
   sellerSlug?: string
   /** The profile's card photo; "" when it has none yet */
   sellerImage?: string
+  /**
+   * The «mağaza»'s logo and cover («üz şəkli»), as /kabinet/profil shows them. DATA_SOURCE=api: the API's photo
+   * addresses; DATA_SOURCE=mock: the cropped pictures themselves (data: URLs), kept in this browser only.
+   */
+  sellerLogo?: string
+  sellerCover?: string
   /** `OwnSeller.version`, sent back with a change so another device's newer edit is not overwritten */
   sellerVersion?: string
 }

@@ -438,7 +438,7 @@ export const apiRepository: MarketplaceRepository = {
     return readOwn<ListingStats>(`me/listings/${path([listingId, 'stats'])}`)
   },
   async createPhotoUpload(input) {
-    return sendSigned<PhotoUpload>('photos', { method: 'POST', body: { ...input, purpose: 'listing' } })
+    return sendSigned<PhotoUpload>('photos', { method: 'POST', body: { ...input, purpose: input.purpose ?? 'listing' } })
   },
   async submitListing(input, idempotencyKey) {
     return sendSigned<ListingSubmitResult>('listings', { method: 'POST', body: input, headers: idempotencyKey ? { 'Idempotency-Key': idempotencyKey } : undefined })

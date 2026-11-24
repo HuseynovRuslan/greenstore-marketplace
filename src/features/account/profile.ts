@@ -21,6 +21,8 @@ export function accountOf(user: UserProfile, seller?: OwnSeller): AccountProfile
           verified: seller.verified,
           sellerSlug: seller.slug,
           sellerImage: seller.image,
+          sellerLogo: seller.logo,
+          sellerCover: seller.coverImage,
           sellerVersion: seller.version,
         }
       : {}),

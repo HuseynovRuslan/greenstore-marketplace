@@ -1,6 +1,7 @@
 using System.Text.Json;
 using GreenStore.Api.Data;
 using GreenStore.Api.Modules.Listings;
+using GreenStore.Api.Modules.Sellers;
 using GreenStore.Api.Modules.Taxonomy;
 
 namespace GreenStore.Api.Modules.Platform;
@@ -66,6 +67,13 @@ public static class Revalidation
 
         return tags;
     }
+
+    /// <summary>
+    /// What a business profile's change touches (its name, logo and cover, its «Təsdiqlənmiş» badge): its page by id and
+    /// by slug, the directory, the home page and its services' provider pages.
+    /// </summary>
+    public static IReadOnlyList<string> TagsFor(Seller seller) =>
+        [$"seller:{seller.Id}", $"seller:{seller.Slug}", "sellers", Home, "services", $"provider:{seller.OwnerUserId}"];
 
     /// <summary>
     /// The most tags one notice may name: the site's <c>/api/revalidate</c> refuses more with 400

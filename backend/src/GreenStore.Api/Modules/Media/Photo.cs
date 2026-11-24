@@ -103,7 +103,13 @@ public static class PhotoUrls
             return key;
         }
 
-        var file = photo.Variants?.GetValueOrDefault(PhotoRules.DisplayWidth.ToString(System.Globalization.CultureInfo.InvariantCulture)) ?? key;
+        var file = Largest(photo.Variants) ?? key;
         return $"{mediaBaseUrl.TrimEnd('/')}/{file}";
     }
+
+    /// <summary>The widest copy's key, by the widths the copies are stored under (1280 for a listing photo, 640 for a logo, 1920 for a cover).</summary>
+    private static string? Largest(Dictionary<string, string>? variants) =>
+        variants is { Count: > 0 }
+            ? variants.MaxBy(v => int.TryParse(v.Key, System.Globalization.NumberStyles.None, System.Globalization.CultureInfo.InvariantCulture, out var width) ? width : 0).Value
+            : null;
 }

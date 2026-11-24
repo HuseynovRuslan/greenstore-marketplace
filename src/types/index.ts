@@ -210,7 +210,8 @@ export interface ProfilePatch {
 
 /**
  * The signed-in business's own profile, «mağaza» (`GET /me/seller`, backend-contract.md 2.1): the public `Seller` with
- * the business's own `phone` and the `version` to send back with a change.
+ * the business's own `phone` and the `version` to send back with a change. Its `logo` and `coverImage` are the
+ * photos /kabinet/profil sets (`logoPhotoId`, `coverPhotoId` of `SellerProfilePatch`).
  */
 export interface OwnSeller extends Seller {
   version: string
@@ -239,6 +240,10 @@ export interface SellerProfilePatch {
   website?: string
   responseMinutes?: number
   location?: { lat: number; lng: number }
+  /** The logo: a ready photo of purpose `seller-logo` (`createPhotoUpload`); `null` removes it */
+  logoPhotoId?: string | null
+  /** The cover («üz şəkli»): a ready photo of purpose `seller-cover`; `null` removes it */
+  coverPhotoId?: string | null
   version?: string
 }
 
@@ -519,12 +524,20 @@ export interface OwnListing extends Listing {
 
 /* ---------- Photo upload (backend-contract.md 3.2) ---------- */
 
+/**
+ * What a photo is for: a listing's (the default), or a business's logo or cover. A logo is at least 400 × 400 px and
+ * near square, a cover at least 1200 × 300 px and near 4:1 (`photo.too-small`, `photo.wrong-shape`).
+ */
+export type PhotoPurpose = 'listing' | 'seller-logo' | 'seller-cover'
+
 /** What the site's server asks for before the browser sends a photo. */
 export interface PhotoUploadRequest {
   fileName: string
   /** `image/jpeg`, `image/png` or `image/webp` */
   contentType: string
   bytes: number
+  /** Left out: `listing` */
+  purpose?: PhotoPurpose
 }
 
 /** Where the browser sends the file (`PUT uploadUrl`, one use, 10 minutes); `photoId` goes into `ListingInput.photoIds`. */

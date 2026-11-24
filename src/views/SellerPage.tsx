@@ -62,7 +62,8 @@ export default function SellerPage({ seller, listings, listingQuery, services }:
         <Breadcrumb items={sellerCrumbs(seller)} />
 
         <section aria-labelledby="satici-adi" className="overflow-hidden rounded-2xl border border-line bg-surface">
-          <div className="h-[140px] bg-mint md:h-[220px] xl:h-[260px]">
+          {/* A cover is cropped 4:1 on /kabinet/profil: shown whole from 768 px, 3:1 (sides trimmed) on a phone. */}
+          <div className={seller.coverImage ? 'aspect-[3/1] bg-mint md:aspect-[4/1]' : 'h-[140px] bg-mint md:h-[220px] xl:h-[260px]'}>
             {seller.coverImage && <img src={seller.coverImage} alt="" className="size-full object-cover" />}
           </div>
           <div className="flex flex-col gap-4 px-5 pb-5 md:flex-row md:items-end md:justify-between md:px-7 md:pb-6">

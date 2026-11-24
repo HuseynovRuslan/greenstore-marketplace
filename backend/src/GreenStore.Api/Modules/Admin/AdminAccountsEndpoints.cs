@@ -159,6 +159,5 @@ public static class AdminAccountsEndpoints
     }
 
     /// <summary>What a seller's «Təsdiqlənmiş» badge shows on: its page, the directory, the home page and its services.</summary>
-    private static IReadOnlyList<string> SellerTags(Seller seller) =>
-        [$"seller:{seller.Id}", $"seller:{seller.Slug}", "sellers", Revalidation.Home, "services", $"provider:{seller.OwnerUserId}"];
+    private static IReadOnlyList<string> SellerTags(Seller seller) => Revalidation.TagsFor(seller);
 }

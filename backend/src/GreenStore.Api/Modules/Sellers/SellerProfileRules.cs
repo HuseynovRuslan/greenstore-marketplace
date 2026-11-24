@@ -53,6 +53,15 @@ public sealed class SellerPatch : PatchBody
 
     public LocationDto? Location { get; set => field = Sent(value); }
 
+    /// <summary>
+    /// The logo: the id of one of the caller's ready <c>seller-logo</c> photos (<c>POST /photos</c>); <c>null</c>
+    /// removes it (<see cref="SellerPhotos"/>).
+    /// </summary>
+    public Guid? LogoPhotoId { get; set => field = Sent(value); }
+
+    /// <summary>The cover («üz şəkli»): the id of one of the caller's ready <c>seller-cover</c> photos; <c>null</c> removes it.</summary>
+    public Guid? CoverPhotoId { get; set => field = Sent(value); }
+
     /// <summary>The <c>version</c> of <c>GET /me/seller</c>: when sent, a profile changed since then is a 409 instead of being overwritten.</summary>
     public string? Version { get; set => field = Sent(value); }
 }

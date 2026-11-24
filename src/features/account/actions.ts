@@ -7,7 +7,7 @@ import { ApiError, isApiError } from '@/services/apiRepository'
 import { getRepository } from '@/services/repository'
 import { clearSession, refreshSession } from '@/services/session'
 import { SESSION_COOKIE, SESSION_HINT_COOKIE } from '@/state/bootstrap'
-import type { BusinessKind, FavoriteItems, OwnSeller, SellerProfilePatch } from '@/types'
+import type { BusinessKind, FavoriteItems, OwnSeller, PhotoUpload, SellerProfilePatch } from '@/types'
 import { waitText } from '@/features/auth/messages'
 import { isValidEmail, messages } from '@/features/auth/validation'
 import { orderedKinds } from '@/features/seller/businessKinds'
@@ -188,6 +188,63 @@ export async function saveProfile(input: ProfileInput): Promise<SaveProfileResul
     return { ok: true, account: accountOf(user, seller) }
   } catch (error) {
     return { ...saveFailure(error), saved: { fullName: user.fullName, email: user.email } }
+  }
+}
+
+/** Which of the «mağaza»'s photos: the logo or the cover («üz şəkli»). */
+export type ProfilePhotoSlot = 'logo' | 'cover'
+
+export type ProfilePhotoUpload = { ok: true; upload: PhotoUpload } | (Fail & { signedOut?: boolean })
+
+export type SaveProfilePhotoResult = { ok: true; account: AccountProfile } | (Fail & { signedOut?: boolean })
+
+const PHOTO_TYPES = ['image/jpeg', 'image/png', 'image/webp']
+const PHOTO_MAX_BYTES = 10 * 1024 * 1024
+const SIGNED_OUT = 'Sessiyanın vaxtı bitib. Yenidən daxil olun.'
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
+const slotOf = (value: unknown): ProfilePhotoSlot | undefined => (value === 'logo' || value === 'cover' ? value : undefined)
+
+/**
+ * DATA_SOURCE=api: an upload address for the «mağaza»'s logo or cover (`POST /photos`, purpose `seller-logo` or
+ * `seller-cover`). The browser crops the picture and sends it there itself, then `saveProfilePhoto` puts it on the
+ * profile.
+ */
+export async function startProfilePhotoUpload(input: { slot: ProfilePhotoSlot; contentType: string; bytes: number }): Promise<ProfilePhotoUpload> {
+  const slot = slotOf(input?.slot)
+  const contentType = typeof input?.contentType === 'string' ? input.contentType : ''
+  const bytes = typeof input?.bytes === 'number' && Number.isFinite(input.bytes) ? Math.floor(input.bytes) : 0
+  if (!slot) return { ok: false, error: 'Sorğu düzgün deyil.' }
+  if (!PHOTO_TYPES.includes(contentType)) return { ok: false, error: 'Yalnız JPG, PNG və ya WebP şəkil göndərmək olar.' }
+  if (bytes <= 0 || bytes > PHOTO_MAX_BYTES) return { ok: false, error: 'Şəkil 10 MB-dan böyük olmamalıdır.' }
+  const purpose = slot === 'logo' ? 'seller-logo' : 'seller-cover'
+  try {
+    return { ok: true, upload: await getRepository().createPhotoUpload({ fileName: `${purpose}.webp`, contentType, bytes, purpose }) }
+  } catch (error) {
+    if (isApiError(error) && error.status === 401) return { ok: false, error: SIGNED_OUT, signedOut: true }
+    if (isApiError(error, 'photo.too-many')) return { ok: false, error: 'Bu gün çox şəkil yükləmisiniz. Bir neçə saat sonra yenidən cəhd edin.' }
+    return { ok: false, error: 'Şəkli yükləmək alınmadı. İnternet bağlantısını yoxlayıb yenidən cəhd edin.' }
+  }
+}
+
+/**
+ * DATA_SOURCE=api: puts an uploaded photo on the «mağaza» as its logo or cover (`PATCH /me/seller`), or removes it
+ * (`null`). The public seller page and the directory show it at once (their cached reads are refreshed).
+ */
+export async function saveProfilePhoto(slot: ProfilePhotoSlot, photoId: string | null): Promise<SaveProfilePhotoResult> {
+  const which = slotOf(slot)
+  if (!which || (photoId !== null && (typeof photoId !== 'string' || !UUID_RE.test(photoId)))) return { ok: false, error: 'Sorğu düzgün deyil.' }
+  const repo = getRepository()
+  try {
+    const user = await repo.getMe()
+    if (!user) return { ok: false, error: SIGNED_OUT, signedOut: true }
+    const seller = await repo.updateOwnSeller(which === 'logo' ? { logoPhotoId: photoId } : { coverPhotoId: photoId })
+    updateTag('sellers')
+    return { ok: true, account: accountOf(user, seller) }
+  } catch (error) {
+    if (isApiError(error) && error.status === 401) return { ok: false, error: SIGNED_OUT, signedOut: true }
+    if (isApiError(error, 'validation')) return { ok: false, error: 'Şəkil hazır deyil və ya artıq silinib. Onu yenidən seçin.' }
+    return { ok: false, error: photoId ? 'Şəkli saxlamaq alınmadı. Bir az sonra yenidən cəhd edin.' : 'Şəkli silmək alınmadı. Bir az sonra yenidən cəhd edin.' }
   }
 }
 

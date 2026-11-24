@@ -218,7 +218,7 @@ Adlar (kateqoriya, şəhər, biznes növü, kartın atribut sətri, xidmətin qi
 | `GET`, `PATCH /api/v1/me` | profil (`role`, `locale` daxil) |
 | `POST /api/v1/me/password`, `POST /api/v1/me/phone` | şifrə (digər sessiyalar bağlanır), yeni nömrə (`change-phone` kodu ilə) |
 | `GET /api/v1/me/sessions`, `DELETE /api/v1/me/sessions/{id}` | «Aktiv cihazlar», cihazdan çıxış |
-| `GET`, `PATCH /api/v1/me/seller` | biznes profili («mağaza»): ad, növ, şəhər, əlaqə şəxsi, ünvan, haqqında, iş saatları, xidmətlər, nömrə, sosial şəbəkələr, `version` |
+| `GET`, `PATCH /api/v1/me/seller` | biznes profili («mağaza»): ad, növ, şəhər, əlaqə şəxsi, ünvan, haqqında, iş saatları, xidmətlər, nömrə, sosial şəbəkələr, loqo və üz şəkli (`logoPhotoId`, `coverPhotoId`: `seller-logo` / `seller-cover` şəklinin id-si, `null` silir), `version` |
 | `GET /api/v1/me/favorites`, `GET …/items`, `PUT`/`DELETE …/{listing\|service}/{id}`, `POST …/merge` | seçilmişlər |
 | `GET`, `POST /api/v1/me/saved-searches`, `PATCH`/`DELETE …/{id}`, `POST …/{id}/opened` | yadda saxlanılan axtarışlar, `newCount` ilə |
 
@@ -305,7 +305,7 @@ DATA_SOURCE=api API_BASE_URL=http://localhost:5080 API_INTERNAL_KEY=dev-internal
 
 | Endpoint | Nə edir |
 |---|---|
-| `POST /api/v1/photos` `{ contentType, bytes }` | şəkil üçün birdəfəlik yükləmə ünvanı → 201 `{ photoId, uploadUrl, expiresAt }` (sessiya ilə) |
+| `POST /api/v1/photos` `{ contentType, bytes, purpose? }` | şəkil üçün birdəfəlik yükləmə ünvanı → 201 `{ photoId, uploadUrl, expiresAt }` (sessiya ilə). `purpose`: `listing` (standart), `seller-logo` (≥ 400 × 400, kvadrat), `seller-cover` (≥ 1200 × 300, 4:1); forması uyğun deyilsə 422 `photo.wrong-shape` |
 | `PUT /api/v1/photo-uploads/{token}` | brauzer faylı göndərir (sessiyasız, CORS) → `{ photoId, status: "ready", width, height, url }` |
 | `POST /api/v1/listings` | elanı göndərir → 201 `{ id, slug, number, status: "pending" }`; `Idempotency-Key` başlığı ilə |
 | `GET /api/v1/me/listings`, `GET …/{id}` | «Elanlarım»: hər statusda (silinmişdən başqa), sahibin sahələri ilə (`contactPhone`, `rejectionReasonCode`, `version`, `photoIds`, …) |

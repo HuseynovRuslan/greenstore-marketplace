@@ -29,7 +29,8 @@ public static class MediaErrors
 /// Photo uploads (ARCHITECTURE.md §11). The site's server asks for an upload address (<c>POST /photos</c>, signed in);
 /// the browser sends the file straight to it (<c>PUT /photo-uploads/{token}</c>: one use, 10 minutes, no session,
 /// CORS for the site's origin). The API checks and processes it at once, so the answer says whether the photo is
-/// ready. Its id then goes into <c>ListingInput.photoIds</c>; a photo not attached within 24 hours is deleted.
+/// ready. Its id then goes into <c>ListingInput.photoIds</c>, or (purpose <c>seller-logo</c>, <c>seller-cover</c>) into
+/// <c>PATCH /me/seller</c>; a photo not attached within 24 hours is deleted.
 /// </summary>
 public static class PhotosEndpoints
 {
@@ -99,8 +100,8 @@ public static class PhotosEndpoints
     /// <c>PUT /photo-uploads/{token}</c> with the file as the body → <c>{ photoId, status: "ready", width, height, url }</c>.
     /// 404 <c>photo.upload-not-found</c> (unknown or used token), 410 <c>photo.upload-expired</c>, 413
     /// <c>photo.too-large</c>, 415 <c>photo.unsupported-type</c>, 422 <c>photo.too-small</c>,
-    /// <c>photo.too-many-pixels</c>, <c>photo.unreadable</c>. A refused file leaves the photo <c>failed</c>: ask for a
-    /// new address to try again.
+    /// <c>photo.wrong-shape</c> (a logo or a cover), <c>photo.too-many-pixels</c>, <c>photo.unreadable</c>. A refused
+    /// file leaves the photo <c>failed</c>: ask for a new address to try again.
     /// </summary>
     private static async Task<Ok<UploadedPhotoDto>> Upload(
         string token,
@@ -226,7 +227,7 @@ public sealed class PhotoService(
         ProcessedPhoto processed;
         try
         {
-            processed = processor.Process(file, PhotosEndpoints.Limits(options.Value));
+            processed = processor.Process(file, PhotosEndpoints.Limits(options.Value), photo.Purpose);
         }
         catch (PhotoRejectedException rejected)
         {

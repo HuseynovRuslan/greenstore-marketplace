@@ -8,8 +8,9 @@ public sealed record ProcessedPhoto(ImageFormat Format, int Width, int Height, I
 /// <summary>
 /// Turns an uploaded file into the stored copies with libvips (NetVips): checks it is what its first bytes say, reads
 /// only the header to check its size before decoding anything (so a small file hiding a huge image is refused cheaply),
-/// then makes 320, 640 and 1280 px wide WebP copies, turned upright, in sRGB, with every metadata block removed
-/// (EXIF can carry the GPS position of the seller's home).
+/// then makes WebP copies of the purpose's widths (a listing photo 320, 640 and 1280 px wide; a logo and a cover their
+/// own), turned upright, in sRGB, with every metadata block removed (EXIF can carry the GPS position of the seller's
+/// home).
 /// </summary>
 public sealed class PhotoProcessor
 {
@@ -29,7 +30,7 @@ public sealed class PhotoProcessor
         Log.SetLogHandler("VIPS", Enums.LogLevelFlags.Warning, static (_, _, _) => { });
     }
 
-    public ProcessedPhoto Process(byte[] file, PhotoLimits limits)
+    public ProcessedPhoto Process(byte[] file, PhotoLimits limits, PhotoPurpose purpose = PhotoPurpose.Listing)
     {
         if (file.Length == 0)
         {
@@ -57,7 +58,7 @@ public sealed class PhotoProcessor
             throw new PhotoRejectedException(PhotoRules.Unreadable);
         }
 
-        if (PhotoRules.CheckDimensions(width, height, limits) is { } problem)
+        if (PhotoRules.CheckDimensions(width, height, limits, purpose) is { } problem)
         {
             throw new PhotoRejectedException(problem);
         }
@@ -72,7 +73,7 @@ public sealed class PhotoProcessor
                 _ = full.Avg();
             }
 
-            foreach (var target in PhotoRules.VariantWidths)
+            foreach (var target in PhotoRules.VariantWidthsFor(purpose))
             {
                 using var copy = Image.ThumbnailBuffer(
                     file,
