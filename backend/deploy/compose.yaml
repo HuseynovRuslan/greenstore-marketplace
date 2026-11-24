@@ -1,0 +1,75 @@
+# GreenStore API on the shared VPS (docs/handoff/deploy.md). Run ./deploy.sh from this folder, not compose by hand.
+#
+# Server rules (the server admin's, they override everything else here):
+# - Unique names only. The shared network already has generic names ("db", "api", "web"), so every service and
+#   container is called greenstore-*.
+# - No published ports at all, not even on 127.0.0.1. The firewall lets only 80/443 in, and the server's Caddy reaches
+#   greenstore-api over the shared Docker network.
+# - greenstore-db joins only greenstore-net. greenstore-api joins greenstore-net and the Caddy network.
+#
+# Secrets come from .env in this folder (chmod 600, never committed; names in .env.server.example).
+name: greenstore
+
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: 10m
+    max-file: "3"
+
+services:
+  greenstore-db:
+    image: postgres:16
+    container_name: greenstore-db
+    environment:
+      POSTGRES_USER: greenstore
+      POSTGRES_DB: greenstore
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is missing from .env}
+      # UTF-8 with a Unicode-aware locale: pg_trgm must treat Cyrillic letters as word characters (DATABASE.md §2).
+      POSTGRES_INITDB_ARGS: --encoding=UTF8 --locale=C.UTF-8
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - greenstore-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U greenstore -d greenstore"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    cpus: 0.5
+    mem_limit: 512m
+    restart: unless-stopped
+    logging: *logging
+
+  greenstore-api:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    # deploy.sh also tags each build with the git commit, for rollback (README.md).
+    image: greenstore-api:latest
+    container_name: greenstore-api
+    env_file: .env
+    volumes:
+      - media:/data/media
+    networks:
+      - greenstore-net
+      - edge
+    depends_on:
+      greenstore-db:
+        condition: service_healthy
+    cpus: 1.0
+    mem_limit: 768m
+    restart: unless-stopped
+    logging: *logging
+
+networks:
+  greenstore-net:
+    name: greenstore-net
+  # The network the server's Caddy container (attendanceqr-caddy-1) is on. Owned by QRLog: compose never creates or
+  # removes it.
+  edge:
+    name: attendanceqr_default
+    external: true
+
+volumes:
+  pgdata:
+  media:
