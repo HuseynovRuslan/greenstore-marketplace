@@ -6,7 +6,9 @@
       "slug": "abseron-tingcilik",
       "owner": "owner-abseron-tingcilik",
       "name": "Abşeron Tingçilik",
-      "businessKind": "nursery",
+      "businessKinds": [
+        "nursery"
+      ],
       "cityId": "abseron",
       "address": "Abşeron, Məhəmmədi qəsəbəsi",
       "location": {
@@ -73,7 +75,9 @@
       "slug": "yasil-bag-merkezi",
       "owner": "owner-yasil-bag-merkezi",
       "name": "Yaşıl Bağ Mərkəzi",
-      "businessKind": "garden-centre",
+      "businessKinds": [
+        "garden-centre"
+      ],
       "cityId": "baki",
       "address": "Bakı, Xətai rayonu, Babək prospekti 42",
       "about": "Otaq bitkiləri, güllər, dibçəklər, torpaq və bağ alətləri bir yerdə. Bitki seçimi və qulluq üzrə pulsuz məsləhət veririk.",
@@ -131,7 +135,9 @@
       "slug": "quba-fidan",
       "owner": "owner-quba-fidan",
       "name": "Quba Fidan",
-      "businessKind": "nursery",
+      "businessKinds": [
+        "nursery"
+      ],
       "cityId": "quba",
       "address": "Quba rayonu, Qırmızı Qəsəbə yolu",
       "about": "Quba iqlimində yetişdirilmiş alma, armud, gilas və qoz fidanları. Topdan sifarişlər və bağ salınması üzrə məsləhət.",
@@ -188,7 +194,9 @@
       "slug": "yasil-mekan-landsaft",
       "owner": "owner-yasil-mekan-landsaft",
       "name": "Yaşıl Məkan Landşaft",
-      "businessKind": "landscaping",
+      "businessKinds": [
+        "landscaping"
+      ],
       "cityId": "baki",
       "address": "Bakı, Nərimanov rayonu, Təbriz küçəsi 18",
       "location": {

@@ -8,7 +8,7 @@ using GreenStore.Api.Modules.Accounts;
 namespace GreenStore.Api.Modules.Sellers;
 
 /// <summary>
-/// <c>PATCH /me/seller</c>: what is sent changes, what is not stays. The company name, kind and city cannot be
+/// <c>PATCH /me/seller</c>: what is sent changes, what is not stays. The company name, kinds and city cannot be
 /// removed; for the rest <c>null</c> or <c>""</c> (<c>[]</c> for lists) removes the value.
 /// </summary>
 public sealed class SellerPatch : PatchBody
@@ -16,7 +16,8 @@ public sealed class SellerPatch : PatchBody
     /// <summary>«Şirkətin adı». The slug (the page's address) stays as it is.</summary>
     public string? Name { get; set => field = Sent(value); }
 
-    public BusinessKind? BusinessKind { get; set => field = Sent(value); }
+    /// <summary>One or more; a kind sent twice counts once. <c>null</c> or <c>[]</c> is <c>required</c>.</summary>
+    public List<BusinessKind>? BusinessKinds { get; set => field = Sent(value); }
 
     public string? CityId { get; set => field = Sent(value); }
 
@@ -89,10 +90,11 @@ public static class SellerProfileRules
             seller.Name = name;
         }
 
-        if (patch.Has(nameof(SellerPatch.BusinessKind)))
+        if (patch.Has(nameof(SellerPatch.BusinessKinds)))
         {
-            errors.Add("businessKind", patch.BusinessKind is null ? FieldErrors.Required : null);
-            seller.BusinessKind = patch.BusinessKind ?? seller.BusinessKind;
+            var kinds = patch.BusinessKinds ?? [];
+            errors.Add("businessKinds", kinds.Count == 0 ? FieldErrors.Required : null);
+            seller.BusinessKinds = kinds.Count == 0 ? seller.BusinessKinds : BusinessKindCodes.From(kinds);
         }
 
         if (patch.Has(nameof(SellerPatch.CityId)))

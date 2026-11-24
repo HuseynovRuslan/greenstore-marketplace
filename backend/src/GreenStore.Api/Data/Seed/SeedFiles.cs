@@ -67,7 +67,7 @@ public sealed record SellerSeed(
     string Slug,
     string Owner,
     string Name,
-    BusinessKind BusinessKind,
+    IReadOnlyList<BusinessKind> BusinessKinds,
     string CityId,
     string Phone,
     bool Whatsapp,

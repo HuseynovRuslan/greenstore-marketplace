@@ -1,4 +1,5 @@
-import { businessKindLabels, type AccountProfile } from '@/data/user'
+import type { AccountProfile } from '@/data/user'
+import { orderedKinds } from '@/features/seller/businessKinds'
 import type { OwnSeller, UserProfile } from '@/types'
 
 /**
@@ -13,7 +14,7 @@ export function accountOf(user: UserProfile, seller?: OwnSeller): AccountProfile
     ...(seller
       ? {
           companyName: seller.name,
-          businessType: seller.businessKind ? businessKindLabels[seller.businessKind] : seller.kind,
+          businessKinds: orderedKinds(seller.businessKinds),
           cityId: seller.cityId,
           address: seller.address,
           about: seller.about,

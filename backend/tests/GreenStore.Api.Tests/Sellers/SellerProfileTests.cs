@@ -16,7 +16,7 @@ public sealed class SellerProfileTests(AccountsApi api)
     private static readonly FrontendContract Contract = FrontendContract.Load();
 
     private Task<Account> BusinessAsync(string name = "Şəki Fidanlığı") =>
-        api.RegisterAsync(accountType: "business", companyName: name, businessKind: "nursery", fullName: "Aysel Kərimova");
+        api.RegisterAsync(accountType: "business", companyName: name, businessKinds: ["nursery"], fullName: "Aysel Kərimova");
 
     private static Task<HttpResponseMessage> Patch(HttpClient client, string json) =>
         client.PatchAsync("/api/v1/me/seller", new StringContent(json, Encoding.UTF8, "application/json"), Ct);
@@ -51,7 +51,7 @@ public sealed class SellerProfileTests(AccountsApi api)
 
         var response = await Patch(api.Client(business.Token), """
             {
-              "name": "Quba Alma Evi", "businessKind": "garden-centre", "contactPerson": "Rauf Həsənli", "cityId": "quba",
+              "name": "Quba Alma Evi", "businessKinds": ["garden-centre", "nursery"], "contactPerson": "Rauf Həsənli", "cityId": "quba",
               "address": "Qırmızı Qəsəbə yolu 12", "about": "Quba almasının ən yaxşı sortları.\nÇatdırılma var.",
               "terms": "Sifarişlər 2 günə çatdırılır.", "offers": ["delivery", "wholesale"],
               "hours": [{ "day": 1, "open": "09:00", "close": "18:00" }, { "day": 7, "closed": true }],
@@ -68,8 +68,8 @@ public sealed class SellerProfileTests(AccountsApi api)
         var page = await api.GetAsync($"/api/v1/sellers/{slug}", business.Token);
         Assert.Empty(Contract.Check(page, "Seller"));
         Assert.Equal("Quba Alma Evi", page.GetProperty("name").GetString());
-        Assert.Equal("Bağ mərkəzi", page.GetProperty("kind").GetString());
-        Assert.Equal("garden-centre", page.GetProperty("businessKind").GetString());
+        Assert.Equal("Tingçilik təsərrüfatı · Bağ mərkəzi", page.GetProperty("kind").GetString());
+        Assert.Equal(["nursery", "garden-centre"], Json.Strings(page.GetProperty("businessKinds")));
         Assert.Equal("Rauf Həsənli", page.GetProperty("contactPerson").GetString());
         Assert.Equal("quba", page.GetProperty("cityId").GetString());
         Assert.Equal("Qırmızı Qəsəbə yolu 12", page.GetProperty("address").GetString());

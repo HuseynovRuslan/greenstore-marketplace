@@ -51,7 +51,7 @@ public sealed class AccountService(
         string? cityId = null;
         if (business)
         {
-            errors.Add("businessKind", input.BusinessKind is null ? FieldErrors.Required : null);
+            errors.Add("businessKinds", input.BusinessKinds is not { Count: > 0 } ? FieldErrors.Required : null);
             errors.Add("companyName", companyName.Length switch
             {
                 0 => FieldErrors.Required,
@@ -94,7 +94,7 @@ public sealed class AccountService(
         Seller? seller = null;
         if (business)
         {
-            seller = await SellerProfiles.CreateAsync(db, user, companyName, input.BusinessKind!.Value, cityId!, clock, ct);
+            seller = await SellerProfiles.CreateAsync(db, user, companyName, input.BusinessKinds!, cityId!, clock, ct);
         }
 
         var session = sessions.Open(user, device);

@@ -170,6 +170,8 @@ public sealed class SmallReadRulesTests
         Assert.Equal("Landşaft şirkəti", SellerTexts.BusinessKindName(BusinessKind.Landscaping, Language.Az));
         Assert.Equal("Садовый центр", SellerTexts.BusinessKindName(BusinessKind.GardenCentre, Language.Ru));
         Assert.Equal("Landscaping company", SellerTexts.BusinessKindName(BusinessKind.Landscaping, Language.En));
+        Assert.Equal("Tingçilik təsərrüfatı · Bağ mərkəzi", SellerTexts.BusinessKindNames(["garden-centre", "nursery"], Language.Az));
+        Assert.Equal(["nursery", "landscaping"], BusinessKindCodes.From([BusinessKind.Landscaping, BusinessKind.Nursery, BusinessKind.Landscaping]));
     }
 
     [Fact]

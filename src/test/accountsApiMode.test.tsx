@@ -72,7 +72,7 @@ const business: AccountProfile = {
   locale: 'az',
   phoneVerified: true,
   companyName: 'Yaşıl Həyət',
-  businessType: 'Bağ mərkəzi',
+  businessKinds: ['garden-centre'],
   cityId: 'baki',
   sellerSlug: 'yasil-heyet',
   sellerImage: '',
@@ -245,6 +245,17 @@ describe('pages with DATA_SOURCE=api', () => {
     expect(auth.signInWithCode).not.toHaveBeenCalled()
   })
 
+  it('a business keeps at least one kind: with none ticked nothing is saved', async () => {
+    const user = userEvent.setup()
+    inApi(<ProfileForm account={business} onSave={vi.fn()} />)
+    const kinds = screen.getByRole('group', { name: 'Biznesin növü' })
+    expect(within(kinds).getAllByRole('checkbox').map((box) => (box as HTMLInputElement).checked)).toEqual([false, true, false])
+    await user.click(within(kinds).getByRole('checkbox', { name: /Bağ mərkəzi/ }))
+    await user.click(screen.getByRole('button', { name: 'Dəyişiklikləri yadda saxla' }))
+    expect(await within(kinds).findByText('Ən azı bir biznes növü seçin.')).toBeInTheDocument()
+    expect(account.saveProfile).not.toHaveBeenCalled()
+  })
+
   it('a business saves its shop details to the API', async () => {
     const user = userEvent.setup()
     const onSave = vi.fn()
@@ -260,10 +271,12 @@ describe('pages with DATA_SOURCE=api', () => {
     await user.type(screen.getByLabelText('Şirkətin adı'), 'aşıl Həyət Bağ')
     await user.selectOptions(screen.getByLabelText('Şəhər'), 'quba')
     await user.type(screen.getByLabelText('Şirkət haqqında'), 'Qubada tingçilik')
+    // A garden centre that grows its own trees too: both kinds.
+    await user.click(screen.getByRole('checkbox', { name: /Tingçilik təsərrüfatı/ }))
     await user.click(screen.getByRole('button', { name: 'Dəyişiklikləri yadda saxla' }))
     expect(await screen.findByText('Dəyişikliklər saxlanıldı')).toBeInTheDocument()
     // With the «mağaza»'s version the form was loaded with: a change from another tab is not overwritten.
-    expect(account.saveProfile).toHaveBeenLastCalledWith({ fullName: 'Nigar Rzayeva', email: 'nigar@bag.az', companyName: 'Yaşıl Həyət Bağ', businessType: 'Bağ mərkəzi', cityId: 'quba', address: '', about: 'Qubada tingçilik', sellerVersion: '812' })
+    expect(account.saveProfile).toHaveBeenLastCalledWith({ fullName: 'Nigar Rzayeva', email: 'nigar@bag.az', companyName: 'Yaşıl Həyət Bağ', businessKinds: ['nursery', 'garden-centre'], cityId: 'quba', address: '', about: 'Qubada tingçilik', sellerVersion: '812' })
     expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ companyName: 'Yaşıl Həyət Bağ' }))
     // The number did not change: no SMS code.
     expect(auth.requestCode).not.toHaveBeenCalled()

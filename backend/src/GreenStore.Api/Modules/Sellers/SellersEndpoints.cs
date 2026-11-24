@@ -45,7 +45,9 @@ public static class SellersEndpoints
         var sellers = db.Sellers.AsNoTracking();
         if (businessKind is { } kind)
         {
-            sellers = sellers.Where(s => s.BusinessKind == kind);
+            // A business with several kinds is listed under each: `'nursery' = ANY (business_kinds)` in SQL.
+            var code = KebabCase.Value(kind);
+            sellers = sellers.Where(s => s.BusinessKinds.Contains(code));
         }
 
         if (cityId is not null)

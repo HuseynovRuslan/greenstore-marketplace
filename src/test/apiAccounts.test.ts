@@ -118,10 +118,10 @@ describe('apiRepository: signing in (backend-contract.md 2.1)', () => {
 
   it('signs in with a verified SMS code and registers with the session at once', async () => {
     respond = () => ({ status: 201, body: { ok: true, user, session } })
-    const result = await apiRepository.register({ accountType: 'business', businessKind: 'garden-centre', companyName: 'Yaşıl Həyət', fullName: 'Nigar Rzayeva', phone: '+994555123456', password: 'bag2026xx', otpChallengeId: 'c-1' })
+    const result = await apiRepository.register({ accountType: 'business', businessKinds: ['nursery', 'garden-centre'], companyName: 'Yaşıl Həyət', fullName: 'Nigar Rzayeva', phone: '+994555123456', password: 'bag2026xx', otpChallengeId: 'c-1' })
     expect(result.ok).toBe(true)
     expect(last().url.pathname).toBe('/api/v1/accounts')
-    expect(bodyOf(last())).toMatchObject({ accountType: 'business', companyName: 'Yaşıl Həyət', otpChallengeId: 'c-1', client: 'web' })
+    expect(bodyOf(last())).toMatchObject({ accountType: 'business', businessKinds: ['nursery', 'garden-centre'], companyName: 'Yaşıl Həyət', otpChallengeId: 'c-1', client: 'web' })
     expect(jar.values.get('gs_session')).toBe(TOKEN)
 
     respond = () => ({ body: { ok: true, user, session } })

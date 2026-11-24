@@ -181,7 +181,7 @@ public class AccountsApi(PostgresDatabase database) : IAsyncLifetime
         string accountType = "individual",
         string password = "Bagban-2026",
         string? companyName = null,
-        string? businessKind = null,
+        string[]? businessKinds = null,
         string? email = null,
         string fullName = "Test İstifadəçi",
         string? cityId = null)
@@ -191,7 +191,7 @@ public class AccountsApi(PostgresDatabase database) : IAsyncLifetime
         var challengeId = await VerifiedChallengeAsync(client, phone, "register");
         var response = await client.PostAsJsonAsync(
             "/api/v1/accounts",
-            new { accountType, fullName, phone, password, otpChallengeId = challengeId, companyName, businessKind, email, cityId },
+            new { accountType, fullName, phone, password, otpChallengeId = challengeId, companyName, businessKinds, email, cityId },
             Ct);
         var body = await JsonAsync(response);
         Assert.True(response.StatusCode == HttpStatusCode.Created, $"POST /accounts: {(int)response.StatusCode} {body}");

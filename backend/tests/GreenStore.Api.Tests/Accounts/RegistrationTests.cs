@@ -14,8 +14,8 @@ public sealed class RegistrationTests(AccountsApi api)
 {
     private static readonly FrontendContract Contract = FrontendContract.Load();
 
-    private static object Body(string phone, string challengeId, string accountType = "individual", string password = "Bagban-2026", string? companyName = null, string? businessKind = null, string? email = null, string fullName = "Leyla Məmmədova", string? cityId = null) =>
-        new { accountType, fullName, phone, password, otpChallengeId = challengeId, companyName, businessKind, email, cityId };
+    private static object Body(string phone, string challengeId, string accountType = "individual", string password = "Bagban-2026", string? companyName = null, string[]? businessKinds = null, string? email = null, string fullName = "Leyla Məmmədova", string? cityId = null) =>
+        new { accountType, fullName, phone, password, otpChallengeId = challengeId, companyName, businessKinds, email, cityId };
 
     [Fact]
     public async Task An_individual_account_is_created_and_signed_in()
@@ -64,7 +64,7 @@ public sealed class RegistrationTests(AccountsApi api)
     {
         // The collection shares one clock and other tests move it weeks ahead, so the year is read, not assumed.
         var year = api.Clock.GetUtcNow().Year;
-        var account = await api.RegisterAsync(accountType: "business", companyName: "  Gəncə Bağ Evi ", businessKind: "garden-centre", fullName: "Nihad Quliyev");
+        var account = await api.RegisterAsync(accountType: "business", companyName: "  Gəncə Bağ Evi ", businessKinds: ["garden-centre"], fullName: "Nihad Quliyev");
         var user = account.Response.GetProperty("user");
         var sellerId = user.GetProperty("sellerId").GetString()!;
 
@@ -75,7 +75,7 @@ public sealed class RegistrationTests(AccountsApi api)
 
         Assert.StartsWith("gence-bag-evi", slug);
         Assert.Equal("Gəncə Bağ Evi", page.GetProperty("name").GetString());
-        Assert.Equal("garden-centre", page.GetProperty("businessKind").GetString());
+        Assert.Equal(new[] { "garden-centre" }, Json.Strings(page.GetProperty("businessKinds")));
         Assert.Equal("Bağ mərkəzi", page.GetProperty("kind").GetString());
         Assert.Equal("business", page.GetProperty("type").GetString());
         Assert.Equal("baki", page.GetProperty("cityId").GetString());
@@ -89,10 +89,45 @@ public sealed class RegistrationTests(AccountsApi api)
     }
 
     [Fact]
+    public async Task A_business_can_be_of_several_kinds()
+    {
+        // Sent out of order and twice: kept once each, in the order nursery, garden-centre, landscaping.
+        var account = await api.RegisterAsync(accountType: "business", companyName: "Yaşıl Bağça", businessKinds: ["landscaping", "nursery", "landscaping"]);
+        var sellerId = account.Response.GetProperty("user").GetProperty("sellerId").GetString()!;
+
+        var seller = await api.GetAsync($"/api/v1/sellers/by-id/{sellerId}", account.Token);
+        var slug = seller.GetProperty("slug").GetString()!;
+
+        Assert.Equal(new[] { "nursery", "landscaping" }, Json.Strings(seller.GetProperty("businessKinds")));
+        Assert.Equal("Tingçilik təsərrüfatı · Landşaft şirkəti", seller.GetProperty("kind").GetString());
+        Assert.Empty(Contract.Check(seller, "Seller"));
+        foreach (var (kind, listed) in new[] { ("nursery", true), ("landscaping", true), ("garden-centre", false) })
+        {
+            var directory = await api.GetAsync($"/api/v1/sellers?businessKind={kind}&pageSize=60", account.Token);
+            Assert.Equal(listed, Json.Slugs(directory.GetProperty("items")).Contains(slug));
+        }
+    }
+
+    [Fact]
+    public async Task A_business_needs_at_least_one_known_kind()
+    {
+        var client = api.Client();
+        var phone = AccountsApi.NewPhone();
+        var challengeId = await api.VerifiedChallengeAsync(client, phone, "register");
+
+        var empty = await client.PostAsJsonAsync("/api/v1/accounts", Body(phone, challengeId, accountType: "business", companyName: "Bağ Evi", businessKinds: []), Ct);
+        var unknown = await client.PostAsJsonAsync("/api/v1/accounts", Body(phone, challengeId, accountType: "business", companyName: "Bağ Evi", businessKinds: ["nursery", "shop"]), Ct);
+
+        var errors = (await ProblemAsync(empty, HttpStatusCode.BadRequest, "validation")).GetProperty("errors");
+        Assert.Equal("required", errors.GetProperty("businessKinds")[0].GetString());
+        await ProblemAsync(unknown, HttpStatusCode.BadRequest, "bad-request");
+    }
+
+    [Fact]
     public async Task Two_businesses_with_one_name_get_two_addresses()
     {
-        var first = await api.RegisterAsync(accountType: "business", companyName: "Lənkəran Sitrus", businessKind: "nursery", cityId: "lenkeran");
-        var second = await api.RegisterAsync(accountType: "business", companyName: "Lənkəran Sitrus", businessKind: "nursery");
+        var first = await api.RegisterAsync(accountType: "business", companyName: "Lənkəran Sitrus", businessKinds: ["nursery"], cityId: "lenkeran");
+        var second = await api.RegisterAsync(accountType: "business", companyName: "Lənkəran Sitrus", businessKinds: ["nursery"]);
 
         var a = await api.GetAsync($"/api/v1/sellers/by-id/{first.Response.GetProperty("user").GetProperty("sellerId").GetString()}", first.Token);
         var b = await api.GetAsync($"/api/v1/sellers/by-id/{second.Response.GetProperty("user").GetProperty("sellerId").GetString()}", second.Token);
@@ -157,7 +192,7 @@ public sealed class RegistrationTests(AccountsApi api)
         Assert.Equal("invalid", errors.GetProperty("email")[0].GetString());
         Assert.Equal("required", errors.GetProperty("fullName")[0].GetString());
         Assert.Equal("required", errors.GetProperty("companyName")[0].GetString());
-        Assert.Equal("required", errors.GetProperty("businessKind")[0].GetString());
+        Assert.Equal("required", errors.GetProperty("businessKinds")[0].GetString());
         Assert.Equal("invalid", errors.GetProperty("cityId")[0].GetString());
 
         // Nothing was used up: the same proof still works once the fields are right.

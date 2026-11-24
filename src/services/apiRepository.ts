@@ -31,6 +31,7 @@ import { headers } from 'next/headers'
 import { formatPhone } from '@/features/auth/validation'
 import type { SearchState } from '@/features/search/searchState'
 import type {
+  BusinessKind,
   Category,
   City,
   ContactReveal,
@@ -271,9 +272,21 @@ const OTP_ERRORS: Record<string, NonNullable<OtpVerifyResult['error']>> = {
   'otp.too-many-attempts': 'too-many-attempts',
 }
 
+/**
+ * A seller's kinds across their change to a list (Nov 2026, docs/handoff/multi-business-kind.md). The site and the API
+ * build at the same time on a merge, and an API not yet deployed sends one `businessKind`. Remove the fallback in a
+ * later release, once every API sends `businessKinds`.
+ */
+function withKinds<T extends Seller>(seller: T): T {
+  if (Array.isArray(seller.businessKinds)) return seller
+  const { businessKind, ...rest } = seller as T & { businessKind?: BusinessKind }
+  return { ...rest, businessKinds: businessKind ? [businessKind] : [] } as T
+}
+
 /** The business profile's own number in the site's spacing too. */
 function toOwnSeller(seller: OwnSeller): OwnSeller {
-  return seller.phone ? { ...seller, phone: formatPhone(seller.phone) } : seller
+  const own = withKinds(seller)
+  return own.phone ? { ...own, phone: formatPhone(own.phone) } : own
 }
 
 /* ---------- The owner's listings (phase 3, backend-contract.md 2.2, 3.3) ---------- */
@@ -384,13 +397,16 @@ export const apiRepository: MarketplaceRepository = {
 
   /* Sellers */
   async listSellers(query) {
-    return read<PageResult<Seller>>('sellers', [TAG.sellers], sellerListParams(query))
+    const found = await read<PageResult<Seller>>('sellers', [TAG.sellers], sellerListParams(query))
+    return { ...found, items: found.items.map(withKinds) }
   },
   async getSeller(slug) {
-    return readOne<Seller>(`sellers/${path([slug])}`, [TAG.sellers, TAG.seller(slug)])
+    const seller = await readOne<Seller>(`sellers/${path([slug])}`, [TAG.sellers, TAG.seller(slug)])
+    return seller && withKinds(seller)
   },
   async getSellerById(id) {
-    return readOne<Seller>(`sellers/by-id/${path([id])}`, [TAG.sellers, TAG.seller(id)])
+    const seller = await readOne<Seller>(`sellers/by-id/${path([id])}`, [TAG.sellers, TAG.seller(id)])
+    return seller && withKinds(seller)
   },
 
   /* Services */

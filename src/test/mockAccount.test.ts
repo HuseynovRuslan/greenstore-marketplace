@@ -23,7 +23,7 @@ describe('mock repository: the demo account', () => {
   })
 
   it('registers a new account signed in at once, without a seller page yet', async () => {
-    const result = await repo.register({ accountType: 'business', businessKind: 'nursery', companyName: 'Yaşıl', fullName: ' Nigar ', phone: '+994555123456', password: 'bag2026xx', otpChallengeId: verified('555123456') })
+    const result = await repo.register({ accountType: 'business', businessKinds: ['nursery'], companyName: 'Yaşıl', fullName: ' Nigar ', phone: '+994555123456', password: 'bag2026xx', otpChallengeId: verified('555123456') })
     expect(result).toMatchObject({ ok: true, user: { fullName: 'Nigar', phone: '+994 55 512 34 56', email: '', accountType: 'business', role: 'user', locale: 'az' } })
     expect(result.ok && result.user.sellerId).toBeUndefined()
   })

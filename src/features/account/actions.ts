@@ -2,14 +2,15 @@
 
 import { cookies } from 'next/headers'
 import { updateTag } from 'next/cache'
-import { businessKindOf, type AccountProfile } from '@/data/user'
+import type { AccountProfile } from '@/data/user'
 import { ApiError, isApiError } from '@/services/apiRepository'
 import { getRepository } from '@/services/repository'
 import { clearSession, refreshSession } from '@/services/session'
 import { SESSION_COOKIE, SESSION_HINT_COOKIE } from '@/state/bootstrap'
-import type { FavoriteItems, OwnSeller, SellerProfilePatch } from '@/types'
+import type { BusinessKind, FavoriteItems, OwnSeller, SellerProfilePatch } from '@/types'
 import { waitText } from '@/features/auth/messages'
 import { isValidEmail, messages } from '@/features/auth/validation'
+import { orderedKinds } from '@/features/seller/businessKinds'
 import { accountOf } from './profile'
 
 /*
@@ -62,7 +63,8 @@ export interface ProfileInput {
   email: string
   /** Business accounts: their «mağaza» */
   companyName?: string
-  businessType?: string
+  /** One or more; left out, the shop's kinds stay */
+  businessKinds?: BusinessKind[]
   cityId?: string
   address?: string
   about?: string
@@ -73,14 +75,15 @@ export interface ProfileInput {
   sellerVersion?: string
 }
 
-export type ProfileField = 'company' | 'contact' | 'email' | 'address' | 'about'
+export type ProfileField = 'company' | 'kinds' | 'contact' | 'email' | 'address' | 'about'
 
-const FIELD_OF: Record<string, ProfileField> = { fullName: 'contact', contactPerson: 'contact', email: 'email', name: 'company', address: 'address', about: 'about' }
+const FIELD_OF: Record<string, ProfileField> = { fullName: 'contact', contactPerson: 'contact', email: 'email', name: 'company', businessKinds: 'kinds', address: 'address', about: 'about' }
 
 const FIELD_TEXT: Record<ProfileField, (code: string) => string> = {
   contact: (code) => (code === 'too-long' ? 'Ad ən çox 60 simvol olsun.' : messages.nameRequired),
   email: () => messages.emailFormat,
   company: (code) => (code === 'too-long' ? 'Şirkətin adı ən çox 80 simvol olsun.' : code === 'too-short' ? 'Şirkətin adı ən azı 2 simvol olsun.' : messages.companyRequired),
+  kinds: () => 'Ən azı bir biznes növü seçin.',
   address: () => 'Ünvan ən çox 200 simvol olsun.',
   about: () => 'Mətn ən çox 2000 simvol olsun.',
 }
@@ -90,7 +93,7 @@ const LIMITS = { fullName: 60, email: 254, companyMin: 2, company: 80, address: 
 
 const text = (value: unknown, max: number) => (typeof value === 'string' ? value.trim().slice(0, max) : '')
 
-type ProfileFields = { fullName: string; email: string; companyName: string; address: string; about: string }
+type ProfileFields = { fullName: string; email: string; companyName: string; businessKinds?: BusinessKind[]; address: string; about: string }
 
 /**
  * The API's field rules, checked before anything is sent: the account and its «mağaza» are two requests, and a shop
@@ -104,6 +107,7 @@ function profileFieldError(fields: ProfileFields, business: boolean): { field: P
   if (!fields.companyName) return { field: 'company', code: 'required' }
   if (fields.companyName.length < LIMITS.companyMin) return { field: 'company', code: 'too-short' }
   if (fields.companyName.length > LIMITS.company) return { field: 'company', code: 'too-long' }
+  if (fields.businessKinds?.length === 0) return { field: 'kinds', code: 'required' }
   if (fields.address.length > LIMITS.address) return { field: 'address', code: 'too-long' }
   if (fields.about.length > LIMITS.about) return { field: 'about', code: 'too-long' }
   return undefined
@@ -132,7 +136,7 @@ export type SaveProfileResult =
 
 /**
  * Saves the profile form: the account (`PATCH /me`: name, e-mail) and, for a business, its «mağaza» (`PATCH
- * /me/seller`: name, kind, city, address, about; the contact person is the account's name). Every field is checked
+ * /me/seller`: name, kinds, city, address, about; the contact person is the account's name). Every field is checked
  * against the API's rules first, and the shop's version against the one the form was loaded with, so in practice only
  * the API failing in between can stop the shop after the account was saved: `saved` then says what was. The public
  * seller page and the directory show the change at once (their cached reads are refreshed).
@@ -144,6 +148,7 @@ export async function saveProfile(input: ProfileInput): Promise<SaveProfileResul
     fullName: text(input.fullName, LIMITS.fullName + 1),
     email: text(input.email, LIMITS.email + 1),
     companyName: text(input.companyName, LIMITS.company + 1),
+    businessKinds: Array.isArray(input.businessKinds) ? orderedKinds(input.businessKinds) : undefined,
     address: text(input.address, LIMITS.address + 1),
     about: text(input.about, LIMITS.about + 1),
   }
@@ -174,7 +179,7 @@ export async function saveProfile(input: ProfileInput): Promise<SaveProfileResul
       contactPerson: fields.fullName,
       address: fields.address,
       about: fields.about,
-      ...(businessKindOf(input.businessType) ? { businessKind: businessKindOf(input.businessType) } : {}),
+      ...(fields.businessKinds?.length ? { businessKinds: fields.businessKinds } : {}),
       ...(typeof input.cityId === 'string' && input.cityId ? { cityId: input.cityId } : {}),
       ...(version ? { version } : {}),
     }

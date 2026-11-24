@@ -32,7 +32,7 @@ Burada ASP.NET Core API qoşulanda müqavilədə dəyişməli olan hər şey yı
 | `elanlar/[slug]/page.tsx` (`generateStaticParams`) | bütün elanlar | `generateStaticParams` çıxır: səhifə ilk sorğuda yaranır və keşlənir |
 | `xidmetler/[slug]/page.tsx` | oxşar xidmətləri bütün siyahıdan seçir | ★ `getRelatedServices(service)` → `{ fromProvider, similar }` |
 | `saticilar/[slug]/page.tsx` | satıcının xidmətlərini süzür | mövcud `listProviderServices(providerId)` |
-| `saticilar/page.tsx` | bütün satıcılar, sonra `type === 'business'` süzgəci | `listSellers({ businessKind?, cityId?, page })` → `PageResult<Seller>` |
+| `saticilar/page.tsx` | bütün satıcılar, sonra `type === 'business'` süzgəci | `listSellers({ businessKind?, cityId?, page })` → `PageResult<Seller>` (`businessKind`: bu növü olanlar; 24 noyabr 2026-dan `Seller.businessKinds` siyahıdır, [multi-business-kind.md](multi-business-kind.md)) |
 
 ### 1.2 Slug-da elanın nömrəsi ⚠
 
@@ -102,7 +102,7 @@ API belə elanlar üçün `price: 0` və `priceType: 'agreement'` göndərir. UI
 > - **Sessiya.** Token `session.token`-dədir (43 simvol); sayt onu `gs_session` cookie-sində saxlayıb hər sorğuda `Authorization: Bearer <token>` göndərir. 30 gün son istifadədən sayılır; 401 `unauthorized` gələndə cookie silinir.
 > - **Profil.** `GET /me` → `UserProfile` + `role`, `locale` (`email` yoxdursa `""`, `phone` E.164: `+994505551234`). `PATCH /me` `{ fullName?, email?, locale? }` (`email: ""` və ya `null` silir). `POST /me/password` `{ current, next }` → `{ ok: true }` (400 `auth.wrong-password`; digər sessiyalar ləğv olunur). `POST /me/phone` `{ otpChallengeId }` → `UserProfile`. `POST /accounts/password-reset` → `{ ok: true }` (bütün sessiyalar ləğv olunur).
 > - ★ **Aktiv cihazlar:** `GET /me/sessions` → `[{ id, client: 'web' | 'ios' | 'android', deviceName?, createdAt, lastSeenAt, expiresAt, current }]`, `DELETE /me/sessions/{id}` → 204.
-> - ★ **Biznes profili («mağaza»):** `GET /me/seller` → public `Seller` + sahibin öz `phone`-u (varsa) və `version`; `PATCH /me/seller` göndərilən sahələri dəyişir: `name`, `businessKind`, `cityId`, `contactPerson`, `address`, `about`, `terms`, `hours`, `offers`, `phone`, `whatsapp`, `email`, `instagram`, `website`, `responseMinutes`, `location`, könüllü `version` (köhnədirsə 409 `concurrency-conflict`). `""`, `null` və ya `[]` dəyəri silir. Slug ad dəyişəndə dəyişmir. Fərdi hesabda 404 `seller.not-found`. Dəyişiklik `/sellers/{slug}` və `/sellers`-də dərhal görünür.
+> - ★ **Biznes profili («mağaza»):** `GET /me/seller` → public `Seller` + sahibin öz `phone`-u (varsa) və `version`; `PATCH /me/seller` göndərilən sahələri dəyişir: `name`, `businessKinds` (bir və ya bir neçəsi; `[]` və `null` `required`dır), `cityId`, `contactPerson`, `address`, `about`, `terms`, `hours`, `offers`, `phone`, `whatsapp`, `email`, `instagram`, `website`, `responseMinutes`, `location`, könüllü `version` (köhnədirsə 409 `concurrency-conflict`). `""`, `null` və ya `[]` dəyəri silir. Slug ad dəyişəndə dəyişmir. Fərdi hesabda 404 `seller.not-found`. Dəyişiklik `/sellers/{slug}` və `/sellers`-də dərhal görünür.
 > - **Qeyd.** Profil formasındakı fərdi hesabın «Şəhər» və «Ünvan» sahələri üçün `users` cədvəlində yer yoxdur (DATABASE.md §3.2), ona görə API onları saxlamır; biznesdə onlar `PATCH /me/seller`-dədir.
 >
 > **Implemented (phase 2), frontend tərəfi:**

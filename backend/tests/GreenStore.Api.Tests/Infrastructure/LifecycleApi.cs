@@ -189,7 +189,7 @@ public sealed class LifecycleApi(PostgresDatabase database) : AccountsApi(databa
 
     /// <summary>A business account, its seller row created with it.</summary>
     public Task<Account> RegisterBusinessAsync() =>
-        RegisterAsync(accountType: "business", businessKind: "nursery", companyName: $"Test Bağ {Guid.NewGuid().ToString("N")[..6]}");
+        RegisterAsync(accountType: "business", businessKinds: ["nursery"], companyName: $"Test Bağ {Guid.NewGuid().ToString("N")[..6]}");
 }
 
 /// <summary>Images made with libvips for the upload tests.</summary>

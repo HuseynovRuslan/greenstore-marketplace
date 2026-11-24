@@ -30,7 +30,7 @@ const { registerAccount, requestCode, resetPasswordWithCode, signInWithPassword,
 const { loadOwnListings } = await import('@/features/cabinet/actions')
 
 const user: UserProfile = { id: '0193-u', fullName: 'Nigar Rzayeva', email: 'nigar@bag.az', phone: '+994 55 512 34 56', accountType: 'business', sellerId: '0193-s', role: 'user', locale: 'az' }
-const seller = { id: '0193-s', slug: 'yasil-heyet', name: 'Yaşıl Həyət', kind: 'Bağ mərkəzi', businessKind: 'garden-centre', type: 'business', cityId: 'baki', activeListings: 0, verified: false, image: '', version: '812' } as OwnSeller
+const seller = { id: '0193-s', slug: 'yasil-heyet', name: 'Yaşıl Həyət', kind: 'Bağ mərkəzi', businessKinds: ['garden-centre'], type: 'business', cityId: 'baki', activeListings: 0, verified: false, image: '', version: '812' } as OwnSeller
 const problem = (status: number, code: string, errors?: Record<string, string[]>, retryAfterSec?: number) => new ApiError(status, code, 'x', { code, ...(errors ? { errors } : {}) }, retryAfterSec)
 
 beforeEach(() => {
@@ -46,13 +46,13 @@ beforeEach(() => {
 })
 
 describe('sign-in actions', () => {
-  const registration = { accountType: 'business' as const, businessKind: 'garden-centre' as const, companyName: ' Yaşıl Həyət ', fullName: 'Nigar Rzayeva', phone: '55 512 34 56', password: 'yasil2026', otpChallengeId: 'c-1' }
+  const registration = { accountType: 'business' as const, businessKinds: ['garden-centre' as const], companyName: ' Yaşıl Həyət ', fullName: 'Nigar Rzayeva', phone: '55 512 34 56', password: 'yasil2026', otpChallengeId: 'c-1' }
 
   it('registers a business: the account comes with its «mağaza», and the sellers’ cached reads are refreshed', async () => {
     repo.register = vi.fn(async () => ({ ok: true, user }))
     const result = await registerAccount(registration)
-    expect(repo.register).toHaveBeenCalledWith(expect.objectContaining({ companyName: 'Yaşıl Həyət', phone: '+994555123456', otpChallengeId: 'c-1' }))
-    expect(result).toMatchObject({ ok: true, userId: '0193-u', account: { companyName: 'Yaşıl Həyət', businessType: 'Bağ mərkəzi', sellerSlug: 'yasil-heyet', sellerVersion: '812', phoneVerified: true } })
+    expect(repo.register).toHaveBeenCalledWith(expect.objectContaining({ businessKinds: ['garden-centre'], companyName: 'Yaşıl Həyət', phone: '+994555123456', otpChallengeId: 'c-1' }))
+    expect(result).toMatchObject({ ok: true, userId: '0193-u', account: { companyName: 'Yaşıl Həyət', businessKinds: ['garden-centre'], sellerSlug: 'yasil-heyet', sellerVersion: '812', phoneVerified: true } })
     expect(updateTag).toHaveBeenCalledWith('sellers')
   })
 
@@ -63,6 +63,7 @@ describe('sign-in actions', () => {
       [problem(400, 'otp.not-verified'), /təsdiqinin vaxtı keçib/],
       [problem(400, 'validation', { password: ['too-weak'] }), /hərf və rəqəm/],
       [problem(400, 'validation', { companyName: ['too-long'] }), /2–80 simvol/],
+      [problem(400, 'validation', { businessKinds: ['required'] }), /Ən azı bir biznes növü/],
     ]
     for (const [error, text] of answers) {
       repo.register = vi.fn(async () => {
@@ -72,6 +73,19 @@ describe('sign-in actions', () => {
       expect(result.ok).toBe(false)
       expect(!result.ok && result.error).toMatch(text)
     }
+  })
+
+  it('sends a business’s kinds once each, in order, and refuses a business without a known kind', async () => {
+    repo.register = vi.fn(async () => ({ ok: true, user }))
+    await registerAccount({ ...registration, businessKinds: ['landscaping', 'nursery', 'landscaping'] })
+    expect(repo.register).toHaveBeenCalledWith(expect.objectContaining({ businessKinds: ['nursery', 'landscaping'] }))
+
+    repo.register = vi.fn()
+    for (const businessKinds of [[], ['shop'], undefined]) {
+      const result = await registerAccount({ ...registration, businessKinds: businessKinds as never })
+      expect(result).toEqual({ ok: false, error: 'Biznesin növünü və adını yazın.' })
+    }
+    expect(repo.register).not.toHaveBeenCalled()
   })
 
   it('keeps the mock’s answer in DATA_SOURCE=mock: the browser signs the demo in', async () => {
@@ -178,9 +192,9 @@ describe('account actions', () => {
   it('saves the profile: the account, then the «mağaza» with its version; the public page is refreshed', async () => {
     repo.updateMe = vi.fn(async (patch: Partial<UserProfile>) => ({ ...user, ...patch }))
     repo.updateOwnSeller = vi.fn(async (patch: Partial<OwnSeller>) => ({ ...seller, ...patch, version: '813' }))
-    const result = await saveProfile({ fullName: ' Nigar R. ', email: '', companyName: 'Yaşıl Həyət Bağ', businessType: 'Landşaft şirkəti', cityId: 'quba', address: ' Quba ', about: '' })
+    const result = await saveProfile({ fullName: ' Nigar R. ', email: '', companyName: 'Yaşıl Həyət Bağ', businessKinds: ['landscaping', 'nursery', 'landscaping'], cityId: 'quba', address: ' Quba ', about: '' })
     expect(repo.updateMe).toHaveBeenCalledWith({ fullName: 'Nigar R.', email: '' })
-    expect(repo.updateOwnSeller).toHaveBeenCalledWith({ name: 'Yaşıl Həyət Bağ', contactPerson: 'Nigar R.', address: 'Quba', about: '', businessKind: 'landscaping', cityId: 'quba', version: '812' })
+    expect(repo.updateOwnSeller).toHaveBeenCalledWith({ name: 'Yaşıl Həyət Bağ', contactPerson: 'Nigar R.', address: 'Quba', about: '', businessKinds: ['nursery', 'landscaping'], cityId: 'quba', version: '812' })
     expect(result).toMatchObject({ ok: true, account: { fullName: 'Nigar R.', companyName: 'Yaşıl Həyət Bağ', cityId: 'quba', sellerVersion: '813' } })
     expect(updateTag).toHaveBeenCalledWith('sellers')
   })

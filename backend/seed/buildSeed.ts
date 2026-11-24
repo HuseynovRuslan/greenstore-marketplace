@@ -272,7 +272,7 @@ function demoData() {
   /* Sellers and their owners */
   const sellerOwner = new Map<string, string>()
   const sellerRows = sellers.map((s) => {
-    if (!s.phone || !s.businessKind) throw new Error(`Demo seller ${s.id} needs a phone and a business kind`)
+    if (!s.phone || !s.businessKinds?.length) throw new Error(`Demo seller ${s.id} needs a phone and a business kind`)
     const owner = addUser(`owner-${s.id}`, {
       fullName: s.contactPerson ?? s.name,
       phone: e164(s.phone),
@@ -286,7 +286,7 @@ function demoData() {
       slug: s.slug,
       owner,
       name: s.name,
-      businessKind: s.businessKind,
+      businessKinds: s.businessKinds,
       cityId: s.cityId,
       ...(s.address ? { address: s.address } : {}),
       ...(s.location ? { location: s.location } : {}),

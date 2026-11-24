@@ -165,7 +165,8 @@ CREATE TABLE sellers (
   owner_user_id    uuid NOT NULL UNIQUE REFERENCES users (id),   -- bir istifadəçiyə bir biznes profili (qərar 1)
   slug             text NOT NULL UNIQUE CHECK (slug ~ '^[a-z0-9-]{1,80}$'),
   name             text NOT NULL CHECK (char_length(name) BETWEEN 2 AND 80),
-  business_kind    text NOT NULL CHECK (business_kind IN ('nursery', 'garden-centre', 'landscaping')),
+  business_kinds   text[] NOT NULL CHECK (cardinality(business_kinds) >= 1
+                     AND business_kinds <@ ARRAY['nursery', 'garden-centre', 'landscaping']::text[]),  -- bir və ya bir neçəsi, hər biri bir dəfə, bu sırada
   city_id          text NOT NULL REFERENCES cities (id),
   address          text CHECK (char_length(address) <= 200),
   lat              numeric(8,6),
@@ -211,7 +212,7 @@ CREATE TABLE photos (
 CREATE INDEX ix_photos_unattached ON photos (created_at) WHERE attached_at IS NULL;
 ```
 
-- **Kontrakta uyğunluq.** `Seller.kind` («Tingçilik təsərrüfatı») bazada saxlanmır. API onu `business_kind`-dən sorğunun dilində doldurur.
+- **Kontrakta uyğunluq.** `Seller.kind` («Tingçilik təsərrüfatı · Bağ mərkəzi») bazada saxlanmır. API onu `business_kinds`-dən sorğunun dilində doldurur. Biznesin bir neçə növü ola bilər (24 noyabr 2026, miqrasiya `MultipleBusinessKinds`): siyahı həmişə `nursery`, `garden-centre`, `landscaping` sırasındadır. Kataloqun `?businessKind=` süzgəci «bu növ də var» deməkdir: `'nursery' = ANY (business_kinds)`.
 - **Hesablanan sahələr.** `Seller.memberSince` `created_at`-ın ilidir. `activeListings` sorğu ilə sayılır və 60 saniyə keşlənir.
 
 ### 3.4 Elanlar

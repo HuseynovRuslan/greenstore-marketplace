@@ -107,6 +107,7 @@ export interface SitemapPage {
 
 /** The sellers directory (/saticilar), one page (backend-contract.md 1.1). */
 export interface SellerQuery {
+  /** Businesses that have this kind (among others: a nursery that is a garden centre too is under both) */
   businessKind?: BusinessKind
   cityId?: string
   page: number

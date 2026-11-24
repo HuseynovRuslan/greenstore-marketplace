@@ -3,6 +3,7 @@
 import { updateTag } from 'next/cache'
 import type { AccountProfile } from '@/data/user'
 import { accountOf } from '@/features/account/profile'
+import { orderedKinds } from '@/features/seller/businessKinds'
 import { localDigits } from '@/lib/phone'
 import { dataSource } from '@/seo/env'
 import { isApiError } from '@/services/apiRepository'
@@ -65,15 +66,14 @@ export async function verifyCode(challengeId: string, code: string): Promise<Ver
   }
 }
 
-const KINDS: BusinessKind[] = ['nursery', 'garden-centre', 'landscaping']
-
 /**
  * The new account, signed in at once (backend-contract.md 2.1). A business account opens its «mağaza» too: its public
  * page /saticilar/<slug> exists from this moment, so the sellers' cached reads are refreshed.
  */
 export async function registerAccount(input: {
   accountType: SellerType
-  businessKind?: BusinessKind
+  /** Business accounts: one or more */
+  businessKinds?: BusinessKind[]
   companyName?: string
   fullName: string
   phone: string
@@ -82,7 +82,8 @@ export async function registerAccount(input: {
   otpChallengeId: string
 }): Promise<{ ok: true; userId: string; account?: AccountProfile } | Fail> {
   if (input?.accountType !== 'business' && input?.accountType !== 'individual') return fail('Hesab növünü seçin.')
-  if (input.accountType === 'business' && (!input.businessKind || !KINDS.includes(input.businessKind) || !input.companyName?.trim())) {
+  const kinds = Array.isArray(input.businessKinds) ? orderedKinds(input.businessKinds) : []
+  if (input.accountType === 'business' && (kinds.length === 0 || !input.companyName?.trim())) {
     return fail('Biznesin növünü və adını yazın.')
   }
   if (!input.fullName?.trim() || input.fullName.length > 60) return fail('Adınızı yazın.')
@@ -92,7 +93,7 @@ export async function registerAccount(input: {
   try {
     const result = await getRepository().register({
       accountType: input.accountType,
-      ...(business ? { businessKind: input.businessKind, companyName: input.companyName?.trim() } : {}),
+      ...(business ? { businessKinds: kinds, companyName: input.companyName?.trim() } : {}),
       fullName: input.fullName.trim(),
       phone: `+994${localDigits(input.phone)}`,
       ...(input.email?.trim() ? { email: input.email.trim() } : {}),

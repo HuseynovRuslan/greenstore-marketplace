@@ -223,7 +223,8 @@ export interface OwnSeller extends Seller {
  */
 export interface SellerProfilePatch {
   name?: string
-  businessKind?: BusinessKind
+  /** One or more; `[]` is refused (a business always has a kind) */
+  businessKinds?: BusinessKind[]
   cityId?: string
   contactPerson?: string
   address?: string
@@ -349,7 +350,10 @@ export interface Listing {
   stats?: ListingStats
 }
 
-/** «Tingçilik təsərrüfatı», «Bağ mərkəzi», «Landşaft şirkəti». `Seller.kind` keeps the display text. */
+/**
+ * «Tingçilik təsərrüfatı», «Bağ mərkəzi», «Landşaft şirkəti». A business has one or more (`Seller.businessKinds`, in
+ * this order); `Seller.kind` keeps the display text («Tingçilik təsərrüfatı · Bağ mərkəzi»).
+ */
 export type BusinessKind = 'nursery' | 'garden-centre' | 'landscaping'
 
 /** What a business offers besides selling («Çatdırılma», «Əkin», …). */
@@ -365,7 +369,8 @@ export interface OpeningHours {
 
 /** Optional seller fields added for business profiles (nurseries, garden centres, landscaping companies). */
 export interface Seller {
-  businessKind?: BusinessKind
+  /** One or more, each once, in the order nursery, garden-centre, landscaping */
+  businessKinds?: BusinessKind[]
   /** Square logo (path under /public) */
   logo?: string
   hours?: OpeningHours[]
@@ -879,7 +884,8 @@ export interface OtpVerifyResult {
 
 export interface RegistrationInput {
   accountType: SellerType
-  businessKind?: BusinessKind
+  /** Business accounts: one or more */
+  businessKinds?: BusinessKind[]
   companyName?: string
   fullName: string
   phone: string

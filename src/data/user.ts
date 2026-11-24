@@ -7,8 +7,8 @@ import type { BusinessKind, SavedSearch, UserProfile } from '@/types'
 export interface AccountProfile extends UserProfile {
   /** "Şirkətin adı" (empty for individual accounts) */
   companyName?: string
-  /** "Biznes növü seçin" */
-  businessType?: string
+  /** «Biznesin növü»: one or more (business accounts) */
+  businessKinds?: BusinessKind[]
   /** "Şəhər seçin" (id from `@/data/cities`) */
   cityId?: string
   /** "Ünvan" */
@@ -33,16 +33,11 @@ export interface AccountProfile extends UserProfile {
   sellerVersion?: string
 }
 
-/** The business kinds as the forms name them (the order of `businessTypes`). */
+/** The business kinds as the forms name them (src/features/seller/businessKinds.ts keeps their order). */
 export const businessKindLabels: Record<BusinessKind, string> = {
   nursery: 'Tingçilik təsərrüfatı',
   'garden-centre': 'Bağ mərkəzi',
   landscaping: 'Landşaft şirkəti',
-}
-
-/** «Biznesin növü» label → kind (the profile form keeps the label). */
-export function businessKindOf(label: string | undefined): BusinessKind | undefined {
-  return (Object.keys(businessKindLabels) as BusinessKind[]).find((k) => businessKindLabels[k] === label)
 }
 
 export interface NotificationSettings {
@@ -53,9 +48,6 @@ export interface NotificationSettings {
   /** "Yeniliklər və xüsusi təkliflər" */
   news: boolean
 }
-
-/** "Biznes növü seçin" options — the selected value and the hint "Bağ mərkəzi və ya landşaft şirkəti də seçə bilərsiniz." */
-export const businessTypes = ['Tingçilik təsərrüfatı', 'Bağ mərkəzi', 'Landşaft şirkəti']
 
 /**
  * The demo account's «Seçilmişlər», as if loaded from the server on sign-in (Figma "Seçilmişlər · 390"). Figma had the
@@ -83,7 +75,7 @@ export const currentUser: AccountProfile = {
   role: 'user',
   locale: 'az',
   companyName: 'Abşeron Tingçilik',
-  businessType: 'Tingçilik təsərrüfatı',
+  businessKinds: ['nursery'],
   cityId: 'abseron',
   address: 'Məhəmmədi qəsəbəsi, tingçilik təsərrüfatı',
   about:

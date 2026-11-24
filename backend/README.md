@@ -196,7 +196,7 @@ Konfiqurasiya `appsettings.json`-dadır, dev dəyərləri `appsettings.Developme
 | `GET /api/v1/services?q&categoryId&cityId&providerKind&minPrice&maxPrice&sort&page&pageSize` | `ServiceSearchResult`; `providerKind=company\|individual`, standart səhifə 6 |
 | `GET /api/v1/services/{slug}`, `GET /api/v1/services/{id}/related` | xidmət; `{ fromProvider, similar }` |
 | `GET /api/v1/providers/{id}`, `GET /api/v1/providers/{id}/services` | `ServiceProvider` (id hesabın id-sidir), onun xidmətləri; xidmətləri biznesin satıcı id-si ilə də vermək olur (satıcı səhifəsi belə soruşur) |
-| `GET /api/v1/sellers?businessKind&cityId&page&pageSize` | `PageResult<Seller>`: əvvəl təsdiqlənmişlər, sonra ada görə (Azərbaycan əlifbası) |
+| `GET /api/v1/sellers?businessKind&cityId&page&pageSize` | `PageResult<Seller>`: əvvəl təsdiqlənmişlər, sonra ada görə (Azərbaycan əlifbası). `businessKind`: bu növü olan bizneslər (bir neçə növü olan biznes hər birində çıxır) |
 | `GET /api/v1/sellers/{slug}`, `GET /api/v1/sellers/by-id/{id}` | satıcı |
 | `GET /api/v1/sitemap/{listing\|seller\|service}?cursor&limit` | `{ items: [{ slug, updatedAt }], nextCursor? }`, `limit` 1–5000 (standart 1000) |
 
@@ -254,7 +254,7 @@ Yalnız Development-də (`Seed:DevAccounts=true`, `appsettings.Development.json`
 
 - Hər ikisi şifrə ilə (telefon və ya e-poçt) və SMS kodu ilə daxil ola bilər (Development-də kod `demoCode`-dadır).
 - **Demo satıcılar** (nümunə marketplace) şifrəsizdir, amma mobil nömrəsi olanlar SMS kodu ilə daxil ola bilər. Məsələn, «Abşeron Tingçilik»in sahibi Elvin Əliyev: `+994 50 555 12 34`. Belə hesabın «mağaza»sı `/me/seller`-dədir.
-- Yeni biznes hesabı: `POST /auth/otp` (`purpose: register`) → `demoCode` ilə `POST /auth/otp/verify` → `POST /accounts` (`accountType: business`, `businessKind`, `companyName`). Satıcı səhifəsi (`GET /sellers/{slug}`) dərhal açılır, 0 elanla.
+- Yeni biznes hesabı: `POST /auth/otp` (`purpose: register`) → `demoCode` ilə `POST /auth/otp/verify` → `POST /accounts` (`accountType: business`, `businessKinds`: bir və ya bir neçəsi, `companyName`). Satıcı səhifəsi (`GET /sellers/{slug}`) dərhal açılır, 0 elanla.
 
 ## 10. Struktur
 

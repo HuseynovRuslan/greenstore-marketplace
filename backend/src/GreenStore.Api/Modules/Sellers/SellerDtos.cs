@@ -17,7 +17,7 @@ public record SellerDto
 
     public required string Name { get; init; }
 
-    /// <summary>«Tingçilik təsərrüfatı»: <see cref="BusinessKind"/> named in the request's language.</summary>
+    /// <summary>«Tingçilik təsərrüfatı · Bağ mərkəzi»: <see cref="BusinessKinds"/> named in the request's language.</summary>
     public required string Kind { get; init; }
 
     public AccountType Type { get; init; } = AccountType.Business;
@@ -47,7 +47,8 @@ public record SellerDto
 
     public string? ContactPerson { get; init; }
 
-    public BusinessKind BusinessKind { get; init; }
+    /// <summary>One or more, each once, in the order nursery, garden-centre, landscaping.</summary>
+    public IReadOnlyList<BusinessKind> BusinessKinds { get; init; } = [];
 
     public string? Logo { get; init; }
 
@@ -107,7 +108,7 @@ public static class SellerMapping
             Id = s.Id.ToString(),
             Slug = s.Slug,
             Name = s.Name,
-            Kind = SellerTexts.BusinessKindName(s.BusinessKind, read.Language),
+            Kind = SellerTexts.BusinessKindNames(s.BusinessKinds, read.Language),
             CityId = s.CityId,
             ActiveListings = stats.ActiveListings,
             Verified = s.VerifiedAt is not null,
@@ -120,7 +121,7 @@ public static class SellerMapping
             Terms = s.Terms,
             Address = s.Address,
             ContactPerson = s.ContactPerson,
-            BusinessKind = s.BusinessKind,
+            BusinessKinds = BusinessKindCodes.Parse(s.BusinessKinds),
             Logo = logo,
             Hours = s.Hours is { Count: > 0 } hours ? hours : null,
             Whatsapp = s.Whatsapp,
@@ -155,7 +156,7 @@ public static class SellerMapping
             Name = seller.Name,
             Verified = seller.VerifiedAt is not null,
             SellerId = seller.Id.ToString(),
-            Summary = $"{SellerTexts.BusinessKindName(seller.BusinessKind, read.Language)} · {place}",
+            Summary = $"{SellerTexts.BusinessKindNames(seller.BusinessKinds, read.Language)} · {place}",
             PhoneMasked = PhoneNumbers.Mask(seller.Phone ?? owner.Phone),
             Kind = ProviderKind.Company,
         };
@@ -165,7 +166,11 @@ public static class SellerMapping
 /// <summary>Seller texts in the request's language. Russian and English are DRAFT translations.</summary>
 public static class SellerTexts
 {
-    /// <summary>«Tingçilik təsərrüfatı», «Bağ mərkəzi», «Landşaft şirkəti» (src/views/RegisterPage.tsx).</summary>
+    /// <summary>A business's kinds named and joined: «Tingçilik təsərrüfatı · Bağ mərkəzi».</summary>
+    public static string BusinessKindNames(IEnumerable<string> codes, Language language) =>
+        string.Join(" · ", BusinessKindCodes.Parse(codes).Select(kind => BusinessKindName(kind, language)));
+
+    /// <summary>«Tingçilik təsərrüfatı», «Bağ mərkəzi», «Landşaft şirkəti» (src/features/seller/businessKinds.ts).</summary>
     public static string BusinessKindName(BusinessKind kind, Language language) => (kind, language) switch
     {
         (BusinessKind.Nursery, Language.Ru) => "Питомник растений",

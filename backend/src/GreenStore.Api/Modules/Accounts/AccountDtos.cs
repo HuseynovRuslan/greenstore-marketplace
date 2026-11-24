@@ -75,7 +75,7 @@ public sealed record RegisterRequest(
     string Phone,
     string Password,
     string OtpChallengeId,
-    BusinessKind? BusinessKind = null,
+    IReadOnlyList<BusinessKind>? BusinessKinds = null,
     string? CompanyName = null,
     string? Email = null,
     string? CityId = null,

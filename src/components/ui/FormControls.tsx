@@ -260,15 +260,18 @@ interface ChoiceCardProps {
   meta?: ReactNode
   className?: string
   describedById?: string
-  /** Id of the radio input (error summaries focus it) */
+  /** Id of the input (error summaries focus it) */
   id?: string
+  /** `checkbox`: one of several that can all be on (a business's kinds); its mark is square, not round */
+  type?: 'radio' | 'checkbox'
 }
 
 /**
- * A radio choice drawn as a card (account type, business kind, price type, promotion package). A native radio
- * inside a label: arrow keys move within the group, the group needs a <fieldset> + <legend> around it.
+ * A radio choice drawn as a card (account type, price type, promotion package), or a checkbox one (`type`, a
+ * business's kinds). A native input inside a label: arrow keys move within a radio group, Tab between checkboxes; the
+ * group needs a <fieldset> + <legend> around it.
  */
-export function ChoiceCard({ name, value, checked, onChange, title, description, icon, meta, className, describedById, id }: ChoiceCardProps) {
+export function ChoiceCard({ name, value, checked, onChange, title, description, icon, meta, className, describedById, id, type = 'radio' }: ChoiceCardProps) {
   return (
     <label
       className={cn(
@@ -280,7 +283,7 @@ export function ChoiceCard({ name, value, checked, onChange, title, description,
     >
       <input
         id={id}
-        type="radio"
+        type={type}
         name={name}
         value={value}
         checked={checked}
@@ -301,7 +304,8 @@ export function ChoiceCard({ name, value, checked, onChange, title, description,
       <span
         aria-hidden
         className={cn(
-          'absolute top-4 right-4 flex size-5 items-center justify-center rounded-full border transition-colors duration-(--dur-fast)',
+          'absolute top-4 right-4 flex size-5 items-center justify-center border transition-colors duration-(--dur-fast)',
+          type === 'checkbox' ? 'rounded-md' : 'rounded-full',
           checked ? 'border-forest bg-forest text-white' : 'border-line-strong bg-surface',
         )}
       >

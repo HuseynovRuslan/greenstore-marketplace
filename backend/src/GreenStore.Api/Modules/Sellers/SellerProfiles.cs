@@ -19,7 +19,7 @@ public static class SellerProfiles
         AppDbContext db,
         User owner,
         string name,
-        BusinessKind kind,
+        IEnumerable<BusinessKind> kinds,
         string cityId,
         TimeProvider clock,
         CancellationToken ct)
@@ -39,7 +39,7 @@ public static class SellerProfiles
             OwnerUserId = owner.Id,
             Slug = SellerSlug.Choose(baseSlug, taken.ToHashSet(StringComparer.Ordinal)),
             Name = name,
-            BusinessKind = kind,
+            BusinessKinds = BusinessKindCodes.From(kinds),
             CityId = cityId,
             ContactPerson = owner.FullName,
             CreatedAt = clock.GetUtcNow(),

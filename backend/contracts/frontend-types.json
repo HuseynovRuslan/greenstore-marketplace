@@ -1173,9 +1173,9 @@
         "optional": false,
         "type": "SellerType"
       },
-      "businessKind": {
+      "businessKinds": {
         "optional": true,
-        "type": "BusinessKind"
+        "type": "BusinessKind[]"
       },
       "companyName": {
         "optional": true,
@@ -1481,9 +1481,9 @@
         "optional": true,
         "type": "string"
       },
-      "businessKind": {
+      "businessKinds": {
         "optional": true,
-        "type": "BusinessKind"
+        "type": "BusinessKind[]"
       },
       "cityId": {
         "optional": false,
@@ -1595,9 +1595,9 @@
         "optional": true,
         "type": "string"
       },
-      "businessKind": {
+      "businessKinds": {
         "optional": true,
-        "type": "BusinessKind"
+        "type": "BusinessKind[]"
       },
       "cityId": {
         "optional": true,
