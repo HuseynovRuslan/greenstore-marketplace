@@ -22,7 +22,6 @@ import {
 import { overviewTiles } from '@/features/admin/AdminOverviewPanel'
 import { isStaff, mayOpen } from '@/features/admin/StaffGate'
 import { subcategoryIdOfDraft, toListingInput, withCategory, createDraft } from '@/features/posting/draft'
-import { requestDetails, requestTitle, sharedNote } from '@/features/cabinet/incomingRequests'
 import type { AdminCategory, AdminOverview, OwnListing, ReportItem, ReportTarget } from '@/types'
 
 /*
@@ -120,7 +119,7 @@ describe('report reasons are codes (backend-contract.md 4.1)', () => {
   })
 })
 
-describe('apiRepository: reports, «Usta çağır» and support (backend-contract.md 4.1, 4.2)', () => {
+describe('apiRepository: reports and support (backend-contract.md 4.1, 4.2)', () => {
   it('sends a guest’s report with the visitor’s IP and no session', async () => {
     respond = () => ({ status: 201, body: { id: ID } })
     expect(await apiRepository.submitReport({ target: 'listing', targetId: ID, reason: 'wrong-price' })).toEqual({ id: ID })
@@ -138,17 +137,6 @@ describe('apiRepository: reports, «Usta çağır» and support (backend-contrac
     expect(bodyOf(last())).toMatchObject({ reason: 'other', comment: 'Zəngə cavab vermir' })
   })
 
-  it('sends a service request with its Idempotency-Key and answers its number', async () => {
-    respond = () => ({ status: 201, body: { id: ID, number: 3001 } })
-    const input = { serviceId: ID, categoryId: 'landsaft-dizayni', cityId: 'baki', description: 'Həyətə qazon salmaq', name: 'Leyla', phone: '+994557001122' }
-    expect(await apiRepository.submitServiceRequest(input, 'sorgu-1')).toEqual({ id: ID, number: 3001 })
-    expect(route(last())).toEqual(['POST', '/api/v1/service-requests'])
-    expect(bodyOf(last())).toEqual(input)
-    expect(last().init.headers['Idempotency-Key']).toBe('sorgu-1')
-    await apiRepository.submitServiceRequest(input)
-    expect(last().init.headers['Idempotency-Key']).toBeUndefined()
-  })
-
   it('sends a support message and answers its ticket', async () => {
     respond = () => ({ status: 201, body: { ticket: 1001 } })
     expect(await apiRepository.submitSupportMessage({ topic: 'listing', name: 'Aynur', contact: 'aynur@poct.az', message: 'Elanım görünmür, niyə?', listingNumber: 10482 })).toEqual({ ticket: 1001 })
@@ -156,26 +144,6 @@ describe('apiRepository: reports, «Usta çağır» and support (backend-contrac
     expect(bodyOf(last())).toMatchObject({ topic: 'listing', listingNumber: 10482 })
   })
 
-  it('reads the provider’s «Gələn sorğular» with the session, the customer’s number in the site’s spacing', async () => {
-    expect(await apiRepository.listIncomingServiceRequests(1)).toEqual({ items: [], total: 0, page: 1, pageCount: 1, unseen: 0 })
-    expect(calls).toHaveLength(0)
-    signedIn()
-    respond = () => ({ body: { items: [{ id: ID, number: 3001, customerName: 'Leyla', customerPhone: '+994557001122' }], total: 1, page: 2, pageCount: 2, unseen: 1 } })
-    const inbox = await apiRepository.listIncomingServiceRequests(2)
-    expect(route(last())).toEqual(['GET', '/api/v1/me/service-requests'])
-    expect(last().url.search).toBe('?page=2&pageSize=20')
-    expect(inbox.items[0].customerPhone).toBe('+994 55 700 11 22')
-    respond = () => ({ status: 204 })
-    await apiRepository.markServiceRequestSeen(ID)
-    expect(route(last())).toEqual(['POST', `/api/v1/me/service-requests/${ID}/seen`])
-  })
-
-  it('the mock answers the same request again for the same key', async () => {
-    const input = { categoryId: 'bag-baximi', cityId: 'baki', description: 'Bağa baxım lazımdır', name: 'Ali', phone: '+994501112233' }
-    const first = await mockRepository.submitServiceRequest(input, 'sorgu-same')
-    expect(await mockRepository.submitServiceRequest(input, 'sorgu-same')).toEqual(first)
-    expect((await mockRepository.submitServiceRequest(input, 'sorgu-other')).number).toBe(first.number + 1)
-  })
 })
 
 const listing = (patch: Partial<OwnListing> = {}) =>
@@ -426,20 +394,17 @@ describe('the admin home and the staff gate', () => {
     listings: { active: 120, pending: 4, rejected: 8, expired: 6, inactive: 2 },
     users: { total: 1250, individual: 1200, business: 50, blocked: 2, staff: 3, newThisWeek: 40 },
     sellers: { total: 50, verified: 12 },
-    serviceRequests: { total: 30, thisWeek: 7, unrouted: 2 },
     support: { new: 5, answered: 20, closed: 11 },
     categories: { total: 6, active: 6, subcategories: 21 },
   }
 
-  it('words every section’s numbers and calls out requests no provider got', () => {
+  it('words every section’s numbers', () => {
     const tiles = overviewTiles(overview, false)
-    expect(tiles.map((t) => t.title)).toEqual(['Moderasiya', 'Şikayətlər', 'Elanlar', 'Usta çağır', 'İstifadəçilər', 'Satıcılar', 'Dəstək', 'Kateqoriyalar'])
+    expect(tiles.map((t) => t.title)).toEqual(['Moderasiya', 'Şikayətlər', 'Elanlar', 'İstifadəçilər', 'Satıcılar', 'Dəstək', 'Kateqoriyalar'])
     expect(tiles.find((t) => t.title === 'İstifadəçilər')?.value).toBe(1250)
-    expect(tiles.find((t) => t.title === 'Usta çağır')?.alert).toBe('2 sorğu heç bir ustaya getməyib')
     // Categories are for admins: a moderator's tile does not link there.
     expect(tiles.find((t) => t.title === 'Kateqoriyalar')?.href).toBeUndefined()
     expect(overviewTiles(overview, true).find((t) => t.title === 'Kateqoriyalar')?.href).toBe('/idareetme/kateqoriyalar')
-    expect(overviewTiles({ ...overview, serviceRequests: { ...overview.serviceRequests, unrouted: 0 } }, true).find((t) => t.title === 'Usta çağır')?.alert).toBeUndefined()
   })
 
   it('lets moderators into staff pages and admins alone into the categories', () => {
@@ -459,16 +424,5 @@ describe('«Elan yerləşdir» sends the sub-category’s id (backend-contract.m
     expect(subcategoryIdOfDraft(service)).toBe('cim-salinmasi')
     expect(subcategoryIdOfDraft({ kind: 'product', categoryId: 'agaclar', subcategory: 'Naməlum' })).toBeUndefined()
     expect(subcategoryIdOfDraft({ kind: 'product', categoryId: 'agaclar', subcategory: '' })).toBeUndefined()
-  })
-})
-
-describe('«Gələn sorğular» words', () => {
-  it('names the request, its place, size, date and when it came', () => {
-    const r = { number: 3001, category: 'Landşaft dizaynı', city: 'Bakı', area: 'Mərdəkan', size: '120 m²', preferredDate: '2026-11-25', createdAt: '2026-11-22T10:05:00Z', recipientCount: 3 }
-    expect(requestTitle(r)).toBe('Sorğu № 3001 · Landşaft dizaynı')
-    expect(requestDetails(r)).toMatch(/^Bakı, Mərdəkan · 120 m² · Nə vaxt: 25 noyabr · Göndərilib: 22 noy\. · \d\d:05$/)
-    expect(requestDetails({ city: 'Quba', createdAt: '2026-11-22T10:05:00Z' })).toMatch(/^Quba · Göndərilib:/)
-    expect(sharedNote(r)).toBe('Bu sorğu 3 ustaya göndərilib: müştəriyə tez zəng edin.')
-    expect(sharedNote({ recipientCount: 1 })).toBeUndefined()
   })
 })

@@ -1,6 +1,6 @@
 # GreenStore backend: arxitektura
 
-**Status:** təsdiqlənib (22 noyabr 2026). Faza 0 (skelet) və faza 1 (kataloq cədvəlləri, seed, oxuma endpoint-ləri və saytın `DATA_SOURCE=api` rejimi, `src/services/apiRepository.ts`) yazılıb. Faza 2-nin API tərəfi də hazırdır: SMS kodu, qeydiyyat (biznes hesabı «mağaza»nı da açır), şifrə və SMS ilə giriş, sessiyalar və «Aktiv cihazlar», `/me`, `/me/seller`, seçilmişlər, yadda saxlanılan axtarışlar. Faza 3 həm API, həm sayt tərəfində yazılıb: şəkil yükləmə və emalı (brauzerdən birbaşa API-yə), elan yerləşdirmə (`Idempotency-Key` ilə), «Elanlarım» və qaralamalar, moderasiya (`/idareetme/moderasiya`, `AdminRepository`), müddət, statistika, baxış sayğacı, «Nömrəni göstər», keşin yenilənməsi (`POST /api/revalidate`) və fon işləri. Faza 4-ün API tərəfi hazırdır: şikayətlər (səbəb kodu ilə) və onların admin baxışı, «Usta çağır» (ustalara paylanma, SMS xəbəri outbox ilə, ustanın gələn sorğuları), dəstək, admin panelinin rəqəmləri, kateqoriyaların idarəsi (üç dildə), satıcı təsdiqi və bloklama; sayt tərəfi də yazılıb (şikayət dialoqunun kodları, «Usta çağır», dəstək, ustanın «Gələn sorğular» səhifəsi `/kabinet/sorgular`, `/idareetme` rəqəmləri, `/idareetme/sikayetler`, `/idareetme/kateqoriyalar`). Faza 5-in API tərəfi hazırdır: reklam paketləri (üç dildə), sifariş (`{ order, paymentUrl }`), `IPaymentGateway` və saxta provayder (Development və Staging: API-nin «Test ödənişi» səhifəsi imzalı callback göndərib sayta qaytarır; Production-da reklam satılmır), callback (`payment_events`, `(provider, provider_ref)` üzrə bir dəfə), «Önə çıxan» və «İrəli çək», `Promotions` fon işi; sayt tərəfi də yazılıb (`/reklam`-da «Ödə» ödəniş səhifəsinə aparır, qayıdış səhifəsi `/kabinet/odenis`, kabinetdə «Önə çıxan» və ödənilməmiş seçim). İşə salmaq üçün: [README.md](README.md). **Bütün fazalar (0–5) yazılıb və yoxlanıb**; gecənin yekun hesabatı, end-to-end yoxlama, deploy və yoxlama siyahısı: [backend-status.md](../docs/handoff/backend-status.md). `Dockerfile` və `docker-compose.yml`-in `api-migrate`/`api` servisləri yazılıb, amma yoxlanmayıb (Docker yox idi).
+**Status:** təsdiqlənib (22 noyabr 2026). Faza 0 (skelet) və faza 1 (kataloq cədvəlləri, seed, oxuma endpoint-ləri və saytın `DATA_SOURCE=api` rejimi, `src/services/apiRepository.ts`) yazılıb. Faza 2-nin API tərəfi də hazırdır: SMS kodu, qeydiyyat (biznes hesabı «mağaza»nı da açır), şifrə və SMS ilə giriş, sessiyalar və «Aktiv cihazlar», `/me`, `/me/seller`, seçilmişlər, yadda saxlanılan axtarışlar. Faza 3 həm API, həm sayt tərəfində yazılıb: şəkil yükləmə və emalı (brauzerdən birbaşa API-yə), elan yerləşdirmə (`Idempotency-Key` ilə), «Elanlarım» və qaralamalar, moderasiya (`/idareetme/moderasiya`, `AdminRepository`), müddət, statistika, baxış sayğacı, «Nömrəni göstər», keşin yenilənməsi (`POST /api/revalidate`) və fon işləri. Faza 4-ün API tərəfi hazırdır: şikayətlər (səbəb kodu ilə) və onların admin baxışı, dəstək, admin panelinin rəqəmləri, kateqoriyaların idarəsi (üç dildə), satıcı təsdiqi və bloklama; sayt tərəfi də yazılıb (şikayət dialoqunun kodları, «Usta çağır», dəstək, ustanın «Gələn sorğular» səhifəsi `/kabinet/sorgular`, `/idareetme` rəqəmləri, `/idareetme/sikayetler`, `/idareetme/kateqoriyalar`). Faza 5-in API tərəfi hazırdır: reklam paketləri (üç dildə), sifariş (`{ order, paymentUrl }`), `IPaymentGateway` və saxta provayder (Development və Staging: API-nin «Test ödənişi» səhifəsi imzalı callback göndərib sayta qaytarır; Production-da reklam satılmır), callback (`payment_events`, `(provider, provider_ref)` üzrə bir dəfə), «Önə çıxan» və «İrəli çək», `Promotions` fon işi; sayt tərəfi də yazılıb (`/reklam`-da «Ödə» ödəniş səhifəsinə aparır, qayıdış səhifəsi `/kabinet/odenis`, kabinetdə «Önə çıxan» və ödənilməmiş seçim). İşə salmaq üçün: [README.md](README.md). **Bütün fazalar (0–5) yazılıb və yoxlanıb**; gecənin yekun hesabatı, end-to-end yoxlama, deploy və yoxlama siyahısı: [backend-status.md](../docs/handoff/backend-status.md). `Dockerfile` və `docker-compose.yml`-in `api-migrate`/`api` servisləri yazılıb, amma yoxlanmayıb (Docker yox idi). «Usta çağır» (xidmət sorğuları) 24 noyabr 2026-da çıxarılıb ([remove-usta-cagir.md](../docs/handoff/remove-usta-cagir.md)).
 **Müqavilə dəyişiklikləri:** [`docs/handoff/backend-contract.md`](../docs/handoff/backend-contract.md). `repository.ts` və `src/types` hər fazada ayrıca razılıqla dəyişir.
 
 ## 1. Tələblər
@@ -88,7 +88,7 @@ backend/
       Sellers/                  satıcı səhifələri, satıcılar kataloqu, xidmət göstərənlər
       Accounts/                 istifadəçi, SMS kodu, sessiya, cihazlar, profil
       Media/                    şəkil yükləmə, emal, yaddaş
-      Engagement/               seçilmişlər, axtarışlar, şikayətlər, «Usta çağır», dəstək
+      Engagement/               seçilmişlər, axtarışlar, şikayətlər, dəstək
       Promotion/                paketlər, sifarişlər, ödəniş, «İrəli çək» cədvəli
       Admin/                    moderasiya, kateqoriyaların idarəsi, şikayətlərə baxış
       Platform/                 outbox, audit_log, Idempotency-Key (modulların ortaq cədvəlləri)
@@ -162,7 +162,7 @@ active ──redaktə──► pending            istənilən status ──sil�
 - **Xətalar** RFC 9457 ProblemDetails formatındadır, sabit `code` sahəsi var (`otp.wrong-code`, `listing.not-editable`, `validation`), sahə üzrə xətalar `errors`-dadır. API mətn yox, kod qaytarır, mətni hər dildə frontend və ya mobil tətbiq göstərir. Server Actions-da artıq belə qurulub.
 - **Tarixlər** ISO 8601, UTC ilə (`2026-10-28T06:15:00Z`). Bakı vaxtı ilə göstərmək müştərinin işidir.
 - **Səhifələmə:** `page`, `pageSize` (maksimum 60). Cavab `PageResult` formasındadır (`items`, `total`, `page`, `pageCount`), `repository.ts`-də artıq belədir.
-- **Yeni nəsə yaradan POST-lar** `Idempotency-Key` başlığını qəbul edir (elan, sifariş, «Usta çağır»). İki dəfə basılan düymə iki elan yaratmır.
+- **Yeni nəsə yaradan POST-lar** `Idempotency-Key` başlığını qəbul edir (elan, sifariş). İki dəfə basılan düymə iki elan yaratmır.
 - **OpenAPI 3.1** `/openapi/v1.json` ünvanındadır. Mobil tətbiqin müqaviləsi də bu sənəd olacaq.
 
 ### Endpoint-lər
@@ -186,8 +186,6 @@ active ──redaktə──► pending            istənilən status ──sil�
 | Xidmətlər | `GET /services` | `searchServices` |
 | | `GET /services/{slug}` | `getService` |
 | | `GET /providers/{id}`, `GET /providers/{id}/services` | `getServiceProvider`, `listProviderServices` |
-| | `POST /service-requests` | `submitServiceRequest` |
-| | `GET /me/service-requests`, `POST /me/service-requests/{id}/seen` | ★ ustanın gələn sorğuları («Gələn sorğular», UI sonra) |
 | Sellers | `GET /sellers?businessKind&cityId&page` | `listSellers` (★ səhifələnmiş) |
 | | `GET /sellers/{slug}`, `GET /sellers/by-id/{id}` | `getSeller`, `getSellerById` |
 | | `POST /sellers/{id}/phone-reveals` | ★ |
@@ -307,7 +305,7 @@ Tətbiq 1 il ərzində gələcək. Onun üçün indi edilən və sonraya qalan i
 |---|---|---|
 | `ExpireListings` | 10 dəqiqədən bir | `active` elan `expires_at`-dan keçibsə, `expired` olur (bir dəfədə ən çox 500). Həmin anda sahibi və ya moderator dəyişdirən elan növbəti dəfəyə qalır, qalanları indi bitir |
 | `Promotions` | 10 dəqiqədən bir | müddəti bitən «Önə çıxar»ı söndürür; «İrəli çək» paketində növbəti qaldırmanı edir (`bumped_at = sort_at = indi`, `bumps_left - 1`); saytda olmayan elanın qaldırması elan qayıdana qədər gözləyir (`Jobs/Promotions.cs`, faza 5) |
-| `Outbox` | 5 saniyədən bir | SMS, push, keş yeniləmə, e-poçt göndərir; uğursuz olanda getdikcə uzanan fasilə ilə təkrar edir. İndi iki növ var: keş yeniləmə (`revalidate`, backend-contract.md 3.6) və ustalara «Usta çağır» SMS xəbəri (`sms-notice`, faza 4; bloklanmış hesaba getmir) |
+| `Outbox` | 5 saniyədən bir | SMS, push, keş yeniləmə, e-poçt göndərir; uğursuz olanda getdikcə uzanan fasilə ilə təkrar edir. İndi bir növ var: keş yeniləmə (`revalidate`, backend-contract.md 3.6). «Usta çağır»ın SMS xəbərləri (`sms-notice`) onunla birlikdə çıxarılıb |
 | `PhotoProcessing` | yükləmə zamanı | şəkil variantlarını yaradır (320, 640, 1280 px WebP), EXIF-i silir. Faza 3-də ayrıca növbə yoxdur: emal `PUT` sorğusunun içində gedir (10 MB-lıq şəkil bir saniyədən az çəkir), ona görə cavab şəklin hazır olub-olmadığını dərhal deyir. Yük artsa, növbəyə köçürmək asandır (`PhotoService.ProcessAsync`) |
 | `Cleanup` | gündə bir | 24 saatda elana bağlanmayan şəkilləri (faylları ilə), köhnə sessiyaları, SMS kodlarını, `listing_seen`, `idempotency_keys`, göndərilmiş outbox, köhnə gündəlik statistika, `audit_log` və `moderation_decisions` sətirlərini DATABASE.md §5-in müddətləri ilə silir (`Jobs/Cleanup.cs`) |
 

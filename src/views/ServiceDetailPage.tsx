@@ -52,16 +52,15 @@ interface ServiceDetailProps {
 
 /**
  * Service page (Nov 2026), on the listing page's layout: gallery, a sticky summary (title, provider, starting price,
- * «Usta çağır», number and WhatsApp, favourite and share, provider card, a payment note), the work and what it
- * includes, areas and the process, completed projects, the listing facts with «Xidmətdən şikayət et», the provider's
- * other services and similar ones. Phones get «Usta çağır» and «Zəng et» in a bar above the bottom navigation.
+ * number and WhatsApp, favourite and share, provider card, a payment note), the work and what it includes, areas
+ * and the process, completed projects, the listing facts with «Xidmətdən şikayət et», the provider's other services
+ * and similar ones. Phones get «Zəng et» and WhatsApp in a bar above the bottom navigation.
  */
 export default function ServiceDetailPage({ service, provider, seller, others, similar, providerNames }: ServiceDetailProps) {
   const contact = providerContact(provider, seller)
   const details = serviceDetails[service.id]
   const priceNote =
     details?.priceNote ?? (service.priceFrom != null ? 'Başlanğıc qiymət: yekun təklif işin həcminə görə verilir.' : 'Qiymət işə baxandan sonra razılaşdırılır.')
-  const who = provider ? { id: provider.id, name: provider.name } : { id: service.providerId, name: 'Usta' }
 
   return (
     <RevealProvider target={{ kind: 'listing', id: service.id }}>
@@ -86,7 +85,7 @@ export default function ServiceDetailPage({ service, provider, seller, others, s
                   <p className="text-[13px] leading-[1.5] text-ink-soft">{priceNote}</p>
                 </div>
                 <div className="max-md:hidden">
-                  <ServiceContact title={service.title} provider={who} serviceId={service.id} categoryId={service.categoryId} />
+                  <ServiceContact title={service.title} serviceId={service.id} />
                 </div>
                 <div className="flex gap-2.5">
                   <FavoriteToggle id={service.id} kind="service" />
@@ -218,10 +217,9 @@ export default function ServiceDetailPage({ service, provider, seller, others, s
         role="region"
         aria-label="Usta ilə əlaqə"
         data-bottom-bar="contact"
-        // No backdrop-filter here: it would make the bar the containing block of the request dialog (position: fixed).
         className="gs-keyboard-aside sticky bottom-[calc(86px+env(safe-area-inset-bottom,0px))] z-30 flex w-full items-center gap-3 border-t border-line bg-surface px-5 py-2.5 md:hidden"
       >
-        <ServiceContact title={service.title} provider={who} serviceId={service.id} categoryId={service.categoryId} layout="bar" />
+        <ServiceContact title={service.title} serviceId={service.id} layout="bar" />
       </div>
     </RevealProvider>
   )

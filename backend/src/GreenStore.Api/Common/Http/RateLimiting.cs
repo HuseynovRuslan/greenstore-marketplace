@@ -40,7 +40,7 @@ public sealed class FixedWindowLimit
 /// </summary>
 public static class RateLimitPolicies
 {
-    /// <summary>POSTs a visitor can make without logging in (reports, «Usta çağır», support), per client IP.</summary>
+    /// <summary>POSTs a visitor can make without logging in (reports, support), per client IP.</summary>
     public const string AnonymousWrites = "anonymous-writes";
 
     /// <summary><c>POST /listings/{id}/views</c>, per client IP.</summary>

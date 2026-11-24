@@ -84,7 +84,7 @@ public sealed class AdminAccessTests(LifecycleApi api)
             var overview = await api.GetAsync("/api/v1/admin/overview", token);
 
             Assert.Equal(
-                ["categories", "listings", "moderation", "reports", "sellers", "serviceRequests", "support", "users"],
+                ["categories", "listings", "moderation", "reports", "sellers", "support", "users"],
                 overview.EnumerateObject().Select(p => p.Name).Order(StringComparer.Ordinal));
             Assert.Equal(["approved", "pending", "recheck", "rejected"], overview.GetProperty("moderation").EnumerateObject().Select(p => p.Name).Order(StringComparer.Ordinal));
             Assert.Equal(["blocked", "business", "individual", "newThisWeek", "staff", "total"], overview.GetProperty("users").EnumerateObject().Select(p => p.Name).Order(StringComparer.Ordinal));

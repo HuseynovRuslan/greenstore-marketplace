@@ -9,8 +9,6 @@ interface Tile {
   unit: string
   details: string[]
   href?: string
-  /** A number that needs someone: shown in the danger colour */
-  alert?: string
 }
 
 /** The overview's tiles, worded (pure, so the words are tested). */
@@ -35,13 +33,6 @@ export function overviewTiles(o: AdminOverview, admin: boolean): Tile[] {
       value: o.listings.active,
       unit: 'aktiv elan',
       details: [`${formatNumber(o.listings.pending)} yoxlamada`, `${formatNumber(o.listings.expired)} müddəti bitib`, `${formatNumber(o.listings.inactive)} deaktiv`],
-    },
-    {
-      title: 'Usta çağır',
-      value: o.serviceRequests.thisWeek,
-      unit: 'sorğu bu həftə',
-      details: [`cəmi ${formatNumber(o.serviceRequests.total)}`],
-      alert: o.serviceRequests.unrouted > 0 ? `${formatNumber(o.serviceRequests.unrouted)} sorğu heç bir ustaya getməyib` : undefined,
     },
     {
       title: 'İstifadəçilər',
@@ -78,7 +69,7 @@ export function overviewTiles(o: AdminOverview, admin: boolean): Tile[] {
 
 /**
  * /idareetme with DATA_SOURCE=api: the numbers of every section (`GET /admin/overview`), a section's tile linking to
- * it. «Usta çağır» requests that reached no provider are called out: someone has to find them one.
+ * it.
  */
 export function AdminOverviewPanel({ overview, admin }: { overview: AdminOverview; admin: boolean }) {
   return (
@@ -96,7 +87,6 @@ export function AdminOverviewPanel({ overview, admin }: { overview: AdminOvervie
                 <span className="text-sm leading-[1.4] text-ink">{tile.unit}</span>
               </span>
               <span className="text-[13px] leading-[1.5] text-muted">{tile.details.join(' · ')}</span>
-              {tile.alert && <span className="text-[13px] leading-[1.5] font-semibold text-danger">{tile.alert}</span>}
             </>
           )
           const box = 'flex h-full w-full flex-col items-start gap-1 rounded-[10px] border border-line bg-surface p-4'

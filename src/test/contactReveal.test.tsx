@@ -171,9 +171,11 @@ describe('service page contact', () => {
     const user = userEvent.setup()
     render(
       <RevealProvider target={{ kind: 'listing', id: 'landsaft-dizayni' }}>
-        <ServiceContact title="Landşaft dizaynı" provider={{ id: 'yasil-mekan-landsaft', name: 'Yaşıl Məkan Landşaft' }} serviceId="landsaft-dizayni" categoryId="landsaft-dizayni" />
+        <ServiceContact title="Landşaft dizaynı" serviceId="landsaft-dizayni" />
       </RevealProvider>,
     )
+    expect(screen.queryByRole('button', { name: /Usta çağır/ })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'WhatsApp-a yaz' })).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: 'Nömrəni göstər' }))
     expect(await screen.findByRole('link', { name: /^Zəng et: 0\d\d \d{3} \d\d \d\d$/ })).toBeInTheDocument()
     expect(actions.listing).toHaveBeenCalledWith('landsaft-dizayni')

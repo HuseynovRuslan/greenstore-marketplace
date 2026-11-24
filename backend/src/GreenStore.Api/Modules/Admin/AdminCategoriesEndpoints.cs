@@ -148,16 +148,15 @@ public static class AdminCategoriesEndpoints
 
     /// <summary>
     /// <c>DELETE /admin/categories/{id}</c> → 204, only for a category nothing uses yet (a mistake just made). 409
-    /// <c>category.in-use</c> when listings (deleted ones too), sub-categories or «Usta çağır» requests have it: take
-    /// it off the site with <c>isActive: false</c> instead, so old listings keep their category.
+    /// <c>category.in-use</c> when listings (deleted ones too) or sub-categories have it: take it off the site with
+    /// <c>isActive: false</c> instead, so old listings keep their category.
     /// </summary>
     private static async Task<NoContent> Delete(string id, CurrentUser me, AppDbContext db, TimeProvider clock, CancellationToken ct)
     {
         var category = await db.Categories.FirstOrDefaultAsync(c => c.Id == id, ct)
             ?? throw ApiProblemException.NotFound(AdminErrors.CategoryNotFound);
         var used = await db.Listings.AnyAsync(l => l.CategoryId == id || l.SubcategoryId == id, ct)
-            || await db.Categories.AnyAsync(c => c.ParentId == id, ct)
-            || await db.ServiceRequests.AnyAsync(r => r.CategoryId == id, ct);
+            || await db.Categories.AnyAsync(c => c.ParentId == id, ct);
         if (used)
         {
             throw ApiProblemException.Conflict(AdminErrors.CategoryInUse);

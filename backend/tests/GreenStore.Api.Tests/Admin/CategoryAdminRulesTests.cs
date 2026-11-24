@@ -4,7 +4,6 @@ using GreenStore.Api.Common.Json;
 using GreenStore.Api.Common.Localization;
 using GreenStore.Api.Modules.Admin;
 using GreenStore.Api.Modules.Taxonomy;
-using GreenStore.Api.Tests.Engagement;
 using GreenStore.Api.Tests.Infrastructure;
 
 namespace GreenStore.Api.Tests.Admin;
@@ -123,7 +122,7 @@ public sealed class CategoryAdminRulesTests
         var (draft, errors) = CategoryAdminRules.ValidateCreate(JsonSerializer.Deserialize<CategoryCreateDto>(json, JsonDefaults.Create())!, Taxonomy);
 
         Assert.Null(draft);
-        Assert.Equal(code, ServiceRequestRulesTests.FirstErrors(errors)[field]);
+        Assert.Equal(code, FieldErrorsReader.FirstErrors(errors)[field]);
     }
 
     [Fact]
@@ -194,7 +193,7 @@ public sealed class CategoryAdminRulesTests
         var (change, errors) = CategoryAdminRules.ValidatePatch(Patch(json), Trees, Taxonomy);
 
         Assert.Null(change);
-        Assert.Equal(code, ServiceRequestRulesTests.FirstErrors(errors)[field]);
+        Assert.Equal(code, FieldErrorsReader.FirstErrors(errors)[field]);
     }
 
     [Fact]
@@ -203,7 +202,7 @@ public sealed class CategoryAdminRulesTests
         Assert.False(CategoryAdminRules.ValidatePatch(Patch("""{"names":{"az":"ağaclar","ru":"Деревья","en":"Trees"}}"""), Trees, Taxonomy).Errors.Any);
         Assert.Equal(
             AdminErrors.NotAllowed,
-            ServiceRequestRulesTests.FirstErrors(CategoryAdminRules.ValidatePatch(Patch("""{"icon":"trees"}"""), FruitTrees, Taxonomy).Errors)["icon"]);
+            FieldErrorsReader.FirstErrors(CategoryAdminRules.ValidatePatch(Patch("""{"icon":"trees"}"""), FruitTrees, Taxonomy).Errors)["icon"]);
     }
 
     [Fact]

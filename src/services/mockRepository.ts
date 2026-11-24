@@ -13,7 +13,7 @@ import { displayPhone, maskPhone, mockAccount, mockChallengePhone, mockListingSt
 import { filterQuery, MAX_SAVED_SEARCHES } from '@/features/saved-searches/query'
 import { isReasonFor } from '@/features/seller/complaintReasons'
 import type { FacetCounts, MarketplaceRepository, PageResult, SitemapEntry } from './repository'
-import type { Category, ContactReveal, Listing, ListingInput, ListingSubmitResult, LoginResult, OwnListing, OwnSeller, PromotionOrder, SavedSearch, Seller, Service, ServiceProvider, ServiceRequestResult } from '@/types'
+import type { Category, ContactReveal, Listing, ListingInput, ListingSubmitResult, LoginResult, OwnListing, OwnSeller, PromotionOrder, SavedSearch, Seller, Service, ServiceProvider } from '@/types'
 import type { CategoryDef } from '@/data/categories'
 
 /** A category with its number of public listings (the sample data has no separate counts). */
@@ -58,9 +58,6 @@ function publicProvider(p: ServiceProvider): ServiceProvider {
 }
 
 const toPublic = (items: Listing[]) => items.map(publicListing)
-
-/** «Usta çağır» answers by `Idempotency-Key` (a retry after a lost answer gets the same number). */
-const mockServiceRequests = new Map<string, ServiceRequestResult>()
 
 /** The demo's promotion orders of this server process, by id and by `Idempotency-Key`; the newest few hundred. */
 const mockOrders = new Map<string, PromotionOrder>()
@@ -291,20 +288,6 @@ export const mockRepository: MarketplaceRepository = {
   },
   async submitSupportMessage() {
     return { ticket: mockSequence('support', 7210) }
-  },
-  /** DEMO: requests are not stored, so no provider has any (the page is DATA_SOURCE=api only). */
-  async listIncomingServiceRequests() {
-    return { items: [], total: 0, page: 1, pageCount: 1, unseen: 0 }
-  },
-  async markServiceRequestSeen() {},
-  /** The same `idempotencyKey` again answers the same request, as the API does. */
-  async submitServiceRequest(_input, idempotencyKey) {
-    const known = idempotencyKey ? mockServiceRequests.get(idempotencyKey) : undefined
-    if (known) return known
-    const number = mockSequence('service-request', 3021)
-    const result = { id: `req-${number}`, number }
-    if (idempotencyKey) mockServiceRequests.set(idempotencyKey, result)
-    return result
   },
 
   async requestOtp({ phone }) {

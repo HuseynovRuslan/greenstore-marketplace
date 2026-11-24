@@ -48,8 +48,6 @@ public sealed class AuthorizationTests(AccountsApi api)
         { "GET", "/api/v1/me/drafts/019a8b4e-0000-7000-8000-000000000001" },
         { "PUT", "/api/v1/me/drafts/019a8b4e-0000-7000-8000-000000000001" },
         { "DELETE", "/api/v1/me/drafts/019a8b4e-0000-7000-8000-000000000001" },
-        { "GET", "/api/v1/me/service-requests" },
-        { "POST", "/api/v1/me/service-requests/019a8b4e-0000-7000-8000-000000000001/seen" },
         { "GET", "/api/v1/me/promotion-orders/019a8b4e-0000-7000-8000-000000000001" },
     };
 
@@ -119,10 +117,10 @@ public sealed class AuthorizationTests(AccountsApi api)
     {
         await using var factory = api.Variant();
         var forms = factory.Services.GetRequiredService<EndpointDataSource>().Endpoints.OfType<RouteEndpoint>()
-            .Where(e => e.RoutePattern.RawText is "/api/v1/reports" or "/api/v1/service-requests" or "/api/v1/support")
+            .Where(e => e.RoutePattern.RawText is "/api/v1/reports" or "/api/v1/support")
             .ToList();
 
-        Assert.Equal(3, forms.Count);
+        Assert.Equal(2, forms.Count);
         Assert.All(forms, form => Assert.Equal(RateLimitPolicies.AnonymousWrites, form.Metadata.GetMetadata<EnableRateLimitingAttribute>()?.PolicyName));
 
         await using var limited = api.Variant(new Dictionary<string, string?> { ["RateLimiting:AnonymousWrites:PermitLimit"] = "1" });
