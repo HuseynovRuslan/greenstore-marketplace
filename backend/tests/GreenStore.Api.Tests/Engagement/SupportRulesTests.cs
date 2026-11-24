@@ -1,11 +1,10 @@
 using GreenStore.Api.Common.Errors;
-using GreenStore.Api.Common.Localization;
-using GreenStore.Api.Modules.Accounts.Sms;
 using GreenStore.Api.Modules.Engagement;
+using GreenStore.Api.Tests.Infrastructure;
 
 namespace GreenStore.Api.Tests.Engagement;
 
-/// <summary>«Bizimlə əlaqə» and the provider's SMS notice, without a database.</summary>
+/// <summary>«Bizimlə əlaqə», without a database.</summary>
 public sealed class SupportRulesTests
 {
     private static SupportMessageInputDto Good(string contact = "+994 50 555 12 34") => new()
@@ -54,13 +53,13 @@ public sealed class SupportRulesTests
         var (message, errors) = SupportRules.Validate(input);
 
         Assert.Null(message);
-        Assert.Equal(code, ServiceRequestRulesTests.FirstErrors(errors)[field]);
+        Assert.Equal(code, FieldErrorsReader.FirstErrors(errors)[field]);
     }
 
     [Fact]
     public void Lengths_and_the_listing_number_are_checked()
     {
-        var errors = ServiceRequestRulesTests.FirstErrors(SupportRules.Validate(Good() with
+        var errors = FieldErrorsReader.FirstErrors(SupportRules.Validate(Good() with
         {
             Name = new string('n', 61),
             Message = new string('m', 2001),
@@ -76,14 +75,4 @@ public sealed class SupportRulesTests
     [Fact]
     public void Every_topic_of_the_form_is_known() =>
         Assert.All(new[] { "listing", "account", "payment", "complaint", "other" }, topic => Assert.NotNull(SupportRules.Validate(Good() with { Topic = topic }).Message));
-
-    [Fact]
-    public void The_provider_notice_carries_what_the_call_back_needs_in_the_providers_language()
-    {
-        Assert.Equal(
-            "GreenStore: yeni xidmət sorğusu № 3021. Landşaft dizaynı, Bakı. Müştəri: Aygün, +994505551234.",
-            SmsTexts.ServiceRequestNotice(3021, "Landşaft dizaynı", "Bakı", "Aygün", "+994505551234", Language.Az));
-        Assert.StartsWith("GreenStore: новая заявка № 3021.", SmsTexts.ServiceRequestNotice(3021, "Ландшафтный дизайн", "Баку", "Aygün", "+994505551234", Language.Ru), StringComparison.Ordinal);
-        Assert.StartsWith("GreenStore: new service request No. 3021.", SmsTexts.ServiceRequestNotice(3021, "Landscape design", "Baku", "Aygün", "+994505551234", Language.En), StringComparison.Ordinal);
-    }
 }

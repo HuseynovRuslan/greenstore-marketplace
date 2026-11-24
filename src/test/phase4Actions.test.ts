@@ -2,8 +2,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { ApiError } from '@/services/apiRepository'
 
 /*
- * Phase 4's Server Actions (backend-contract.md 3.5, 4.1, 4.2): «Şikayət et», «Usta çağır», «Bizimlə əlaqə» and the
- * staff's changes of reports, accounts and categories. The repositories are fakes; `updateTag` is a spy.
+ * Phase 4's Server Actions (backend-contract.md 3.5, 4.1, 4.2): «Şikayət et», «Bizimlə əlaqə» and the staff's changes
+ * of reports, accounts and categories. The repositories are fakes; `updateTag` is a spy.
  */
 
 const { repo, admin, updateTag } = vi.hoisted(() => ({
@@ -18,10 +18,8 @@ vi.mock('@/services/repository', async (original) => ({ ...(await original<typeo
 vi.mock('@/services/adminRepository', () => ({ adminRepository: admin }))
 
 const { sendReport } = await import('@/features/listing/actions')
-const { sendServiceRequest } = await import('@/features/services/actions')
 const { sendSupportMessage } = await import('@/features/support/actions')
 const { createCategory, setAccountBlocked, setSellerVerified, updateCategory, updateReportStatus } = await import('@/features/admin/actions')
-const { markRequestSeen } = await import('@/features/cabinet/actions')
 
 const ID = '01937a52-6c4e-7a1b-9f00-2d5c1e4b8a10'
 const problem = (status: number, code: string, errors?: Record<string, string[]>) => new ApiError(status, code, 'x', { code, ...(errors ? { errors } : {}) })
@@ -65,34 +63,6 @@ describe('«Şikayət et» (sendReport)', () => {
   })
 })
 
-describe('«Usta çağır» (sendServiceRequest)', () => {
-  const input = { serviceId: ID, providerId: ' ', categoryId: 'landsaft-dizayni', cityId: 'baki', area: ' Mərdəkan ', description: ' Həyətə qazon salmaq ', name: ' Leyla ', phone: '055 700 11 22' }
-
-  it('sends exactly the contract’s fields, the number in E.164, with the form’s key', async () => {
-    repo.submitServiceRequest = vi.fn(async () => ({ id: 'q1', number: 3001 }))
-    expect(await sendServiceRequest({ ...input, extra: 'x' } as never, 'sorgu-abc')).toEqual({ ok: true, id: 'q1', number: 3001 })
-    const [sent, key] = repo.submitServiceRequest.mock.calls[0]
-    expect(JSON.parse(JSON.stringify(sent))).toEqual({ serviceId: ID, categoryId: 'landsaft-dizayni', cityId: 'baki', area: 'Mərdəkan', description: 'Həyətə qazon salmaq', name: 'Leyla', phone: '+994557001122' })
-    expect(key).toBe('sorgu-abc')
-  })
-
-  it('drops a key that is not one', async () => {
-    repo.submitServiceRequest = vi.fn(async () => ({ id: 'q1', number: 3001 }))
-    await sendServiceRequest(input, 'açar with spaces')
-    expect(repo.submitServiceRequest.mock.calls[0][1]).toBeUndefined()
-  })
-
-  it('words the API’s refusals', async () => {
-    const refuse = (error: ApiError) => (repo.submitServiceRequest = vi.fn(async () => Promise.reject(error)))
-    refuse(problem(429, 'service-request.phone-limit'))
-    expect(await sendServiceRequest(input)).toMatchObject({ ok: false, error: expect.stringMatching(/Bu nömrədən/) })
-    refuse(problem(404, 'service.not-found'))
-    expect(await sendServiceRequest(input)).toEqual({ ok: false, error: 'Bu xidmət artıq saytda deyil.' })
-    refuse(problem(400, 'validation', { preferredDate: ['in-past'] }))
-    expect(await sendServiceRequest(input)).toEqual({ ok: false, error: 'Bu gündən bir ilə qədər olan tarixi seçin.' })
-  })
-})
-
 describe('«Bizimlə əlaqə» (sendSupportMessage)', () => {
   it('sends the trimmed message and answers the ticket', async () => {
     repo.submitSupportMessage = vi.fn(async () => ({ ticket: 1001 }))
@@ -104,19 +74,6 @@ describe('«Bizimlə əlaqə» (sendSupportMessage)', () => {
     repo.submitSupportMessage = vi.fn(async () => Promise.reject(problem(400, 'validation', { contact: ['invalid'] })))
     expect(await sendSupportMessage({ topic: 'listing', name: 'A', contact: '12345', message: 'Elanım görünmür, niyə?', listingNumber: -4 })).toEqual({ ok: false, error: 'Elan nömrəsini rəqəmlə yazın.' })
     expect(await sendSupportMessage({ topic: 'listing', name: 'A', contact: '12345', message: 'Elanım görünmür, niyə?' })).toEqual({ ok: false, error: 'Telefon nömrəsini və ya e-poçtu düzgün yazın.' })
-  })
-})
-
-describe('«Baxıldı» on a provider’s request (markRequestSeen)', () => {
-  it('tells the API; refuses an id that is not one, and the demo', async () => {
-    repo.markServiceRequestSeen = vi.fn(async () => undefined)
-    expect(await markRequestSeen(ID)).toEqual({ ok: true })
-    expect(repo.markServiceRequestSeen).toHaveBeenCalledWith(ID)
-    expect(await markRequestSeen('../x')).toEqual({ ok: false })
-    repo.markServiceRequestSeen = vi.fn(async () => Promise.reject(problem(404, 'service-request.not-found')))
-    expect(await markRequestSeen(ID)).toEqual({ ok: false })
-    vi.stubEnv('DATA_SOURCE', 'mock')
-    expect(await markRequestSeen(ID)).toEqual({ ok: false })
   })
 })
 

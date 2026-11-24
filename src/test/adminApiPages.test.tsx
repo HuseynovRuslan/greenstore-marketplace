@@ -11,9 +11,8 @@ import type { AdminCategory, AdminOverview, OwnListing, ReportItem, ReportQueue,
 
 vi.setConfig({ testTimeout: 20_000 })
 
-const { repo, admin, actions, router, cabinet } = vi.hoisted(() => ({
-  repo: { getMe: vi.fn(), listIncomingServiceRequests: vi.fn() },
-  cabinet: { markRequestSeen: vi.fn() },
+const { repo, admin, actions, router } = vi.hoisted(() => ({
+  repo: { getMe: vi.fn() },
   admin: {} as Record<string, ReturnType<typeof vi.fn>>,
   actions: {
     updateReportStatus: vi.fn(),
@@ -30,13 +29,11 @@ vi.mock('next/navigation', () => ({ useRouter: () => router, usePathname: () => 
 vi.mock('@/services/repository', () => ({ getRepository: () => repo }))
 vi.mock('@/services/adminRepository', () => ({ adminRepository: admin }))
 vi.mock('@/features/admin/actions', () => actions)
-vi.mock('@/features/cabinet/actions', () => cabinet)
 vi.mock('@/features/account/useAccount', () => ({ useAccount: () => ({ account: undefined, signOut: vi.fn() }), firstName: (n: string) => n }))
 
 const { default: ApiComplaintsPage } = await import('@/views/admin/ApiComplaintsPage')
 const { default: ApiCategoriesPage } = await import('@/views/admin/ApiCategoriesPage')
 const { default: ApiModerationPage } = await import('@/views/admin/ApiModerationPage')
-const { default: IncomingRequestsPage } = await import('@/views/account/IncomingRequestsPage')
 
 const ID = '01937a52-6c4e-7a1b-9f00-2d5c1e4b8a10'
 const OWNER = '01937a52-2222-7a1b-9f00-2d5c1e4b8a10'
@@ -85,7 +82,7 @@ const params = (value: Record<string, string> = {}) => ({ searchParams: Promise.
 
 beforeEach(() => {
   for (const key of Object.keys(admin)) delete admin[key]
-  for (const fn of [...Object.values(actions), ...Object.values(router), ...Object.values(repo), cabinet.markRequestSeen]) fn.mockReset()
+  for (const fn of [...Object.values(actions), ...Object.values(router), ...Object.values(repo)]) fn.mockReset()
 })
 
 describe('/idareetme/sikayetler (DATA_SOURCE=api)', () => {
@@ -266,7 +263,6 @@ describe('/idareetme (DATA_SOURCE=api)', () => {
     listings: { active: 120, pending: 4, rejected: 8, expired: 6, inactive: 2 },
     users: { total: 1250, individual: 1200, business: 50, blocked: 2, staff: 3, newThisWeek: 40 },
     sellers: { total: 50, verified: 12 },
-    serviceRequests: { total: 30, thisWeek: 7, unrouted: 2 },
     support: { new: 5, answered: 20, closed: 11 },
     categories: { total: 6, active: 6, subcategories: 21 },
   }
@@ -279,7 +275,7 @@ describe('/idareetme (DATA_SOURCE=api)', () => {
     const section = screen.getByRole('region', { name: 'İcmal' })
     expect(within(section).getByRole('link', { name: /Şikayətlər\s*3\s*açıq şikayət/ })).toHaveAttribute('href', '/idareetme/sikayetler')
     expect(within(section).getByText('1 250')).toBeInTheDocument()
-    expect(within(section).getByText('2 sorğu heç bir ustaya getməyib')).toBeInTheDocument()
+    expect(within(section).queryByText(/Usta çağır/)).not.toBeInTheDocument()
   })
 
   it('the queue alone at /idareetme/moderasiya', async () => {
@@ -289,55 +285,5 @@ describe('/idareetme (DATA_SOURCE=api)', () => {
     render(await ApiModerationPage(params()))
     expect(screen.queryByRole('region', { name: 'İcmal' })).not.toBeInTheDocument()
     expect(admin.overview).not.toHaveBeenCalled()
-  })
-})
-
-describe('/kabinet/sorgular (DATA_SOURCE=api)', () => {
-  const request = {
-    id: ID,
-    number: 3001,
-    categoryId: 'landsaft-dizayni',
-    category: 'Landşaft dizaynı',
-    cityId: 'baki',
-    city: 'Bakı',
-    area: 'Mərdəkan',
-    description: 'Həyətə qazon salmaq, 120 m²',
-    customerName: 'Leyla',
-    customerPhone: '+994 55 700 11 22',
-    createdAt: '2026-11-22T10:05:00Z',
-    recipientCount: 2,
-    service: { id: ID, slug: 'landsaft-dizayni-20316', title: 'Landşaft dizaynı' },
-  }
-
-  it('asks a visitor without a session to sign in', async () => {
-    repo.getMe.mockResolvedValue(undefined)
-    render(await IncomingRequestsPage(params()))
-    expect(screen.getByText('Şəxsi kabinetə daxil olun')).toBeInTheDocument()
-    expect(repo.listIncomingServiceRequests).not.toHaveBeenCalled()
-  })
-
-  it('shows the provider’s requests with the number to call back, and marks one seen', async () => {
-    const user = userEvent.setup()
-    repo.getMe.mockResolvedValue(person('user'))
-    repo.listIncomingServiceRequests.mockResolvedValue({ items: [request, { ...request, id: 'seen-1', number: 3000, seenAt: '2026-11-22T11:00:00Z', service: undefined, recipientCount: 1 }], total: 2, page: 1, pageCount: 1, unseen: 1 })
-    cabinet.markRequestSeen.mockResolvedValue({ ok: true })
-    render(await IncomingRequestsPage(params({ sehife: '1' })))
-    expect(repo.listIncomingServiceRequests).toHaveBeenCalledWith(1)
-    expect(screen.getByRole('heading', { name: '2 sorğu · 1 yeni' })).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: 'Sorğu № 3001 · Landşaft dizaynı' })).toBeInTheDocument()
-    expect(screen.getAllByText('Yeni')).toHaveLength(1)
-    expect(screen.getAllByRole('link', { name: 'Leyla: +994 55 700 11 22' })[0]).toHaveAttribute('href', 'tel:+994557001122')
-    expect(screen.getByRole('link', { name: 'Landşaft dizaynı' })).toHaveAttribute('href', '/xidmetler/landsaft-dizayni-20316')
-    expect(screen.getByText('Bu sorğu 2 ustaya göndərilib: müştəriyə tez zəng edin.')).toBeInTheDocument()
-    await user.click(screen.getByRole('button', { name: 'Baxıldı' }))
-    expect(cabinet.markRequestSeen).toHaveBeenCalledWith(ID)
-    expect(router.refresh).toHaveBeenCalled()
-  })
-
-  it('explains where requests come from when there are none', async () => {
-    repo.getMe.mockResolvedValue(person('user'))
-    repo.listIncomingServiceRequests.mockResolvedValue({ items: [], total: 0, page: 1, pageCount: 1, unseen: 0 })
-    render(await IncomingRequestsPage(params()))
-    expect(screen.getByText('Gələn sorğu yoxdur')).toBeInTheDocument()
   })
 })

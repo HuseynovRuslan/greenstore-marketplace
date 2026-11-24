@@ -4,7 +4,6 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using GreenStore.Api.Common;
 using GreenStore.Api.Data;
-using GreenStore.Api.Modules.Engagement;
 using GreenStore.Api.Modules.Platform;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -71,16 +70,14 @@ public sealed class HttpRevalidationSender(HttpClient http, IOptions<FrontendOpt
 }
 
 /// <summary>
-/// Sends what the outbox holds (ARCHITECTURE.md §12, every 5 seconds): cache refresh notices to the site and SMS
-/// notices to accounts («Usta çağır», <see cref="ServiceRequestNotices"/>). Due rows are locked with <c>FOR UPDATE SKIP
-/// LOCKED</c>, so two API instances never send the same one. A failure is tried again later
-/// (<see cref="OutboxRetry"/>); after <see cref="OutboxRetry.MaxAttempts"/> it is given up and logged as an error,
+/// Sends what the outbox holds (ARCHITECTURE.md §12, every 5 seconds): cache refresh notices to the site. Due rows are
+/// locked with <c>FOR UPDATE SKIP LOCKED</c>, so two API instances never send the same one. A failure is tried again
+/// later (<see cref="OutboxRetry"/>); after <see cref="OutboxRetry.MaxAttempts"/> it is given up and logged as an error,
 /// since a refresh notice that late is no use (the site's own 60-second cache has refreshed the pages long since).
 /// </summary>
 public sealed class OutboxDispatcher(
     AppDbContext db,
     IRevalidationSender revalidation,
-    ServiceRequestNotices notices,
     TimeProvider clock,
     ILogger<OutboxDispatcher> logger) : IJobStep
 {
@@ -116,17 +113,10 @@ public sealed class OutboxDispatcher(
                     OutboxTypes.Revalidate => await revalidation.SendAsync(
                         JsonSerializer.Deserialize<RevalidatePayload>(message.Payload, ColumnMapping.StorageJson)!.Tags,
                         ct),
-                    OutboxTypes.SmsNotice => await notices.SendAsync(
-                        JsonSerializer.Deserialize<SmsNoticePayload>(message.Payload, ColumnMapping.StorageJson)!,
-                        ct),
                     _ => throw new InvalidOperationException($"Unknown outbox message type '{message.Type}'."),
                 };
                 message.SentAt = now;
-                message.LastError = delivered ? null : message.Type switch
-                {
-                    OutboxTypes.SmsNotice => "skipped: the account is no longer active, or the request was marked spam",
-                    _ => "skipped: no receiver configured (Frontend:BaseUrl, Revalidation:Secret)",
-                };
+                message.LastError = delivered ? null : "skipped: no receiver configured (Frontend:BaseUrl, Revalidation:Secret)";
                 done++;
             }
             catch (Exception error) when (error is not OperationCanceledException || !ct.IsCancellationRequested)

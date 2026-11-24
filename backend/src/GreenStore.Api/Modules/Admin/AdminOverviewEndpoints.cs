@@ -21,10 +21,9 @@ public static class AdminOverviewEndpoints
     }
 
     /// <summary>
-    /// <c>GET /admin/overview</c> → <c>{ moderation, reports, listings, users, sellers, serviceRequests, support,
-    /// categories }</c>: the moderation queue's totals (as <c>GET /admin/moderation</c> has them), reports by status,
-    /// listings by status, accounts, businesses, «Usta çağır» requests (<c>unrouted</c>: no provider got them), support
-    /// messages by status, and categories. Deleted listings and accounts are not counted.
+    /// <c>GET /admin/overview</c> → <c>{ moderation, reports, listings, users, sellers, support, categories }</c>: the
+    /// moderation queue's totals (as <c>GET /admin/moderation</c> has them), reports by status, listings by status,
+    /// accounts, businesses, support messages by status, and categories. Deleted listings and accounts are not counted.
     /// </summary>
     private static async Task<Ok<AdminOverviewDto>> Overview(AppDbContext db, TimeProvider clock, CancellationToken ct)
     {
@@ -45,7 +44,6 @@ public static class AdminOverviewEndpoints
             .ToDictionaryAsync(g => g.Key, g => g.Count, ct);
 
         var users = db.Users.AsNoTracking().Where(u => u.Status != UserStatus.Deleted);
-        var requests = db.ServiceRequests.AsNoTracking();
         return TypedResults.Ok(new AdminOverviewDto(
             await ModerationEndpoints.TotalsAsync(db, ct),
             new ReportTotalsDto(
@@ -68,10 +66,6 @@ public static class AdminOverviewEndpoints
             new SellerTotalsDto(
                 await db.Sellers.CountAsync(ct),
                 await db.Sellers.CountAsync(s => s.VerifiedAt != null, ct)),
-            new ServiceRequestTotalsDto(
-                await requests.CountAsync(ct),
-                await requests.CountAsync(r => r.CreatedAt > since, ct),
-                await requests.CountAsync(r => r.Status == ServiceRequestStatus.New, ct)),
             new SupportTotalsDto(
                 support.GetValueOrDefault(SupportStatus.New),
                 support.GetValueOrDefault(SupportStatus.Answered),
@@ -90,7 +84,6 @@ public sealed record AdminOverviewDto(
     ListingTotalsDto Listings,
     UserTotalsDto Users,
     SellerTotalsDto Sellers,
-    ServiceRequestTotalsDto ServiceRequests,
     SupportTotalsDto Support,
     CategoryTotalsDto Categories);
 
@@ -105,9 +98,6 @@ public sealed record UserTotalsDto(int Total, int Individual, int Business, int 
 
 /// <summary>Business profiles («mağaza»), and how many are «Təsdiqlənmiş satıcı».</summary>
 public sealed record SellerTotalsDto(int Total, int Verified);
-
-/// <summary>«Usta çağır»: all, the last 7 days, and those no provider got (<c>unrouted</c>).</summary>
-public sealed record ServiceRequestTotalsDto(int Total, int ThisWeek, int Unrouted);
 
 public sealed record SupportTotalsDto(int New, int Answered, int Closed);
 

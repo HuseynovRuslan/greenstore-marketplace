@@ -38,7 +38,6 @@ public static class ApiRoutes
         api.MapListingCounters();
         api.MapModeration();
         api.MapReports();
-        api.MapServiceRequests();
         api.MapSupport();
         api.MapAdminOverview();
         api.MapAdminReports();

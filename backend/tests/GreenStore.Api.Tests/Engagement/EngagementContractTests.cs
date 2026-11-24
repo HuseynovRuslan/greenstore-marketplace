@@ -13,7 +13,6 @@ public sealed class EngagementContractTests
 
     [Theory]
     [InlineData(typeof(ReportInputDto), "ReportInput")]
-    [InlineData(typeof(ServiceRequestInputDto), "ServiceRequestInput")]
     [InlineData(typeof(SupportMessageInputDto), "SupportMessageInput")]
     public void A_form_body_has_the_fields_of_its_input_type(Type dto, string type) =>
         Assert.Equal(

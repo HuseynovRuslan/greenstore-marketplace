@@ -4,16 +4,13 @@ import { useRouter } from 'next/navigation'
 import { BadgeCheck, LogOut } from 'lucide-react'
 import { UnderlineTabs } from '@/components/ui/UnderlineTabs'
 import { useAccount, firstName } from '@/features/account/useAccount'
-import { useDataSource } from '@/state/store'
 
-export type CabinetSection = 'listings' | 'favorites' | 'searches' | 'requests' | 'profile'
+export type CabinetSection = 'listings' | 'favorites' | 'searches' | 'profile'
 
-const sections: Array<{ key: CabinetSection; label: string; href: string; apiOnly?: boolean }> = [
+const sections: Array<{ key: CabinetSection; label: string; href: string }> = [
   { key: 'listings', label: 'Elanlarım', href: '/kabinet' },
   { key: 'favorites', label: 'Seçilmişlər', href: '/secilmisler' },
   { key: 'searches', label: 'Axtarışlarım', href: '/kabinet/axtarislar' },
-  // «Usta çağır» requests are stored by the API only: the demo has none to show.
-  { key: 'requests', label: 'Gələn sorğular', href: '/kabinet/sorgular', apiOnly: true },
   { key: 'profile', label: 'Profil', href: '/kabinet/profil' },
 ]
 
@@ -24,7 +21,6 @@ const sections: Array<{ key: CabinetSection; label: string; href: string; apiOnl
  */
 export function CabinetHeader({ active, counts }: { active: CabinetSection; counts?: Partial<Record<CabinetSection, number>> }) {
   const { account, signOut } = useAccount()
-  const api = useDataSource() === 'api'
   const router = useRouter()
   if (!account) return null
   const business = account.accountType === 'business'
@@ -59,7 +55,7 @@ export function CabinetHeader({ active, counts }: { active: CabinetSection; coun
       </div>
       <UnderlineTabs
         label="Şəxsi kabinet"
-        tabs={sections.filter((s) => api || !s.apiOnly).map((s) => ({ key: s.key, label: s.label, href: s.href, active: s.key === active, count: counts?.[s.key] }))}
+        tabs={sections.map((s) => ({ key: s.key, label: s.label, href: s.href, active: s.key === active, count: counts?.[s.key] }))}
       />
     </header>
   )

@@ -155,10 +155,6 @@
         "optional": false,
         "type": "{ total: number; verified: number }"
       },
-      "serviceRequests": {
-        "optional": false,
-        "type": "{ total: number; thisWeek: number; unrouted: number }"
-      },
       "support": {
         "optional": false,
         "type": "{ new: number; answered: number; closed: number }"
@@ -290,98 +286,6 @@
       "vip": {
         "optional": false,
         "type": "Listing[]"
-      }
-    },
-    "IncomingServiceRequest": {
-      "area": {
-        "optional": true,
-        "type": "string"
-      },
-      "category": {
-        "optional": false,
-        "type": "string"
-      },
-      "categoryId": {
-        "optional": false,
-        "type": "string"
-      },
-      "city": {
-        "optional": false,
-        "type": "string"
-      },
-      "cityId": {
-        "optional": false,
-        "type": "string"
-      },
-      "createdAt": {
-        "optional": false,
-        "type": "string"
-      },
-      "customerName": {
-        "optional": false,
-        "type": "string"
-      },
-      "customerPhone": {
-        "optional": false,
-        "type": "string"
-      },
-      "description": {
-        "optional": false,
-        "type": "string"
-      },
-      "id": {
-        "optional": false,
-        "type": "string"
-      },
-      "notifiedAt": {
-        "optional": true,
-        "type": "string"
-      },
-      "number": {
-        "optional": false,
-        "type": "number"
-      },
-      "preferredDate": {
-        "optional": true,
-        "type": "string"
-      },
-      "recipientCount": {
-        "optional": false,
-        "type": "number"
-      },
-      "seenAt": {
-        "optional": true,
-        "type": "string"
-      },
-      "service": {
-        "optional": true,
-        "type": "{ id: string; slug: string; title: string }"
-      },
-      "size": {
-        "optional": true,
-        "type": "string"
-      }
-    },
-    "IncomingServiceRequestPage": {
-      "items": {
-        "optional": false,
-        "type": "IncomingServiceRequest[]"
-      },
-      "page": {
-        "optional": false,
-        "type": "number"
-      },
-      "pageCount": {
-        "optional": false,
-        "type": "number"
-      },
-      "total": {
-        "optional": false,
-        "type": "number"
-      },
-      "unseen": {
-        "optional": false,
-        "type": "number"
       }
     },
     "Listing": {
@@ -1890,58 +1794,6 @@
       "workingHours": {
         "optional": true,
         "type": "string"
-      }
-    },
-    "ServiceRequestInput": {
-      "area": {
-        "optional": true,
-        "type": "string"
-      },
-      "categoryId": {
-        "optional": false,
-        "type": "string"
-      },
-      "cityId": {
-        "optional": false,
-        "type": "string"
-      },
-      "description": {
-        "optional": false,
-        "type": "string"
-      },
-      "name": {
-        "optional": false,
-        "type": "string"
-      },
-      "phone": {
-        "optional": false,
-        "type": "string"
-      },
-      "preferredDate": {
-        "optional": true,
-        "type": "string"
-      },
-      "providerId": {
-        "optional": true,
-        "type": "string"
-      },
-      "serviceId": {
-        "optional": true,
-        "type": "string"
-      },
-      "size": {
-        "optional": true,
-        "type": "string"
-      }
-    },
-    "ServiceRequestResult": {
-      "id": {
-        "optional": false,
-        "type": "string"
-      },
-      "number": {
-        "optional": false,
-        "type": "number"
       }
     },
     "ServiceSearchResult": {

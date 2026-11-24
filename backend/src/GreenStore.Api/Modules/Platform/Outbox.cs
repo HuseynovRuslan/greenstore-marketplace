@@ -10,19 +10,6 @@ public static class OutboxTypes
 {
     /// <summary>Tell the site to refresh cached pages: <c>{"tags": ["listing:…", "listings", …]}</c>.</summary>
     public const string Revalidate = "revalidate";
-
-    /// <summary>An SMS notice to an account (not a code: codes never go through the outbox, DATABASE.md §3.2).</summary>
-    public const string SmsNotice = "sms-notice";
-}
-
-/// <summary>
-/// The body of an <see cref="OutboxTypes.SmsNotice"/> message: which notice, about what, to whom. The text is made when
-/// it is sent, in the account's language, so a notice to an account blocked meanwhile is not sent at all.
-/// </summary>
-public sealed record SmsNoticePayload(string Template, Guid SubjectId, Guid UserId)
-{
-    /// <summary><see cref="Template"/>: a «Usta çağır» request (<see cref="SubjectId"/>) for a provider.</summary>
-    public const string ServiceRequest = "service-request";
 }
 
 /// <summary>The body of a <see cref="OutboxTypes.Revalidate"/> message, and what the site's <c>POST /api/revalidate</c> receives.</summary>

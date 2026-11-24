@@ -18,7 +18,6 @@ import type {
   City,
   ContactReveal,
   FavoriteItems,
-  IncomingServiceRequestPage,
   Listing,
   ListingInput,
   ListingStats,
@@ -44,8 +43,6 @@ import type {
   SellerProfilePatch,
   Service,
   ServiceProvider,
-  ServiceRequestInput,
-  ServiceRequestResult,
   SupportMessageInput,
   UserProfile,
 } from '@/types'
@@ -225,20 +222,8 @@ export interface MarketplaceRepository {
    * unresolved report of the same target and reason answers again with its id instead of a second one.
    */
   submitReport(input: ReportInput): Promise<{ id: string }>
-  /**
-   * «Usta çağır» (backend-contract.md 4.2), signed in or not: to the service's provider, to the chosen one, or to the
-   * type's providers in the city. `idempotencyKey` (≤ 80 printable ASCII): the same key again answers the same request.
-   */
-  submitServiceRequest(input: ServiceRequestInput, idempotencyKey?: string): Promise<ServiceRequestResult>
   /** «Bizimlə əlaqə» (support form); returns the ticket number. */
   submitSupportMessage(input: SupportMessageInput): Promise<{ ticket: number }>
-  /**
-   * «Gələn sorğular» (backend-contract.md 4.2): the «Usta çağır» requests that came to the signed-in provider, newest
-   * first, 20 a page; an empty page when nobody is signed in.
-   */
-  listIncomingServiceRequests(page: number): Promise<IncomingServiceRequestPage>
-  /** The provider opened a request (it is no longer counted as new). */
-  markServiceRequestSeen(id: string): Promise<void>
 
   /* Accounts: SMS code, registration, password reset */
   requestOtp(input: { phone: string; purpose: OtpPurpose }): Promise<OtpChallenge>

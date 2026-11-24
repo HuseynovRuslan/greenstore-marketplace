@@ -72,10 +72,6 @@ public class AppDbContext : DbContext
 
     public DbSet<Report> Reports => Set<Report>();
 
-    public DbSet<ServiceRequest> ServiceRequests => Set<ServiceRequest>();
-
-    public DbSet<ServiceRequestRecipient> ServiceRequestRecipients => Set<ServiceRequestRecipient>();
-
     public DbSet<SupportMessage> SupportMessages => Set<SupportMessage>();
 
     public DbSet<PromotionPackage> PromotionPackages => Set<PromotionPackage>();
@@ -101,8 +97,7 @@ public class AppDbContext : DbContext
         modelBuilder.HasPostgresExtension("pg_trgm");
         // «Elan № 10001» is the first listing number (DATABASE.md §2).
         modelBuilder.HasSequence<long>(ListingConfiguration.NumberSequence).StartsAt(10001);
-        // «Sorğu № 3001» and the support ticket numbers.
-        modelBuilder.HasSequence<long>(ServiceRequestConfiguration.NumberSequence).StartsAt(3001);
+        // The support ticket numbers.
         modelBuilder.HasSequence<long>(SupportMessageConfiguration.TicketSequence).StartsAt(1001);
         // «Sifariş № 1001»: promotion orders.
         modelBuilder.HasSequence<long>(PromotionOrderConfiguration.NumberSequence).StartsAt(1001);

@@ -15,15 +15,4 @@ public static class SmsTexts
         Language.En => $"GreenStore code: {code}. Valid for {minutes} min. Do not share it with anyone.",
         _ => $"GreenStore kodunuz: {code}. Kod {minutes} dəqiqə etibarlıdır. Onu heç kimə deməyin.",
     };
-
-    /// <summary>
-    /// «Usta çağır» to a provider: the request's number, the service type and city in the provider's language, and the
-    /// customer to call back (the inbox page comes later, so the SMS carries what the call needs).
-    /// </summary>
-    public static string ServiceRequestNotice(long number, string serviceType, string city, string customerName, string customerPhone, Language language) => language switch
-    {
-        Language.Ru => $"GreenStore: новая заявка № {number}. {serviceType}, {city}. Клиент: {customerName}, {customerPhone}.",
-        Language.En => $"GreenStore: new service request No. {number}. {serviceType}, {city}. Customer: {customerName}, {customerPhone}.",
-        _ => $"GreenStore: yeni xidmət sorğusu № {number}. {serviceType}, {city}. Müştəri: {customerName}, {customerPhone}.",
-    };
 }

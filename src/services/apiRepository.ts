@@ -20,7 +20,7 @@
  * - **Listing cycle** (phase 3, backend-contract.md 3.2–3.6): photo upload addresses, sending and editing a listing
  *   (`Idempotency-Key`), «Elanlarım» and its actions, the owner's statistics, «Nömrəni göstər» and the view beacon.
  *   The owner's and the revealed numbers come as E.164 and are returned in the site's spacing too.
- * - **Reports, «Usta çağır», support** (phase 4, backend-contract.md 4.1, 4.2): per-visitor writes, guests too.
+ * - **Reports and support** (phase 4, backend-contract.md 4.1, 4.2): per-visitor writes, guests too.
  * - **Promotion** (phase 5, backend-contract.md 5.1): the packages (a cached public read), an order for the owner's
  *   listing with the payment provider's page (`Idempotency-Key`), and the owner's order after the provider brings
  *   them back.
@@ -35,7 +35,6 @@ import type {
   City,
   ContactReveal,
   FavoriteItems,
-  IncomingServiceRequestPage,
   Listing,
   ListingStats,
   ListingSubmitResult,
@@ -53,10 +52,9 @@ import type {
   Seller,
   Service,
   ServiceProvider,
-  ServiceRequestResult,
   UserProfile,
 } from '@/types'
-import { listingFilterParams, listingSearchParams, pageParam, sellerListParams, serviceSearchParams } from './apiQuery'
+import { listingFilterParams, listingSearchParams, sellerListParams, serviceSearchParams } from './apiQuery'
 import type { FacetCounts, HomeContent, MarketplaceRepository, PageResult, ServiceSearchResult, SitemapKind, SitemapPage } from './repository'
 import { clearSession, sessionToken, storeSession, type SessionGrant } from './session'
 import { clientIpOf } from './clientIp'
@@ -455,23 +453,12 @@ export const apiRepository: MarketplaceRepository = {
     return toReveal(await send<ContactReveal>(`sellers/${path([sellerId, 'phone-reveals'])}`, { method: 'POST' }))
   },
 
-  /* Reports, «Usta çağır» and support (phase 4, backend-contract.md 4.1, 4.2): guests too, per visitor (IP-limited) */
+  /* Reports and support (phase 4, backend-contract.md 4.1, 4.2): guests too, per visitor (IP-limited) */
   async submitReport(input) {
     return send<{ id: string }>('reports', { method: 'POST', body: input })
   },
-  async submitServiceRequest(input, idempotencyKey) {
-    return send<ServiceRequestResult>('service-requests', { method: 'POST', body: input, headers: idempotencyKey ? { 'Idempotency-Key': idempotencyKey } : undefined })
-  },
   async submitSupportMessage(input) {
     return send<{ ticket: number }>('support', { method: 'POST', body: input })
-  },
-  async listIncomingServiceRequests(page) {
-    const empty: IncomingServiceRequestPage = { items: [], total: 0, page: 1, pageCount: 1, unseen: 0 }
-    const result = await readSigned<IncomingServiceRequestPage>(`me/service-requests?page=${pageParam(page)}&pageSize=${INBOX_PAGE_SIZE}`, empty)
-    return { ...result, items: result.items.map((r) => ({ ...r, customerPhone: formatPhone(r.customerPhone) })) }
-  },
-  async markServiceRequestSeen(id) {
-    await sendSigned<void>(`me/service-requests/${path([id, 'seen'])}`, { method: 'POST' })
   },
 
   /* «Önə çıxar», «İrəli çək» and the bundle (phase 5, backend-contract.md 5.1) */
@@ -597,6 +584,3 @@ export const apiRepository: MarketplaceRepository = {
 
 /** The most keys one merge sends (the API's limit). */
 const MERGE_LIMIT = 500
-
-/** «Gələn sorğular» a page. */
-const INBOX_PAGE_SIZE = 20

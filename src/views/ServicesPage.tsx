@@ -8,7 +8,6 @@ import { serviceCategories } from '@/data/services'
 import { Breadcrumb } from '@/features/seller/ui'
 import { optionClass } from '@/features/search/filterStyles'
 import type { ProductMatches } from '@/features/services/productMatches'
-import { RequestButton } from '@/features/services/RequestDialog'
 import { ServiceSearchCard, ServiceSort } from '@/features/services/ServiceCatalogControls'
 import { ServiceTile } from '@/features/services/ServiceTile'
 import { providerTabs, serviceHref, type ServiceQuery } from '@/features/services/query'
@@ -35,8 +34,8 @@ const pricePresets = [
 /**
  * /xidmetler (Nov 2026): the services catalogue on the product catalogue's model — the same search card, a sidebar
  * of categories with icons and counts, provider type and starting price (links, so it works without JavaScript),
- * the card language of /elanlar, sort, pagination, empty state, and «Usta çağır» for a request to every provider of
- * a category. Phones get the categories as a chip row and the other filters under them.
+ * the card language of /elanlar, sort, pagination and empty state. Phones get the categories as a chip row and the
+ * other filters under them.
  */
 interface ServicesPageProps {
   query: string
@@ -143,7 +142,6 @@ export default function ServicesPage({ query, parsed, result, productMatches, ca
             </div>
             <div className="flex w-full items-center gap-2 sm:w-auto">
               <ServiceSort query={query} value={parsed.sort} />
-              <RequestButton categoryId={parsed.categoryId} className="max-sm:hidden" />
             </div>
           </div>
 
@@ -190,7 +188,7 @@ export default function ServicesPage({ query, parsed, result, productMatches, ca
                 <EmptyState
                   icon={<Search aria-hidden size={30} strokeWidth={1.8} absoluteStrokeWidth />}
                   title="Bu seçimlə xidmət tapılmadı"
-                  description="Filtrləri azaldın və ya «Usta çağır» ilə sorğu göndərin: uyğun ustalar özləri zəng edəcək."
+                  description="Filtrləri azaldın və ya başqa şəhər seçin."
                   action={
                     <ButtonLink href="/xidmetler" fullWidth>
                       Filtrləri təmizlə
@@ -205,14 +203,7 @@ export default function ServicesPage({ query, parsed, result, productMatches, ca
             <PaginationLinks page={result.page} pageCount={result.pageCount} basePath="/xidmetler" query={query} scrollTargetId="xidmet-elanlari" />
           )}
 
-          <div className="mt-4 flex flex-col gap-4 rounded-2xl bg-sand p-5 md:flex-row md:items-center md:justify-between md:p-6">
-            <div className="flex flex-col gap-1">
-              <p className="text-[17px] leading-[1.3] font-semibold text-forest">Uyğun usta tapmadınız?</p>
-              <p className="max-w-[60ch] text-sm leading-[1.5] text-ink-soft">İşi təsvir edin — həmin xidməti göstərən ustalar sizə zəng etsin. Pulsuzdur.</p>
-            </div>
-            <RequestButton categoryId={parsed.categoryId} className="shrink-0" />
-          </div>
-          <p className="text-xs leading-[1.5] text-muted">Başlanğıc qiymət işin həcminə görə dəyişir. İşin həcmini, müddətini və zəmanəti ustalarla yazılı razılaşdırın.</p>
+          <p className="mt-4 text-xs leading-[1.5] text-muted">Başlanğıc qiymət işin həcminə görə dəyişir. İşin həcmini, müddətini və zəmanəti ustalarla yazılı razılaşdırın.</p>
         </section>
       </div>
     </div>

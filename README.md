@@ -229,12 +229,11 @@ The API lives in [`backend/`](backend/README.md) (ASP.NET Core 10, PostgreSQL). 
   * a Server Action that changes what the site shows refreshes those pages at once (`updateTag` with the API's tags),
     and `POST /api/revalidate` takes the API's change notices for the rest (`REVALIDATE_SECRET`). The data cache is per
     server process: with several Next.js servers each needs the notice (or a shared cache handler).
-* **Reports, «Usta çağır», support and the staff pages (phase 4, done).** With `DATA_SOURCE=mock` the forms answer
-  from the demo and the admin pages read `src/data/admin`, as before. With `DATA_SOURCE=api`:
-  * «Şikayət et» sends a reason code (`src/features/seller/complaintReasons.ts`, backend-contract.md 4.1); «Usta
-    çağır» sends the request with an `Idempotency-Key` per request content; «Bizimlə əlaqə» returns the API's ticket;
-  * a provider finds the requests that came to them in «Gələn sorğular» (`/kabinet/sorgular`, API mode only), with
-    the customer's number to call back: until an SMS provider is chosen the SMS notice only reaches the API's log;
+* **Reports, support and the staff pages (phase 4, done).** With `DATA_SOURCE=mock` the forms answer from the demo
+  and the admin pages read `src/data/admin`, as before. With `DATA_SOURCE=api`:
+  * «Şikayət et» sends a reason code (`src/features/seller/complaintReasons.ts`, backend-contract.md 4.1); «Bizimlə
+    əlaqə» returns the API's ticket. «Usta çağır» (service requests) was removed from the site and the API on
+    24 Nov 2026 (docs/handoff/remove-usta-cagir.md);
   * `/idareetme` shows every section's numbers above the moderation queue, `/idareetme/sikayetler` handles reports
     (status, resolution, note, history; admins also block the account behind the target and verify sellers) and
     `/idareetme/kateqoriyalar` (admins only) edits categories in three languages. All are rendered on the server and

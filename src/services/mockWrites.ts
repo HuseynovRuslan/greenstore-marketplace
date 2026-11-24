@@ -8,7 +8,7 @@ import type { Listing, ListingStats, OtpChallenge, OtpVerifyResult, SavedSearch,
 
 const counters = new Map<string, number>()
 
-/** Next number of a mock sequence ("Elan № 10540", "Sorğu № 3021"). */
+/** Next number of a mock sequence ("Elan № 10540", "Bilet № 7210"). */
 export function mockSequence(name: string, start: number): number {
   const next = (counters.get(name) ?? start - 1) + 1
   counters.set(name, next)

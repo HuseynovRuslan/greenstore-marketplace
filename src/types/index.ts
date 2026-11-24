@@ -754,8 +754,6 @@ export interface AdminOverview {
   /** `staff`: moderators and admins; `newThisWeek`: the last 7 days */
   users: { total: number; individual: number; business: number; blocked: number; staff: number; newThisWeek: number }
   sellers: { total: number; verified: number }
-  /** «Usta çağır»; `unrouted`: no provider got the request */
-  serviceRequests: { total: number; thisWeek: number; unrouted: number }
   support: { new: number; answered: number; closed: number }
   categories: { total: number; active: number; subcategories: number }
 }
@@ -918,66 +916,6 @@ export interface ReportInput {
   reason: ReportReason
   /** Required for `other`; at most 500 characters */
   comment?: string
-}
-
-/** «Usta çağır»: a request sent to a service provider (or to all providers of a category when none is chosen). */
-export interface ServiceRequestInput {
-  serviceId?: string
-  providerId?: string
-  categoryId: string
-  cityId: string
-  area?: string
-  /** ISO date the customer prefers */
-  preferredDate?: string
-  /** Rough size of the job, e.g. "120 m²" */
-  size?: string
-  description: string
-  name: string
-  phone: string
-}
-
-export interface ServiceRequestResult {
-  id: string
-  /** "Sorğu № 3021" */
-  number: number
-}
-
-/** A «Usta çağır» request that came to the signed-in provider («Gələn sorğular», backend-contract.md 4.2). */
-export interface IncomingServiceRequest {
-  id: string
-  number: number
-  /** The service type */
-  categoryId: string
-  /** Its name */
-  category: string
-  cityId: string
-  city: string
-  area?: string
-  /** `YYYY-MM-DD` */
-  preferredDate?: string
-  size?: string
-  description: string
-  customerName: string
-  /** The customer's number to call back ("+994 55 700 11 22"; the API's E.164 in the site's spacing) */
-  customerPhone: string
-  createdAt: string
-  /** Not sent while the provider has not opened it */
-  seenAt?: string
-  /** When the SMS notice went out */
-  notifiedAt?: string
-  /** How many providers got it: 1 when the customer chose this one */
-  recipientCount: number
-  /** The service whose page it came from */
-  service?: { id: string; slug: string; title: string }
-}
-
-/** A page of the provider's requests, newest first, with how many are not opened yet. */
-export interface IncomingServiceRequestPage {
-  items: IncomingServiceRequest[]
-  total: number
-  page: number
-  pageCount: number
-  unseen: number
 }
 
 /** «Axtarışı yadda saxla»: a named catalogue search with optional alerts about new matches. */

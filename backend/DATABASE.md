@@ -1,6 +1,6 @@
 # GreenStore: verilənlər bazası
 
-**Status:** təsdiqlənib (22 noyabr 2026). Faza 1-in cədvəlləri yaradılıb (miqrasiya `AddCatalogueTables`): `categories`, `cities`, `users`, `photos`, `sellers`, `listings` (`pending_promotion_option_id` faza 5-də, `promotion_options` ilə birlikdə), `listing_photos`, `listing_counters` və `listing_number_seq`. Faza 2-də (miqrasiya `AddAccounts`, sonra `AddOtpCreatedIndex`) `sessions`, `otp_challenges`, `favorites` və `saved_searches` gəlib; `users` faza 1-dən tamdır. Faza 3-də (miqrasiya `AddListingLifecycle`) `listing_drafts`, `listing_revisions`, `moderation_decisions`, `listing_daily_stats`, `listing_seen` (UNLOGGED), `outbox`, `audit_log` və `idempotency_keys` gəlib. Faza 4-də (miqrasiya `AddReportsRequestsSupport`) `reports`, `service_requests`, `service_request_recipients`, `support_messages` və `service_request_number_seq`, `support_ticket_seq` ardıcıllıqları gəlib. Faza 5-də (miqrasiya `AddPromotions`) `promotion_packages`, `promotion_options` (seed: `src/data/promotions.ts`-dən, adlar üç dildə), `promotion_orders`, `payment_events`, `listing_promotions`, `promotion_order_number_seq`, `listings.pending_promotion_option_id` və `listings.promoted_at` (`ix_listings_feed` onu da daxil edir) gəlib. `devices` mobil tətbiqi gözləyir.
+**Status:** təsdiqlənib (22 noyabr 2026). Faza 1-in cədvəlləri yaradılıb (miqrasiya `AddCatalogueTables`): `categories`, `cities`, `users`, `photos`, `sellers`, `listings` (`pending_promotion_option_id` faza 5-də, `promotion_options` ilə birlikdə), `listing_photos`, `listing_counters` və `listing_number_seq`. Faza 2-də (miqrasiya `AddAccounts`, sonra `AddOtpCreatedIndex`) `sessions`, `otp_challenges`, `favorites` və `saved_searches` gəlib; `users` faza 1-dən tamdır. Faza 3-də (miqrasiya `AddListingLifecycle`) `listing_drafts`, `listing_revisions`, `moderation_decisions`, `listing_daily_stats`, `listing_seen` (UNLOGGED), `outbox`, `audit_log` və `idempotency_keys` gəlib. Faza 4-də (miqrasiya `AddReportsRequestsSupport`) `reports`, `service_requests`, `service_request_recipients`, `support_messages` və `service_request_number_seq`, `support_ticket_seq` ardıcıllıqları gəlib. Faza 5-də (miqrasiya `AddPromotions`) `promotion_packages`, `promotion_options` (seed: `src/data/promotions.ts`-dən, adlar üç dildə), `promotion_orders`, `payment_events`, `listing_promotions`, `promotion_order_number_seq`, `listings.pending_promotion_option_id` və `listings.promoted_at` (`ix_listings_feed` onu da daxil edir) gəlib. `devices` mobil tətbiqi gözləyir. 24 noyabr 2026-da (miqrasiya `RemoveServiceRequests`) «Usta çağır» çıxarılıb: `service_requests`, `service_request_recipients` və `service_request_number_seq` silinib, göndərilməmiş `sms-notice` outbox sətirləri də ([remove-usta-cagir.md](../docs/handoff/remove-usta-cagir.md)).
 **Əlaqəli sənədlər:** [ARCHITECTURE.md](ARCHITECTURE.md) (ümumi arxitektura), [backend-contract.md](../docs/handoff/backend-contract.md) (frontend müqaviləsi).
 
 Aşağıdakı SQL hədəf sxemdir. Real cədvəllər EF Core miqrasiyaları ilə yaradılacaq, amma nəticə bu sxemlə eyni olmalıdır. Hər miqrasiyanın SQL-i bu sənədlə müqayisə olunur.
@@ -22,8 +22,7 @@ users
  │    └─ N listing_promotions ─► promotion_orders ─► promotion_options ─► promotion_packages
  ├─ N favorites ─► listings
  ├─ N saved_searches
- ├─ N reports ─► listings | sellers
- └─ N service_request_recipients ─► service_requests ─► listings (xidmət)
+ └─ N reports ─► listings | sellers
 
 Müstəqil: otp_challenges, support_messages, payment_events, outbox, audit_log, idempotency_keys
 ```
@@ -52,7 +51,6 @@ Müstəqil: otp_challenges, support_messages, payment_events, outbox, audit_log,
 CREATE EXTENSION IF NOT EXISTS pg_trgm;
 
 CREATE SEQUENCE listing_number_seq          START 10001;  -- «Elan № 10001»
-CREATE SEQUENCE service_request_number_seq  START 3001;   -- «Sorğu № 3001»
 CREATE SEQUENCE support_ticket_seq          START 1001;
 CREATE SEQUENCE promotion_order_number_seq  START 1001;
 ```
@@ -462,35 +460,11 @@ CREATE INDEX ix_reports_listing ON reports (listing_id) WHERE listing_id IS NOT 
 
 `status` dəyərləri admin-in indiki `ComplaintStatus`-u ilə eynidir. Səbəb kodu da başqa enum-lar kimi `CHECK` ilə yoxlanır (§2); hansı hədəfin hansı kodu seçə bildiyini C# (`ReportRules`) yoxlayır. Moderatorun qeydi və şikayətin tarixçəsi ayrıca sütunda deyil, `audit_log`-dadır (`report.update`: yeni status, əvvəlki status, `resolution`, qeyd).
 
-### 3.8 «Usta çağır» və dəstək
+### 3.8 Dəstək
+
+«Usta çağır»ın `service_requests` və `service_request_recipients` cədvəlləri burada idi; 24 noyabr 2026-da çıxarılıb.
 
 ```sql
-CREATE TABLE service_requests (
-  id               uuid PRIMARY KEY,
-  number           bigint NOT NULL UNIQUE DEFAULT nextval('service_request_number_seq'),
-  listing_id       uuid REFERENCES listings (id),                 -- konkret xidmətin səhifəsindən gəlibsə
-  category_id      text NOT NULL REFERENCES categories (id),      -- xidmət növü
-  city_id          text NOT NULL REFERENCES cities (id),
-  area             text CHECK (char_length(area) <= 80),
-  preferred_date   date,
-  size             text CHECK (char_length(size) <= 40),          -- «120 m²»
-  description      text NOT NULL CHECK (char_length(description) <= 1000),
-  customer_name    text NOT NULL CHECK (char_length(customer_name) <= 60),
-  customer_phone   text NOT NULL CHECK (customer_phone ~ '^\+994[0-9]{9}$'),
-  customer_user_id uuid REFERENCES users (id),
-  status           text NOT NULL DEFAULT 'new' CHECK (status IN ('new', 'sent', 'closed', 'spam')),
-  ip_hash          bytea,
-  created_at       timestamptz NOT NULL DEFAULT now()
-);
-
-CREATE TABLE service_request_recipients (
-  request_id       uuid NOT NULL REFERENCES service_requests (id) ON DELETE CASCADE,
-  provider_user_id uuid NOT NULL REFERENCES users (id),
-  notified_at      timestamptz,
-  seen_at          timestamptz,
-  PRIMARY KEY (request_id, provider_user_id)
-);
-
 CREATE TABLE support_messages (
   id             uuid PRIMARY KEY,
   ticket         bigint NOT NULL UNIQUE DEFAULT nextval('support_ticket_seq'),
@@ -505,16 +479,6 @@ CREATE TABLE support_messages (
   created_at     timestamptz NOT NULL DEFAULT now()
 );
 ```
-
-**«Usta çağır» bir və ya bir neçə ustaya gedə bilər:**
-- Sorğu konkret xidmətdən gəlibsə, `service_request_recipients`-də bir sətir olur.
-- Usta seçilməyibsə (bütün kateqoriyaya), həmin növ və şəhərdə ən çoxu 10 aktiv ustaya paylanır. Hər ustaya bir sətir yazılır.
-
-- Ustalar sırası: əvvəl «Önə çıxan» xidməti olanlar, sonra təsdiqlənmiş biznes, sonra ən yeni xidmət (`ServiceRequestRules.ChooseProviders`). Müştəri özü siyahıya düşmür. Heç kim tapılmasa sorğu `new` qalır.
-- Hər ustaya SMS xəbəri sorğu ilə eyni tranzaksiyada outbox-a yazılır (`sms-notice`), göndəriləndə `notified_at` dolur. Bütün sayt üzrə 24 saatda ən çox `ServiceRequests:DailyNoticeCap` xəbər gedir; ondan sonra sorğu yalnız ustanın gələn sorğularına düşür.
-- Spam qarşısında: IP üzrə limit, bir müştəri nömrəsindən 24 saatda 5, bir IP-dən 20 sorğu (`ip_hash` və `customer_phone` üzrə sayılır; 10 min elan ölçüsündə indeks lazım deyil, §3.4).
-
-**Hələ olmayan UI.** API-də ustanın gələn sorğuları var (`GET /me/service-requests`), amma saytda onun səhifəsi («Gələn sorğular») hələ yoxdur. Onu sonra əlavə etmək lazımdır.
 
 ### 3.9 Reklam və ödəniş
 
