@@ -40,6 +40,8 @@ interface FieldShellProps {
   optional?: boolean
   /** Right side of the label row, e.g. a character counter. */
   aside?: ReactNode
+  /** The label is read by screen readers only: a visible question above already names the box. */
+  labelHidden?: boolean
   className?: string
   children: ReactNode
 }
@@ -60,13 +62,18 @@ export function useErrorRole(): 'alert' | undefined {
   return useContext(ErrorsAnnounced) ? 'alert' : undefined
 }
 
-export function FieldShell({ label, hint, error, htmlFor, hintId, errorId, optional, aside, className, children }: FieldShellProps) {
+export function FieldShell({ label, hint, error, htmlFor, hintId, errorId, optional, aside, labelHidden, className, children }: FieldShellProps) {
   const errorRole = useErrorRole()
   return (
     <div className={cn('flex min-w-0 flex-col items-start gap-[7px]', className)}>
-      {(label || aside) && (
+      {label && labelHidden && (
+        <label htmlFor={htmlFor} className="sr-only">
+          {label}
+        </label>
+      )}
+      {((label && !labelHidden) || aside) && (
         <div className="flex w-full items-baseline justify-between gap-3">
-          {label && (
+          {label && !labelHidden && (
             <label htmlFor={htmlFor} className="text-[13px] leading-[normal] font-semibold text-ink">
               {label}
               {optional && <span className="font-normal text-muted"> (istəyə bağlı)</span>}
@@ -97,13 +104,14 @@ interface TextFieldProps extends InputHTMLAttributes<HTMLInputElement> {
   error?: string
   optional?: boolean
   aside?: ReactNode
+  labelHidden?: boolean
   containerClassName?: string
 }
 
-export function TextField({ label, hint, error, optional, aside, containerClassName, className, id, 'aria-describedby': extra, ...rest }: TextFieldProps) {
+export function TextField({ label, hint, error, optional, aside, labelHidden, containerClassName, className, id, 'aria-describedby': extra, ...rest }: TextFieldProps) {
   const ids = useFieldIds(id)
   return (
-    <FieldShell label={label} hint={hint} error={error} optional={optional} aside={aside} htmlFor={ids.fieldId} {...ids} className={containerClassName}>
+    <FieldShell label={label} hint={hint} error={error} optional={optional} aside={aside} labelHidden={labelHidden} htmlFor={ids.fieldId} {...ids} className={containerClassName}>
       <input
         id={ids.fieldId}
         aria-invalid={error ? true : undefined}

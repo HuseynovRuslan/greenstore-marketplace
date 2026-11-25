@@ -1,4 +1,5 @@
 import { subcategoriesOf } from '@/data/categories'
+import { isPersonName } from '@/lib/names'
 import { phoneFieldError } from '@/lib/phone'
 import { parseNumberValue, SERVICE_CATEGORY, visibleAttributes } from './attributes'
 import { DESCRIPTION_MAX, DESCRIPTION_MIN, MAX_PHOTOS, TITLE_MAX, TITLE_MIN, type PostingDraft, type StepNumber } from './draft'
@@ -103,6 +104,7 @@ export function validateStep(step: StepNumber, d: PostingDraft): StepErrors {
       const name = d.contactName.trim()
       if (!name) e.contactName = 'Adınızı yazın: alıcı kiminlə danışdığını bilsin.'
       else if (name.length < 2 || name.length > 50) e.contactName = 'Ad 2–50 simvol olmalıdır.'
+      else if (!isPersonName(name)) e.contactName = 'Adınızı yalnız hərflərlə yazın.'
       set('phone', phoneFieldError(d.phone))
       if (d.hidePhone && !d.whatsapp) e.whatsapp = 'Nömrə gizlidirsə, alıcılar sizə yalnız WhatsApp-da yaza bilər. WhatsApp-ı açın.'
       break

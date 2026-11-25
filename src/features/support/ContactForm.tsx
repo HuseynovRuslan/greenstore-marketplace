@@ -5,8 +5,11 @@ import { useSearchParams } from 'next/navigation'
 import { CircleCheck } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { CharCount, SelectField, TextAreaField, TextField } from '@/components/ui/Field'
+import { NameField, PhoneField } from '@/components/ui/FormControls'
 import { Notice } from '@/components/ui/Notice'
+import { Segmented } from '@/features/auth/ui'
 import { emailError } from '@/features/auth/validation'
+import { isPersonName, nameChars } from '@/lib/names'
 import { phoneFieldError } from '@/lib/phone'
 import { useDataSource, useSession } from '@/state/store'
 import type { SupportMessageInput } from '@/types'
@@ -16,13 +19,16 @@ import { contactTopics, topicFromParam, type ContactTopic } from './contactTopic
 const topics: Array<{ value: ContactTopic | ''; label: string }> = [{ value: '', label: 'Seçin' }, ...contactTopics]
 
 /**
- * «Bizimlə əlaqə»: topic, name, phone or e-mail, optional listing number, message → ticket number. `initialTopic`
- * comes from a link that names the subject (?movzu=, see ContactFormFromUrl).
+ * «Bizimlə əlaqə»: topic, name (letters only), where the answer goes («Telefon» with the masked number, or «E-poçt»),
+ * optional listing number, message → ticket number. `initialTopic` comes from a link that names the subject
+ * (?movzu=, see ContactFormFromUrl).
  */
 export function ContactForm({ initialTopic }: { initialTopic?: ContactTopic }) {
   const { user } = useSession()
   const demo = useDataSource() === 'mock'
-  const [form, setForm] = useState({ topic: initialTopic ?? '', name: user?.fullName ?? '', contact: user?.phone ?? '', listing: '', message: '' })
+  const [form, setForm] = useState({ topic: initialTopic ?? '', name: nameChars(user?.fullName ?? ''), phone: user?.phone ?? '', email: user?.email ?? '', listing: '', message: '' })
+  // Where the answer goes: the phone unless the account has only an e-mail.
+  const [channel, setChannel] = useState<'phone' | 'email'>(!user?.phone && user?.email ? 'email' : 'phone')
   const [errors, setErrors] = useState<Record<string, string | undefined>>({})
   const [busy, setBusy] = useState(false)
   const [failure, setFailure] = useState<string>()
@@ -31,11 +37,11 @@ export function ContactForm({ initialTopic }: { initialTopic?: ContactTopic }) {
 
   const submit = async (e: FormEvent) => {
     e.preventDefault()
-    const contact = form.contact.trim()
+    const contact = channel === 'phone' ? form.phone : form.email.trim()
     const found = {
       topic: form.topic ? undefined : 'Mövzunu seçin.',
-      name: form.name.trim() ? undefined : 'Adınızı yazın.',
-      contact: !contact ? 'Telefon və ya e-poçt yazın: cavabı ora göndərəcəyik.' : contact.includes('@') ? emailError(contact) : phoneFieldError(contact),
+      name: !form.name.trim() ? 'Adınızı yazın.' : isPersonName(form.name) ? undefined : 'Adınızı yalnız hərflərlə yazın.',
+      contact: channel === 'phone' ? phoneFieldError(contact) : emailError(contact),
       listing: form.listing && !/^\d{3,8}$/.test(form.listing.trim()) ? 'Elan nömrəsini rəqəmlə yazın, məsələn 10482.' : undefined,
       message: form.message.trim().length >= 10 ? undefined : 'Sualınızı bir-iki cümlə ilə yazın.',
     }
@@ -71,19 +77,43 @@ export function ContactForm({ initialTopic }: { initialTopic?: ContactTopic }) {
   return (
     <form onSubmit={submit} noValidate className="flex flex-col gap-4 rounded-2xl border border-line bg-surface p-5 md:p-6">
       <SelectField id="elaqe-topic" label="Mövzu" value={form.topic} error={errors.topic} onChange={(e) => set('topic')(e.target.value)} options={topics} />
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <TextField id="elaqe-name" label="Adınız" autoComplete="name" value={form.name} error={errors.name} maxLength={60} onChange={(e) => set('name')(e.target.value)} />
-        <TextField
-          id="elaqe-contact"
-          label="Telefon və ya e-poçt"
-          autoComplete="email"
-          autoCapitalize="none"
-          spellCheck={false}
-          placeholder="050 555 12 34 və ya ad@poct.az"
-          value={form.contact}
-          error={errors.contact}
-          onChange={(e) => set('contact')(e.target.value)}
+      <NameField id="elaqe-name" label="Adınız" autoComplete="name" value={form.name} error={errors.name} maxLength={60} onValueChange={set('name')} />
+      <div className="flex flex-col gap-2.5">
+        {/* The same words name the radio group for screen readers (Segmented's legend). */}
+        <p aria-hidden className="text-[13px] leading-[normal] font-semibold text-ink">
+          Cavabı hara göndərək?
+        </p>
+        <Segmented
+          legend="Cavabı hara göndərək?"
+          name="elaqe-kanal"
+          value={channel}
+          onChange={(next) => {
+            setChannel(next)
+            setErrors((prev) => ({ ...prev, contact: undefined }))
+          }}
+          options={[
+            { value: 'phone', label: 'Telefon' },
+            { value: 'email', label: 'E-poçt' },
+          ]}
         />
+        {channel === 'phone' ? (
+          <PhoneField id="elaqe-contact" labelHidden value={form.phone} error={errors.contact} onValueChange={set('phone')} />
+        ) : (
+          <TextField
+            id="elaqe-contact"
+            label="E-poçt ünvanı"
+            labelHidden
+            type="email"
+            inputMode="email"
+            autoComplete="email"
+            autoCapitalize="none"
+            spellCheck={false}
+            placeholder="ad@poct.az"
+            value={form.email}
+            error={errors.contact}
+            onChange={(e) => set('email')(e.target.value)}
+          />
+        )}
       </div>
       {(form.topic === 'listing' || form.topic === 'complaint') && (
         <TextField id="elaqe-listing" label="Elan nömrəsi" optional inputMode="numeric" placeholder="10482" hint="Elanın altında «Elan №» yazılıb." value={form.listing} error={errors.listing} onChange={(e) => set('listing')(e.target.value.replace(/\D/g, ''))} />

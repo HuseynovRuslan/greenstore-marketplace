@@ -15,6 +15,7 @@ import { useCabinet } from '@/features/cabinet/useCabinet'
 import { listingPrice } from '@/features/listing/facts'
 import { optionClass } from '@/features/search/filterStyles'
 import { cn, formatPrice } from '@/lib/format'
+import { nameChars } from '@/lib/names'
 import { useSession } from '@/state/store'
 import type { PromotionOrder, PromotionPackage, PromotionPackageId } from '@/types'
 import { buyPromotion, type BuyPromotionResult } from './actions'
@@ -397,7 +398,7 @@ function Checkout({
           onChange={(e) => setCard((c) => ({ ...c, cvc: e.target.value.replace(/\D/g, '').slice(0, 3) }))}
         />
       </div>
-      <TextField label="Kartın üzərindəki ad" optional autoComplete="cc-name" autoCapitalize="characters" value={card.name} onChange={(e) => setCard((c) => ({ ...c, name: e.target.value }))} />
+      <TextField label="Kartın üzərindəki ad" optional autoComplete="cc-name" autoCapitalize="characters" spellCheck={false} maxLength={60} value={card.name} onChange={(e) => setCard((c) => ({ ...c, name: nameChars(e.target.value).toUpperCase() }))} />
       <p className="flex gap-2 rounded-lg bg-warning-soft px-3 py-2.5 text-[13px] leading-[1.5] text-ink">
         <span className="font-semibold">Demo:</span> ödəniş alınmır. Sınaq kartı: 4111 1111 1111 1111, istənilən gələcək tarix və CVC.
       </p>

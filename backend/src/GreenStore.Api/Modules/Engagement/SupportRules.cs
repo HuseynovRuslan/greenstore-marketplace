@@ -63,6 +63,7 @@ public static class SupportRules
         {
             null => FieldErrors.Required,
             { Length: > MaxNameLength } => FieldErrors.TooLong,
+            _ when !PersonNames.IsValid(name) => FieldErrors.Invalid,
             _ => null,
         });
 

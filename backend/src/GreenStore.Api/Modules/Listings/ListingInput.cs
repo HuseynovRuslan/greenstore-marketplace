@@ -405,7 +405,7 @@ public static partial class ListingInputRules
 
         /* Step 5: contact */
         var contactName = Clean(input.ContactName);
-        errors.Add("contactName", Length(contactName, ContactNameMin, ContactNameMax));
+        errors.Add("contactName", Length(contactName, ContactNameMin, ContactNameMax) ?? (PersonNames.IsValid(contactName) ? null : FieldErrors.Invalid));
         var phone = PhoneNumbers.Normalize(input.ContactPhone);
         errors.Add("contactPhone", string.IsNullOrWhiteSpace(input.ContactPhone) ? FieldErrors.Required : phone is null ? FieldErrors.Invalid : null);
         if (input.PhoneHidden && !input.Whatsapp)

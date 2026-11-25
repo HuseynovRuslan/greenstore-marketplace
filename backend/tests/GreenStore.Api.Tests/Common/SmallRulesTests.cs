@@ -25,6 +25,24 @@ public sealed class IdsTests
     }
 }
 
+public sealed class PersonNamesTests
+{
+    [Theory]
+    [InlineData("Sərxan Əşrəfzadə", true)]
+    [InlineData("Məmməd-Əli", true)]
+    [InlineData("S. Əşrəfzadə", true)]
+    [InlineData("O'Neil", true)]
+    [InlineData(" Elvin ", true)]
+    [InlineData("İlqar Ağayev", true)]
+    [InlineData("Elvin 2", false)]
+    [InlineData("Elvin@", false)]
+    [InlineData("050 555 12 34", false)]
+    [InlineData("-Elvin", false)]
+    [InlineData("", false)]
+    [InlineData(null, false)]
+    public void A_name_is_letters_with_single_separators(string? name, bool valid) => Assert.Equal(valid, PersonNames.IsValid(name));
+}
+
 public sealed class RowVersionTests
 {
     [Fact]

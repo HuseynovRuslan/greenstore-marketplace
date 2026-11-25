@@ -4,6 +4,7 @@ import { updateTag } from 'next/cache'
 import type { AccountProfile } from '@/data/user'
 import { accountOf } from '@/features/account/profile'
 import { orderedKinds } from '@/features/seller/businessKinds'
+import { isPersonName } from '@/lib/names'
 import { localDigits } from '@/lib/phone'
 import { dataSource } from '@/seo/env'
 import { isApiError } from '@/services/apiRepository'
@@ -87,6 +88,7 @@ export async function registerAccount(input: {
     return fail('Biznesin növünü və adını yazın.')
   }
   if (!input.fullName?.trim() || input.fullName.length > 60) return fail('Adınızı yazın.')
+  if (!isPersonName(input.fullName)) return fail('Ad və soyadı yalnız hərflərlə yazın.')
   if (localDigits(input.phone ?? '').length !== 9) return fail('Telefon nömrəsi düzgün deyil.')
   if (typeof input.password !== 'string' || input.password.length < 8 || input.password.length > 128) return fail('Şifrə ən azı 8 simvol olmalıdır.')
   const business = input.accountType === 'business'

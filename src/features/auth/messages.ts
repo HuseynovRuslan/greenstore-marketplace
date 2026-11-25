@@ -63,7 +63,7 @@ export function registerErrorText(code: string | undefined, errors: Record<strin
       if (errors.email) return 'E-poçt ünvanını ad@poct.az kimi yazın.'
       if (errors.companyName) return 'Biznesin adı 2–80 simvol olmalıdır.'
       if (errors.businessKinds) return 'Ən azı bir biznes növü seçin.'
-      if (errors.fullName) return 'Adınızı yazın: ən çox 60 simvol.'
+      if (errors.fullName) return errors.fullName[0] === 'invalid' ? 'Ad və soyadı yalnız hərflərlə yazın.' : 'Adınızı yazın: ən çox 60 simvol.'
       return 'Məlumatları yoxlayın və yenidən göndərin.'
     }
     default:

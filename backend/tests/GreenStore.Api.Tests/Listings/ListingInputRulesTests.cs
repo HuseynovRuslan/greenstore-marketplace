@@ -276,6 +276,7 @@ public sealed class ListingInputRulesTests
     {
         Assert.Equal(FieldErrors.TooShort, Errors(Validate(Tree() with { ContactName = "E" }))["contactName"]);
         Assert.Equal(FieldErrors.TooLong, Errors(Validate(Tree() with { ContactName = new string('a', 51) }))["contactName"]);
+        Assert.Equal(FieldErrors.Invalid, Errors(Validate(Tree() with { ContactName = "Elvin 050" }))["contactName"]);
     }
 
     [Fact]

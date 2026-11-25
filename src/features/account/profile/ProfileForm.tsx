@@ -4,20 +4,23 @@ import { useState, type FormEvent } from 'react'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { SelectField, TextAreaField, TextField } from '@/components/ui/Field'
+import { FieldGroup, NameField, PhoneField } from '@/components/ui/FormControls'
 import { Notice } from '@/components/ui/Notice'
 import { cities } from '@/data/cities'
 import type { AccountProfile } from '@/data/user'
 import { saveProfile, confirmPhoneChange, type ProfileField } from '@/features/account/actions'
 import { requestCode } from '@/features/auth/actions'
 import { OtpVerify } from '@/features/auth/OtpVerify'
-import { emailError, formatPhone, hasErrors, messages, phoneError, requiredError, type Errors } from '@/features/auth/validation'
+import { emailError, formatPhone, hasErrors, messages, requiredError, type Errors } from '@/features/auth/validation'
 import { orderedKinds } from '@/features/seller/businessKinds'
 import { BusinessKindsField } from '@/features/seller/BusinessKindsField'
+import { joinFullName, namePartError, splitFullName } from '@/lib/names'
+import { phoneFieldError } from '@/lib/phone'
 import { useSession } from '@/state/store'
 import type { BusinessKind, OtpChallenge } from '@/types'
 import { Card, PanelTitle } from '../ui'
 
-type Field = 'company' | 'kinds' | 'contact' | 'phone' | 'email'
+type Field = 'company' | 'kinds' | 'firstName' | 'lastName' | 'phone' | 'email'
 
 /** DATA_SOURCE=api: the API's rule for a shop's name (2–80 characters), so it is said before anything is saved. */
 function companyNameError(value: string): string | undefined {
@@ -27,8 +30,11 @@ function companyNameError(value: string): string | undefined {
   return name.length > 80 ? 'Şirkətin adı ən çox 80 simvol olsun.' : undefined
 }
 
-/** The API's field (ProfileField) on this form; the address and «about» errors are said above the button. */
-const FORM_FIELD: Partial<Record<ProfileField, Field>> = { company: 'company', kinds: 'kinds', contact: 'contact', email: 'email' }
+/**
+ * The API's field (ProfileField) on this form; the address and «about» errors are said above the button. The API
+ * keeps one name (`fullName`, `contactPerson`), so its error goes on «Ad».
+ */
+const FORM_FIELD: Partial<Record<ProfileField, Field>> = { company: 'company', kinds: 'kinds', contact: 'firstName', email: 'email' }
 
 /**
  * The profile form of /kabinet/profil, in cards: «Şirkət» (name, kinds, about; a business), «Əlaqə» and «Ünvan», with
@@ -45,9 +51,11 @@ export function ProfileForm({ account, onSave }: { account: AccountProfile; onSa
   const { source } = useSession()
   const api = source === 'api'
   const isBusiness = account.accountType === 'business'
+  const name = splitFullName(account.fullName)
   const [values, setValues] = useState({
     company: account.companyName ?? '',
-    contact: account.fullName,
+    firstName: name.first,
+    lastName: name.last,
     phone: account.phone,
     email: account.email,
     cityId: account.cityId ?? cities[0].id,
@@ -62,12 +70,12 @@ export function ProfileForm({ account, onSave }: { account: AccountProfile; onSa
   // DATA_SOURCE=api: the SMS code sent to a new number, until it is confirmed.
   const [phoneChange, setPhoneChange] = useState<{ phone: string; challenge: OtpChallenge }>()
 
-  const set = (key: keyof typeof values) => (e: { target: { value: string } }) => {
-    const value = e.target.value
+  const setValue = (key: keyof typeof values) => (value: string) => {
     setValues((prev) => ({ ...prev, [key]: value }))
     setSaved(false)
     if (key in errors) setErrors((prev) => ({ ...prev, [key]: undefined }))
   }
+  const set = (key: keyof typeof values) => (e: { target: { value: string } }) => setValue(key)(e.target.value)
 
   const phoneUnchanged = formatPhone(values.phone) === account.phone
   const phoneVerified = Boolean(account.phoneVerified && account.phone) && phoneUnchanged
@@ -78,11 +86,13 @@ export function ProfileForm({ account, onSave }: { account: AccountProfile; onSa
     const nextErrors: Errors<Field> = {
       company: isBusiness ? (api ? companyNameError(values.company) : requiredError(values.company, messages.companyRequired)) : undefined,
       kinds: isBusiness && kinds.length === 0 ? 'Ən azı bir biznes növü seçin.' : undefined,
-      contact: requiredError(values.contact, messages.nameRequired),
+      firstName: namePartError(values.firstName, 'Adınızı'),
+      lastName: namePartError(values.lastName, 'Soyadınızı'),
       // At least one contact is required (registration allows phone-only or e-mail-only accounts).
-      phone: phoneError(values.phone, !values.email.trim()),
+      phone: phoneFieldError(values.phone, { required: !values.email.trim() }),
       email: emailError(values.email, !values.phone.trim()),
     }
+    const fullName = joinFullName(values.firstName, values.lastName)
     setErrors(nextErrors)
     setFormError(undefined)
     if (hasErrors(nextErrors)) {
@@ -94,7 +104,7 @@ export function ProfileForm({ account, onSave }: { account: AccountProfile; onSa
       onSave({
         companyName: isBusiness ? values.company.trim() : account.companyName,
         businessKinds: isBusiness ? kinds : account.businessKinds,
-        fullName: values.contact.trim(),
+        fullName,
         phone,
         phoneVerified: phone === account.phone ? account.phoneVerified : false,
         email: values.email.trim(),
@@ -109,7 +119,7 @@ export function ProfileForm({ account, onSave }: { account: AccountProfile; onSa
 
     setBusy(true)
     const result = await saveProfile({
-      fullName: values.contact.trim(),
+      fullName,
       email: values.email.trim(),
       ...(isBusiness
         ? { companyName: values.company.trim(), businessKinds: kinds, cityId: values.cityId, address: values.address.trim(), about: values.about.trim(), sellerVersion: account.sellerVersion }
@@ -146,6 +156,30 @@ export function ProfileForm({ account, onSave }: { account: AccountProfile; onSa
     onSave({ phone: result.phone, phoneVerified: true })
     setValues((prev) => ({ ...prev, phone: result.phone }))
   }
+
+  // «Ad» and «Soyad»: under the legend «Əlaqə şəxsi» for a business, on their own for a person.
+  const nameFields = (
+    <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2">
+      <NameField
+        id="profile-first-name"
+        label="Ad"
+        name="given-name"
+        autoComplete="given-name"
+        value={values.firstName}
+        onValueChange={setValue('firstName')}
+        error={errors.firstName}
+      />
+      <NameField
+        id="profile-last-name"
+        label="Soyad"
+        name="family-name"
+        autoComplete="family-name"
+        value={values.lastName}
+        onValueChange={setValue('lastName')}
+        error={errors.lastName}
+      />
+    </div>
+  )
 
   return (
     <div className="flex w-full flex-col gap-6">
@@ -187,23 +221,18 @@ export function ProfileForm({ account, onSave }: { account: AccountProfile; onSa
         )}
         <Card role="group" aria-labelledby="profile-contact-title" className="w-full gap-5">
           <PanelTitle id="profile-contact-title">{isBusiness ? 'Əlaqə' : 'Əlaqə məlumatları'}</PanelTitle>
-          <TextField
-            label={isBusiness ? 'Əlaqə şəxsi' : 'Ad və soyad'}
-            name="contact"
-            autoComplete="name"
-            value={values.contact}
-            onChange={set('contact')}
-            error={errors.contact}
-            containerClassName="w-full"
-          />
-          <TextField
-            label="Telefon nömrəsi"
+          {isBusiness ? (
+            <FieldGroup legend="Əlaqə şəxsi" className="w-full">
+              {nameFields}
+            </FieldGroup>
+          ) : (
+            nameFields
+          )}
+          <PhoneField
+            id="profile-phone"
             name="phone"
-            type="tel"
-            inputMode="tel"
-            autoComplete="tel"
             value={values.phone}
-            onChange={set('phone')}
+            onValueChange={setValue('phone')}
             hint="Nömrəni dəyişdikdə yenidən təsdiq tələb olunur."
             error={errors.phone}
             containerClassName="w-full"

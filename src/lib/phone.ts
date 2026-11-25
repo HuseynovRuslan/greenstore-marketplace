@@ -4,13 +4,23 @@
  * shape ("+994505551234", "0505551234", "(050) 555-12-34") are accepted.
  */
 
-/** The 9 local digits of whatever was typed or pasted (fewer while typing). */
+/**
+ * The 9 local digits (fewer while typing) of a kept value ("+994 50 5", partial ones too) or of whatever was typed,
+ * pasted or autofilled. Letters and symbols never get in. A local part never starts with 0, so the habitual «0» of
+ * «050…» is dropped as it is typed: «+994» is already there. «994» typed out of habit goes once the number is longer
+ * than 9 digits.
+ */
 export function localDigits(value: string): string {
-  let d = value.replace(/\D/g, '')
-  if (d.startsWith('994') && d.length > 9) d = d.slice(3)
-  else if (d.startsWith('0') && d.length > 9) d = d.slice(1)
-  return d.slice(0, 9)
+  const text = value.trim()
+  // The kept value and autofill carry the code in front: what follows it is the local part, however short.
+  if (text.startsWith('+994')) return localDigits(text.slice(4))
+  let d = text.replace(/\D/g, '')
+  if (d.length > 9 && d.startsWith('994')) d = d.slice(3)
+  return d.replace(/^0+/, '').slice(0, 9)
 }
+
+/** The shape of the local part, shown in the box until digits take its place. */
+export const LOCAL_MASK = '__ ___ __ __'
 
 /** "505551234" → "50 555 12 34"; partial input is grouped as far as it goes ("5055" → "50 55"). */
 export function formatLocal(digits: string): string {

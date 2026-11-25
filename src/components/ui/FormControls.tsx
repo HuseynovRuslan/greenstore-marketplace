@@ -3,8 +3,9 @@
 import { useState, type InputHTMLAttributes, type ReactNode, type Ref } from 'react'
 import { Check, Eye, EyeOff } from 'lucide-react'
 import { cn } from '@/lib/format'
-import { formatLocal, localDigits, phoneValue } from '@/lib/phone'
-import { controlClass, describedBy, FieldShell, useFieldIds, useErrorRole } from './Field'
+import { nameChars, NAME_PART_MAX } from '@/lib/names'
+import { formatLocal, LOCAL_MASK, localDigits, phoneValue } from '@/lib/phone'
+import { controlClass, describedBy, FieldShell, TextField, useFieldIds, useErrorRole } from './Field'
 
 /*
  * Form controls added for the posting flow, auth and the cabinet (Nov 2026). They share Field.tsx's shell: a
@@ -21,44 +22,85 @@ interface PhoneFieldProps extends InputProps {
   /** "+994 50 555 12 34" or '' */
   value: string
   onValueChange: (value: string) => void
+  labelHidden?: boolean
   containerClassName?: string
 }
 
 /**
- * Phone number with a fixed «+994» and the local part grouped as it is typed ("50 555 12 34"). `type="tel"` gets the
- * phone keypad; `autocomplete="tel"` lets the browser fill a saved number, whatever its shape (lib/phone.ts).
+ * Phone number: «+994 __ ___ __ __». The code is fixed, digits take the places of the mask as they are typed and
+ * nothing else gets in (letters, symbols, a leading 0: lib/phone.ts). The mask is a layer behind the input: the typed
+ * part is repeated in it invisibly, so the rest of the mask starts exactly where the caret is. `type="tel"` gets the
+ * phone keypad; `autocomplete="tel"` lets the browser fill a saved number, whatever its shape.
  */
-export function PhoneField({ label = 'Telefon nömrəsi', hint, error, optional, value, onValueChange, containerClassName, id, className, ...rest }: PhoneFieldProps) {
+export function PhoneField({ label = 'Telefon nömrəsi', hint, error, optional, value, onValueChange, labelHidden, containerClassName, id, className, ...rest }: PhoneFieldProps) {
   const ids = useFieldIds(id)
+  const local = formatLocal(localDigits(value))
   return (
-    <FieldShell label={label} hint={hint} error={error} optional={optional} htmlFor={ids.fieldId} {...ids} className={containerClassName}>
+    <FieldShell label={label} hint={hint} error={error} optional={optional} labelHidden={labelHidden} htmlFor={ids.fieldId} {...ids} className={containerClassName}>
       <div
         className={cn(
           controlClass,
-          'flex items-center gap-2 p-0 focus-within:border-olive focus-within:shadow-[inset_0_0_0_1px_var(--color-olive)] has-[input[aria-invalid=true]]:border-danger',
+          // `p-0!`: controlClass's px/py come later in the CSS than a plain p-0 and would make the box 72 px tall.
+          'flex cursor-text items-center p-0! tabular-nums focus-within:border-olive focus-within:shadow-[inset_0_0_0_1px_var(--color-olive)] has-[input[aria-invalid=true]]:border-danger',
           className,
         )}
       >
-        <span aria-hidden className="flex h-full items-center border-r border-line pr-2.5 pl-[13px] font-medium text-muted tabular-nums">
-          +994
+        {/* A label too, so a tap on the code puts the caret in the number (the input's aria-label names it). */}
+        <label htmlFor={ids.fieldId} aria-hidden className="shrink-0 cursor-text pl-[13px] text-ink select-none">
+          +994&nbsp;
+        </label>
+        <span className="relative flex min-w-0 flex-1 items-center">
+          <span aria-hidden className="pointer-events-none absolute inset-y-0 left-0 flex items-center whitespace-pre text-muted select-none">
+            <span className="invisible">{local}</span>
+            {LOCAL_MASK.slice(local.length)}
+          </span>
+          <input
+            id={ids.fieldId}
+            type="tel"
+            inputMode="tel"
+            autoComplete="tel"
+            // The visible «+994» and mask are decoration; the accessible name says the code is already there.
+            aria-label={typeof label === 'string' ? `${label}, +994 kodu ilə` : undefined}
+            aria-invalid={error ? true : undefined}
+            aria-describedby={describedBy(ids, hint, error)}
+            value={local}
+            onChange={(e) => onValueChange(phoneValue(e.target.value))}
+            className="relative h-[46px] w-full min-w-0 bg-transparent pr-[13px] text-ink outline-none"
+            {...rest}
+          />
         </span>
-        <input
-          id={ids.fieldId}
-          type="tel"
-          inputMode="tel"
-          autoComplete="tel"
-          placeholder="50 555 12 34"
-          // The visible «+994» is decoration; the accessible name says the code is already there.
-          aria-label={typeof label === 'string' ? `${label}, +994 kodu ilə` : undefined}
-          aria-invalid={error ? true : undefined}
-          aria-describedby={describedBy(ids, hint, error)}
-          value={formatLocal(localDigits(value))}
-          onChange={(e) => onValueChange(phoneValue(e.target.value))}
-          className="h-[46px] min-w-0 flex-1 bg-transparent pr-[13px] text-ink tabular-nums outline-none placeholder:text-muted"
-          {...rest}
-        />
       </div>
     </FieldShell>
+  )
+}
+
+interface NameFieldProps extends InputProps {
+  label: ReactNode
+  hint?: ReactNode
+  error?: string
+  optional?: boolean
+  aside?: ReactNode
+  labelHidden?: boolean
+  value: string
+  onValueChange: (value: string) => void
+  containerClassName?: string
+}
+
+/**
+ * A person's name («Ad», «Soyad», «Adınız»): letters only, so a digit or a symbol does not get in, typed or pasted
+ * (lib/names.ts). Words start with a capital on phone keyboards; no spell check underlines a surname.
+ */
+export function NameField({ value, onValueChange, maxLength = NAME_PART_MAX, ...rest }: NameFieldProps) {
+  return (
+    <TextField
+      type="text"
+      autoCapitalize="words"
+      spellCheck={false}
+      maxLength={maxLength}
+      value={value}
+      onChange={(e) => onValueChange(nameChars(e.target.value))}
+      {...rest}
+    />
   )
 }
 

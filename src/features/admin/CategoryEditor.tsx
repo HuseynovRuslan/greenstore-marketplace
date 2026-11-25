@@ -201,9 +201,10 @@ export function CategoryEditor({ category, parent, q }: Props) {
           optional={isNew}
           hint={isNew ? 'Boş qalsa, siyahının sonuna düşür.' : 'Kiçik rəqəm əvvəl göstərilir.'}
           inputMode="numeric"
+          maxLength={6}
           value={draft.sortOrder}
           error={errors.sortOrder}
-          onChange={(e) => update({ sortOrder: e.target.value })}
+          onChange={(e) => update({ sortOrder: e.target.value.replace(/\D/g, '') })}
           containerClassName="w-full"
         />
 

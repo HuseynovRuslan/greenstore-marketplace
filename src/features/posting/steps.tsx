@@ -3,7 +3,7 @@
 import { Shovel, Sprout } from 'lucide-react'
 import { CategoryIcon } from '@/components/ui/CategoryIcon'
 import { CharCount, TextAreaField, TextField } from '@/components/ui/Field'
-import { ChoiceCard, FieldGroup, PhoneField, Switch } from '@/components/ui/FormControls'
+import { ChoiceCard, FieldGroup, NameField, PhoneField, Switch } from '@/components/ui/FormControls'
 import { Listbox } from '@/components/ui/Listbox'
 import { cities } from '@/data/cities'
 import { productCategories, subcategoriesOf } from '@/data/categories'
@@ -453,15 +453,15 @@ export function ContactStep({ draft, update, error, touch, user }: StepProps) {
   return (
     <div className="flex flex-col gap-6">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <TextField
+        <NameField
           id={id('contactName')}
           label="Adınız"
           autoComplete="name"
           placeholder="Məsələn: Elvin"
           error={error('contactName')}
           value={draft.contactName}
-          maxLength={60}
-          onChange={(e) => update({ contactName: e.target.value })}
+          maxLength={50}
+          onValueChange={(contactName) => update({ contactName })}
           onBlur={() => touch('contactName')}
         />
         <PhoneField

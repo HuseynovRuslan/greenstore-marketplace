@@ -116,6 +116,10 @@ public static class SellerProfileRules
         if (patch.Has(nameof(SellerPatch.ContactPerson)))
         {
             seller.ContactPerson = Text(patch.ContactPerson, ContactPersonMaxLength, "contactPerson", errors);
+            if (seller.ContactPerson is { } person && !PersonNames.IsValid(person))
+            {
+                errors.Add("contactPerson", FieldErrors.Invalid);
+            }
         }
 
         if (patch.Has(nameof(SellerPatch.Address)))

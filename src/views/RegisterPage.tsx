@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import { ArrowLeft, Building2, UserRound } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { TextField } from '@/components/ui/Field'
-import { CheckboxField, ChoiceCard, FieldGroup, PasswordField, PhoneField } from '@/components/ui/FormControls'
+import { CheckboxField, ChoiceCard, FieldGroup, NameField, PasswordField, PhoneField } from '@/components/ui/FormControls'
 import { Notice } from '@/components/ui/Notice'
 import { useToast } from '@/components/ui/Toast'
 import { registerAccount, requestCode } from '@/features/auth/actions'
@@ -15,6 +15,7 @@ import { AuthShell, FormCard, PasswordRules } from '@/features/auth/ui'
 import { emailError, newPasswordError, safeNext } from '@/features/auth/validation'
 import { BusinessKindsField } from '@/features/seller/BusinessKindsField'
 import { cn } from '@/lib/format'
+import { joinFullName, namePartError } from '@/lib/names'
 import { phoneFieldError } from '@/lib/phone'
 import { useSession } from '@/state/store'
 import type { BusinessKind, OtpChallenge, SellerType } from '@/types'
@@ -36,7 +37,9 @@ export default function RegisterPage({ next, accountType }: { next?: string; acc
   const [type, setType] = useState<SellerType | ''>(accountType ?? '')
   const [kinds, setKinds] = useState<BusinessKind[]>([])
   const [company, setCompany] = useState('')
-  const [name, setName] = useState('')
+  const [firstName, setFirstName] = useState('')
+  const [lastName, setLastName] = useState('')
+  const name = joinFullName(firstName, lastName)
   const [phone, setPhone] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -67,7 +70,8 @@ export default function RegisterPage({ next, accountType }: { next?: string; acc
   const submitDetails = async (e: FormEvent) => {
     e.preventDefault()
     const found = {
-      name: name.trim().length >= 2 ? undefined : 'Adınızı və soyadınızı yazın.',
+      firstName: namePartError(firstName, 'Adınızı'),
+      lastName: namePartError(lastName, 'Soyadınızı'),
       phone: phoneFieldError(phone),
       email: emailError(email, false),
       password: newPasswordError(password) ? 'Şifrə ən azı 8 simvol olmalı, hərf və rəqəm olmalıdır.' : undefined,
@@ -129,6 +133,14 @@ export default function RegisterPage({ next, accountType }: { next?: string; acc
     router.replace(safeNext(next))
   }
 
+  // «Ad» and «Soyad»: under the legend «Əlaqə şəxsi» for a business, on their own for a person.
+  const nameFields = (
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <NameField id="q-firstName" label="Ad" autoComplete="given-name" placeholder="Məsələn: Elvin" value={firstName} error={errors.firstName} onValueChange={setFirstName} />
+      <NameField id="q-lastName" label="Soyad" autoComplete="family-name" placeholder="Məsələn: Əliyev" value={lastName} error={errors.lastName} onValueChange={setLastName} />
+    </div>
+  )
+
   return (
     <AuthShell title="Hesab yaradın" lead="Bir dəqiqəlik iş: elan yerləşdirin, satıcılarla əlaqə saxlayın, axtarışlarınızı yadda saxlayın." image="/images/auth/register.webp">
       <ol aria-label="Qeydiyyat addımları" className="flex gap-1.5">
@@ -171,7 +183,13 @@ export default function RegisterPage({ next, accountType }: { next?: string; acc
 
         {step === 1 && (
           <form onSubmit={submitDetails} noValidate className="flex flex-col gap-5">
-            <TextField id="q-name" label={type === 'business' ? 'Əlaqələndirici şəxs' : 'Ad və soyad'} autoComplete="name" placeholder="Məsələn: Elvin Əliyev" value={name} error={errors.name} maxLength={60} onChange={(e) => setName(e.target.value)} />
+            {type === 'business' ? (
+              <FieldGroup legend="Əlaqə şəxsi" hint="Alıcılar zəng edəndə kiminlə danışacaqlarını bilsinlər.">
+                {nameFields}
+              </FieldGroup>
+            ) : (
+              nameFields
+            )}
             <PhoneField id="q-phone" value={phone} onValueChange={setPhone} error={errors.phone} hint="Bu nömrəni SMS kodu ilə təsdiqləyəcəyik. Alıcılar sizə ona zəng edəcək." />
             <TextField id="q-email" label="E-poçt" optional type="email" inputMode="email" autoComplete="email" autoCapitalize="none" spellCheck={false} placeholder="ad@poct.az" value={email} error={errors.email} hint="Ödəniş qəbzləri və bildirişlər üçün." onChange={(e) => setEmail(e.target.value)} />
             <div className="flex flex-col gap-2">
