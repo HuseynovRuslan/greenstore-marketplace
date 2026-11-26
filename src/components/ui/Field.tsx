@@ -105,20 +105,44 @@ interface TextFieldProps extends InputHTMLAttributes<HTMLInputElement> {
   optional?: boolean
   aside?: ReactNode
   labelHidden?: boolean
+  /** A decorative icon at the start of the box (the sign-in forms); the label still names the field. */
+  icon?: ReactNode
   containerClassName?: string
 }
 
-export function TextField({ label, hint, error, optional, aside, labelHidden, containerClassName, className, id, 'aria-describedby': extra, ...rest }: TextFieldProps) {
+/** Start padding beside a leading icon: 44 px + the 1 px border, kept when focus thickens the border to 2 px. */
+export const iconPadding = 'pl-11 focus:pl-[43px]'
+
+/** The leading icon of a field: muted, olive once the field has focus. */
+export function FieldIcon({ children }: { children: ReactNode }) {
+  return (
+    <span aria-hidden className="pointer-events-none absolute top-1/2 left-3.5 flex -translate-y-1/2 text-muted transition-colors duration-(--dur-fast) group-focus-within:text-olive-text">
+      {children}
+    </span>
+  )
+}
+
+export function TextField({ label, hint, error, optional, aside, labelHidden, icon, containerClassName, className, id, 'aria-describedby': extra, ...rest }: TextFieldProps) {
   const ids = useFieldIds(id)
+  const input = (
+    <input
+      id={ids.fieldId}
+      aria-invalid={error ? true : undefined}
+      aria-describedby={describedBy(ids, hint, error, extra)}
+      className={cn(controlClass, icon ? iconPadding : undefined, className)}
+      {...rest}
+    />
+  )
   return (
     <FieldShell label={label} hint={hint} error={error} optional={optional} aside={aside} labelHidden={labelHidden} htmlFor={ids.fieldId} {...ids} className={containerClassName}>
-      <input
-        id={ids.fieldId}
-        aria-invalid={error ? true : undefined}
-        aria-describedby={describedBy(ids, hint, error, extra)}
-        className={cn(controlClass, className)}
-        {...rest}
-      />
+      {icon ? (
+        <div className="group relative w-full">
+          <FieldIcon>{icon}</FieldIcon>
+          {input}
+        </div>
+      ) : (
+        input
+      )}
     </FieldShell>
   )
 }

@@ -9,9 +9,15 @@
  * The API extends a session by 30 days from its last use. The cookies are written again (another 30 days) when they are
  * a day old and the visitor comes back (`refreshSession`), so both stay in step without a write on every request.
  *
+ * «Məni xatırla» left unticked (`untilBrowserCloses`): both cookies are written as browser-session cookies (no
+ * Max-Age), which the browser deletes when it is closed; the hint remembers that, so a refresh keeps them that way.
+ * The token still never reaches a script. The API's own session is not shortened (it has no such option): it goes
+ * unused and expires 30 days after its last use.
+ *
  * Cookies can only be written in Server Actions and Route Handlers: outside them (a page render) writes are skipped.
  */
 import 'server-only'
+import { AsyncLocalStorage } from 'node:async_hooks'
 import { cookies } from 'next/headers'
 import { initials } from '@/lib/format'
 import { decodeSessionHint, encodeSessionHint, SESSION_COOKIE, SESSION_HINT_COOKIE } from '@/state/bootstrap'
@@ -29,8 +35,22 @@ const REFRESH_AFTER_SEC = 24 * 60 * 60
 
 const nowSec = () => Math.floor(Date.now() / 1000)
 
-function cookieOptions(httpOnly: boolean, env: Record<string, string | undefined> = process.env) {
-  return { httpOnly, secure: env.NODE_ENV === 'production', sameSite: 'lax' as const, path: '/', maxAge: SESSION_MAX_AGE_SEC }
+/** Set for the length of a sign-in whose session should end with the browser (see `untilBrowserCloses`). */
+const browserOnlySignIn = new AsyncLocalStorage<true>()
+
+/**
+ * Runs a sign-in («Məni xatırla» unticked) so that the session it stores ends with the browser: `storeSession`,
+ * called by the repository deep inside, writes cookies without Max-Age. Request-scoped, so concurrent sign-ins of
+ * other visitors are not affected, and the repository's contract does not change.
+ */
+export function untilBrowserCloses<T>(signIn: () => Promise<T>): Promise<T> {
+  return browserOnlySignIn.run(true, signIn)
+}
+
+/** `persistent: false` → a browser-session cookie (no Max-Age): gone when the browser is closed. */
+function cookieOptions(httpOnly: boolean, env: Record<string, string | undefined> = process.env, persistent = true) {
+  const base = { httpOnly, secure: env.NODE_ENV === 'production', sameSite: 'lax' as const, path: '/' }
+  return persistent ? { ...base, maxAge: SESSION_MAX_AGE_SEC } : base
 }
 
 /** The token of this request's session, if it has one. */
@@ -43,12 +63,16 @@ export async function sessionToken(): Promise<string | undefined> {
   }
 }
 
-/** After a sign-in: both cookies, for the account named `fullName`. */
-export async function storeSession(token: string, fullName: string): Promise<void> {
+/**
+ * After a sign-in: both cookies, for the account named `fullName`. `browserOnly` (until the browser is closed)
+ * defaults to the sign-in's choice made with `untilBrowserCloses`.
+ */
+export async function storeSession(token: string, fullName: string, browserOnly = browserOnlySignIn.getStore() === true): Promise<void> {
   const store = await cookies()
-  store.set(SESSION_COOKIE, token, cookieOptions(true))
-  store.set(SESSION_HINT_COOKIE, encodeSessionHint({ initials: initials(fullName), issuedAt: nowSec() }), cookieOptions(false))
+  store.set(SESSION_COOKIE, token, cookieOptions(true, process.env, !browserOnly))
+  store.set(SESSION_HINT_COOKIE, encodeSessionHint({ initials: initials(fullName), issuedAt: nowSec(), browserOnly }), cookieOptions(false, process.env, !browserOnly))
 }
+
 
 /**
  * On a visit of a signed-in browser: writes the hint again when the name's initials changed or the hint is missing,
@@ -60,8 +84,10 @@ export async function refreshSession(fullName: string): Promise<void> {
     const token = store.get(SESSION_COOKIE)?.value
     if (!token) return
     const hint = decodeSessionHint(store.get(SESSION_HINT_COOKIE)?.value)
-    if (!hint || nowSec() - hint.issuedAt > REFRESH_AFTER_SEC) await storeSession(token, fullName)
-    else if (hint.initials !== initials(fullName)) store.set(SESSION_HINT_COOKIE, encodeSessionHint({ initials: initials(fullName), issuedAt: hint.issuedAt }), cookieOptions(false))
+    // A browser-only session stays one: rewriting it must not give it 30 days.
+    const browserOnly = hint?.browserOnly ?? false
+    if (!hint || nowSec() - hint.issuedAt > REFRESH_AFTER_SEC) await storeSession(token, fullName, browserOnly)
+    else if (hint.initials !== initials(fullName)) store.set(SESSION_HINT_COOKIE, encodeSessionHint({ ...hint, initials: initials(fullName) }), cookieOptions(false, process.env, !browserOnly))
   } catch {
     // A page render cannot write cookies; the next Server Action will.
   }

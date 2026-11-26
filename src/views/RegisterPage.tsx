@@ -3,18 +3,17 @@
 import { useState, type FormEvent } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft, Building2, UserRound } from 'lucide-react'
+import { ArrowLeft, Building2, LockKeyhole, Mail, Store, UserRound } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { TextField } from '@/components/ui/Field'
-import { CheckboxField, ChoiceCard, FieldGroup, NameField, PasswordField, PhoneField } from '@/components/ui/FormControls'
+import { CheckboxField, FieldGroup, NameField, PasswordField, PhoneField } from '@/components/ui/FormControls'
 import { Notice } from '@/components/ui/Notice'
 import { useToast } from '@/components/ui/Toast'
 import { registerAccount, requestCode } from '@/features/auth/actions'
 import { OtpVerify } from '@/features/auth/OtpVerify'
-import { AuthShell, FormCard, PasswordRules } from '@/features/auth/ui'
+import { AccountTypeCard, AuthShell, AuthSteps, AuthSwitch, FormCard, PasswordRules } from '@/features/auth/ui'
 import { emailError, newPasswordError, safeNext } from '@/features/auth/validation'
 import { BusinessKindsField } from '@/features/seller/BusinessKindsField'
-import { cn } from '@/lib/format'
 import { joinFullName, namePartError } from '@/lib/names'
 import { phoneFieldError } from '@/lib/phone'
 import { useSession } from '@/state/store'
@@ -142,17 +141,8 @@ export default function RegisterPage({ next, accountType }: { next?: string; acc
   )
 
   return (
-    <AuthShell title="Hesab yaradın" lead="Bir dəqiqəlik iş: elan yerləşdirin, satıcılarla əlaqə saxlayın, axtarışlarınızı yadda saxlayın." image="/images/auth/register.webp">
-      <ol aria-label="Qeydiyyat addımları" className="flex gap-1.5">
-        {STEPS.map((s, i) => (
-          <li key={s} className="flex min-w-0 flex-1 flex-col gap-1.5" aria-current={i === step ? 'step' : undefined}>
-            <span aria-hidden className={cn('h-1.5 rounded-full', i <= step ? 'bg-forest' : 'bg-line')} />
-            <span className={cn('truncate text-xs leading-[normal]', i === step ? 'font-semibold text-forest' : 'text-muted')}>
-              {i + 1}. {s}
-            </span>
-          </li>
-        ))}
-      </ol>
+    <AuthShell tab="register" next={next} title="Hesab yaradın" lead="Bir dəqiqəlik iş: elan yerləşdirin, satıcılarla əlaqə saxlayın, axtarışlarınızı yadda saxlayın.">
+      <AuthSteps steps={STEPS} current={step} />
 
       <FormCard>
         {formError && (
@@ -164,15 +154,15 @@ export default function RegisterPage({ next, accountType }: { next?: string; acc
         {step === 0 && (
           <form onSubmit={submitType} noValidate className="flex flex-col gap-6">
             <FieldGroup legend="Hesabın növü" error={errors.type}>
-              <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
-                <ChoiceCard id="q-type" name="type" value="individual" checked={type === 'individual'} onChange={() => setType('individual')} icon={<UserRound size={20} strokeWidth={1.8} />} title="Fərdi şəxs" description="Öz bağınızdan bitki satırsınız və ya alırsınız" />
-                <ChoiceCard name="type" value="business" checked={type === 'business'} onChange={() => setType('business')} icon={<Building2 size={20} strokeWidth={1.8} />} title="Biznes" description="Tingçilik, bağ mərkəzi və ya landşaft şirkəti" />
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <AccountTypeCard id="q-type" name="type" value="individual" checked={type === 'individual'} onChange={() => setType('individual')} icon={<UserRound size={22} strokeWidth={1.8} />} title="Fərdi şəxs" description="Öz bağınızdan bitki satırsınız və ya alırsınız" />
+                <AccountTypeCard name="type" value="business" checked={type === 'business'} onChange={() => setType('business')} icon={<Building2 size={22} strokeWidth={1.8} />} title="Biznes" description="Tingçilik, bağ mərkəzi və ya landşaft şirkəti" />
               </div>
             </FieldGroup>
             {type === 'business' && (
               <>
                 <BusinessKindsField id="q-kind" value={kinds} onChange={setKinds} error={errors.kind} hint="Bir və ya bir neçəsini seçin. Profil səhifəniz və axtarışdakı filtr buna görə qurulur." />
-                <TextField id="q-company" label="Biznesin adı" autoComplete="organization" placeholder="Məsələn: Abşeron Tingçilik" value={company} error={errors.company} maxLength={60} onChange={(e) => setCompany(e.target.value)} />
+                <TextField id="q-company" label="Biznesin adı" autoComplete="organization" icon={<Store size={18} strokeWidth={1.8} />} placeholder="Məsələn: Abşeron Tingçilik" value={company} error={errors.company} maxLength={60} onChange={(e) => setCompany(e.target.value)} />
               </>
             )}
             <Button type="submit" fullWidth>
@@ -191,9 +181,9 @@ export default function RegisterPage({ next, accountType }: { next?: string; acc
               nameFields
             )}
             <PhoneField id="q-phone" value={phone} onValueChange={setPhone} error={errors.phone} hint="Bu nömrəni SMS kodu ilə təsdiqləyəcəyik. Alıcılar sizə ona zəng edəcək." />
-            <TextField id="q-email" label="E-poçt" optional type="email" inputMode="email" autoComplete="email" autoCapitalize="none" spellCheck={false} placeholder="ad@poct.az" value={email} error={errors.email} hint="Ödəniş qəbzləri və bildirişlər üçün." onChange={(e) => setEmail(e.target.value)} />
+            <TextField id="q-email" label="E-poçt" optional type="email" inputMode="email" autoComplete="email" autoCapitalize="none" spellCheck={false} icon={<Mail size={18} strokeWidth={1.8} />} placeholder="ad@poct.az" value={email} error={errors.email} hint="Ödəniş qəbzləri və bildirişlər üçün." onChange={(e) => setEmail(e.target.value)} />
             <div className="flex flex-col gap-2">
-              <PasswordField id="q-password" autoComplete="new-password" value={password} onValueChange={setPassword} error={errors.password} aria-describedby="sifre-qaydalari" />
+              <PasswordField id="q-password" autoComplete="new-password" icon={<LockKeyhole size={18} strokeWidth={1.8} />} placeholder="Ən azı 8 simvol" value={password} onValueChange={setPassword} error={errors.password} aria-describedby="sifre-qaydalari" />
               <PasswordRules id="sifre-qaydalari" value={password} />
             </div>
             <CheckboxField
@@ -224,12 +214,7 @@ export default function RegisterPage({ next, accountType }: { next?: string; acc
         )}
       </FormCard>
 
-      <p className="text-center text-[15px] leading-[1.5] text-ink">
-        Artıq hesabınız var?{' '}
-        <Link href={`/daxil-ol${query}`} className="font-semibold text-forest underline-offset-2 hover:underline">
-          Daxil olun
-        </Link>
-      </p>
+      <AuthSwitch question="Artıq hesabınız var?" href={`/daxil-ol${query}`} label="Daxil olun" />
     </AuthShell>
   )
 }

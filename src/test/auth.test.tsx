@@ -52,7 +52,7 @@ describe('login', () => {
   it('signs in with an SMS code after a wrong one', async () => {
     const user = userEvent.setup()
     renderWithStore(<LoginPage />)
-    await user.click(screen.getByRole('radio', { name: 'SMS kodu ilə' }))
+    await user.click(screen.getByRole('button', { name: 'SMS kodu ilə daxil olun' }))
     await user.type(screen.getByRole('textbox', { name: /Telefon nömrəsi/ }), '505551234')
     await user.click(screen.getByRole('button', { name: 'Kod göndər' }))
     expect(requestCode).toHaveBeenCalledWith('+994 50 555 12 34', 'login')

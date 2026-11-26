@@ -5,7 +5,7 @@ import { Check, Eye, EyeOff } from 'lucide-react'
 import { cn } from '@/lib/format'
 import { nameChars, NAME_PART_MAX } from '@/lib/names'
 import { formatLocal, LOCAL_MASK, localDigits, phoneValue } from '@/lib/phone'
-import { controlClass, describedBy, FieldShell, TextField, useFieldIds, useErrorRole } from './Field'
+import { controlClass, describedBy, FieldIcon, FieldShell, iconPadding, TextField, useFieldIds, useErrorRole } from './Field'
 
 /*
  * Form controls added for the posting flow, auth and the cabinet (Nov 2026). They share Field.tsx's shell: a
@@ -81,6 +81,7 @@ interface NameFieldProps extends InputProps {
   optional?: boolean
   aside?: ReactNode
   labelHidden?: boolean
+  icon?: ReactNode
   value: string
   onValueChange: (value: string) => void
   containerClassName?: string
@@ -114,15 +115,18 @@ interface PasswordFieldProps extends InputProps {
   autoComplete: 'current-password' | 'new-password'
   containerClassName?: string
   aside?: ReactNode
+  /** A decorative icon at the start of the box (the sign-in forms). */
+  icon?: ReactNode
 }
 
 /** Password with a show / hide button (44 px, its state announced with aria-pressed). Paste always works. */
-export function PasswordField({ label = 'Şifrə', hint, error, value, onValueChange, autoComplete, containerClassName, aside, id, 'aria-describedby': extra, ...rest }: PasswordFieldProps) {
+export function PasswordField({ label = 'Şifrə', hint, error, value, onValueChange, autoComplete, containerClassName, aside, icon, id, 'aria-describedby': extra, ...rest }: PasswordFieldProps) {
   const ids = useFieldIds(id)
   const [shown, setShown] = useState(false)
   return (
     <FieldShell label={label} hint={hint} error={error} aside={aside} htmlFor={ids.fieldId} {...ids} className={containerClassName}>
-      <div className="relative w-full">
+      <div className="group relative w-full">
+        {icon && <FieldIcon>{icon}</FieldIcon>}
         <input
           id={ids.fieldId}
           type={shown ? 'text' : 'password'}
@@ -133,7 +137,7 @@ export function PasswordField({ label = 'Şifrə', hint, error, value, onValueCh
           aria-describedby={describedBy(ids, hint, error, extra)}
           value={value}
           onChange={(e) => onValueChange(e.target.value)}
-          className={cn(controlClass, 'pr-12 focus:pr-12')}
+          className={cn(controlClass, 'pr-12 focus:pr-12', icon ? iconPadding : undefined)}
           {...rest}
         />
         <button
