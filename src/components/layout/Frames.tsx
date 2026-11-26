@@ -8,9 +8,9 @@ import { DemoBanner } from './DemoBanner'
 import { MAIN_ID } from './ids'
 
 /*
- * The header/footer variants of the Figma file, used by the route-group layouts in src/app. The home frame lives in
- * HomeFrame.tsx: its full footer brings a client island (the phone accordions, with Motion) that a module imported
- * by every layout would put into every page's first load.
+ * The header/footer variants of the Figma file, used by the route-group layouts in src/app. The frames with the full
+ * footer live in their own modules, HomeFrame.tsx (home) and MainFrame.tsx (public inner pages), so the cabinet,
+ * auth, posting and admin layouts that import this module do not pull the full footer in.
  * (Formerly src/layouts/Layouts.tsx; Next.js restores scroll and follows "#hash" links itself.)
  */
 
@@ -24,10 +24,11 @@ export function Main({ children }: { children: ReactNode }) {
 }
 
 /**
- * Inner public pages (catalogue, listing, seller, services, favourites, cabinet…): the same Variant 2 header as the
- * home page, so the main sections are one click away everywhere, + "Yığcam sonluq".
+ * The cabinet (/kabinet…), and login, registration and password reset: the Variant 2 header + "Yığcam sonluq". A
+ * workspace or a form, so the footer is the one row of help and terms links, without the sellers' card and the link
+ * groups that would pull the eye away from it.
  */
-export function MainFrame({ children }: { children: ReactNode }) {
+export function CompactFrame({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-dvh flex-col pb-[calc(86px+env(safe-area-inset-bottom,0px))] md:pb-0">
       <DemoBanner />
@@ -39,19 +40,7 @@ export function MainFrame({ children }: { children: ReactNode }) {
   )
 }
 
-/** Login / registration / password reset: the Variant 2 header, no footer. */
-export function AuthFrame({ children }: { children: ReactNode }) {
-  return (
-    <div className="flex min-h-dvh flex-col pb-[calc(86px+env(safe-area-inset-bottom,0px))] md:pb-0">
-      <DemoBanner />
-      <SiteHeader />
-      <Main>{children}</Main>
-      <MobileNav />
-    </div>
-  )
-}
-
-/** Ad posting wizard: "İş axını başlığı", no footer. */
+/** Ad posting wizard: "İş axını başlığı", no footer: a step-by-step flow, like a checkout, keeps the way out small. */
 export function WorkflowFrame({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-dvh flex-col">

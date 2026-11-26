@@ -83,7 +83,7 @@ export function footerGroups({ categories = allCategories, cities = allCities }:
   ]
 }
 
-/** Bottom row of the full footer; also part of the compact footer on inner pages. */
+/** Bottom row of the full footer; also part of the compact footer (cabinet, login pages). */
 export const legalLinks: FooterLink[] = [
   { label: 'İstifadə şərtləri', href: '/istifade-sertleri' },
   { label: 'Məxfilik siyasəti', href: '/mexfilik' },

@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
-import { AuthFrame } from '@/components/layout/Frames'
+import { CompactFrame } from '@/components/layout/Frames'
 
+/** Login, registration, password reset: the form comes first, the footer is the compact one. */
 export default function Layout({ children }: { children: ReactNode }) {
-  return <AuthFrame>{children}</AuthFrame>
+  return <CompactFrame>{children}</CompactFrame>
 }

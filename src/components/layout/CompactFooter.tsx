@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { legalLinks } from './footerLinks'
 
-/* Inner pages keep the one-row compact footer: support pages, then the legal links of the full footer. */
+/* The cabinet and the login pages keep the one-row compact footer: support pages, then the legal links of the full footer. */
 const support = [
   { label: 'Kömək', href: '/komek' },
   { label: 'Elan qaydaları', href: '/qaydalar' },
@@ -11,8 +11,8 @@ const support = [
 ]
 
 /**
- * Inner pages: the support and legal links in one row (the full footer, SiteFooter, lives on the home page). Its own
- * module, so inner pages never load the full footer's client island. Focus outline mint: olive is 2.8:1 on forest.
+ * The cabinet and login, registration and password reset (CompactFrame): the support and legal links in one row. The
+ * full footer, SiteFooter, is on the home page and the public pages. Focus outline mint: olive is 2.8:1 on forest.
  */
 export function CompactFooter() {
   return (
