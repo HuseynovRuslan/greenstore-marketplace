@@ -280,7 +280,7 @@ export function PostingWizard({ step }: { step: StepNumber }) {
 
       <div className={cn('grid grid-cols-1 gap-8', !review && 'lg:grid-cols-[minmax(0,1fr)_300px] xl:grid-cols-[minmax(0,1fr)_320px]')}>
         <form id="elan-formu" onSubmit={next} noValidate className="flex min-w-0 flex-col gap-6">
-          <ErrorSummary ref={summaryRef} errors={attempted ? errors : {}} labels={LABELS} />
+          <ErrorSummary ref={summaryRef} errors={attempted ? errors : {}} labels={draft.kind === 'service' ? { ...LABELS, subcategory: 'Xidmətin növü' } : LABELS} />
           {/* Guests learn at the start, not at the last step, that sending needs an account (the draft waits). */}
           {step === 1 && !user && (
             <p className="flex items-start gap-2 rounded-xl bg-mint px-4 py-3 text-[13px] leading-[1.5] text-ink">

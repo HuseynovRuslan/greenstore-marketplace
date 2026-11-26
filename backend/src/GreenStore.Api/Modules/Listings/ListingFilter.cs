@@ -73,7 +73,7 @@ public sealed record ServiceFilter
 {
     public string? Query { get; init; }
 
-    /// <summary>The service type, a sub-category of the service category («landsaft-dizayni»).</summary>
+    /// <summary>The service type, a sub-category of the service category («landsaft-dizayni»): one of the service's types.</summary>
     public string? CategoryId { get; init; }
 
     /// <summary>A city the service covers.</summary>

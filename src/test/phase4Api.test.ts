@@ -21,7 +21,8 @@ import {
 } from '@/features/admin/categoriesApi'
 import { overviewTiles } from '@/features/admin/AdminOverviewPanel'
 import { isStaff, mayOpen } from '@/features/admin/StaffGate'
-import { subcategoryIdOfDraft, toListingInput, withCategory, createDraft } from '@/features/posting/draft'
+import { createDraft, restoreDraft, serviceTypeIdsOfDraft, subcategoryIdOfDraft, toListingInput, withCategory, withTypes, type PostingDraft } from '@/features/posting/draft'
+import { validateStep } from '@/features/posting/validation'
 import type { AdminCategory, AdminOverview, OwnListing, ReportItem, ReportTarget } from '@/types'
 
 /*
@@ -424,5 +425,32 @@ describe('«Elan yerləşdir» sends the sub-category’s id (backend-contract.m
     expect(subcategoryIdOfDraft(service)).toBe('cim-salinmasi')
     expect(subcategoryIdOfDraft({ kind: 'product', categoryId: 'agaclar', subcategory: 'Naməlum' })).toBeUndefined()
     expect(subcategoryIdOfDraft({ kind: 'product', categoryId: 'agaclar', subcategory: '' })).toBeUndefined()
+  })
+
+  it('sends every type of a service, the first chosen as the main one (Nov 2026)', () => {
+    const base = withCategory(createDraft({ name: 'Elvin', phone: '+994505551234' }), 'service', 'landsaft-xidmetleri')
+    const service = withTypes(base, ['Bağ baxımı', 'Qazon salınması'])
+    expect(service.subcategory).toBe('Bağ baxımı')
+    const input = toListingInput(service)
+    expect(input.subcategory).toBe('Bağ baxımı')
+    expect(input.subcategoryId).toBe(serviceTypeIdsOfDraft(service)![0])
+    expect(input.subcategoryIds).toEqual(serviceTypeIdsOfDraft(service))
+    expect(input.subcategoryIds).toHaveLength(2)
+    expect(input.subcategoryIds).toContain('cim-salinmasi')
+    // None ticked: step 1 asks for one.
+    expect(validateStep(1, withTypes(base, []))).toMatchObject({ subcategory: 'Ən azı bir xidmət növü seçin.' })
+    expect(validateStep(1, service)).toEqual({})
+    // A product sends no list (one sub-category, as before).
+    const product = { ...withCategory(createDraft({ name: 'Elvin', phone: '+994505551234' }), 'product', 'agaclar'), subcategory: 'Meyvə ağacları' }
+    expect(toListingInput(product)).not.toHaveProperty('subcategoryIds')
+  })
+
+  it('reads a draft saved before Nov 2026 (one service type) as a list, and drops a type no longer offered', () => {
+    const old = { ...withCategory(createDraft(), 'service', 'landsaft-xidmetleri'), subcategory: 'Bağ baxımı' } as Partial<PostingDraft>
+    delete old.types
+    expect(restoreDraft(old).types).toEqual(['Bağ baxımı'])
+    const gone = restoreDraft({ ...withTypes(withCategory(createDraft(), 'service', 'landsaft-xidmetleri'), ['Bağ baxımı', 'Köhnə növ']) })
+    expect(gone.types).toEqual(['Bağ baxımı'])
+    expect(gone.subcategory).toBe('Bağ baxımı')
   })
 })

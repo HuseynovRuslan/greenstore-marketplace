@@ -43,7 +43,8 @@ function reviewFromListing(listing: Listing | undefined, fallbackSeller: string,
   if (!listing) return { details: category?.name, seller: fallbackSeller }
   const seller = sellerById(listing.sellerId)
   const images = listing.images.length ? listing.images : [listing.cover]
-  const categoryLabel = category ? (listing.subcategory ? `${category.name} / ${listing.subcategory}` : category.name) : listing.subcategory
+  const sub = listing.subcategories?.length ? listing.subcategories.join(', ') : listing.subcategory
+  const categoryLabel = category ? (sub ? `${category.name} / ${sub}` : category.name) : sub
   const checks: string[] = []
   if (listing.price > 0) checks.push('Qiymət göstərilib')
   if (images.length) checks.push(`${images.length} şəkil əlavə edilib`)

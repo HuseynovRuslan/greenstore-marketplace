@@ -159,6 +159,7 @@ public static class DemoSeeder
             SellerId = seller?.Id,
             CategoryId = seed.CategoryId,
             SubcategoryId = seed.SubcategoryId,
+            SubcategoryIds = seed.SubcategoryId is { } subcategoryId ? [subcategoryId] : [],
             Status = seed.Status,
             Title = seed.Title,
             Description = string.Join("\n\n", seed.Description),

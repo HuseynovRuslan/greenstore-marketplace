@@ -429,6 +429,10 @@
         "optional": false,
         "type": "ListingStatus"
       },
+      "subcategories": {
+        "optional": true,
+        "type": "string[]"
+      },
       "subcategory": {
         "optional": true,
         "type": "string"
@@ -436,6 +440,10 @@
       "subcategoryId": {
         "optional": true,
         "type": "string"
+      },
+      "subcategoryIds": {
+        "optional": true,
+        "type": "string[]"
       },
       "thumbnail": {
         "optional": true,
@@ -550,6 +558,10 @@
       "subcategoryId": {
         "optional": true,
         "type": "string"
+      },
+      "subcategoryIds": {
+        "optional": true,
+        "type": "string[]"
       },
       "title": {
         "optional": false,
@@ -1708,6 +1720,10 @@
       "categoryId": {
         "optional": false,
         "type": "string"
+      },
+      "categoryIds": {
+        "optional": true,
+        "type": "string[]"
       },
       "cover": {
         "optional": false,

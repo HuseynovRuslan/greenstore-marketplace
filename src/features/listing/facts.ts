@@ -123,7 +123,8 @@ export function factRows(listing: Listing): FactRow[] {
   if (!plant) return listingSpecs(listing).filter((s) => s.label !== 'Satıcı növü')
   const category = categoryById(listing.categoryId)?.name
   const rows: FactRow[] = []
-  if (category) rows.push({ label: 'Kateqoriya', value: listing.subcategory ? `${category} / ${listing.subcategory}` : category })
+  const sub = listing.subcategories?.length ? listing.subcategories.join(', ') : listing.subcategory
+  if (category) rows.push({ label: 'Kateqoriya', value: sub ? `${category} / ${sub}` : category })
   if (plant.species) rows.push({ label: 'Növ', value: plant.species, latin: true })
   if (plant.heightCm) rows.push({ label: 'Hündürlük', value: heightLabel(plant.heightCm) })
   if (plant.ageYears != null) rows.push({ label: 'Yaş', value: `${plant.ageYears} yaş` })

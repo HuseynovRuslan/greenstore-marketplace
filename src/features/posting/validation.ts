@@ -42,8 +42,8 @@ export function validateStep(step: StepNumber, d: PostingDraft): StepErrors {
       if (d.editing) break
       if (!d.kind) e.kind = 'Məhsul və ya xidmət seçin.'
       else if (!d.categoryId) e.categoryId = d.kind === 'service' ? 'Xidmət növünü seçin.' : 'Kateqoriyanı seçin.'
-      else if (d.kind === 'service' ? !d.subcategory : subcategoriesOf(d.categoryId).length > 0 && !d.subcategory)
-        e.subcategory = d.kind === 'service' ? 'Xidmətin növünü seçin.' : 'Alt kateqoriyanı seçin.'
+      else if (d.kind === 'service' ? !d.types.length : subcategoriesOf(d.categoryId).length > 0 && !d.subcategory)
+        e.subcategory = d.kind === 'service' ? 'Ən azı bir xidmət növü seçin.' : 'Alt kateqoriyanı seçin.'
       break
     }
 

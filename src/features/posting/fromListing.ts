@@ -39,7 +39,9 @@ export function listingToDraft(listing: Listing, contact: { name?: string; phone
     ...base,
     kind: service ? 'service' : 'product',
     categoryId: listing.categoryId,
-    subcategory: listing.subcategory ?? '',
+    subcategory: listing.subcategories?.[0] ?? listing.subcategory ?? '',
+    // A service's types (the API sends them all; a listing from before Nov 2026 has its one).
+    types: service ? (listing.subcategories?.length ? listing.subcategories : listing.subcategory ? [listing.subcategory] : []) : [],
     title: listing.title,
     description: (listing.description ?? []).join('\n\n'),
     attrs,

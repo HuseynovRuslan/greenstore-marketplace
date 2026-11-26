@@ -12,7 +12,7 @@ users
  ├─ 0..1 sellers                    biznes profili (fərdi satıcının profili yoxdur)
  ├─ N sessions ── N devices         giriş; devices mobil tətbiq gələndə
  ├─ N listing_drafts                «Elan yerləşdir»in yarımçıq vəziyyəti
- ├─ N listings ─► categories        category_id və subcategory_id (alt kateqoriya da categories-dədir)
+ ├─ N listings ─► categories        category_id və subcategory_id (alt kateqoriya da categories-dədir); subcategory_ids: xidmətin bütün növləri
  │    │        ─► cities
  │    │        ─► sellers           biznes hesabında
  │    ├─ 1 listing_counters         baxış, nömrə göstərmə, seçilmiş
@@ -227,6 +227,7 @@ CREATE TABLE listings (
   seller_id              uuid REFERENCES sellers (id),            -- biznes hesabında doldurulur
   category_id            text NOT NULL REFERENCES categories (id),
   subcategory_id         text REFERENCES categories (id),
+  subcategory_ids        text[] NOT NULL DEFAULT '{}',            -- bütün alt kateqoriyalar, birincisi subcategory_id: xidmətin növləri (1–6), məhsulun biri
   status                 text NOT NULL CHECK (status IN ('pending', 'active', 'rejected', 'expired', 'inactive')),
 
   title                  text NOT NULL CHECK (char_length(title) BETWEEN 3 AND 80),
@@ -299,6 +300,8 @@ CREATE TABLE listings (
   CHECK (status <> 'active' OR (published_at IS NOT NULL AND expires_at IS NOT NULL AND sort_at IS NOT NULL)),
   CHECK (status <> 'rejected' OR rejection_reason_code IS NOT NULL),
   CHECK (kind = 'service' OR (cardinality(service_city_ids) = 0 AND cardinality(includes) = 0)),
+  CHECK (subcategory_ids[1] IS NOT DISTINCT FROM subcategory_id AND cardinality(subcategory_ids) <= 6
+         AND (kind = 'service' OR cardinality(subcategory_ids) <= 1)),  -- ck_listings_subcategory_ids (26 noyabr 2026)
   CHECK (is_promoted = (promoted_at IS NOT NULL))                 -- ck_listings_promoted_at (faza 5)
 );
 
@@ -316,6 +319,7 @@ CREATE INDEX ix_listings_expiry     ON listings (expires_at)            WHERE st
 **Niyə belə.**
 - **Filtrə düşən bitki faktları ayrıca sütundadır:** növ, hündürlük, yaş, kök sistemi. Belə sütunu indeksləmək və `CHECK` ilə yoxlamaq olur. Yalnız göstərilən faktlar (günəş, su, şaxta) `plant` jsonb-dədir. Yeni bir fakt filtr olsa, sütuna keçirilir.
 - **Qaralamalar `listings`-də deyil, `listing_drafts`-dadır** (§3.5). Qaralamada hər sahə boş ola bilər. Ayrı cədvəl sayəsində `listings`-in bütün `CHECK`-ləri sərt qalır. Kabinetdə qaralama yenə `status: 'draft'` kimi görünür, müqavilə dəyişmir.
+- **Xidmətin bir neçə növü** ola bilər (26 noyabr 2026, miqrasiya `ServiceTypes`): `subcategory_ids` siyahısı. Siyahının birincisi həmişə `subcategory_id`-dir, o da xarici açar olaraq qalır, ona görə bir alt kateqoriyanı bilən köhnə kod düz işləyir. Siyahının qalanı xarici açar deyil: admin alt kateqoriyanı silmək istəyəndə API onu siyahıda da axtarır (`category.in-use`). Məhsulun siyahısında bir alt kateqoriya olur və ya heç biri olmur. Miqrasiya köhnə elanların siyahısını `ARRAY[subcategory_id]` ilə doldurub. Növə görə süzgəc `'bag-baximi' = ANY (subcategory_ids)` ilə işləyir. Saylar `unnest(subcategory_ids)` ilə sayılır, ona görə bir neçə növü olan xidmət hər növün sayına düşür.
 - **Sayğaclar `listings`-də deyil, `listing_counters`-dədir** (§3.6). Hər baxış `listings` sətrini dəyişsəydi, `xmin` da dəyişərdi və elanı redaktə edən sahib ya moderator boş yerə «elan dəyişib» xətası alardı.
 - **İndekslər.** 10 min sətirdə PostgreSQL çox vaxt cədvəli tam oxuyur və bu millisaniyələr çəkir. Yuxarıdakı indekslər əsas sorğular və 100 min+ üçün hazırlıqdır. Şəhər və qiymət indeksi indi lazım deyil. Yeni indeks yalnız `EXPLAIN ANALYZE` göstərəndə əlavə olunur.
 
@@ -601,7 +605,7 @@ CREATE TABLE idempotency_keys (
 - başlıq;
 - Latın növ adı;
 - atributların göstərilən dəyərləri;
-- kateqoriya, alt kateqoriya və şəhər adları **üç dildə**;
+- kateqoriya, alt kateqoriya (xidmətdə bütün növlər) və şəhər adları **üç dildə**;
 - `area`.
 
 **Normallaşdırma:**
@@ -614,7 +618,7 @@ Frontend-in `normalizeSearch` funksiyası da eyni işi görür. Test nümunələ
 
 **Sorğu.** Axtarış sətri eyni üsulla normallaşdırılır və sözlərə bölünür. Hər söz üçün `search_text LIKE '%söz%'` şərti yazılır və şərtlər `AND` ilə birləşir. Bu, mock-dakı «hər söz tapılmalıdır» məntiqidir. `pg_trgm` GIN indeksi `LIKE '%…%'`-i sürətləndirir. 3 hərfdən qısa sözdə indeks kömək etmir, amma 10 min sətirdə bu fərq etmir.
 
-**Yenidən yığmaq.** Admin kateqoriya və ya alt kateqoriya adını dəyişəndə həmin kateqoriyanın elanlarının `search_text`-i yenidən yığılır. Faza 4-də bu fon işində yox, adminin sorğusunun içində, 500-lük hissələrlə bir SQL ifadəsi ilə gedir (`Modules/Admin/SearchTextRebuilder.cs`): bir kateqoriyada ən çoxu bir neçə min elan olur və admin nəticəni dərhal görür. Şəhər adlarını dəyişən admin səhifəsi hələ yoxdur.
+**Yenidən yığmaq.** Admin kateqoriya və ya alt kateqoriya adını dəyişəndə həmin kateqoriyanın elanlarının `search_text`-i yenidən yığılır (növü xidmətin ikinci, üçüncü növü olsa da). Faza 4-də bu fon işində yox, adminin sorğusunun içində, 500-lük hissələrlə bir SQL ifadəsi ilə gedir (`Modules/Admin/SearchTextRebuilder.cs`): bir kateqoriyada ən çoxu bir neçə min elan olur və admin nəticəni dərhal görür. Şəhər adlarını dəyişən admin səhifəsi hələ yoxdur.
 
 **Filtr sayları** (`getFacetCounts`) eyni filtrlə, `GROUP BY category_id` və `GROUP BY city_id` ilə hesablanır və 60 saniyə keşlənir.
 

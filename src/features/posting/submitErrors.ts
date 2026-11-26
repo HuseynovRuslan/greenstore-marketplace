@@ -20,7 +20,7 @@ export interface SubmitFailure {
 /** The step of a `ListingInput` field the API named (`title`, `plant.heightCm.min`, `attributes.availability`, …). */
 export function stepOfField(field: string): StepNumber {
   const root = field.split('.')[0]
-  if (['kind', 'categoryId', 'subcategory', 'subcategoryId'].includes(root)) return 1
+  if (['kind', 'categoryId', 'subcategory', 'subcategoryId', 'subcategoryIds'].includes(root)) return 1
   if (['title', 'description', 'attributes', 'plant'].includes(root)) return 2
   if (root === 'photoIds') return 3
   if (['contactName', 'contactPhone', 'whatsapp', 'phoneHidden'].includes(root)) return 5
@@ -33,6 +33,7 @@ const FIELD_NAMES: Record<string, string> = {
   categoryId: 'Kateqoriya',
   subcategory: 'Alt kateqoriya',
   subcategoryId: 'Alt kateqoriya',
+  subcategoryIds: 'Xidmətin növü',
   title: 'Başlıq',
   description: 'Təsvir',
   attributes: 'Xüsusiyyətlər',
@@ -54,6 +55,7 @@ const FIELD_NAMES: Record<string, string> = {
 
 /** The seller's words for one field error. */
 export function fieldMessage(field: string, code: string): string {
+  if (field === 'subcategoryIds') return code === 'too-many' ? 'Ən çoxu 6 xidmət növü seçmək olar.' : 'Ən azı bir xidmət növü seçin.'
   if (field === 'description' && code === 'contains-phone') return 'Təsvirdə telefon nömrəsi olmasın: nömrəni «Əlaqə» addımında yazın.'
   if (field === 'categoryId' && code === 'locked') return 'Dərc olunmuş elanın kateqoriyası dəyişmir.'
   if (field === 'photoIds') {

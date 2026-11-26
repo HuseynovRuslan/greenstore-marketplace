@@ -96,10 +96,8 @@ public static class ListingsEndpoints
         var all = await anyCategory.CountAsync(ct);
         var byCategory = await CountByAsync(anyCategory, l => l.CategoryId, ct);
         var byCategoryWithRoot = filter.RootSystem is null ? byCategory : await CountByAsync(withRoot, l => l.CategoryId, ct);
-        var bySubcategory = await CountByAsync(anyCategory.Where(l => l.SubcategoryId != null), l => l.SubcategoryId!, ct);
-        var bySubcategoryWithRoot = filter.RootSystem is null
-            ? bySubcategory
-            : await CountByAsync(withRoot.Where(l => l.SubcategoryId != null), l => l.SubcategoryId!, ct);
+        var bySubcategory = await CountBySubcategoryAsync(anyCategory, ct);
+        var bySubcategoryWithRoot = filter.RootSystem is null ? bySubcategory : await CountBySubcategoryAsync(withRoot, ct);
 
         var anyCity = products.Filter(filter, FilterPart.Cities);
         var cityAll = await anyCity.CountAsync(ct);
@@ -187,6 +185,13 @@ public static class ListingsEndpoints
         System.Linq.Expressions.Expression<Func<Listing, string>> key,
         CancellationToken ct) =>
         await listings.GroupBy(key).Select(g => new { g.Key, Count = g.Count() }).ToDictionaryAsync(g => g.Key, g => g.Count, StringComparer.Ordinal, ct);
+
+    /// <summary>Listings per sub-category, each counted under every one of its sub-categories (<c>unnest(subcategory_ids)</c>).</summary>
+    internal static async Task<Dictionary<string, int>> CountBySubcategoryAsync(IQueryable<Listing> listings, CancellationToken ct) =>
+        await listings.SelectMany(l => l.SubcategoryIds)
+            .GroupBy(id => id)
+            .Select(g => new { g.Key, Count = g.Count() })
+            .ToDictionaryAsync(g => g.Key, g => g.Count, StringComparer.Ordinal, ct);
 }
 
 /// <summary><c>HomeContent</c> of src/services/repository.ts.</summary>

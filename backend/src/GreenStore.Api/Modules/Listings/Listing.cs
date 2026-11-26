@@ -36,10 +36,16 @@ public sealed class Listing : IHasRowVersion
 
     public Category? Category { get; set; }
 
-    /// <summary>For a service: the service type («landsaft-dizayni»).</summary>
+    /// <summary>For a service: the service type («landsaft-dizayni»); its first type when it has several.</summary>
     public string? SubcategoryId { get; set; }
 
     public Category? Subcategory { get; set; }
+
+    /// <summary>
+    /// Every sub-category, <see cref="SubcategoryId"/> first (<c>ck_listings_subcategory_ids</c>): a service's types,
+    /// one to <see cref="ListingInputRules.MaxServiceTypes"/>; a product's one sub-category, or none.
+    /// </summary>
+    public List<string> SubcategoryIds { get; set; } = [];
 
     public ListingStatus Status { get; set; }
 
@@ -162,6 +168,18 @@ public sealed class Listing : IHasRowVersion
     public ListingCounter? Counter { get; set; }
 
     public uint Version { get; set; }
+}
+
+/// <summary>
+/// A listing's sub-categories as one list: <c>subcategory_ids</c>, or, for a value written before the list existed (a
+/// revision sent before 26 November 2026, a listing built in memory), its one <c>subcategory_id</c>.
+/// </summary>
+public static class ListingSubcategories
+{
+    public static IReadOnlyList<string> Of(string? subcategoryId, IReadOnlyList<string>? subcategoryIds) =>
+        subcategoryIds is { Count: > 0 } ? subcategoryIds : subcategoryId is { } id ? [id] : [];
+
+    public static IReadOnlyList<string> Of(Listing listing) => Of(listing.SubcategoryId, listing.SubcategoryIds);
 }
 
 /// <summary>The plant facts kept in the <c>plant</c> jsonb (the rest of <c>PlantFacts</c> in src/types).</summary>

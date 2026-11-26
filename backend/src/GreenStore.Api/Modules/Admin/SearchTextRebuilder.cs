@@ -15,7 +15,10 @@ public static class SearchTextRebuilder
 {
     public const int BatchSize = 500;
 
-    /// <summary>The listings (not deleted) of <paramref name="categoryId"/>, as a category or as a sub-category; returns how many.</summary>
+    /// <summary>
+    /// The listings (not deleted) of <paramref name="categoryId"/>, as a category or as a sub-category (any of a
+    /// service's types); returns how many.
+    /// </summary>
     public static async Task<int> RebuildAsync(AppDbContext db, string categoryId, CancellationToken ct)
     {
         var taxonomy = await TaxonomySnapshot.LoadAsync(db, ct);
@@ -24,7 +27,7 @@ public static class SearchTextRebuilder
         while (true)
         {
             var batch = await db.Listings.AsNoTracking()
-                .Where(l => (l.CategoryId == categoryId || l.SubcategoryId == categoryId) && l.DeletedAt == null && l.Number > after)
+                .Where(l => (l.CategoryId == categoryId || l.SubcategoryIds.Contains(categoryId)) && l.DeletedAt == null && l.Number > after)
                 .OrderBy(l => l.Number)
                 .Take(BatchSize)
                 .Include(l => l.Seller)

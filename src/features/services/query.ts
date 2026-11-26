@@ -74,16 +74,28 @@ export function hasActiveFilters(f: ServiceFilters): boolean {
   return Boolean(f.q || f.categoryId || f.cityId || f.tab !== 'all' || f.minPrice != null || f.maxPrice != null)
 }
 
+/** A service's type ids, its main one first (a service from before Nov 2026 has its one `categoryId`). */
+export function serviceTypeIdsOf(service: Pick<Service, 'categoryId' | 'categoryIds'>): string[] {
+  return service.categoryIds?.length ? service.categoryIds : [service.categoryId]
+}
+
+/** A service's types (id and name) for links and labels, in its order; unknown ids drop out. */
+export function serviceTypesOf(service: Pick<Service, 'categoryId' | 'categoryIds'>): Array<{ id: string; name: string }> {
+  return serviceTypeIdsOf(service).flatMap((id) => {
+    const category = serviceCategories.find((c) => c.id === id)
+    return category ? [{ id: category.id, name: category.name }] : []
+  })
+}
+
 function searchText(service: Service): string {
   const provider = providerById(service.providerId)
-  const category = serviceCategories.find((c) => c.id === service.categoryId)
+  const categories = serviceCategories.filter((c) => serviceTypeIdsOf(service).includes(c.id))
   return normalizeSearch(
     [
       service.title,
       service.homeTitle ?? '',
       provider?.name ?? '',
-      category?.name ?? '',
-      ...(category?.searchWords ?? []),
+      ...categories.flatMap((c) => [c.name, ...(c.searchWords ?? [])]),
       ...service.areas,
       ...(service.description ?? []),
       ...(service.includes ?? []),
@@ -99,7 +111,8 @@ export function filterServices(source: Service[], f: ServiceFilters): Service[] 
       const haystack = searchText(s)
       if (!words.every((w) => haystack.includes(w))) return false
     }
-    if (f.categoryId && s.categoryId !== f.categoryId) return false
+    // A service with several types is found under each of them.
+    if (f.categoryId && !serviceTypeIdsOf(s).includes(f.categoryId)) return false
     if (area && !s.areas.includes(area)) return false
     if (f.tab !== 'all') {
       const provider = providerById(s.providerId)

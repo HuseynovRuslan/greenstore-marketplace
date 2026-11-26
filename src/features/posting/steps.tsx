@@ -11,8 +11,8 @@ import { monthName, cn } from '@/lib/format'
 import { isCompletePhone } from '@/lib/phone'
 import type { UserProfile } from '@/types'
 import { PLANT_CATEGORIES, SERVICE_CATEGORY, unitOptions, visibleAttributes, type AttrDef } from './attributes'
-import { DESCRIPTION_MAX, TITLE_MAX, serviceTypes, withCategory, type PostingDraft } from './draft'
-import { RadioPills, TogglePills, UnitInput } from './ui'
+import { DESCRIPTION_MAX, TITLE_MAX, serviceTypes, withCategory, withTypes, type PostingDraft } from './draft'
+import { CheckPills, RadioPills, TogglePills, UnitInput } from './ui'
 import { fieldDomId } from './validation'
 
 export interface StepProps {
@@ -38,7 +38,7 @@ export function CategoryStep({ draft, update, error }: StepProps) {
     return (
       <div className="flex flex-col gap-5">
         <p className="text-[15px] leading-[1.5] text-ink">
-          Kateqoriya: <span className="font-semibold">{[name, draft.subcategory].filter(Boolean).join(' / ')}</span>
+          Kateqoriya: <span className="font-semibold">{[name, draft.kind === 'service' ? draft.types.join(', ') : draft.subcategory].filter(Boolean).join(' / ')}</span>
         </p>
         <p className="rounded-xl bg-mint p-4 text-sm leading-[1.5] text-ink">
           Dərc olunmuş elanın kateqoriyasını dəyişmək olmur. Başqa bitki satırsınızsa, yeni elan yerləşdirin.
@@ -105,15 +105,30 @@ export function CategoryStep({ draft, update, error }: StepProps) {
       )}
 
       {draft.kind && subs.length > 0 && (draft.kind === 'service' || draft.categoryId) && (
-        <FieldGroup legend={draft.kind === 'service' ? 'Xidmətin növü' : 'Alt kateqoriya'} error={error('subcategory')}>
-          <RadioPills
-            name="subcategory"
-            firstId={id('subcategory')}
-            options={subs.map((s) => ({ value: s, label: s }))}
-            value={draft.subcategory}
-            onChange={(v) => update({ subcategory: v })}
-            invalid={Boolean(error('subcategory'))}
-          />
+        <FieldGroup
+          legend={draft.kind === 'service' ? 'Xidmətin növü' : 'Alt kateqoriya'}
+          hint={draft.kind === 'service' ? 'Bir və ya bir neçəsini seçin: elan hər birinin siyahısında görünəcək.' : undefined}
+          error={error('subcategory')}
+        >
+          {draft.kind === 'service' ? (
+            <CheckPills
+              name="subcategory"
+              firstId={id('subcategory')}
+              options={subs.map((s) => ({ value: s, label: s }))}
+              values={draft.types}
+              onChange={(types) => update((d) => withTypes(d, types))}
+              invalid={Boolean(error('subcategory'))}
+            />
+          ) : (
+            <RadioPills
+              name="subcategory"
+              firstId={id('subcategory')}
+              options={subs.map((s) => ({ value: s, label: s }))}
+              value={draft.subcategory}
+              onChange={(v) => update({ subcategory: v })}
+              invalid={Boolean(error('subcategory'))}
+            />
+          )}
         </FieldGroup>
       )}
     </div>

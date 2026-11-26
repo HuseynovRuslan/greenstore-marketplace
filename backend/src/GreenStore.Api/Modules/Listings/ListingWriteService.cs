@@ -94,7 +94,9 @@ public sealed class ListingWriteService(AppDbContext db, TimeProvider clock, IOp
         }
 
         var state = LifecycleState.Of(listing);
-        var locked = ListingLifecycle.CategoryLocked(state) ? new LockedCategory(listing.Kind, listing.CategoryId, listing.SubcategoryId) : null;
+        var locked = ListingLifecycle.CategoryLocked(state)
+            ? new LockedCategory(listing.Kind, listing.CategoryId, listing.SubcategoryId, ListingSubcategories.Of(listing))
+            : null;
         var taxonomy = await TaxonomySnapshot.LoadAsync(db, ct);
         var (content, errors) = ListingInputRules.Validate(input, taxonomy, locked);
         errors.ThrowIfAny();

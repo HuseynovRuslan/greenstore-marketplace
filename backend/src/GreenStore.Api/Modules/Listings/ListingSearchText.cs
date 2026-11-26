@@ -15,7 +15,8 @@ public sealed record ListingSearchInput
 
     public LocalizedText? Category { get; init; }
 
-    public LocalizedText? Subcategory { get; init; }
+    /// <summary>The sub-category, or every type of a service.</summary>
+    public IReadOnlyList<LocalizedText> Subcategories { get; init; } = [];
 
     public LocalizedText? City { get; init; }
 
@@ -45,7 +46,7 @@ public static class ListingSearchText
         var parts = new List<string?> { input.Title, input.Species };
         parts.AddRange(input.AttributeLine);
         parts.AddRange(Names(input.Category));
-        parts.AddRange(Names(input.Subcategory));
+        parts.AddRange(input.Subcategories.SelectMany(Names));
         parts.AddRange(Names(input.City));
         parts.Add(input.Area);
         parts.Add(input.ProviderName);
@@ -70,7 +71,8 @@ public static class ListingSearchText
 
     /// <summary>
     /// The search text of a listing as stored: its own words, the card line in every language, and the names of its
-    /// category, sub-category and city (and, for a service, the cities it covers) from <paramref name="taxonomy"/>.
+    /// category, sub-category (every type of a service) and city (and, for a service, the cities it covers) from
+    /// <paramref name="taxonomy"/>.
     /// <paramref name="providerName"/> is the business or person behind a service.
     /// </summary>
     public static string For(Listing listing, TaxonomySnapshot taxonomy, string? providerName)
@@ -88,7 +90,7 @@ public static class ListingSearchText
             AttributeLine = line,
             // Every service is under the one service category: its name tells services apart no more than nothing.
             Category = isService ? null : taxonomy.Category(listing.CategoryId)?.Name,
-            Subcategory = taxonomy.Category(listing.SubcategoryId)?.Name,
+            Subcategories = ListingSubcategories.Of(listing).Select(taxonomy.Category).OfType<Category>().Select(c => c.Name).ToList(),
             City = taxonomy.City(listing.CityId)?.Name,
             Area = listing.Area,
             ProviderName = isService ? providerName : null,
