@@ -7,7 +7,7 @@ import { featuredSellerIds, sellerById, sellerBySlug, sellers } from '@/data/sel
 import { homeServices, providerById, serviceById, serviceBySlug, services } from '@/data/services'
 import { otherSellerListings, similarListings } from '@/features/listing/detail'
 import { runSearch, selectCategory, type SearchState } from '@/features/search/searchState'
-import { searchServices } from '@/features/services/query'
+import { searchServices, serviceTypeIdsOf } from '@/features/services/query'
 import { filterListings } from './marketplace'
 import { displayPhone, maskPhone, mockAccount, mockChallengePhone, mockListingStats, mockOtp, mockSequence } from './mockWrites'
 import { filterQuery, MAX_SAVED_SEARCHES } from '@/features/saved-searches/query'
@@ -45,7 +45,10 @@ function publicListing(l: Listing): Listing {
   const number = contactPhone ?? sellerById(l.sellerId)?.phone
   // The mask, never the number: the page asks revealPhone for it.
   const subcategoryId = l.subcategoryId ?? subcategoryIdOf(l.categoryId, l.subcategory)
-  return { ...rest, ...(subcategoryId ? { subcategoryId } : {}), ...(number && !l.phoneHidden ? { phoneMasked: maskPhone(number) } : {}) }
+  // Every sub-category, as the API sends it (Nov 2026): the sample listings have one each.
+  const subcategoryIds = l.subcategoryIds ?? (subcategoryId ? [subcategoryId] : [])
+  const subcategories = l.subcategories ?? (l.subcategory ? [l.subcategory] : [])
+  return { ...rest, ...(subcategoryId ? { subcategoryId } : {}), subcategoryIds, subcategories, ...(number && !l.phoneHidden ? { phoneMasked: maskPhone(number) } : {}) }
 }
 
 function publicSeller(s: Seller): Seller {
@@ -189,7 +192,10 @@ export const mockRepository: MarketplaceRepository = {
       .slice(0, 4)
     const shown = new Set([service.id, ...fromProvider.map((s) => s.id)])
     const rest = services.filter((s) => !shown.has(s.id))
-    const similar = [...rest.filter((s) => s.categoryId === service.categoryId), ...rest.filter((s) => s.categoryId !== service.categoryId)].slice(0, 4)
+    // Services that share a type come first (a service may have several types).
+    const types = serviceTypeIdsOf(service)
+    const shares = (s: Service) => serviceTypeIdsOf(s).some((t) => types.includes(t))
+    const similar = [...rest.filter(shares), ...rest.filter((s) => !shares(s))].slice(0, 4)
     return { fromProvider, similar }
   },
 

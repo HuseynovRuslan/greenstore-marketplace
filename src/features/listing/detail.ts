@@ -55,7 +55,8 @@ export function listingSpecs(listing: Listing): Spec[] {
   if (listing.specs?.length) return listing.specs
   const specs: Spec[] = []
   const category = categoryById(listing.categoryId)?.name
-  if (category) specs.push({ label: 'Kateqoriya', value: listing.subcategory ? `${category} / ${listing.subcategory}` : category })
+  const sub = listing.subcategories?.length ? listing.subcategories.join(', ') : listing.subcategory
+  if (category) specs.push({ label: 'Kateqoriya', value: sub ? `${category} / ${sub}` : category })
   const height = heightRange(listing)
   if (height) specs.push({ label: 'Hündürlük', value: height[0] === height[1] ? `${height[0]} sm` : `${height[0]}–${height[1]} sm` })
   const age = ageYears(listing)

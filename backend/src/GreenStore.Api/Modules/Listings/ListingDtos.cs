@@ -41,6 +41,15 @@ public record ListingDto
 
     public string? SubcategoryId { get; init; }
 
+    /// <summary>
+    /// ★ Every sub-category (backend-contract.md 1.3): a service's types, <see cref="SubcategoryId"/> first; a
+    /// product's one sub-category, or none.
+    /// </summary>
+    public IReadOnlyList<string> SubcategoryIds { get; init; } = [];
+
+    /// <summary>★ The names of <see cref="SubcategoryIds"/> in the same order, in the request's language.</summary>
+    public IReadOnlyList<string> Subcategories { get; init; } = [];
+
     public string? SellerId { get; init; }
 
     public required string Cover { get; init; }
@@ -200,7 +209,11 @@ public sealed record ServiceDto
     /// <summary>City names in the request's language.</summary>
     public required IReadOnlyList<string> Areas { get; init; }
 
+    /// <summary>The service type; its first one when it has several.</summary>
     public required string CategoryId { get; init; }
+
+    /// <summary>★ Every type of the service, <see cref="CategoryId"/> first (backend-contract.md 1.3).</summary>
+    public required IReadOnlyList<string> CategoryIds { get; init; }
 
     public required string Cover { get; init; }
 
@@ -232,6 +245,7 @@ public static class ListingMapping
     {
         var language = read.Language;
         var photos = PhotoUrls(l, read);
+        var subcategoryIds = ListingSubcategories.Of(l);
         return new ListingDto
         {
             Id = l.Id.ToString(),
@@ -247,6 +261,8 @@ public static class ListingMapping
             CategoryId = l.CategoryId,
             Subcategory = l.SubcategoryId is { } sub ? read.Taxonomy.CategoryName(sub, language) : null,
             SubcategoryId = l.SubcategoryId,
+            SubcategoryIds = subcategoryIds,
+            Subcategories = subcategoryIds.Select(id => read.Taxonomy.CategoryName(id, language)).ToList(),
             SellerId = l.SellerId?.ToString(),
             Cover = photos.FirstOrDefault() ?? string.Empty,
             Images = photos,
@@ -311,6 +327,8 @@ public static class ListingMapping
     {
         var language = read.Language;
         var photos = PhotoUrls(l, read);
+        var categoryId = l.SubcategoryId ?? l.CategoryId;
+        var types = ListingSubcategories.Of(l);
         return new ServiceDto
         {
             Id = l.Id.ToString(),
@@ -322,7 +340,8 @@ public static class ListingMapping
             PriceUnit = l.PriceUnit,
             ProviderId = l.OwnerUserId.ToString(),
             Areas = l.ServiceCityIds.Select(id => read.Taxonomy.CityName(id, language)).ToList(),
-            CategoryId = l.SubcategoryId ?? l.CategoryId,
+            CategoryId = categoryId,
+            CategoryIds = types.Count > 0 ? types : [categoryId],
             Cover = photos.FirstOrDefault() ?? string.Empty,
             Images = photos,
             Description = Paragraphs(l.Description),

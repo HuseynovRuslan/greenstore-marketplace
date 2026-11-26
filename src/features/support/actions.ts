@@ -1,5 +1,6 @@
 'use server'
 
+import { isPersonName } from '@/lib/names'
 import { isApiError } from '@/services/apiRepository'
 import { getRepository } from '@/services/repository'
 import type { SupportMessageInput } from '@/types'
@@ -8,7 +9,7 @@ const TOPICS: SupportMessageInput['topic'][] = ['listing', 'account', 'payment',
 
 const FIELD_MESSAGES: Record<string, string> = {
   topic: 'Mövzunu seçin.',
-  name: 'Adınızı yazın.',
+  name: 'Adınızı yalnız hərflərlə yazın.',
   contact: 'Telefon nömrəsini və ya e-poçtu düzgün yazın.',
   message: 'Mesajı yazın (10–2000 simvol).',
   listingNumber: 'Elan nömrəsini rəqəmlə yazın.',
@@ -28,6 +29,7 @@ function supportFailure(error: unknown): string {
 export async function sendSupportMessage(input: SupportMessageInput): Promise<{ ok: true; ticket: number } | { ok: false; error: string }> {
   if (!input || !TOPICS.includes(input.topic)) return { ok: false, error: 'Mövzunu seçin.' }
   if (typeof input.name !== 'string' || !input.name.trim() || input.name.length > 60) return { ok: false, error: 'Adınızı yazın.' }
+  if (!isPersonName(input.name)) return { ok: false, error: 'Adınızı yalnız hərflərlə yazın.' }
   if (typeof input.contact !== 'string' || input.contact.trim().length < 5 || input.contact.length > 100) return { ok: false, error: 'Telefon və ya e-poçt yazın.' }
   if (typeof input.message !== 'string' || input.message.trim().length < 10 || input.message.length > 2000) return { ok: false, error: 'Mesajı yazın.' }
   const listingNumber = input.listingNumber

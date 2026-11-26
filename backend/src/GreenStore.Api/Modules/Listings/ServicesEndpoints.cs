@@ -60,20 +60,21 @@ public static class ServicesEndpoints
     }
 
     /// <summary>
-    /// «Bu ustanın digər xidmətləri» (the same provider's) and similar services: the same service type first, then
-    /// any other, newest first (src/app/(main)/xidmetler/[slug]/page.tsx).
+    /// «Bu ustanın digər xidmətləri» (the same provider's) and similar services: those sharing a service type first
+    /// (any of either's types), then any other, newest first (src/app/(main)/xidmetler/[slug]/page.tsx).
     /// </summary>
     private static async Task<Ok<RelatedServicesDto>> Related(Guid id, HttpContext http, AppDbContext db, CancellationToken ct)
     {
         var services = db.Listings.AsNoTracking().Public(CategoryKind.Service);
-        var service = await services.Where(l => l.Id == id).Select(l => new { l.OwnerUserId, l.SubcategoryId }).FirstOrDefaultAsync(ct)
+        var service = await services.Where(l => l.Id == id).Select(l => new { l.OwnerUserId, l.SubcategoryIds }).FirstOrDefaultAsync(ct)
             ?? throw ApiProblemException.NotFound(NotFound);
+        var types = service.SubcategoryIds;
 
         var fromProvider = await services.Where(l => l.OwnerUserId == service.OwnerUserId && l.Id != id)
             .Sort(ListingSort.Newest).WithCardData().Take(RelatedLimit).ToListAsync(ct);
         var shown = fromProvider.Select(l => l.Id).Append(id).ToList();
         var similar = await services.Where(l => !shown.Contains(l.Id))
-            .OrderBy(l => l.SubcategoryId != service.SubcategoryId)
+            .OrderBy(l => !l.SubcategoryIds.Any(t => types.Contains(t)))
             .ThenByDescending(l => l.IsPromoted)
             .ThenByDescending(l => l.SortAt)
             .ThenByDescending(l => l.Number)

@@ -11,6 +11,7 @@ import type { BusinessKind, FavoriteItems, OwnSeller, PhotoUpload, SellerProfile
 import { waitText } from '@/features/auth/messages'
 import { isValidEmail, messages } from '@/features/auth/validation'
 import { orderedKinds } from '@/features/seller/businessKinds'
+import { isPersonName } from '@/lib/names'
 import { accountOf } from './profile'
 
 /*
@@ -80,7 +81,7 @@ export type ProfileField = 'company' | 'kinds' | 'contact' | 'email' | 'address'
 const FIELD_OF: Record<string, ProfileField> = { fullName: 'contact', contactPerson: 'contact', email: 'email', name: 'company', businessKinds: 'kinds', address: 'address', about: 'about' }
 
 const FIELD_TEXT: Record<ProfileField, (code: string) => string> = {
-  contact: (code) => (code === 'too-long' ? 'Ad ən çox 60 simvol olsun.' : messages.nameRequired),
+  contact: (code) => (code === 'too-long' ? 'Ad ən çox 60 simvol olsun.' : code === 'invalid' ? 'Adı yalnız hərflərlə yazın.' : messages.nameRequired),
   email: () => messages.emailFormat,
   company: (code) => (code === 'too-long' ? 'Şirkətin adı ən çox 80 simvol olsun.' : code === 'too-short' ? 'Şirkətin adı ən azı 2 simvol olsun.' : messages.companyRequired),
   kinds: () => 'Ən azı bir biznes növü seçin.',
@@ -102,6 +103,7 @@ type ProfileFields = { fullName: string; email: string; companyName: string; bus
 function profileFieldError(fields: ProfileFields, business: boolean): { field: ProfileField; code: string } | undefined {
   if (!fields.fullName) return { field: 'contact', code: 'required' }
   if (fields.fullName.length > LIMITS.fullName) return { field: 'contact', code: 'too-long' }
+  if (!isPersonName(fields.fullName)) return { field: 'contact', code: 'invalid' }
   if (fields.email && (fields.email.length > LIMITS.email || !isValidEmail(fields.email))) return { field: 'email', code: 'invalid' }
   if (!business) return undefined
   if (!fields.companyName) return { field: 'company', code: 'required' }

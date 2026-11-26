@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { describe, expect, it } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { OtpField, PasswordField, PhoneField, Switch } from '@/components/ui/FormControls'
+import { NameField, OtpField, PasswordField, PhoneField, Switch } from '@/components/ui/FormControls'
 import { TextField } from '@/components/ui/Field'
 import { formatLocal, isCompletePhone, localDigits, phoneFieldError, phoneValue } from '@/lib/phone'
 
@@ -13,6 +13,8 @@ describe('phone helpers', () => {
     ['0505551234', '505551234'],
     ['(050) 555-12-34', '505551234'],
     ['5055', '5055'],
+    ['050', '50'],
+    ['50 abc 5', '505'],
   ])('reads %s as %s', (input, digits) => {
     expect(localDigits(input)).toBe(digits)
   })
@@ -56,6 +58,36 @@ describe('PhoneField', () => {
     await user.type(input, '505551234')
     expect(input).toHaveValue('50 555 12 34')
     expect(screen.getByTestId('value')).toHaveTextContent('+994 50 555 12 34')
+  })
+
+  it('lets no letter or symbol in, drops the habitual 0, and shows the places left', async () => {
+    const user = userEvent.setup()
+    render(<PhoneHarness />)
+    const input = screen.getByRole('textbox', { name: /Telefon nömrəsi/ })
+    // The mask is the layer behind the input: the typed part (invisible) and the rest of «__ ___ __ __».
+    const mask = () => input.previousElementSibling?.textContent
+    expect(mask()).toBe('__ ___ __ __')
+    await user.type(input, 'a0b5-0x')
+    expect(input).toHaveValue('50')
+    expect(mask()).toBe('50 ___ __ __')
+    await user.type(input, '5551234999')
+    expect(input).toHaveValue('50 555 12 34')
+    expect(mask()).toBe('50 555 12 34')
+  })
+})
+
+describe('NameField', () => {
+  it('keeps letters only', async () => {
+    const user = userEvent.setup()
+    function Harness() {
+      const [value, setValue] = useState('')
+      return <NameField label="Ad" value={value} onValueChange={setValue} />
+    }
+    render(<Harness />)
+    const input = screen.getByRole('textbox', { name: 'Ad' })
+    expect(input).toHaveAttribute('autocapitalize', 'words')
+    await user.type(input, 'El1vi#n 2')
+    expect(input).toHaveValue('Elvin ')
   })
 })
 

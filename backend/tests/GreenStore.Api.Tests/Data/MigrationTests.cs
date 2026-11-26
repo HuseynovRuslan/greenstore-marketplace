@@ -1,4 +1,5 @@
 using GreenStore.Api.Data;
+using GreenStore.Api.Data.Seed;
 using GreenStore.Api.Tests.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
@@ -86,6 +87,40 @@ public sealed class MigrationTests(PostgresDatabase database)
             .SqlQuery<string>($"SELECT tablename AS \"Value\" FROM pg_tables WHERE schemaname = 'public'")
             .ToListAsync(Ct);
         Assert.Equal([DatabaseSetup.MigrationsHistoryTable], tables);
+    }
+
+    [Fact]
+    public async Task ServiceTypes_starts_every_listings_list_with_its_sub_category()
+    {
+        // A database as it was before the migration, with a listing that has a sub-category and one that has none.
+        await using var scratch = await database.CreateScratchDatabaseAsync("service_types");
+        var options = new DbContextOptionsBuilder<AppDbContext>();
+        DatabaseSetup.Configure(options, scratch.ConnectionString);
+        await using var db = new AppDbContext(options.Options);
+        var migrator = db.GetService<IMigrator>();
+        await migrator.MigrateAsync("20261124135023_MultipleBusinessKinds", cancellationToken: Ct);
+        await ReferenceSeeder.SeedAsync(db, Path.Combine(AppContext.BaseDirectory, "seed"), Ct);
+        await db.Database.ExecuteSqlRawAsync(
+            """
+            INSERT INTO users (id, phone, full_name, account_type, password_hash)
+            VALUES ('019a8b4e-0000-7000-8000-0000000000aa', '+994509999998', 'Test', 'individual', 'x');
+            INSERT INTO listings (id, number, slug, kind, owner_user_id, category_id, subcategory_id, city_id, status, title,
+                                  price_type, price, contact_name, contact_phone, contact_phone_verified)
+            VALUES (gen_random_uuid(), 1, 'alma-1', 'product', '019a8b4e-0000-7000-8000-0000000000aa', 'agaclar', 'agaclar-meyve', 'baki',
+                    'pending', 'Alma tingi', 'fixed', 10, 'Test', '+994500000999', false),
+                   (gen_random_uuid(), 2, 'dizayn-2', 'service', '019a8b4e-0000-7000-8000-0000000000aa', 'landsaft-xidmetleri', 'landsaft-dizayni',
+                    'baki', 'pending', 'Bağın dizaynı', 'fixed', 10, 'Test', '+994500000999', false),
+                   (gen_random_uuid(), 3, 'kol-3', 'product', '019a8b4e-0000-7000-8000-0000000000aa', 'agaclar', NULL, 'baki',
+                    'pending', 'Ağac kolu', 'fixed', 10, 'Test', '+994500000999', false);
+            """,
+            Ct);
+
+        await migrator.MigrateAsync(cancellationToken: Ct);
+
+        var lists = await db.Database
+            .SqlQuery<string>($"SELECT array_to_string(subcategory_ids, ',') AS \"Value\" FROM listings ORDER BY number")
+            .ToListAsync(Ct);
+        Assert.Equal(["agaclar-meyve", "landsaft-dizayni", ""], lists);
     }
 
     [Fact]

@@ -33,6 +33,7 @@ public sealed class SupportRulesTests
     [InlineData("topic", null, FieldErrors.Required)]
     [InlineData("topic", "billing", FieldErrors.Invalid)]
     [InlineData("name", "  ", FieldErrors.Required)]
+    [InlineData("name", "Rauf 2", FieldErrors.Invalid)]
     [InlineData("contact", null, FieldErrors.Required)]
     [InlineData("contact", "zəng edin", FieldErrors.Invalid)]
     [InlineData("contact", "1234", FieldErrors.Invalid)]

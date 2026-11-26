@@ -823,6 +823,13 @@ namespace GreenStore.Api.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("subcategory_id");
 
+                    b.PrimitiveCollection<List<string>>("SubcategoryIds")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text[]")
+                        .HasColumnName("subcategory_ids")
+                        .HasDefaultValueSql("'{}'::text[]");
+
                     b.Property<DateTimeOffset?>("SubmittedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("submitted_at");
@@ -950,6 +957,8 @@ namespace GreenStore.Api.Data.Migrations
                             t.HasCheckConstraint("ck_listings_species", "char_length(species) <= 60");
 
                             t.HasCheckConstraint("ck_listings_status", "status IN ('pending', 'active', 'rejected', 'expired', 'inactive')");
+
+                            t.HasCheckConstraint("ck_listings_subcategory_ids", "subcategory_ids[1] IS NOT DISTINCT FROM subcategory_id AND cardinality(subcategory_ids) <= 6 AND (kind = 'service' OR cardinality(subcategory_ids) <= 1)");
 
                             t.HasCheckConstraint("ck_listings_title", "char_length(title) BETWEEN 3 AND 80");
 

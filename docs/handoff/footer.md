@@ -56,12 +56,19 @@ New query parameters: `movzu` on `/elaqe` (`elan`, `hesab`, `odenis`, `sikayet`,
 - Under 768 px the groups are accordions («Kateqoriyalar» open), animated with Motion (height + opacity, chevron
   turn), instant with reduced motion. Each group opens on its own. 768–1279 px: three columns. From 1280 px: one
   row beside the brand block.
-- The full footer is on the home page; inner pages keep the one-row compact footer, which now also has
-  «Sayt xəritəsi».
+- Since 25 Nov 2026 the full footer is on the home page and every public page (catalogue, listing, seller, services,
+  help, contact, terms, favourites, 404: `MainFrame.tsx`). The cabinet and the login, registration and password reset
+  pages keep the one-row compact footer (`CompactFrame` in `Frames.tsx`, with «Sayt xəritəsi» among its links); the
+  posting wizard and admin have none. The cabinet moved to its own route group, `src/app/(cabinet)`, for that; its
+  URLs did not change.
 - Weight: the brand icons render on the server (0 bytes of JS; ≈ 4.8 KB of HTML, 2 KB gzip, once all four URLs are
-  set). The accordions add 1.5 KB gzip to the home page's first load and nothing to other pages: `HomeFrame` lives in
-  its own module (`src/components/layout/HomeFrame.tsx`), and `m` comes from `motion/react-m` — imported from
-  `motion/react` it pulls Motion's whole `domAnimation` bundle (≈ 36 KB gzip) into the first load.
+  set). The accordions add 1.5 KB gzip to the home page's first load. On the public pages the full footer instead of
+  the compact one costs 1–7 KB gzip of first-load JS and 4–5 KB gzip of HTML (measured 25 Nov 2026 on a production
+  build: /saticilar +1 / +4, /elanlar +1 / +5, /elaqe +7 / +4, /komek +7 / +5). Turbopack puts the accordions in a
+  chunk that most pages load anyway (17 of the 18 prerendered pages, the cabinet and the posting wizard too), so
+  keeping `HomeFrame` and `MainFrame` in their own modules, apart from `Frames.tsx`, saves those pages the footer's
+  HTML more than its JS. `m` comes from `motion/react-m`: imported from `motion/react` it pulls Motion's whole
+  `domAnimation` bundle (≈ 36 KB gzip) into the first load.
 
 ## Open questions
 

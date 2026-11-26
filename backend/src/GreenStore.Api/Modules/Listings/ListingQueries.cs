@@ -41,7 +41,8 @@ public static class ListingQueries
 
             if (f.SubcategoryId is { } subcategoryId)
             {
-                listings = listings.Where(l => l.SubcategoryId == subcategoryId);
+                // `= ANY (subcategory_ids)`: a product has one sub-category, the list keeps it the same as for services.
+                listings = listings.Where(l => l.SubcategoryIds.Contains(subcategoryId));
             }
         }
 
@@ -116,7 +117,8 @@ public static class ListingQueries
 
         if (f.CategoryId is { } serviceType)
         {
-            services = services.Where(l => l.SubcategoryId == serviceType);
+            // A service with several types is found under each: `'bag-baximi' = ANY (subcategory_ids)` in SQL.
+            services = services.Where(l => l.SubcategoryIds.Contains(serviceType));
         }
 
         if (f.CityId is { } cityId)

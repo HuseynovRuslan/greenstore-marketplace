@@ -11,6 +11,7 @@ import { SellerAvatar } from '@/features/listing/SellerSummary'
 import { ComplaintButton } from '@/features/seller/ComplaintButton'
 import { Breadcrumb } from '@/features/seller/ui'
 import { providerContact } from '@/features/services/contact'
+import { serviceTypesOf } from '@/features/services/query'
 import { Portfolio } from '@/features/services/Portfolio'
 import { ServiceContact } from '@/features/services/ServiceContact'
 import { ServiceTile } from '@/features/services/ServiceTile'
@@ -75,6 +76,16 @@ export default function ServiceDetailPage({ service, provider, seller, others, s
               <div className="flex flex-col gap-4 rounded-xl border border-line bg-surface p-5">
                 <div className="flex flex-col gap-1.5">
                   <h1 className="text-[22px] leading-[1.25] font-semibold tracking-[-0.015em] break-words text-forest md:text-[26px]">{service.title}</h1>
+                  {/* Its types, one or more: each opens the services of that type. */}
+                  <ul aria-label="Xidmətin növü" className="flex flex-wrap gap-1.5 py-0.5">
+                    {serviceTypesOf(service).map((t) => (
+                      <li key={t.id}>
+                        <Link href={`/xidmetler?kateqoriya=${t.id}`} className="inline-flex min-h-8 items-center rounded-full bg-mint px-3 text-[13px] font-medium text-forest transition-colors duration-(--dur-fast) hover:bg-line">
+                          {t.name}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
                   <p className="flex items-center gap-1.5 text-sm leading-[1.4] text-muted">
                     <MapPin aria-hidden size={15} strokeWidth={1.8} className="shrink-0" />
                     {service.areas.join(', ')}

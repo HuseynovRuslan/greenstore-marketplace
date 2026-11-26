@@ -1,4 +1,5 @@
 import { categoryById, subcategoryById } from '@/data/categories'
+import { serviceCategories } from '@/data/services'
 import { cityName } from '@/data/cities'
 import { ordinal } from '@/features/listing/detail'
 import { foliageLabels, listingPrice, placeLabel, priceUnitLabels, rootSystemLabels, sunLabels, waterLabels } from '@/features/listing/facts'
@@ -77,7 +78,8 @@ export function moderationHref(state: ModerationPageState, patch: Partial<Omit<M
 export function reviewDetails(item: ModerationItem): string {
   const { listing } = item
   const category = categoryById(listing.categoryId)?.name
-  const kind = category && listing.subcategory ? `${category} / ${listing.subcategory}` : (category ?? listing.subcategory)
+  const sub = listing.subcategories?.length ? listing.subcategories.join(', ') : listing.subcategory
+  const kind = category && sub ? `${category} / ${sub}` : (category ?? sub)
   // A service's card line is its areas: the place is already there.
   const place = listing.kind === 'service' ? undefined : placeLabel(listing)
   return [kind, ...listing.attributes, place].filter(Boolean).join(' · ')
@@ -127,6 +129,7 @@ const FIELD_LABELS: Record<string, string> = {
   kind: 'Elanın növü',
   categoryId: 'Kateqoriya',
   subcategoryId: 'Alt kateqoriya',
+  subcategoryIds: 'Xidmətin növü',
   title: 'Başlıq',
   description: 'Təsvir',
   'plant.species': 'Növün adı',
@@ -173,13 +176,17 @@ const CODES: Record<string, Record<string, string>> = {
 
 const SHORT = 90
 
+/** A product sub-category's or a service type's name (service types live in data/services.ts). */
+const subOrServiceName = (id: string) => subcategoryById(id)?.name ?? serviceCategories.find((c) => c.id === id)?.name ?? id
+
 /** One value of a change as the moderator reads it: names instead of ids and codes, «bəli» / «xeyr», long text cut. */
 function changeValue(field: string, value: string | undefined): string {
   if (value === undefined || value === '') return '—'
   if (value === 'true') return 'bəli'
   if (value === 'false') return 'xeyr'
   if (field === 'categoryId') return categoryById(value)?.name ?? value
-  if (field === 'subcategoryId') return subcategoryById(value)?.name ?? value
+  if (field === 'subcategoryId') return subOrServiceName(value)
+  if (field === 'subcategoryIds') return value.split(',').map((id) => subOrServiceName(id.trim())).join(', ')
   if (field === 'cityId') return cityName(value)
   if (field === 'serviceCityIds') return value.split(',').map((id) => cityName(id.trim())).join(', ')
   if (field === 'price' && Number.isFinite(Number(value))) return formatPrice(Number(value))

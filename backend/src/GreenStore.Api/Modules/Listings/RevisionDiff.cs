@@ -29,6 +29,15 @@ public static class RevisionDiff
         Add("kind", Code(before.Kind), Code(after.Kind));
         Add("categoryId", before.CategoryId, after.CategoryId);
         Add("subcategoryId", before.SubcategoryId, after.SubcategoryId);
+        // A service's types, the main one first: a line of their own once either version has more than one (with one
+        // type, as for a product, the subcategoryId line above already says it).
+        var typesBefore = before.AllSubcategoryIds();
+        var typesAfter = after.AllSubcategoryIds();
+        if (typesBefore.Count > 1 || typesAfter.Count > 1)
+        {
+            Add("subcategoryIds", List(typesBefore), List(typesAfter));
+        }
+
         Add("title", before.Title, after.Title);
         Add("description", before.Description, after.Description);
         Add("plant.species", before.Species, after.Species);

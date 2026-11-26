@@ -21,6 +21,9 @@ public sealed class ListingInputRulesTests
             new Category { Id = "kohne", Kind = CategoryKind.Product, Form = CategoryForm.Plant, Name = new LocalizedText("Köhnə"), IsActive = false },
             new Category { Id = "landsaft-xidmetleri", Kind = CategoryKind.Service, Form = CategoryForm.Service, Name = new LocalizedText("Bağ xidmətləri") },
             new Category { Id = "landsaft-dizayni", ParentId = "landsaft-xidmetleri", Kind = CategoryKind.Service, Name = new LocalizedText("Landşaft dizaynı") },
+            new Category { Id = "bag-baximi", ParentId = "landsaft-xidmetleri", Kind = CategoryKind.Service, Name = new LocalizedText("Bağ baxımı") },
+            new Category { Id = "cim-salinmasi", ParentId = "landsaft-xidmetleri", Kind = CategoryKind.Service, Name = new LocalizedText("Qazon salınması") },
+            new Category { Id = "kohne-xidmet", ParentId = "landsaft-xidmetleri", Kind = CategoryKind.Service, Name = new LocalizedText("Köhnə xidmət"), IsActive = false },
         ],
         [
             new City { Id = "baki", Name = new LocalizedText("Bakı") },
@@ -61,6 +64,7 @@ public sealed class ListingInputRulesTests
         Assert.NotNull(content);
         Assert.Equal(CategoryKind.Product, content.Kind);
         Assert.Equal("agaclar-meyve", content.SubcategoryId);
+        Assert.Equal(["agaclar-meyve"], content.SubcategoryIds);
         Assert.Equal(150, content.HeightMinCm);
         Assert.Null(content.HeightMaxCm);
         Assert.Equal((short)2, content.AgeYears);
@@ -139,6 +143,25 @@ public sealed class ListingInputRulesTests
         var input = Tree() with { CategoryId = "guller", Subcategory = null, Plant = new PlantInputDto { HeightCm = new HeightInputDto(30) } };
 
         Assert.False(Validate(input).Errors.Any);
+        Assert.Empty(Validate(input).Content!.SubcategoryIds);
+        Assert.False(Validate(input with { SubcategoryIds = [] }).Errors.Any);
+    }
+
+    [Fact]
+    public void A_product_sends_at_most_one_sub_category_in_the_list()
+    {
+        // One id in the list is the same as subcategoryId; the list decides over the name.
+        var one = Validate(Tree() with { Subcategory = "Köhnə", SubcategoryIds = ["agaclar-meyve"] });
+        Assert.False(one.Errors.Any);
+        Assert.Equal("agaclar-meyve", one.Content!.SubcategoryId);
+        Assert.Equal(["agaclar-meyve"], one.Content.SubcategoryIds);
+
+        Assert.Equal(ListingInputRules.TooMany, Errors(Validate(Tree() with { SubcategoryIds = ["agaclar-meyve", "agaclar-kohne"] }))["subcategoryIds"]);
+        Assert.Equal(FieldErrors.Required, Errors(Validate(Tree() with { SubcategoryIds = [] }))["subcategoryIds"]);
+        Assert.Equal(FieldErrors.Invalid, Errors(Validate(Tree() with { SubcategoryIds = ["agaclar-kohne"] }))["subcategoryIds"]);
+        Assert.Equal(FieldErrors.Invalid, Errors(Validate(Tree() with { SubcategoryIds = ["landsaft-dizayni"] }))["subcategoryIds"]);
+        // The same id twice is one.
+        Assert.Equal(["agaclar-meyve"], Validate(Tree() with { SubcategoryIds = ["agaclar-meyve", " agaclar-meyve "] }).Content!.SubcategoryIds);
     }
 
     [Fact]
@@ -276,6 +299,7 @@ public sealed class ListingInputRulesTests
     {
         Assert.Equal(FieldErrors.TooShort, Errors(Validate(Tree() with { ContactName = "E" }))["contactName"]);
         Assert.Equal(FieldErrors.TooLong, Errors(Validate(Tree() with { ContactName = new string('a', 51) }))["contactName"]);
+        Assert.Equal(FieldErrors.Invalid, Errors(Validate(Tree() with { ContactName = "Elvin 050" }))["contactName"]);
     }
 
     [Fact]
@@ -320,6 +344,90 @@ public sealed class ListingInputRulesTests
         Assert.Equal(FieldErrors.Invalid, Errors(Validate(service with { Attributes = new() { ["areas"] = "baki,mars" } }))["attributes.areas"]);
     }
 
+    private static ListingInputDto Service() => new()
+    {
+        Kind = CategoryKind.Service,
+        CategoryId = "landsaft-xidmetleri",
+        Subcategory = "Landşaft dizaynı",
+        SubcategoryId = "landsaft-dizayni",
+        Title = "Həyətyanı sahənin dizaynı",
+        Description = "Layihə, bitki seçimi və əkin. Bakı və Abşeronda işləyirik.",
+        Attributes = new() { ["areas"] = "baki" },
+        PriceType = PriceType.Fixed,
+        Price = 350,
+        PriceUnit = PriceUnit.Job,
+        CityId = "baki",
+        ContactName = "Nigar",
+        ContactPhone = "0551234567",
+        PhotoIds = [Photo],
+    };
+
+    [Fact]
+    public void A_service_can_have_several_types_the_first_being_its_main_one()
+    {
+        // The list decides over subcategoryId and the name; an id sent twice counts once, in the order first sent.
+        var (content, errors) = Validate(Service() with { SubcategoryIds = ["bag-baximi", "landsaft-dizayni", "bag-baximi"] });
+
+        Assert.False(errors.Any, string.Join(", ", Errors(errors)));
+        Assert.Equal("bag-baximi", content!.SubcategoryId);
+        Assert.Equal(["bag-baximi", "landsaft-dizayni"], content.SubcategoryIds);
+        Assert.Equal(["landsaft-dizayni"], Validate(Service()).Content!.SubcategoryIds);
+    }
+
+    [Fact]
+    public void A_service_has_one_to_six_types_of_the_service_category()
+    {
+        Assert.Equal(FieldErrors.Required, Errors(Validate(Service() with { SubcategoryIds = [] }))["subcategoryIds"]);
+        Assert.Equal(FieldErrors.Invalid, Errors(Validate(Service() with { SubcategoryIds = ["landsaft-dizayni", "agaclar-meyve"] }))["subcategoryIds"]);
+        Assert.Equal(FieldErrors.Invalid, Errors(Validate(Service() with { SubcategoryIds = ["landsaft-dizayni", "kohne-xidmet"] }))["subcategoryIds"]);
+        Assert.Equal(FieldErrors.Invalid, Errors(Validate(Service() with { SubcategoryIds = ["landsaft-dizayni", " "] }))["subcategoryIds"]);
+        Assert.Equal(FieldErrors.Invalid, Errors(Validate(Service() with { SubcategoryIds = ["yoxdur"] }))["subcategoryIds"]);
+        var seven = Enumerable.Range(1, ListingInputRules.MaxServiceTypes + 1).Select(i => $"nov-{i}").ToList();
+        Assert.Equal(ListingInputRules.TooMany, Errors(Validate(Service() with { SubcategoryIds = seven }))["subcategoryIds"]);
+        Assert.False(Errors(Validate(Service() with { SubcategoryIds = ["landsaft-dizayni", "bag-baximi", "cim-salinmasi"] })).ContainsKey("subcategoryIds"));
+    }
+
+    [Fact]
+    public void A_published_service_keeps_its_main_type_and_may_change_the_others()
+    {
+        var locked = new LockedCategory(CategoryKind.Service, "landsaft-xidmetleri", "landsaft-dizayni", ["landsaft-dizayni", "kohne-xidmet"]);
+        ListingContent? Edit(IReadOnlyList<string?>? types, out Dictionary<string, string> errors)
+        {
+            var result = ListingInputRules.Validate(Service() with { SubcategoryIds = types }, Taxonomy, locked);
+            errors = Errors(result.Errors);
+            return result.Content;
+        }
+
+        // Other types change; one taken off the site since may stay, but not be added.
+        Assert.Equal(["landsaft-dizayni", "bag-baximi"], Edit(["landsaft-dizayni", "bag-baximi"], out _)!.SubcategoryIds);
+        Assert.Equal(["landsaft-dizayni", "kohne-xidmet", "cim-salinmasi"], Edit(["landsaft-dizayni", "kohne-xidmet", "cim-salinmasi"], out _)!.SubcategoryIds);
+        Assert.Equal(["landsaft-dizayni"], Edit(["landsaft-dizayni"], out _)!.SubcategoryIds);
+        // A site that sends the main type only keeps the others.
+        Assert.Equal(["landsaft-dizayni", "kohne-xidmet"], Edit(null, out _)!.SubcategoryIds);
+
+        // The main type is locked like the category.
+        Assert.Null(Edit(["bag-baximi", "landsaft-dizayni"], out var reordered));
+        Assert.Equal(ListingInputRules.Locked, reordered["categoryId"]);
+        Assert.Null(Edit([], out var none));
+        Assert.Equal(FieldErrors.Required, none["subcategoryIds"]);
+        Assert.Null(Edit(["landsaft-dizayni", "agaclar-meyve"], out var foreign));
+        Assert.Equal(FieldErrors.Invalid, foreign["subcategoryIds"]);
+
+        var unlisted = new LockedCategory(CategoryKind.Service, "landsaft-xidmetleri", "landsaft-dizayni");
+        var added = ListingInputRules.Validate(Service() with { SubcategoryIds = ["landsaft-dizayni", "kohne-xidmet"] }, Taxonomy, unlisted);
+        Assert.Equal(FieldErrors.Invalid, Errors(added.Errors)["subcategoryIds"]);
+    }
+
+    [Fact]
+    public void A_published_product_keeps_its_one_sub_category_in_the_list()
+    {
+        var locked = new LockedCategory(CategoryKind.Product, "agaclar", "agaclar-meyve");
+
+        Assert.Equal(["agaclar-meyve"], ListingInputRules.Validate(Tree() with { SubcategoryIds = ["agaclar-meyve"] }, Taxonomy, locked).Content!.SubcategoryIds);
+        Assert.Equal(ListingInputRules.TooMany, Errors(ListingInputRules.Validate(Tree() with { SubcategoryIds = ["agaclar-meyve", "agaclar-kohne"] }, Taxonomy, locked).Errors)["subcategoryIds"]);
+        Assert.Equal(ListingInputRules.Locked, Errors(ListingInputRules.Validate(Tree() with { SubcategoryIds = ["agaclar-kohne"] }, Taxonomy, locked).Errors)["categoryId"]);
+    }
+
     [Fact]
     public void An_edit_of_a_published_listing_keeps_its_category()
     {
@@ -327,6 +435,7 @@ public sealed class ListingInputRulesTests
 
         Assert.False(ListingInputRules.Validate(Tree(), Taxonomy, locked).Errors.Any);
         Assert.Equal("agaclar-meyve", ListingInputRules.Validate(Tree() with { CategoryId = null, Subcategory = null }, Taxonomy, locked).Content!.SubcategoryId);
+        Assert.Equal(["agaclar-meyve"], ListingInputRules.Validate(Tree() with { CategoryId = null, Subcategory = null }, Taxonomy, locked).Content!.SubcategoryIds);
         Assert.Equal(ListingInputRules.Locked, Errors(ListingInputRules.Validate(Tree() with { CategoryId = "guller", Subcategory = null }, Taxonomy, locked).Errors)["categoryId"]);
         Assert.Equal(ListingInputRules.Locked, Errors(ListingInputRules.Validate(Tree() with { SubcategoryId = "agaclar-kohne" }, Taxonomy, locked).Errors)["categoryId"]);
     }

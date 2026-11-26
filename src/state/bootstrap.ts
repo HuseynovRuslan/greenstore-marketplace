@@ -30,23 +30,29 @@ export const SESSION_COOKIE = 'gs_session'
 /** DATA_SOURCE=api: «signed in» and the avatar's initials, readable by the pre-hydration script. No token, no name. */
 export const SESSION_HINT_COOKIE = 'gs_hint'
 
-/** What `gs_hint` holds: the initials (initials() of the account's name) and when the cookies were written (seconds). */
+/**
+ * What `gs_hint` holds: the initials (initials() of the account's name), when the cookies were written (seconds) and
+ * whether they end with the browser («Məni xatırla» left unticked: `browserOnly`, written `s: 1`; hints written before
+ * Nov 2026 have no `s` and are the 30-day kind).
+ */
 export interface SessionHint {
   initials: string
   issuedAt: number
+  browserOnly?: boolean
 }
 
 /** The cookie value (Next.js URI-encodes it once more when it writes the cookie). */
 export function encodeSessionHint(hint: SessionHint): string {
-  return JSON.stringify({ i: hint.initials, t: hint.issuedAt })
+  return JSON.stringify(hint.browserOnly ? { i: hint.initials, t: hint.issuedAt, s: 1 } : { i: hint.initials, t: hint.issuedAt })
 }
 
 /** `undefined` for anything that is not a hint this site wrote. */
 export function decodeSessionHint(value: string | undefined): SessionHint | undefined {
   if (!value) return undefined
   try {
-    const raw = JSON.parse(value) as { i?: unknown; t?: unknown }
-    return typeof raw.i === 'string' && typeof raw.t === 'number' ? { initials: raw.i, issuedAt: raw.t } : undefined
+    const raw = JSON.parse(value) as { i?: unknown; t?: unknown; s?: unknown }
+    if (typeof raw.i !== 'string' || typeof raw.t !== 'number') return undefined
+    return raw.s === 1 ? { initials: raw.i, issuedAt: raw.t, browserOnly: true } : { initials: raw.i, issuedAt: raw.t }
   } catch {
     return undefined
   }

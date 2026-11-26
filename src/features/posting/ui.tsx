@@ -40,7 +40,8 @@ export function StepProgress({ step, reached, dir }: { step: StepNumber; reached
               />
               <span
                 className={cn(
-                  'mt-2 hidden items-center gap-1.5 text-[13px] leading-[1.3] md:flex',
+                  // Centred under its own segment of the bar.
+                  'mt-2 hidden items-center justify-center gap-1.5 text-center text-[13px] leading-[1.3] md:flex',
                   state === 'current' ? 'font-semibold text-forest' : state === 'done' ? 'text-ink-soft' : 'text-muted',
                 )}
               >
@@ -150,6 +151,42 @@ export function RadioPills({ name, options, value, onChange, clearable, firstId,
           {o.label}
         </label>
       ))}
+    </div>
+  )
+}
+
+/**
+ * Several choices of one question as checkbox pills (a service's types): a tick marks the chosen ones, so the choice
+ * is not told by colour alone; the order they were ticked in is kept (the first is the main one).
+ */
+export function CheckPills({ name, options, values, onChange, firstId, invalid }: { name: string; options: FilterOption[]; values: string[]; onChange: (values: string[]) => void; firstId?: string; invalid?: boolean }) {
+  return (
+    <div className="flex flex-wrap gap-2">
+      {options.map((o, i) => {
+        const on = values.includes(o.value)
+        return (
+          <label
+            key={o.value}
+            className={cn(
+              optionClass(on),
+              'inline-flex cursor-pointer items-center gap-1.5 pointer-coarse:h-11 has-[input:focus-visible]:outline-2 has-[input:focus-visible]:outline-offset-2 has-[input:focus-visible]:outline-olive',
+              invalid && !on && 'border-danger/60',
+            )}
+          >
+            <input
+              id={i === 0 ? firstId : undefined}
+              type="checkbox"
+              name={name}
+              value={o.value}
+              checked={on}
+              onChange={() => onChange(on ? values.filter((v) => v !== o.value) : [...values, o.value])}
+              className="sr-only"
+            />
+            {on && <Check aria-hidden size={14} strokeWidth={2.6} className="shrink-0" />}
+            {o.label}
+          </label>
+        )
+      })}
     </div>
   )
 }

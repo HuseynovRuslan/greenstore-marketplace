@@ -1,5 +1,5 @@
 import { services } from '@/data/services'
-import { filterServices, pageWindow, paginate, parseServiceQuery, searchServices, sortServices } from './query'
+import { filterServices, pageWindow, paginate, parseServiceQuery, searchServices, serviceTypesOf, sortServices } from './query'
 
 const q = (s: string) => parseServiceQuery(new URLSearchParams(s))
 
@@ -55,5 +55,19 @@ describe('services query', () => {
     expect(pageWindow(42, 42)).toEqual([40, 41, 42])
     expect(pageWindow(1, 1)).toEqual([1])
     expect(pageWindow(2, 2)).toEqual([1, 2])
+  })
+})
+
+describe('a service with several types (Nov 2026)', () => {
+  const several = { ...services[0], id: 'iki-nov', categoryId: 'landsaft-dizayni', categoryIds: ['landsaft-dizayni', 'bag-baximi'] }
+
+  it('is found under each of its types, and named in its order', () => {
+    const base = q('')
+    expect(filterServices([several], { ...base, categoryId: 'bag-baximi' }).map((s) => s.id)).toEqual(['iki-nov'])
+    expect(filterServices([several], { ...base, categoryId: 'landsaft-dizayni' }).map((s) => s.id)).toEqual(['iki-nov'])
+    expect(filterServices([several], { ...base, categoryId: 'cim-salinmasi' })).toEqual([])
+    expect(serviceTypesOf(several).map((t) => t.name)).toEqual(['Landşaft dizaynı', 'Bağ baxımı'])
+    // One that came before the change: its one type.
+    expect(serviceTypesOf({ categoryId: 'bag-baximi' }).map((t) => t.id)).toEqual(['bag-baximi'])
   })
 })

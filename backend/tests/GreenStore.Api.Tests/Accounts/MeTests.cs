@@ -84,6 +84,9 @@ public sealed class MeTests(AccountsApi api)
         Assert.Equal("invalid", errors.GetProperty("email")[0].GetString());
         Assert.Equal("required", errors.GetProperty("locale")[0].GetString());
 
+        var name = (await ProblemAsync(await Patch(client, """{ "fullName": "Elvin 050" }"""), HttpStatusCode.BadRequest, "validation")).GetProperty("errors");
+        Assert.Equal("invalid", name.GetProperty("fullName")[0].GetString());
+
         await ProblemAsync(await Patch(client, $$"""{ "email": "{{other.ToUpperInvariant()}}" }"""), HttpStatusCode.Conflict, "account.email-taken");
         await ProblemAsync(await Patch(client, """{ "locale": "de" }"""), HttpStatusCode.BadRequest, "bad-request");
         Assert.Equal("Test İstifadəçi", (await api.GetAsync("/api/v1/me", account.Token)).GetProperty("fullName").GetString());

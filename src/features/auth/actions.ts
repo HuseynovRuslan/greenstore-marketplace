@@ -4,10 +4,12 @@ import { updateTag } from 'next/cache'
 import type { AccountProfile } from '@/data/user'
 import { accountOf } from '@/features/account/profile'
 import { orderedKinds } from '@/features/seller/businessKinds'
+import { isPersonName } from '@/lib/names'
 import { localDigits } from '@/lib/phone'
 import { dataSource } from '@/seo/env'
 import { isApiError } from '@/services/apiRepository'
 import { getRepository } from '@/services/repository'
+import { untilBrowserCloses } from '@/services/session'
 import type { BusinessKind, LoginResult, OtpChallenge, OtpPurpose, OtpVerifyResult, SellerType } from '@/types'
 import { loginErrorText, otpRequestErrorText, registerErrorText, waitText } from './messages'
 
@@ -87,6 +89,7 @@ export async function registerAccount(input: {
     return fail('Biznesin növünü və adını yazın.')
   }
   if (!input.fullName?.trim() || input.fullName.length > 60) return fail('Adınızı yazın.')
+  if (!isPersonName(input.fullName)) return fail('Ad və soyadı yalnız hərflərlə yazın.')
   if (localDigits(input.phone ?? '').length !== 9) return fail('Telefon nömrəsi düzgün deyil.')
   if (typeof input.password !== 'string' || input.password.length < 8 || input.password.length > 128) return fail('Şifrə ən azı 8 simvol olmalıdır.')
   const business = input.accountType === 'business'
@@ -109,12 +112,16 @@ export async function registerAccount(input: {
   }
 }
 
-/** DATA_SOURCE=api: «Şifrə ilə» on /daxil-ol. (The mock's demo signs in in the browser.) */
-export async function signInWithPassword(login: string, password: string): Promise<SignedIn | Fail> {
+/**
+ * DATA_SOURCE=api: «Şifrə ilə» on /daxil-ol. (The mock's demo signs in in the browser.) `remember: false` («Məni
+ * xatırla» unticked): the session's cookies end with the browser (session.ts, `untilBrowserCloses`).
+ */
+export async function signInWithPassword(login: string, password: string, remember = true): Promise<SignedIn | Fail> {
   if (typeof login !== 'string' || !login.trim() || login.length > 200) return fail('Telefon nömrəsini və ya e-poçtu yazın.')
   if (typeof password !== 'string' || !password || password.length > 128) return fail('Şifrəni yazın.')
   try {
-    const result = await getRepository().login({ login: login.trim(), password })
+    const signIn = () => getRepository().login({ login: login.trim(), password })
+    const result = await (remember === false ? untilBrowserCloses(signIn) : signIn())
     return result.ok ? { ok: true, account: await signedInAccount(result) } : fail(loginErrorText(result.error, result.retryAfterSec))
   } catch (error) {
     if (isApiError(error, 'rate-limited')) return fail(`Çox cəhd oldu. ${waitText(error.retryAfterSec)} sonra yenidən yoxlayın.`)
@@ -122,11 +129,12 @@ export async function signInWithPassword(login: string, password: string): Promi
   }
 }
 
-/** DATA_SOURCE=api: «SMS kodu ilə» on /daxil-ol, once the code is verified. */
-export async function signInWithCode(otpChallengeId: string): Promise<SignedIn | Fail> {
+/** DATA_SOURCE=api: «SMS kodu ilə» on /daxil-ol, once the code is verified (`remember` as for the password). */
+export async function signInWithCode(otpChallengeId: string, remember = true): Promise<SignedIn | Fail> {
   if (typeof otpChallengeId !== 'string' || !otpChallengeId) return fail('Kodun vaxtı bitib. Yenisini istəyin.')
   try {
-    const result = await getRepository().loginWithOtp({ otpChallengeId })
+    const signIn = () => getRepository().loginWithOtp({ otpChallengeId })
+    const result = await (remember === false ? untilBrowserCloses(signIn) : signIn())
     return result.ok ? { ok: true, account: await signedInAccount(result) } : fail(loginErrorText(result.error, result.retryAfterSec))
   } catch (error) {
     return fail(notAboutTheCode(error) ?? 'Kodun vaxtı bitib. Yenisini istəyin.')

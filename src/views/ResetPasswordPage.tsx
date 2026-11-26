@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, type FormEvent } from 'react'
-import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/Button'
 import { PasswordField, PhoneField } from '@/components/ui/FormControls'
@@ -9,7 +8,7 @@ import { Notice } from '@/components/ui/Notice'
 import { useToast } from '@/components/ui/Toast'
 import { requestCode, resetPasswordWithCode } from '@/features/auth/actions'
 import { OtpVerify } from '@/features/auth/OtpVerify'
-import { AuthShell, FormCard, PasswordRules } from '@/features/auth/ui'
+import { AuthShell, AuthSwitch, FormCard, PasswordRules } from '@/features/auth/ui'
 import { newPasswordError } from '@/features/auth/validation'
 import { phoneFieldError } from '@/lib/phone'
 import { useSession } from '@/state/store'
@@ -130,12 +129,7 @@ export default function ResetPasswordPage() {
           </form>
         )}
       </FormCard>
-      <p className="text-center text-[15px] leading-[1.5] text-ink">
-        Şifrəni xatırladınız?{' '}
-        <Link href="/daxil-ol" className="font-semibold text-forest underline-offset-2 hover:underline">
-          Daxil olun
-        </Link>
-      </p>
+      <AuthSwitch question="Şifrəni xatırladınız?" href="/daxil-ol" label="Daxil olun" />
     </AuthShell>
   )
 }

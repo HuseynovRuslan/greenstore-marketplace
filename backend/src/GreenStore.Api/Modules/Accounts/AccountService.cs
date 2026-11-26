@@ -319,6 +319,7 @@ public sealed class AccountService(
     {
         0 => FieldErrors.Required,
         > FullNameMaxLength => FieldErrors.TooLong,
+        _ when !PersonNames.IsValid(fullName) => FieldErrors.Invalid,
         _ => null,
     };
 

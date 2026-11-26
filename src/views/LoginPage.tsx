@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { KeyRound, LockKeyhole, LogIn, MessageSquareText, UserRound } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { TextField } from '@/components/ui/Field'
 import { Notice } from '@/components/ui/Notice'
@@ -11,7 +12,7 @@ import { useToast } from '@/components/ui/Toast'
 import { DEMO_LOGIN_PASSWORD } from '@/config/demo'
 import { requestCode, signInWithCode, signInWithPassword } from '@/features/auth/actions'
 import { OtpVerify } from '@/features/auth/OtpVerify'
-import { AuthShell, DemoNote, FormCard, Segmented } from '@/features/auth/ui'
+import { AuthShell, AuthSwitch, DemoNote, FormCard } from '@/features/auth/ui'
 import { emailError, safeNext } from '@/features/auth/validation'
 import { phoneFieldError, phoneValue } from '@/lib/phone'
 import { useSession } from '@/state/store'
@@ -32,7 +33,8 @@ function identifierError(value: string) {
 
 /**
  * /daxil-ol — sign in with a password (phone or e-mail in one field, so the browser's saved login fills it) or with
- * an SMS code. «Şifrəni unutmusunuz?» leads to the reset flow.
+ * an SMS code: the password form comes first, a button under it switches to the code (and back), focusing the new
+ * form's field. «Şifrəni unutmusunuz?» leads to the reset flow. Frame: AuthShell with the «Daxil ol» tab.
  * - DATA_SOURCE=mock (DEMO): any well-formed login and an 8-character password sign in the demo account in the
  *   browser; the SMS code is shown on screen.
  * - DATA_SOURCE=api: the Server Actions sign in with the API and set the session cookie; the page hands the account
@@ -43,6 +45,8 @@ export default function LoginPage({ next }: { next?: string }) {
   const router = useRouter()
   const { toast } = useToast()
   const [method, setMethod] = useState<Method>('password')
+  // «Məni xatırla», shared by both ways in: unticked, the session's cookies end with the browser (services/session.ts).
+  const [remember, setRemember] = useState(true)
   const target = safeNext(next)
   const query = next ? `?next=${encodeURIComponent(next)}` : ''
 
@@ -52,28 +56,23 @@ export default function LoginPage({ next }: { next?: string }) {
     router.replace(target)
   }
   const api = source === 'api'
+  const sms = method === 'sms'
+
+  /** The other way in; its first field takes focus, so a keyboard or screen reader user lands in the new form. */
+  const switchMethod = () => {
+    setMethod(sms ? 'password' : 'sms')
+    requestAnimationFrame(() => document.getElementById(sms ? 'giris' : 'sms-telefon')?.focus())
+  }
 
   return (
-    <AuthShell title="Daxil olun" lead="Elanlarınız, seçilmişləriniz və yadda saxladığınız axtarışlar sizi gözləyir.">
+    <AuthShell tab="login" next={next} title="Hesabınıza daxil olun" lead="GreenStore hesabınıza daxil olaraq elanlarınızı idarə edin.">
       <FormCard>
-        <Segmented
-          legend="Daxil olma üsulu"
-          name="method"
-          value={method}
-          onChange={setMethod}
-          options={[
-            { value: 'password', label: 'Şifrə ilə' },
-            { value: 'sms', label: 'SMS kodu ilə' },
-          ]}
-        />
-        {method === 'password' ? <PasswordLogin api={api} onDone={done} /> : <SmsLogin api={api} onDone={done} />}
+        {sms ? <SmsLogin api={api} remember={remember} onRemember={setRemember} onDone={done} /> : <PasswordLogin api={api} remember={remember} onRemember={setRemember} onDone={done} />}
+        <Button variant="secondary" fullWidth onClick={switchMethod} icon={sms ? <KeyRound aria-hidden size={18} strokeWidth={1.8} /> : <MessageSquareText aria-hidden size={18} strokeWidth={1.8} />}>
+          {sms ? 'Şifrə ilə daxil olun' : 'SMS kodu ilə daxil olun'}
+        </Button>
       </FormCard>
-      <p className="text-center text-[15px] leading-[1.5] text-ink">
-        Hesabınız yoxdur?{' '}
-        <Link href={`/qeydiyyat${query}`} className="font-semibold text-forest underline-offset-2 hover:underline">
-          Qeydiyyatdan keçin
-        </Link>
-      </p>
+      <AuthSwitch question="Hesabınız yoxdur?" href={`/qeydiyyat${query}`} label="Hesab yaradın" />
     </AuthShell>
   )
 }
@@ -89,10 +88,21 @@ function FormError({ message }: { message?: string }) {
 
 type Done = (patch: Partial<AccountProfile>) => void
 
-function PasswordLogin({ api, onDone }: { api: boolean; onDone: Done }) {
+interface FormProps {
+  api: boolean
+  remember: boolean
+  onRemember: (remember: boolean) => void
+  onDone: Done
+}
+
+/** «Məni xatırla»: kept for 30 days when ticked, until the browser is closed when not. */
+function RememberMe({ remember, onRemember }: Pick<FormProps, 'remember' | 'onRemember'>) {
+  return <CheckboxField label="Məni xatırla" checked={remember} onChange={(e) => onRemember(e.target.checked)} />
+}
+
+function PasswordLogin({ api, remember, onRemember, onDone }: FormProps) {
   const [login, setLogin] = useState('')
   const [password, setPassword] = useState('')
-  const [remember, setRemember] = useState(true)
   const [errors, setErrors] = useState<{ login?: string; password?: string }>({})
   const [busy, setBusy] = useState(false)
   const [formError, setFormError] = useState<string>()
@@ -111,7 +121,7 @@ function PasswordLogin({ api, onDone }: { api: boolean; onDone: Done }) {
       window.setTimeout(() => onDone(looksLikeEmail(login) ? { email: login.trim() } : { phone: phoneValue(login) }), 350)
       return
     }
-    const result = await signInWithPassword(looksLikeEmail(login) ? login.trim() : phoneValue(login), password)
+    const result = await signInWithPassword(looksLikeEmail(login) ? login.trim() : phoneValue(login), password, remember)
     setBusy(false)
     if (!result.ok) {
       setFormError(result.error)
@@ -124,7 +134,7 @@ function PasswordLogin({ api, onDone }: { api: boolean; onDone: Done }) {
   }
 
   return (
-    <form onSubmit={submit} noValidate className="flex flex-col gap-5">
+    <form onSubmit={submit} noValidate className="flex flex-col gap-4">
       <FormError message={formError} />
       <TextField
         id="giris"
@@ -133,6 +143,7 @@ function PasswordLogin({ api, onDone }: { api: boolean; onDone: Done }) {
         autoComplete="username"
         autoCapitalize="none"
         spellCheck={false}
+        icon={<UserRound size={18} strokeWidth={1.8} />}
         placeholder="050 555 12 34 və ya ad@poct.az"
         value={login}
         error={errors.login}
@@ -142,25 +153,27 @@ function PasswordLogin({ api, onDone }: { api: boolean; onDone: Done }) {
       <PasswordField
         id="sifre"
         autoComplete="current-password"
+        icon={<LockKeyhole size={18} strokeWidth={1.8} />}
+        placeholder="Şifrənizi yazın"
         value={password}
         error={errors.password}
         onValueChange={setPassword}
-        aside={
-          <Link href="/sifreni-berpa-et" className="-my-2 inline-flex min-h-11 items-center text-[13px] font-semibold text-forest hover:underline">
-            Şifrəni unutmusunuz?
-          </Link>
-        }
       />
-      <CheckboxField label="Bu cihazda məni xatırla" checked={remember} onChange={(e) => setRemember(e.target.checked)} />
+      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
+        <RememberMe remember={remember} onRemember={onRemember} />
+        <Link href="/sifreni-berpa-et" className="inline-flex min-h-11 items-center text-sm font-semibold text-forest underline-offset-2 hover:underline">
+          Şifrəni unutmusunuz?
+        </Link>
+      </div>
       {!api && <DemoNote>istənilən düzgün nömrə və ya e-poçt, şifrə üçün 8 simvol (məsələn, «{DEMO_LOGIN_PASSWORD}»).</DemoNote>}
-      <Button type="submit" fullWidth disabled={busy} aria-busy={busy}>
+      <Button type="submit" fullWidth disabled={busy} aria-busy={busy} icon={busy ? undefined : <LogIn aria-hidden size={18} strokeWidth={1.8} />}>
         {busy ? 'Daxil olunur…' : 'Daxil ol'}
       </Button>
     </form>
   )
 }
 
-function SmsLogin({ api, onDone }: { api: boolean; onDone: Done }) {
+function SmsLogin({ api, remember, onRemember, onDone }: FormProps) {
   const [phone, setPhone] = useState('')
   const [error, setError] = useState<string>()
   const [busy, setBusy] = useState(false)
@@ -170,7 +183,7 @@ function SmsLogin({ api, onDone }: { api: boolean; onDone: Done }) {
   /** The code is right: the demo signs in in the browser; the API opens the session with the verified code. */
   const verified = async (challengeId: string) => {
     if (!api) return onDone({ phone })
-    const result = await signInWithCode(challengeId)
+    const result = await signInWithCode(challengeId, remember)
     if (result.ok) return onDone(result.account)
     setFormError(result.error)
     setChallenge(undefined)
@@ -192,9 +205,10 @@ function SmsLogin({ api, onDone }: { api: boolean; onDone: Done }) {
     return <OtpVerify challenge={challenge} phone={phone} purpose="login" submitLabel="Daxil ol" onVerified={verified} onChangePhone={() => setChallenge(undefined)} />
   }
   return (
-    <form onSubmit={send} noValidate className="flex flex-col gap-5">
+    <form onSubmit={send} noValidate className="flex flex-col gap-4">
       <FormError message={formError} />
       <PhoneField id="sms-telefon" value={phone} onValueChange={setPhone} error={error} hint="Hesabınıza bağlı nömrə. Kodu SMS ilə göndərəcəyik." />
+      <RememberMe remember={remember} onRemember={onRemember} />
       <Button type="submit" fullWidth disabled={busy} aria-busy={busy}>
         {busy ? 'Göndərilir…' : 'Kod göndər'}
       </Button>

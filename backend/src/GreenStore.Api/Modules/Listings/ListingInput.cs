@@ -24,6 +24,13 @@ public sealed record ListingInputDto
     /// <summary>The sub-category's (or service type's) Azerbaijani name, as the wizard sends it today.</summary>
     public string? Subcategory { get; init; }
 
+    /// <summary>
+    /// ★ Every sub-category (backend-contract.md 1.3, 26 November 2026): a service's types, one to
+    /// <see cref="ListingInputRules.MaxServiceTypes"/>, the main one first; a product at most one. When sent it decides
+    /// over <see cref="SubcategoryId"/> and <see cref="Subcategory"/>.
+    /// </summary>
+    public IReadOnlyList<string?>? SubcategoryIds { get; init; }
+
     public string? Title { get; init; }
 
     public string? Description { get; init; }
@@ -129,6 +136,9 @@ public static partial class ListingInputRules
     public const int AttributeKeyMax = 40;
     public const int AttributeValueMax = 200;
 
+    /// <summary>A service's types at most (<c>subcategoryIds</c>); the service category has six today.</summary>
+    public const int MaxServiceTypes = 6;
+
     /* Field error codes besides FieldErrors' required, invalid, too-short, too-long */
 
     /// <summary>The description has a phone number in it: it belongs in the contact step.</summary>
@@ -172,16 +182,45 @@ public static partial class ListingInputRules
         /* Step 1: what it is */
         var kind = input.Kind;
         Category? category = null;
-        Category? subcategory = null;
+        List<string> subcategoryIds = [];
         if (locked is not null)
         {
-            // An edit of a published listing keeps its category, even one taken off the site since; naming another
-            // one is refused. The wizard locks it too and sends the same values.
+            // An edit of a published listing keeps its category and its (main) sub-category, even ones taken off the
+            // site since; naming others is refused. The wizard locks them too and sends the same values. A service's
+            // other types may change: they are only checked like new ones, an old one taken off the site may stay.
             category = taxonomy.Category(locked.CategoryId);
-            subcategory = taxonomy.Category(locked.SubcategoryId);
-            var otherSub = Clean(input.SubcategoryId) is { } sentId
-                ? sentId != locked.SubcategoryId
-                : Clean(input.Subcategory) is { } sentName && !SameName(subcategory, sentName);
+            var lockedIds = ListingSubcategories.Of(locked.SubcategoryId, locked.SubcategoryIds);
+            var otherSub = false;
+            if (input.SubcategoryIds is { } sentIds)
+            {
+                var ids = DistinctIds(sentIds);
+                otherSub = ids.Count > 0 && ids[0] != locked.SubcategoryId;
+                if (ids.Count == 0)
+                {
+                    errors.Add("subcategoryIds", lockedIds.Count > 0 ? FieldErrors.Required : null);
+                }
+                else if (!otherSub)
+                {
+                    var allowed = taxonomy.Categories
+                        .Where(c => c.ParentId == locked.CategoryId && (c.IsActive || lockedIds.Contains(c.Id)))
+                        .Select(c => c.Id)
+                        .Append(locked.SubcategoryId!)
+                        .ToHashSet(StringComparer.Ordinal);
+                    var code = ListCode(ids, allowed, locked.Kind);
+                    errors.Add("subcategoryIds", code);
+                    subcategoryIds = code is null ? [.. ids.OfType<string>()] : [];
+                }
+            }
+            else
+            {
+                var subcategory = taxonomy.Category(locked.SubcategoryId);
+                otherSub = Clean(input.SubcategoryId) is { } sentId
+                    ? sentId != locked.SubcategoryId
+                    : Clean(input.Subcategory) is { } sentName && !SameName(subcategory, sentName);
+                // An edit that names the main type only (a site before the list) keeps the other types.
+                subcategoryIds = [.. lockedIds];
+            }
+
             if ((kind is { } sentKind && sentKind != locked.Kind)
                 || (Clean(input.CategoryId) is { } sentCategory && sentCategory != locked.CategoryId)
                 || otherSub)
@@ -218,7 +257,18 @@ public static partial class ListingInputRules
                 var children = taxonomy.Categories.Where(c => c.ParentId == category.Id && c.IsActive).ToList();
                 var subId = Clean(input.SubcategoryId);
                 var subName = Clean(input.Subcategory);
-                if (subId is not null)
+                Category? subcategory = null;
+                if (input.SubcategoryIds is { } sentIds)
+                {
+                    // The list decides: the same check as one subcategoryId, for each.
+                    var ids = DistinctIds(sentIds);
+                    var code = ids.Count == 0
+                        ? children.Count > 0 ? FieldErrors.Required : null
+                        : ListCode(ids, children.Select(c => c.Id).ToHashSet(StringComparer.Ordinal), category.Kind);
+                    errors.Add("subcategoryIds", code);
+                    subcategoryIds = code is null ? [.. ids.OfType<string>()] : [];
+                }
+                else if (subId is not null)
                 {
                     subcategory = children.FirstOrDefault(c => c.Id == subId);
                     errors.Add("subcategoryId", subcategory is null ? FieldErrors.Invalid : null);
@@ -231,6 +281,11 @@ public static partial class ListingInputRules
                 else if (children.Count > 0)
                 {
                     errors.Add("subcategoryId", FieldErrors.Required);
+                }
+
+                if (subcategory is not null)
+                {
+                    subcategoryIds = [subcategory.Id];
                 }
             }
         }
@@ -405,7 +460,7 @@ public static partial class ListingInputRules
 
         /* Step 5: contact */
         var contactName = Clean(input.ContactName);
-        errors.Add("contactName", Length(contactName, ContactNameMin, ContactNameMax));
+        errors.Add("contactName", Length(contactName, ContactNameMin, ContactNameMax) ?? (PersonNames.IsValid(contactName) ? null : FieldErrors.Invalid));
         var phone = PhoneNumbers.Normalize(input.ContactPhone);
         errors.Add("contactPhone", string.IsNullOrWhiteSpace(input.ContactPhone) ? FieldErrors.Required : phone is null ? FieldErrors.Invalid : null);
         if (input.PhoneHidden && !input.Whatsapp)
@@ -438,7 +493,8 @@ public static partial class ListingInputRules
         {
             Kind = kind!.Value,
             CategoryId = category!.Id,
-            SubcategoryId = subcategory?.Id,
+            SubcategoryId = subcategoryIds.FirstOrDefault(),
+            SubcategoryIds = subcategoryIds,
             Title = title!,
             Description = description!,
             Attributes = attributes,
@@ -634,7 +690,28 @@ public static partial class ListingInputRules
     /// <summary>A sub-category named as the wizard names it: its Azerbaijani name (letters and case aside).</summary>
     private static bool SameName(Category? category, string name) =>
         category is not null && SearchText.Normalize(category.Name.Az) == SearchText.Normalize(name);
+
+    /// <summary><c>subcategoryIds</c> trimmed, each id once, in the order first sent; a blank one stays (as null) and is invalid.</summary>
+    private static List<string?> DistinctIds(IReadOnlyList<string?> sent) => sent.Select(Clean).Distinct(StringComparer.Ordinal).ToList();
+
+    /// <summary>
+    /// The error of a non-empty <c>subcategoryIds</c>: <c>too-many</c> past six types for a service and one sub-category
+    /// for a product, <c>invalid</c> for an id not in <paramref name="allowed"/>; null when it passes.
+    /// </summary>
+    private static string? ListCode(IReadOnlyList<string?> ids, IReadOnlySet<string> allowed, CategoryKind kind)
+    {
+        if (ids.Count > (kind == CategoryKind.Service ? MaxServiceTypes : 1))
+        {
+            return TooMany;
+        }
+
+        return ids.All(id => id is not null && allowed.Contains(id)) ? null : FieldErrors.Invalid;
+    }
 }
 
-/// <summary>The category of a published listing, which an edit keeps (<see cref="ListingLifecycle.CategoryLocked"/>).</summary>
-public sealed record LockedCategory(CategoryKind Kind, string CategoryId, string? SubcategoryId);
+/// <summary>
+/// The category of a published listing, which an edit keeps (<see cref="ListingLifecycle.CategoryLocked"/>): the
+/// category and the (main) sub-category; <paramref name="SubcategoryIds"/> are all its sub-categories now (a service's
+/// types, <paramref name="SubcategoryId"/> first; null reads as that one alone).
+/// </summary>
+public sealed record LockedCategory(CategoryKind Kind, string CategoryId, string? SubcategoryId, IReadOnlyList<string>? SubcategoryIds = null);

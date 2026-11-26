@@ -13,7 +13,14 @@ public sealed record ListingContent
 
     public required string CategoryId { get; init; }
 
+    /// <summary>The first of <see cref="SubcategoryIds"/>: a service's main type, a product's sub-category.</summary>
     public string? SubcategoryId { get; init; }
+
+    /// <summary>
+    /// Every sub-category, <see cref="SubcategoryId"/> first (a service's types). A revision stored before the list
+    /// existed has none here: <see cref="AllSubcategoryIds"/> reads it as its one <see cref="SubcategoryId"/>.
+    /// </summary>
+    public List<string> SubcategoryIds { get; init; } = [];
 
     public required string Title { get; init; }
 
@@ -79,12 +86,16 @@ public sealed record ListingContent
     /// </summary>
     public PromotionChoice? Promotion { get; init; }
 
+    /// <summary>The sub-categories as a list, also for a revision stored before the list existed.</summary>
+    public IReadOnlyList<string> AllSubcategoryIds() => ListingSubcategories.Of(SubcategoryId, SubcategoryIds);
+
     /// <summary>Writes the content into the listing's columns (not the photos, the slug or the search text).</summary>
     public void ApplyTo(Listing listing)
     {
         listing.Kind = Kind;
         listing.CategoryId = CategoryId;
         listing.SubcategoryId = SubcategoryId;
+        listing.SubcategoryIds = [.. AllSubcategoryIds()];
         listing.Title = Title;
         listing.Description = Description;
         listing.Attributes = new Dictionary<string, string>(Attributes, StringComparer.Ordinal);
@@ -119,6 +130,7 @@ public sealed record ListingContent
         Kind = listing.Kind,
         CategoryId = listing.CategoryId,
         SubcategoryId = listing.SubcategoryId,
+        SubcategoryIds = [.. ListingSubcategories.Of(listing)],
         Title = listing.Title,
         Description = listing.Description,
         Attributes = new Dictionary<string, string>(listing.Attributes, StringComparer.Ordinal),

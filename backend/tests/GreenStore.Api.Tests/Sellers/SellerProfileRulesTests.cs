@@ -148,11 +148,12 @@ public sealed class SellerProfileRulesTests
             {
               "name": "A", "cityId": "paris", "about": "{{new string('x', 2001)}}", "phone": "12345", "email": "satis@bag",
               "website": "bag.az", "instagram": "abseron bag", "responseMinutes": 0, "location": { "lat": 91, "lng": 49 },
-              "hours": [{ "day": 1, "open": "18:00", "close": "09:00" }], "whatsapp": null
+              "hours": [{ "day": 1, "open": "18:00", "close": "09:00" }], "whatsapp": null, "contactPerson": "Elvin 1"
             }
             """);
 
         Assert.Equal(["too-short"], errors["name"]);
+        Assert.Equal(["invalid"], errors["contactPerson"]);
         Assert.Equal(["invalid"], errors["cityId"]);
         Assert.Equal(["too-long"], errors["about"]);
         Assert.Equal(["invalid"], errors["phone"]);

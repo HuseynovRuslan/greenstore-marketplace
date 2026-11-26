@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { AppStoreProvider } from '@/state/store'
 import LoginPage from '@/views/LoginPage'
@@ -52,7 +52,7 @@ describe('login', () => {
   it('signs in with an SMS code after a wrong one', async () => {
     const user = userEvent.setup()
     renderWithStore(<LoginPage />)
-    await user.click(screen.getByRole('radio', { name: 'SMS kodu ilə' }))
+    await user.click(screen.getByRole('button', { name: 'SMS kodu ilə daxil olun' }))
     await user.type(screen.getByRole('textbox', { name: /Telefon nömrəsi/ }), '505551234')
     await user.click(screen.getByRole('button', { name: 'Kod göndər' }))
     expect(requestCode).toHaveBeenCalledWith('+994 50 555 12 34', 'login')
@@ -89,7 +89,10 @@ describe('registration', () => {
     await user.type(screen.getByLabelText('Biznesin adı'), 'Yaşıl Həyət')
     await user.click(screen.getByRole('button', { name: 'Davam et' }))
 
-    await user.type(screen.getByLabelText('Əlaqələndirici şəxs'), 'Nigar Rzayeva')
+    // «Əlaqə şəxsi»: «Ad» and «Soyad», letters only (the digit does not get in).
+    const contact = within(screen.getByRole('group', { name: 'Əlaqə şəxsi' }))
+    await user.type(contact.getByLabelText('Ad'), 'Nigar1')
+    await user.type(contact.getByLabelText('Soyad'), 'Rzayeva')
     await user.type(screen.getByRole('textbox', { name: /Telefon nömrəsi/ }), '555123456')
     await user.type(screen.getByLabelText('Şifrə'), 'qisa')
     await user.click(screen.getByRole('button', { name: 'Kod göndər' }))

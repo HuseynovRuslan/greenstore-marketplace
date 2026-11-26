@@ -155,7 +155,8 @@ public static class AdminCategoriesEndpoints
     {
         var category = await db.Categories.FirstOrDefaultAsync(c => c.Id == id, ct)
             ?? throw ApiProblemException.NotFound(AdminErrors.CategoryNotFound);
-        var used = await db.Listings.AnyAsync(l => l.CategoryId == id || l.SubcategoryId == id, ct)
+        // Any of a service's types counts: only the first one is a foreign key (subcategory_id).
+        var used = await db.Listings.AnyAsync(l => l.CategoryId == id || l.SubcategoryIds.Contains(id), ct)
             || await db.Categories.AnyAsync(c => c.ParentId == id, ct);
         if (used)
         {
@@ -177,19 +178,19 @@ public static class AdminCategoriesEndpoints
         return ToDto(category, all, await CountsAsync(db, ct));
     }
 
-    /// <summary>Active listings per category and per sub-category (a listing counts for both of its own).</summary>
+    /// <summary>
+    /// Active listings per category and per sub-category (a listing counts for its category and each of its
+    /// sub-categories: a service under every one of its types).
+    /// </summary>
     private static async Task<Dictionary<string, int>> CountsAsync(AppDbContext db, CancellationToken ct)
     {
         var active = db.Listings.AsNoTracking().Where(l => l.Status == ListingStatus.Active && l.DeletedAt == null);
         var byCategory = await active.GroupBy(l => l.CategoryId).Select(g => new { g.Key, Count = g.Count() }).ToListAsync(ct);
-        var bySubcategory = await active.Where(l => l.SubcategoryId != null)
-            .GroupBy(l => l.SubcategoryId!)
-            .Select(g => new { g.Key, Count = g.Count() })
-            .ToListAsync(ct);
+        var bySubcategory = await ListingsEndpoints.CountBySubcategoryAsync(active, ct);
         var counts = new Dictionary<string, int>(StringComparer.Ordinal);
-        foreach (var row in byCategory.Concat(bySubcategory))
+        foreach (var (key, count) in byCategory.Select(r => (r.Key, r.Count)).Concat(bySubcategory.Select(r => (r.Key, r.Value))))
         {
-            counts[row.Key] = counts.GetValueOrDefault(row.Key) + row.Count;
+            counts[key] = counts.GetValueOrDefault(key) + count;
         }
 
         return counts;

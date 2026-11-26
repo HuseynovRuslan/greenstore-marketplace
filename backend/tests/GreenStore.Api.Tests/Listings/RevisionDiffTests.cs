@@ -69,6 +69,31 @@ public sealed class RevisionDiffTests
     }
 
     [Fact]
+    public void A_change_of_a_services_types_is_one_line_with_both_lists()
+    {
+        var service = Approved with { Kind = CategoryKind.Service, CategoryId = "landsaft-xidmetleri", SubcategoryId = "landsaft-dizayni", SubcategoryIds = ["landsaft-dizayni"] };
+
+        Assert.Equal(
+            [new FieldChange("subcategoryIds", "landsaft-dizayni", "landsaft-dizayni,bag-baximi")],
+            RevisionDiff.Compare(service, service with { SubcategoryIds = ["landsaft-dizayni", "bag-baximi"] }));
+        Assert.Equal(
+            [new FieldChange("subcategoryIds", "landsaft-dizayni,bag-baximi", "landsaft-dizayni,cim-salinmasi")],
+            RevisionDiff.Compare(service with { SubcategoryIds = ["landsaft-dizayni", "bag-baximi"] }, service with { SubcategoryIds = ["landsaft-dizayni", "cim-salinmasi"] }));
+        // One type, as a product's one sub-category, is the subcategoryId line alone.
+        Assert.Equal(
+            [new FieldChange("subcategoryId", "agaclar-meyve", "agaclar-hemiseyasil")],
+            RevisionDiff.Compare(Approved, Approved with { SubcategoryId = "agaclar-hemiseyasil", SubcategoryIds = ["agaclar-hemiseyasil"] }));
+    }
+
+    [Fact]
+    public void A_revision_stored_before_the_list_reads_as_its_one_sub_category()
+    {
+        // Approved has no list, as revisions sent before 26 November 2026.
+        Assert.Equal(["agaclar-meyve"], Approved.AllSubcategoryIds());
+        Assert.Empty(RevisionDiff.Compare(Approved, Approved with { SubcategoryIds = ["agaclar-meyve"] }));
+    }
+
+    [Fact]
     public void Removed_values_have_no_after()
     {
         var changes = RevisionDiff.Compare(Approved, Approved with { RootSystem = null, PriceType = PriceType.Agreement, Price = null, PriceUnit = null });

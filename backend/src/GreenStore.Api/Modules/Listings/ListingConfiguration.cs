@@ -52,6 +52,12 @@ internal sealed class ListingConfiguration : IEntityTypeConfiguration<Listing>
                 "status <> 'active' OR (published_at IS NOT NULL AND expires_at IS NOT NULL AND sort_at IS NOT NULL)");
             t.HasCheckConstraint("ck_listings_rejected_reason", "status <> 'rejected' OR rejection_reason_code IS NOT NULL");
             t.HasCheckConstraint("ck_listings_service_fields", "kind = 'service' OR (cardinality(service_city_ids) = 0 AND cardinality(includes) = 0)");
+            // The list starts with subcategory_id (the foreign key) and is empty without one; a service has at most
+            // six types, a product one sub-category.
+            t.HasCheckConstraint(
+                "ck_listings_subcategory_ids",
+                $"subcategory_ids[1] IS NOT DISTINCT FROM subcategory_id AND cardinality(subcategory_ids) <= {ListingInputRules.MaxServiceTypes}"
+                + " AND (kind = 'service' OR cardinality(subcategory_ids) <= 1)");
             // The «Önə çıxan» group is ordered by promoted_at: a stale one would reorder the listings that are not.
             t.HasCheckConstraint("ck_listings_promoted_at", "is_promoted = (promoted_at IS NOT NULL)");
         });
@@ -65,6 +71,7 @@ internal sealed class ListingConfiguration : IEntityTypeConfiguration<Listing>
         listing.HasOne(l => l.Seller).WithMany().HasForeignKey(l => l.SellerId).OnDelete(DeleteBehavior.NoAction);
         listing.HasOne(l => l.Category).WithMany().HasForeignKey(l => l.CategoryId).OnDelete(DeleteBehavior.NoAction);
         listing.HasOne(l => l.Subcategory).WithMany().HasForeignKey(l => l.SubcategoryId).OnDelete(DeleteBehavior.NoAction);
+        listing.Property(l => l.SubcategoryIds).HasColumnType("text[]").HasDefaultValueSql("'{}'::text[]");
         listing.Property(l => l.Status).IsKebabCase();
         listing.Property(l => l.Description).HasDefaultValue(string.Empty);
 

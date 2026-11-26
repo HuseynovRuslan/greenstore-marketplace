@@ -75,6 +75,13 @@ export interface Listing {
    * Sent by the API; the mock derives it from `subcategory`.
    */
   subcategoryId?: string
+  /**
+   * Every sub-category of the listing (backend-contract.md 1.3, Nov 2026): a service's types, one or more, the first
+   * being `subcategoryId`; a product's one sub-category. Sent by the API; the mock derives it.
+   */
+  subcategoryIds?: string[]
+  /** The names of `subcategoryIds`, in the same order and the request's language. */
+  subcategories?: string[]
   sellerId?: string
   /** Image used on listing cards (path under /public) — the photo of the 1440 desktop frames */
   cover: string
@@ -162,7 +169,10 @@ export interface Service {
   providerId: string
   /** Service areas, e.g. ["Bakı", "Abşeron"] */
   areas: string[]
+  /** The service's type (its first one when it has several) */
   categoryId: string
+  /** Every type of the service, `categoryId` first (backend-contract.md 1.3, Nov 2026). Absent: `categoryId` alone. */
+  categoryIds?: string[]
   cover: string
   images: string[]
   description?: string[]
@@ -461,6 +471,11 @@ export interface ListingInput {
    * new listings.
    */
   subcategoryId?: string
+  /**
+   * A service's types, one to six, all of `categoryId` (Nov 2026); a product sends at most one. Decides over
+   * `subcategoryId` and `subcategory`, whose value the first id should repeat for older readers.
+   */
+  subcategoryIds?: string[]
   title: string
   description: string
   /** Category attributes from the posting form, keyed by attribute id (see features/posting/attributes.ts) */

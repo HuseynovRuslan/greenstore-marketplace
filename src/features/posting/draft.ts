@@ -49,8 +49,13 @@ export interface PostingDraft {
   version: 2
   kind: CategoryKind | ''
   categoryId: string
-  /** Sub-category name (products) or the service type name (services) */
+  /** Sub-category name (products) or the service's first type (services) */
   subcategory: string
+  /**
+   * A service's types (names), one or more, in the order chosen; `subcategory` repeats the first. Empty for a
+   * product (Nov 2026: a service may offer several types, backend-contract.md 1.3).
+   */
+  types: string[]
   title: string
   description: string
   /** Category attribute values by attribute id (attributes.ts); ranges use `<id>Min` / `<id>Max` */
@@ -97,6 +102,7 @@ export function createDraft(contact?: { name?: string; phone?: string }): Postin
     kind: '',
     categoryId: '',
     subcategory: '',
+    types: [],
     title: '',
     description: '',
     attrs: {},
@@ -134,6 +140,13 @@ export function restoreDraft(raw: unknown, contact?: { name?: string; phone?: st
     attrs: d.attrs && typeof d.attrs === 'object' ? d.attrs : {},
     photos: Array.isArray(d.photos) ? d.photos.filter((p) => p && typeof p.id === 'string').slice(0, MAX_PHOTOS) : [],
     reachedStep: ([1, 2, 3, 4, 5, 6] as const).includes(d.reachedStep) ? d.reachedStep : 1,
+    // From the stored draft itself: `d` has the default empty list, which would hide an old draft's one type.
+    types: restoredTypes(raw as Partial<PostingDraft>),
+  }
+  if (restored.kind === 'service') {
+    restored.subcategory = restored.types[0] ?? ''
+    // A service type that is no longer offered: back to step 1 to choose again (an edit keeps what it has).
+    if (!restored.editing && !restored.types.length && restored.reachedStep > 1) return { ...restored, reachedStep: 1 }
   }
   // The category list changes (src/data/categories.ts): a draft saved under a category or sub-category that is no
   // longer offered goes back to step 1 to choose again. An edit keeps its locked category.
@@ -147,6 +160,17 @@ export function restoreDraft(raw: unknown, contact?: { name?: string; phone?: st
   return restored
 }
 
+/**
+ * A stored draft's service types: the list, or (a draft saved before Nov 2026) its one `subcategory`; names no longer
+ * offered drop out, an edit keeps its own. Products have none.
+ */
+function restoredTypes(d: Partial<PostingDraft>): string[] {
+  if (d.kind !== 'service') return []
+  const saved = Array.isArray(d.types) ? d.types.filter((t): t is string => typeof t === 'string') : d.subcategory ? [d.subcategory] : []
+  const unique = [...new Set(saved)]
+  return d.editing ? unique : unique.filter((t) => serviceTypes.includes(t))
+}
+
 /** Has the seller entered anything yet? (The resume note and «Yenidən başla» only make sense then.) */
 export function hasProgress(d: PostingDraft): boolean {
   return Boolean(d.kind || d.title || d.photos.length || d.price)
@@ -155,7 +179,12 @@ export function hasProgress(d: PostingDraft): boolean {
 /** Choosing another category resets what depends on it: sub-category, attributes, the unit. */
 export function withCategory(d: PostingDraft, kind: CategoryKind, categoryId: string): PostingDraft {
   if (d.kind === kind && d.categoryId === categoryId) return d
-  return { ...d, kind, categoryId, subcategory: '', attrs: {}, priceUnit: unitsFor(categoryId)[0] ?? '' }
+  return { ...d, kind, categoryId, subcategory: '', types: [], attrs: {}, priceUnit: unitsFor(categoryId)[0] ?? '' }
+}
+
+/** A service's types after a pill is ticked or unticked: the order chosen is kept, the first is the main type. */
+export function withTypes(d: PostingDraft, types: string[]): PostingDraft {
+  return { ...d, types, subcategory: types[0] ?? '' }
 }
 
 /** Service types («Landşaft dizaynı», …) for the service category. */
@@ -175,8 +204,16 @@ const amount = (value: string) => parseNumberValue(value)
  */
 export function subcategoryIdOfDraft(d: Pick<PostingDraft, 'kind' | 'categoryId' | 'subcategory'>): string | undefined {
   if (!d.subcategory) return undefined
-  if (d.kind === 'service' || d.categoryId === SERVICE_CATEGORY) return serviceCategories.find((c) => c.name === d.subcategory)?.id
+  if (d.kind === 'service' || d.categoryId === SERVICE_CATEGORY) return serviceTypeId(d.subcategory)
   return subcategoryIdOf(d.categoryId, d.subcategory)
+}
+
+const serviceTypeId = (name: string) => serviceCategories.find((c) => c.name === name)?.id
+
+/** A service's type ids, the main one first (`ListingInput.subcategoryIds`); undefined for a product. */
+export function serviceTypeIdsOfDraft(d: Pick<PostingDraft, 'kind' | 'types'>): string[] | undefined {
+  if (d.kind !== 'service') return undefined
+  return d.types.map(serviceTypeId).filter((id): id is string => Boolean(id))
 }
 
 /** What «Elan yerləşdir» sends (`photoIds` are the uploaded photo ids, cover first). */
@@ -188,6 +225,7 @@ export function toListingInput(d: PostingDraft): ListingInput {
     categoryId: d.categoryId,
     subcategory: d.subcategory || undefined,
     subcategoryId: subcategoryIdOfDraft(d),
+    ...(d.kind === 'service' ? { subcategoryIds: serviceTypeIdsOfDraft(d) } : {}),
     title: d.title.trim(),
     description: d.description.trim(),
     attributes: Object.fromEntries(Object.entries(d.attrs).filter(([, v]) => v.trim() !== '')),
@@ -247,6 +285,7 @@ export function toListing(d: PostingDraft, { images, now, number, sellerId, stat
     vip: false,
     categoryId: d.kind === 'service' ? SERVICE_CATEGORY : d.categoryId,
     subcategory: d.subcategory || undefined,
+    ...(d.kind === 'service' && d.types.length ? { subcategories: d.types, subcategoryIds: input.subcategoryIds } : {}),
     sellerId,
     cover: images[0] ?? '',
     images,

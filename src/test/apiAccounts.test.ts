@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { apiRepository, ApiError } from '@/services/apiRepository'
-import { SESSION_MAX_AGE_SEC, sessionCookieOptions } from '@/services/session'
-import { decodeSessionHint } from '@/state/bootstrap'
+import { refreshSession, SESSION_MAX_AGE_SEC, sessionCookieOptions, untilBrowserCloses } from '@/services/session'
+import { decodeSessionHint, encodeSessionHint } from '@/state/bootstrap'
 import type { UserProfile } from '@/types'
 
 /*
@@ -93,6 +93,32 @@ describe('apiRepository: signing in (backend-contract.md 2.1)', () => {
     // Neither the token nor the name is in the hint.
     expect(hint.value).not.toContain(TOKEN)
     expect(hint.value).not.toContain('Nigar')
+  })
+
+  it('«Məni xatırla» unticked: both cookies end with the browser, and a refresh keeps them that way', async () => {
+    respond = () => ({ body: { ok: true, user, session } })
+    await untilBrowserCloses(() => apiRepository.login({ login: '050 555 12 34', password: 'bag2026xx' }))
+    const cookie = jar.sets.find((c) => c.name === 'gs_session')!
+    const hint = jar.sets.find((c) => c.name === 'gs_hint')!
+    expect(cookie.value).toBe(TOKEN)
+    // No Max-Age: a browser-session cookie, still httpOnly.
+    expect(cookie.options).toEqual({ httpOnly: true, secure: false, sameSite: 'lax', path: '/' })
+    expect(hint.options).not.toHaveProperty('maxAge')
+    expect(decodeSessionHint(hint.value)).toMatchObject({ initials: 'NR', browserOnly: true })
+
+    // A day later the visit writes the cookies again: still without Max-Age.
+    jar.sets.length = 0
+    jar.values.set('gs_hint', encodeSessionHint({ initials: 'NR', issuedAt: 1, browserOnly: true }))
+    await refreshSession('Nigar Rzayeva')
+    expect(jar.sets.map((c) => [c.name, 'maxAge' in c.options])).toEqual([
+      ['gs_session', false],
+      ['gs_hint', false],
+    ])
+  })
+
+  it('reads the hints written before «Məni xatırla» as the 30-day kind', () => {
+    expect(decodeSessionHint(JSON.stringify({ i: 'NR', t: 5 }))).toEqual({ initials: 'NR', issuedAt: 5 })
+    expect(decodeSessionHint(encodeSessionHint({ initials: 'NR', issuedAt: 5, browserOnly: true }))).toEqual({ initials: 'NR', issuedAt: 5, browserOnly: true })
   })
 
   it('marks the cookies Secure in production', () => {

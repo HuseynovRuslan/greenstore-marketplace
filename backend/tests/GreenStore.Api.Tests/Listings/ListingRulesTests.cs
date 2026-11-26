@@ -130,7 +130,7 @@ public sealed class ListingSearchTextTests
             Species = "Olea europaea",
             AttributeLine = ["180–200 sm", "180–200 см", "5 yaş"],
             Category = Trees,
-            Subcategory = FruitTrees,
+            Subcategories = [FruitTrees],
             City = Baku,
             Area = "Məhəmmədi qəsəbəsi",
         });
@@ -218,5 +218,36 @@ public sealed class ListingSearchTextTests
 
         // The one service category names every service: it is left out, so it does not make every service match.
         Assert.False(ListingSearchText.Matches(serviceText, "garden services"));
+    }
+
+    [Fact]
+    public void A_service_is_found_by_every_one_of_its_types()
+    {
+        var categories = new List<Category>
+        {
+            new() { Id = "landsaft-xidmetleri", Kind = CategoryKind.Service, Form = CategoryForm.Service, Name = new LocalizedText("Bağ xidmətləri", "Садовые услуги", "Garden services") },
+            new() { Id = "landsaft-dizayni", ParentId = "landsaft-xidmetleri", Kind = CategoryKind.Service, Name = new LocalizedText("Landşaft dizaynı", "Ландшафтный дизайн", "Landscape design") },
+            new() { Id = "bag-baximi", ParentId = "landsaft-xidmetleri", Kind = CategoryKind.Service, Name = new LocalizedText("Bağ baxımı", "Уход за садом", "Garden care") },
+        };
+        var taxonomy = new TaxonomySnapshot(categories, [new City { Id = "baki", Name = Baku }]);
+        var service = new Listing
+        {
+            Slug = "z-3",
+            Kind = CategoryKind.Service,
+            CategoryId = "landsaft-xidmetleri",
+            SubcategoryId = "landsaft-dizayni",
+            SubcategoryIds = ["landsaft-dizayni", "bag-baximi"],
+            CityId = "baki",
+            Title = "Həyət",
+            ContactName = "C",
+            ContactPhone = "+994500000002",
+        };
+
+        var text = ListingSearchText.For(service, taxonomy, providerName: null);
+
+        foreach (var word in new[] { "landsaft dizayni", "ландшафтный", "bag baximi", "уход за садом", "garden care" })
+        {
+            Assert.True(ListingSearchText.Matches(text, word), $"«{word}» should match «{text}»");
+        }
     }
 }
