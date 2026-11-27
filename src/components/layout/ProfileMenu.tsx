@@ -3,7 +3,7 @@
 import { useEffect, useId, useRef, useState, type FocusEvent as ReactFocusEvent, type MouseEvent as ReactMouseEvent, type PointerEvent as ReactPointerEvent } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { ChevronDown, LogOut, UserRound } from 'lucide-react'
+import { ChevronDown, LogOut, ShieldCheck, UserRound } from 'lucide-react'
 import { panelAlignClass, useOutsidePress, usePanelAlign, usePresence } from '@/components/ui/Popover'
 import { cn, initials } from '@/lib/format'
 
@@ -51,7 +51,18 @@ function Avatar({ name, className }: { name: string | undefined; className: stri
  * Esc returns focus to the chevron. Over the home hero (the header's over-hero: variant) the capsule turns glassy and
  * the chevron white; the avatar and the white panel are the same on every header.
  */
-export function ProfileMenu({ fullName, onSignOut, className }: { fullName: string | undefined; onSignOut: () => void; className?: string }) {
+export function ProfileMenu({
+  fullName,
+  staff = false,
+  onSignOut,
+  className,
+}: {
+  fullName: string | undefined
+  /** A moderator or admin: «İdarəetmə» leads to /idareetme (nobody else sees it) */
+  staff?: boolean
+  onSignOut: () => void
+  className?: string
+}) {
   const pathname = usePathname()
   const id = useId()
   const panelId = `${id}-panel`
@@ -192,6 +203,16 @@ export function ProfileMenu({ fullName, onSignOut, className }: { fullName: stri
             </span>
           </Link>
           <div aria-hidden className="mx-1 my-1.5 h-px bg-line" />
+          {staff && (
+            <Link
+              href="/idareetme"
+              onClick={() => close('instant')}
+              className="flex h-10 w-full items-center gap-2.5 rounded-option px-2 text-sm font-medium text-ink-soft transition-colors duration-(--dur-base) ease-out hover:bg-mint hover:text-forest"
+            >
+              <ShieldCheck aria-hidden size={17} strokeWidth={1.8} absoluteStrokeWidth className="shrink-0" />
+              İdarəetmə
+            </Link>
+          )}
           <button
             type="button"
             onClick={() => {

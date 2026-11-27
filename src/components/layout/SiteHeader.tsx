@@ -3,13 +3,14 @@
 import { useRef, useState, type FocusEvent as ReactFocusEvent } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { Heart, LogOut, Menu, Plus, Rocket, Search, UserRound, X } from 'lucide-react'
+import { Heart, LogOut, Menu, Plus, Rocket, Search, ShieldCheck, UserRound, X } from 'lucide-react'
 import { Logo } from '@/components/ui/Logo'
 import { ButtonLink } from '@/components/ui/Button'
 import { useSession } from '@/state/store'
 import { preHydrationClass } from '@/state/bootstrap'
 import { useSessionKnown } from './ClientGate'
 import { ProfileMenu } from './ProfileMenu'
+import { isStaff } from '@/features/admin/roles'
 import { cn } from '@/lib/format'
 import { usePageScrolled, useScrolledPast } from '@/hooks/useHeaderState'
 import { HERO_QUERY_ID, HERO_SEARCH_ID } from '@/features/home/ids'
@@ -127,7 +128,7 @@ export function SiteHeader({
     <>
       {showUser && (
         // Keyed by `active`: a menu left open in the home header that just went out of use doesn't come back open.
-        <ProfileMenu key={String(active)} fullName={user?.fullName} onSignOut={handleSignOut} className={preClass('user')} />
+        <ProfileMenu key={String(active)} fullName={user?.fullName} staff={isStaff(user)} onSignOut={handleSignOut} className={preClass('user')} />
       )}
       {showGuest && (
         <Link href="/daxil-ol" aria-label="Daxil ol" className={cn(accountIcon, 'xl:hidden', preClass('guest'))}>
@@ -269,6 +270,14 @@ export function SiteHeader({
                   {user ? 'Şəxsi kabinet' : 'Daxil ol'}
                 </Link>
               </li>
+              {isStaff(user) && (
+                <li>
+                  <Link href="/idareetme" onClick={closeMenu} className="flex items-center gap-2 rounded-lg px-3 py-3 hover:bg-mint">
+                    <ShieldCheck aria-hidden size={18} strokeWidth={1.8} absoluteStrokeWidth />
+                    İdarəetmə
+                  </Link>
+                </li>
+              )}
               {user && (
                 <li>
                   <button

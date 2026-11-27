@@ -1,9 +1,11 @@
 'use client'
 
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { BadgeCheck, LogOut } from 'lucide-react'
+import { BadgeCheck, LogOut, ShieldCheck } from 'lucide-react'
 import { UnderlineTabs } from '@/components/ui/UnderlineTabs'
 import { useAccount, firstName } from '@/features/account/useAccount'
+import { isStaff } from '@/features/admin/roles'
 
 export type CabinetSection = 'listings' | 'favorites' | 'searches' | 'profile'
 
@@ -16,7 +18,8 @@ const sections: Array<{ key: CabinetSection; label: string; href: string }> = [
 
 /**
  * Top of every cabinet page: greeting, account line (business name, verified), the section tabs and «Çıxış» (kept
- * apart from the tabs: signing out is not a section). «Elan yerləşdir» is not repeated here: the site header has it
+ * apart from the tabs: signing out is not a section). Moderators and admins also get «İdarəetmə» there: on a phone the
+ * header's account menu is not shown. «Elan yerləşdir» is not repeated here: the site header has it
  * from 768 px and the bottom nav below that.
  */
 export function CabinetHeader({ active, counts }: { active: CabinetSection; counts?: Partial<Record<CabinetSection, number>> }) {
@@ -40,6 +43,15 @@ export function CabinetHeader({ active, counts }: { active: CabinetSection; coun
           </p>
         </div>
         <div className="flex items-center gap-2">
+          {isStaff(account) && (
+            <Link
+              href="/idareetme"
+              className="inline-flex min-h-11 items-center gap-2 rounded-lg px-3 text-sm leading-[normal] font-medium text-forest transition-colors duration-(--dur-fast) hover:bg-mint"
+            >
+              <ShieldCheck aria-hidden size={16} strokeWidth={1.8} />
+              İdarəetmə
+            </Link>
+          )}
           <button
             type="button"
             onClick={() => {
