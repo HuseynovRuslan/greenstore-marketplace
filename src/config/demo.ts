@@ -10,8 +10,8 @@
  * - Everything a visitor creates (favourites, posted ads, profile edits, moderation decisions) lives only in that
  *   browser's localStorage.
  *
- * The demo banner is shown unless the build sets `NEXT_PUBLIC_DEMO_MODE=false` (only do that once a real API is
- * connected). Indexing is controlled separately and stays off while the data source is mock — see src/seo/env.ts.
+ * The demo banner is shown with DATA_SOURCE=mock unless the build sets `NEXT_PUBLIC_DEMO_MODE=false`; with
+ * DATA_SOURCE=api it is never shown (the data is real since Nov 2026). Indexing is controlled separately and stays off while the data source is mock — see src/seo/env.ts.
  */
 export const DEMO_MODE = process.env.NEXT_PUBLIC_DEMO_MODE !== 'false'
 
