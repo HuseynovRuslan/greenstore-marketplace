@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { listingById } from '@/data/listings'
-import { actionsFor, countByStatus, daysLeft, expiryLabel, mergeOwnListings, renewal, tabFromParam } from '@/features/cabinet/model'
+import { actionsFor, countByStatus, daysLeft, expiryLabel, mergeOwnListings, pendingNote, renewal, tabFromParam } from '@/features/cabinet/model'
 import { listingToDraft } from '@/features/posting/fromListing'
 import { filterQuery, searchSummary, suggestedName } from '@/features/saved-searches/useSavedSearches'
 import { firstInvalidStep } from '@/features/posting/validation'
@@ -59,6 +59,18 @@ describe('cabinet model', () => {
     expect(expiryLabel(3)).toEqual({ text: '3 gün qalıb', soon: true })
     expect(expiryLabel(1)?.text).toBe('Sabah bitir')
     expect(expiryLabel(0)?.text).toBe('Bu gün bitir')
+  })
+
+  it('stops promising «1 saat» once the check has taken longer (Nov 2026)', () => {
+    const sent = { publishedAt: '2026-11-06T09:00:00Z', submittedAt: '2026-11-07T09:30:00Z' }
+    expect(pendingNote(sent, now)).toEqual({ text: 'Moderator adətən 1 saat ərzində yoxlayır.', late: false })
+    // Sent yesterday: no «1 saat» any more.
+    expect(pendingNote({ ...sent, submittedAt: '2026-11-06T09:30:00Z' }, now)).toMatchObject({ late: true, text: 'Yoxlama adi vaxtdan uzun çəkir. Nəticəni burada görəcəksiniz.' })
+    // No submittedAt (the demo data): the last edit, then the publishing date.
+    expect(pendingNote({ publishedAt: '2026-11-06T09:00:00Z' }, now).late).toBe(true)
+    expect(pendingNote({ publishedAt: '2026-11-06T09:00:00Z', updatedAt: '2026-11-07T09:45:00Z' }, now).late).toBe(false)
+    // The server render (now 0) keeps the usual note.
+    expect(pendingNote({ publishedAt: '2026-11-06T09:00:00Z' }, 0).late).toBe(false)
   })
 
   it('opens a published listing for editing with its category locked and its facts filled', () => {
