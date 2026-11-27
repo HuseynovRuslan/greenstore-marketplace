@@ -96,7 +96,7 @@ export function statusInfo(status: ListingStatus): StatusInfo {
     case 'pending':
       return {
         badge: { tone: 'warning', label: 'Yoxlamada' },
-        notice: { tone: 'warning', title: 'Elan yoxlamadadır', text: 'Yoxlama adətən 1 saat ərzində tamamlanır. Nəticəni «Elanlarım» bölməsində görəcəksiniz.' },
+        notice: { tone: 'warning', title: 'Elan yoxlamadadır', text: 'Yoxlamadan keçəndən sonra elan alıcılara görünəcək. Nəticəni «Elanlarım» bölməsində görəcəksiniz.' },
       }
     case 'rejected':
       return {

@@ -1,8 +1,9 @@
 import { categoryById, subcategoryById } from '@/data/categories'
 import { serviceCategories } from '@/data/services'
 import { cityName } from '@/data/cities'
+import { USUAL_CHECK_MS } from '@/features/cabinet/model'
 import { ordinal } from '@/features/listing/detail'
-import { foliageLabels, listingPrice, placeLabel, priceUnitLabels, rootSystemLabels, sunLabels, waterLabels } from '@/features/listing/facts'
+import { factRows, foliageLabels, listingPrice, placeLabel, priceUnitLabels, rootSystemLabels, sunLabels, waterLabels, wholesaleLabel } from '@/features/listing/facts'
 import { formatPrice } from '@/lib/format'
 import type { ModerationChange, ModerationItem, ModerationKind, ModerationQuery, ModerationSort, ModerationStatus } from '@/types'
 
@@ -74,37 +75,70 @@ export function moderationHref(state: ModerationPageState, patch: Partial<Omit<M
   return query ? `${basePath}?${query}` : basePath
 }
 
-/** «Ağaclar / Meyvə ağacları · 120 sm · 2 yaş · Dibçəkdə · Abşeron, Məhəmmədi» */
-export function reviewDetails(item: ModerationItem): string {
+export interface ReviewRow {
+  label: string
+  value: string
+  /** A plant's Latin name, set in italics */
+  latin?: boolean
+}
+
+/**
+ * The listing's facts as buyers will read them (the listing page's rows), then where it is and how it gets there:
+ * the moderator checks the same words.
+ */
+export function reviewFacts(item: ModerationItem): ReviewRow[] {
   const { listing } = item
-  const category = categoryById(listing.categoryId)?.name
-  const sub = listing.subcategories?.length ? listing.subcategories.join(', ') : listing.subcategory
-  const kind = category && sub ? `${category} / ${sub}` : (category ?? sub)
-  // A service's card line is its areas: the place is already there.
-  const place = listing.kind === 'service' ? undefined : placeLabel(listing)
-  return [kind, ...listing.attributes, place].filter(Boolean).join(' · ')
+  const rows: ReviewRow[] = factRows(listing).map((r) => ({ label: r.label, value: r.value, ...(r.latin ? { latin: true } : {}) }))
+  if (!rows.some((r) => r.label === 'Kateqoriya')) {
+    const category = categoryById(listing.categoryId)?.name
+    const sub = listing.subcategories?.length ? listing.subcategories.join(', ') : listing.subcategory
+    const kind = category && sub ? `${category} / ${sub}` : (category ?? sub)
+    if (kind) rows.unshift({ label: listing.kind === 'service' ? 'Xidmət' : 'Kateqoriya', value: kind })
+  }
+  const wholesale = wholesaleLabel(listing)
+  if (wholesale) rows.push({ label: 'Topdan', value: wholesale })
+  // A service's areas are its place.
+  if (listing.kind !== 'service') rows.push({ label: 'Ünvan', value: placeLabel(listing) })
+  if (listing.deliveryAvailable != null) {
+    rows.push({ label: 'Çatdırılma', value: listing.deliveryAvailable ? (listing.deliveryAreas?.trim() || 'Var') : 'Yoxdur' })
+  }
+  if (listing.plantingAvailable) rows.push({ label: 'Əkin xidməti', value: 'Var' })
+  return rows
+}
+
+/** Who posted it, for the review's «Satıcı» block. */
+export function sellerFacts(item: ModerationItem): ReviewRow[] {
+  const { seller, listing } = item
+  const business = seller.accountType === 'business'
+  const rows: ReviewRow[] = [{ label: 'Hesab', value: business ? (seller.verified ? 'Təsdiqlənmiş biznes' : 'Biznes hesabı') : 'Fərdi hesab' }]
+  if (listing.contactName && listing.contactName !== seller.name) rows.push({ label: 'Əlaqə şəxsi', value: listing.contactName })
+  if (business) rows.push({ label: 'Aktiv elanlar', value: String(seller.activeListings) })
+  if (seller.memberSince) rows.push({ label: 'GreenStore-da', value: `${ordinal(seller.memberSince)} ildən` })
+  return rows
+}
+
+/** The time a page is rendered at (the server renders the queue per request): the waits are counted from it. */
+export const requestTime = () => Date.now()
+
+/** How long a listing has waited: «12 dəq», «3 saat», «2 gün»; `late` past the hour sellers are promised. */
+export function waitLabel(submittedAt: string, now: number): { text: string; late: boolean } {
+  const sent = Date.parse(submittedAt)
+  if (!Number.isFinite(sent)) return { text: '', late: false }
+  const minutes = Math.max(0, Math.floor((now - sent) / 60_000))
+  const text = minutes < 60 ? `${Math.max(1, minutes)} dəq` : minutes < 24 * 60 ? `${Math.floor(minutes / 60)} saat` : `${Math.floor(minutes / (24 * 60))} gün`
+  return { text, late: now - sent > USUAL_CHECK_MS }
+}
+
+/** What a queue row warns about before the listing is opened. */
+export function queueFlags(item: Pick<ModerationItem, 'contactPhoneVerified' | 'photoCount' | 'status'>): string[] {
+  if (item.status !== 'pending') return []
+  return [...(item.contactPhoneVerified ? [] : ['Nömrə təsdiqlənməyib']), ...(item.photoCount > 0 ? [] : ['Şəkil yoxdur'])]
 }
 
 /** «38 ₼ · ədəd», «Razılaşma ilə» */
 export function reviewPrice(item: ModerationItem): string {
   const price = listingPrice(item.listing)
   return price.unit ? `${price.amount} ${price.unit}` : price.amount
-}
-
-/** «Abşeron Tingçilik · Elvin Əliyev · +994 50 555 12 34 · Təsdiqlənmiş biznes · 24 aktiv elan · 2021-dən» */
-export function sellerLine(item: ModerationItem): string {
-  const { seller, listing } = item
-  const business = seller.accountType === 'business'
-  return [
-    seller.name,
-    listing.contactName && listing.contactName !== seller.name ? listing.contactName : undefined,
-    listing.contactPhone,
-    business ? (seller.verified ? 'Təsdiqlənmiş biznes' : 'Biznes hesabı') : 'Fərdi hesab',
-    business ? `${seller.activeListings} aktiv elan` : undefined,
-    seller.memberSince ? `${ordinal(seller.memberSince)} ildən GreenStore-da` : undefined,
-  ]
-    .filter(Boolean)
-    .join(' · ')
 }
 
 export interface ReviewCheck {

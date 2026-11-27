@@ -4,11 +4,12 @@ import { ButtonLink } from '@/components/ui/Button'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { SignInPrompt } from '@/features/account/SignInPrompt'
 import type { UserProfile } from '@/types'
+import { isStaff } from './roles'
 
 /** Who may open a staff page: moderators and admins, or admins alone (categories). */
 export type StaffLevel = 'staff' | 'admin'
 
-export const isStaff = (user: Pick<UserProfile, 'role'>) => user.role === 'moderator' || user.role === 'admin'
+export { isStaff }
 
 /** May `user` open a page of `level`? (The API checks it again: 403 otherwise.) */
 export const mayOpen = (user: Pick<UserProfile, 'role'>, level: StaffLevel) => (level === 'admin' ? user.role === 'admin' : isStaff(user))

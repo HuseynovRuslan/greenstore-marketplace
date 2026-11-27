@@ -379,4 +379,20 @@ describe('profile menu (signed in)', () => {
       expect(el.getAttribute('class') ?? '').not.toMatch(/over-hero:/)
     }
   })
+
+  it('offers «İdarəetmə» to moderators and admins only, in the menu and the phone drawer (Nov 2026)', async () => {
+    const user = userEvent.setup()
+    const { unmount } = renderPage({ hero: false })
+    await user.click(chevron())
+    expect(within(panel()).queryByRole('link', { name: 'İdarəetmə' })).toBeNull()
+    unmount()
+
+    const stored = JSON.parse(localStorage.getItem(SESSION_KEY)!)
+    localStorage.setItem(SESSION_KEY, JSON.stringify({ ...stored, role: 'admin' }))
+    renderPage({ hero: false })
+    await user.click(chevron())
+    expect(within(panel()).getByRole('link', { name: 'İdarəetmə' })).toHaveAttribute('href', '/idareetme')
+    await user.click(screen.getAllByRole('button', { name: 'Menyu' })[0])
+    expect(within(screen.getByRole('navigation', { name: 'Əsas menyu' })).getByRole('link', { name: 'İdarəetmə' })).toHaveAttribute('href', '/idareetme')
+  })
 })

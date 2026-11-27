@@ -1,18 +1,16 @@
 'use client'
 
-import { useRef, useState, useTransition, type ReactNode } from 'react'
+import { useId, useRef, useState, useTransition, type ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
-import { Check } from 'lucide-react'
+import { Check, CircleAlert, Undo2 } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
-import { SelectField, TextAreaField } from '@/components/ui/Field'
-import { Notice } from '@/components/ui/Notice'
-import { Panel } from '@/components/ui/Panel'
+import { TextAreaField } from '@/components/ui/Field'
 import { rejectionReasonCodes, rejectionReasonLabels } from '@/features/listing/rejection'
+import { cn } from '@/lib/format'
 import type { RejectionReasonCode } from '@/types'
 import { decideModeration } from './actions'
-import { PanelTitle } from './AdminUi'
 
-const TEXT_ERROR = 'Rədd etmək üçün aydın izah yazılmalıdır.'
+const TEXT_ERROR = 'Satıcıya nəyi düzəltməli olduğunu yazın.'
 const REASON_ERROR = 'Rədd səbəbini seçin.'
 
 interface Props {
@@ -24,29 +22,33 @@ interface Props {
   pending: boolean
   /** The queue's address after the decision (the notice is added to it) */
   afterHref: string
-  /** The review panel's content, rendered on the server */
+  /** The review's content, rendered on the server */
   review: ReactNode
 }
 
 /**
- * DATA_SOURCE=api: the review panel with «Təsdiqlə və dərc et» and «Rədd et», and the «Rədd səbəbi» form (a reason
- * code and a note for the seller; both required, as on the demo's page). The decision goes to the API with the version
- * the moderator saw; the queue then reloads with a notice. A listing changed meanwhile is shown again, newer.
+ * DATA_SOURCE=api: the review with its decision bar. The bar stays at the bottom of the screen while the listing is
+ * read; «Təsdiqlə və dərc et» decides at once, «Rədd et» opens the reason and the note for the seller in its place
+ * (both required; their errors show only after a try). The decision goes to the API with the version the moderator
+ * saw; the queue then reloads with a notice. A listing changed meanwhile is shown again, newer.
  */
 export function ModerationDecision({ listingId, title, version, pending, afterHref, review }: Props) {
   const router = useRouter()
+  const [rejecting, setRejecting] = useState(false)
   const [reason, setReason] = useState<RejectionReasonCode | ''>('')
   const [note, setNote] = useState('')
-  const [touched, setTouched] = useState(false)
+  const [tried, setTried] = useState(false)
   const [error, setError] = useState<string>()
   const [sending, setSending] = useState<'approve' | 'reject' | null>(null)
   const [, startTransition] = useTransition()
-  const rejectRef = useRef<HTMLDivElement>(null)
+  const reasonsRef = useRef<HTMLFieldSetElement>(null)
+  const barRef = useRef<HTMLDivElement>(null)
+  const legendId = useId()
+  const noteId = useId()
 
   const trimmed = note.trim()
-  const canReject = Boolean(reason && trimmed)
-  const textError = touched && !trimmed ? TEXT_ERROR : undefined
-  const reasonError = touched && trimmed && !reason ? REASON_ERROR : undefined
+  const reasonError = tried && !reason ? REASON_ERROR : undefined
+  const textError = tried && !trimmed ? TEXT_ERROR : undefined
 
   const send = async (decision: 'approve' | 'reject') => {
     if (sending) return
@@ -68,76 +70,126 @@ export function ModerationDecision({ listingId, title, version, pending, afterHr
     startTransition(() => router.replace(`${afterHref}${separator}done=${encodeURIComponent(listingId)}&decision=${decision}`, { scroll: false }))
   }
 
+  const openReject = () => {
+    setRejecting(true)
+    setError(undefined)
+    // The form comes into view and its first reason gets the focus.
+    requestAnimationFrame(() => {
+      const still = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+      barRef.current?.scrollIntoView?.({ block: 'end', behavior: still ? 'auto' : 'smooth' })
+      reasonsRef.current?.querySelector<HTMLInputElement>('input')?.focus({ preventScroll: true })
+    })
+  }
+
+  const submitReject = () => {
+    setTried(true)
+    if (!reason) return reasonsRef.current?.querySelector<HTMLInputElement>('input')?.focus()
+    if (!trimmed) return document.getElementById(noteId)?.focus()
+    void send('reject')
+  }
+
   return (
-    <>
-      <Panel aria-labelledby="review-title" className="w-full">
-        {review}
-        {error && (
-          <Notice tone="danger" title="Qərar göndərilmədi">
-            {error}
-          </Notice>
-        )}
-        {pending && (
-          <div className="flex w-full flex-col gap-3 sm:flex-row">
-            <Button
-              className="sm:flex-1"
-              disabled={sending !== null}
-              aria-busy={sending === 'approve'}
-              icon={<Check aria-hidden size={18} strokeWidth={1.8} absoluteStrokeWidth />}
-              onClick={() => void send('approve')}
-            >
-              {sending === 'approve' ? 'Təsdiqlənir…' : 'Təsdiqlə və dərc et'}
-            </Button>
-            <Button
-              variant="danger"
-              className="sm:flex-1"
-              disabled={sending !== null}
-              onClick={() => {
-                setTouched(true)
-                rejectRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
-              }}
-            >
-              Rədd et
-            </Button>
-          </div>
-        )}
-      </Panel>
+    <article aria-labelledby="review-title" className="flex w-full min-w-0 flex-col rounded-xl border border-line bg-surface">
+      <div className="flex w-full flex-col gap-7 p-5 md:p-7">{review}</div>
 
       {pending && (
-        <div ref={rejectRef} className="w-full scroll-mt-4">
-          <Panel aria-labelledby="reject-title" className="w-full">
-            <PanelTitle id="reject-title" subtitle="Yalnız elan rədd edildikdə doldurulur. Səbəb satıcıya göndərilir.">
-              Rədd səbəbi
-            </PanelTitle>
-            <SelectField
-              label="Səbəb seçin"
-              value={reason}
-              onChange={(e) => setReason(e.target.value as RejectionReasonCode | '')}
-              options={[{ value: '', label: 'Səbəb seçilməyib' }, ...rejectionReasonCodes.map((code) => ({ value: code, label: rejectionReasonLabels[code] }))]}
-              error={reasonError}
-              containerClassName="w-full"
-            />
-            <TextAreaField
-              label="Satıcı üçün izah"
-              placeholder="Düzəliş tələb olunan məqamı qeyd edin"
-              value={note}
-              maxLength={500}
-              onChange={(e) => setNote(e.target.value)}
-              error={textError}
-              containerClassName="w-full"
-            />
-            <Button
-              variant="danger"
-              disabled={!canReject || sending !== null}
-              aria-busy={sending === 'reject'}
-              aria-label={`Rədd qərarını təsdiqlə: ${title}`}
-              onClick={() => (canReject ? void send('reject') : setTouched(true))}
-            >
-              {sending === 'reject' ? 'Göndərilir…' : 'Rədd qərarını təsdiqlə'}
-            </Button>
-          </Panel>
+        <div
+          ref={barRef}
+          className={cn(
+            'z-10 scroll-mb-4 rounded-b-xl border-t border-line bg-surface px-5 py-4 md:px-7',
+            // Docked while the listing is read; the reject form stays in place at the end, so the listing can be checked again above it.
+            rejecting ? 'relative' : 'sticky bottom-0 shadow-dock',
+          )}
+        >
+          {error && (
+            <p role="alert" className="mb-3 flex items-start gap-2 rounded-lg bg-danger-soft px-3 py-2.5 text-[13px] leading-[1.45] text-ink">
+              <CircleAlert aria-hidden size={16} strokeWidth={2} className="mt-px shrink-0 text-danger" />
+              <span>
+                <span className="font-semibold">Qərar göndərilmədi. </span>
+                {error}
+              </span>
+            </p>
+          )}
+
+          {rejecting ? (
+            <div className="flex animate-fade-up flex-col gap-4">
+              <fieldset ref={reasonsRef} aria-describedby={reasonError ? `${legendId}-error` : undefined} className="flex flex-col gap-2.5">
+                <legend id={legendId} className="mb-2.5 text-[15px] leading-[1.3] font-semibold text-forest">
+                  Niyə rədd edilir?
+                </legend>
+                <div className="flex flex-wrap gap-2">
+                  {rejectionReasonCodes.map((code) => (
+                    <label
+                      key={code}
+                      className={cn(
+                        'inline-flex min-h-10 cursor-pointer items-center rounded-lg border px-3 text-[13px] leading-[1.3] transition-colors duration-(--dur-fast)',
+                        'has-[:focus-visible]:ring-[3px] has-[:focus-visible]:ring-olive',
+                        reason === code ? 'border-danger bg-danger-soft font-semibold text-danger' : 'border-line-strong bg-surface text-ink hover:border-olive',
+                      )}
+                    >
+                      <input type="radio" name={`reason-${listingId}`} value={code} checked={reason === code} onChange={() => setReason(code)} className="sr-only" />
+                      {rejectionReasonLabels[code]}
+                    </label>
+                  ))}
+                </div>
+                {reasonError && (
+                  <p id={`${legendId}-error`} className="text-[13px] leading-[1.4] font-medium text-danger">
+                    {reasonError}
+                  </p>
+                )}
+              </fieldset>
+
+              <TextAreaField
+                id={noteId}
+                label="Satıcıya izah"
+                hint="Satıcı bu mətni kabinetində görəcək. Nəyi düzəltməli olduğunu yazın."
+                placeholder="Məsələn: şəkillərdə başqa bitki görünür, öz bitkinizin şəklini əlavə edin."
+                value={note}
+                maxLength={500}
+                rows={3}
+                onChange={(e) => setNote(e.target.value)}
+                error={textError}
+                containerClassName="w-full"
+              />
+
+              <div className="flex flex-col-reverse gap-2.5 sm:flex-row sm:justify-end">
+                <Button
+                  variant="secondary"
+                  disabled={sending !== null}
+                  icon={<Undo2 aria-hidden size={17} strokeWidth={1.8} absoluteStrokeWidth />}
+                  onClick={() => {
+                    setRejecting(false)
+                    setTried(false)
+                  }}
+                >
+                  Geri
+                </Button>
+                <Button variant="danger" disabled={sending !== null} aria-busy={sending === 'reject'} aria-label={`Rədd et və satıcıya göndər: ${title}`} onClick={submitReject}>
+                  {sending === 'reject' ? 'Göndərilir…' : 'Rədd et və satıcıya göndər'}
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-[13px] leading-[1.45] text-muted max-sm:hidden">Təsdiqdən sonra elan 30 gün saytda görünür.</p>
+              <div className="flex flex-col-reverse gap-2.5 min-[360px]:flex-row sm:shrink-0">
+                <Button variant="secondary" className="flex-1 text-danger hover:border-danger sm:flex-none" disabled={sending !== null} onClick={openReject}>
+                  Rədd et
+                </Button>
+                <Button
+                  className="flex-[1.6] sm:flex-none"
+                  disabled={sending !== null}
+                  aria-busy={sending === 'approve'}
+                  icon={<Check aria-hidden size={18} strokeWidth={1.8} absoluteStrokeWidth />}
+                  onClick={() => void send('approve')}
+                >
+                  {sending === 'approve' ? 'Təsdiqlənir…' : 'Təsdiqlə və dərc et'}
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
       )}
-    </>
+    </article>
   )
 }

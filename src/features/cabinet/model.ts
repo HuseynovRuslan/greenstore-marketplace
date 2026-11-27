@@ -108,6 +108,22 @@ export function expiryLabel(days: number | undefined): { text: string; soon: boo
   return { text: `${days} gün qalıb`, soon: days <= 3 }
 }
 
+/** How long a check usually takes: the promise under a pending listing holds this long. */
+export const USUAL_CHECK_MS = 60 * 60 * 1000
+
+/**
+ * The note under a pending listing. The usual time («1 saat ərzində») until it has passed since the listing went to the
+ * moderator; after that a promise already broken is not repeated (a listing sent yesterday no longer reads «1 saat»).
+ * `now` 0 is the server render: the usual note.
+ */
+export function pendingNote(listing: Pick<Listing, 'publishedAt' | 'updatedAt'> & Pick<Partial<OwnListing>, 'submittedAt'>, now: number): { text: string; late: boolean } {
+  const sent = Date.parse(listing.submittedAt ?? listing.updatedAt ?? listing.publishedAt)
+  const late = now > 0 && Number.isFinite(sent) && now - sent > USUAL_CHECK_MS
+  return late
+    ? { text: 'Yoxlama adi vaxtdan uzun çəkir. Nəticəni burada görəcəksiniz.', late }
+    : { text: 'Moderator adətən 1 saat ərzində yoxlayır.', late }
+}
+
 /**
  * The listing shows as «Önə çıxan» to buyers now: on the site and promoted (`vip`, which the API sets while a paid
  * «Önə çıxar» or bundle runs), or with a running «Önə çıxar» / bundle this browser applied (the demo).

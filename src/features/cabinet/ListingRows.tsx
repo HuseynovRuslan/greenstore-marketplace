@@ -37,7 +37,7 @@ import { STEPS, type PostingDraft } from '@/features/posting/draft'
 import { cn, formatDayMonth, formatNumber } from '@/lib/format'
 import { useBrokenImage } from '@/lib/useBrokenImage'
 import type { Listing, ListingStats } from '@/types'
-import { actionsFor, daysLeft, expiryLabel, isFeatured, pendingPromotionOf, statusBadges, type CabinetAction } from './model'
+import { actionsFor, daysLeft, expiryLabel, isFeatured, pendingNote, pendingPromotionOf, statusBadges, type CabinetAction } from './model'
 import type { RowResult } from './useCabinet'
 
 const actionClass =
@@ -243,8 +243,8 @@ export function ListingRowCard({ listing, stats, now, handlers }: { listing: Lis
       )}
       {listing.status === 'pending' && (
         <p className="flex items-center gap-2 text-[13px] leading-[1.4] text-warning">
-          <Clock3 aria-hidden size={15} strokeWidth={2} />
-          Moderator adətən 1 saat ərzində yoxlayır.
+          <Clock3 aria-hidden size={15} strokeWidth={2} className="shrink-0" />
+          {pendingNote(listing, now).text}
         </p>
       )}
       {pending && pendingOffer && (

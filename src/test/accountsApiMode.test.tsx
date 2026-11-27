@@ -191,10 +191,10 @@ describe('the store with DATA_SOURCE=api', () => {
 })
 
 describe('pages with DATA_SOURCE=api', () => {
-  it('the demo banner says the listings are samples but the accounts are real', () => {
+  it('shows no demo banner: the listings and accounts are real (Nov 2026)', () => {
     inApi(<DemoBanner />)
-    expect(screen.getByText(/hesablar realdır/)).toBeInTheDocument()
-    expect(screen.queryByText(/real hesab yaradılmır/)).not.toBeInTheDocument()
+    expect(screen.queryByRole('complementary', { name: 'Demo versiya' })).not.toBeInTheDocument()
+    expect(screen.queryByText(/nümunə/)).not.toBeInTheDocument()
   })
 
   it('signs in with the password through the API and says why it was refused', async () => {

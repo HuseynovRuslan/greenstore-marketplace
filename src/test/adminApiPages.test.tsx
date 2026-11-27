@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import type { AdminCategory, AdminOverview, OwnListing, ReportItem, ReportQueue, UserProfile } from '@/types'
+import type { AdminCategory, AdminOverview, ModerationItem, OwnListing, ReportItem, ReportQueue, UserProfile } from '@/types'
 
 /*
  * The staff pages with DATA_SOURCE=api (backend-contract.md 3.5, phase 4), rendered as the server renders them: the
@@ -285,5 +285,75 @@ describe('/idareetme (DATA_SOURCE=api)', () => {
     render(await ApiModerationPage(params()))
     expect(screen.queryByRole('region', { name: 'İcmal' })).not.toBeInTheDocument()
     expect(admin.overview).not.toHaveBeenCalled()
+  })
+})
+
+describe('/idareetme/moderasiya: the review desk (Nov 2026)', () => {
+  const sent = new Date(Date.now() - 3 * 3_600_000).toISOString()
+  const item: ModerationItem = {
+    id: ID,
+    listingId: ID,
+    number: 10442,
+    title: 'Şabalıd — Castanea sativa',
+    sellerName: 'Elçin',
+    submittedAt: sent,
+    categoryId: 'agaclar',
+    kind: 'new',
+    status: 'pending',
+    revision: 1,
+    version: '7',
+    contactPhoneVerified: false,
+    photoCount: 0,
+    seller: { userId: OWNER, name: 'Elçin', accountType: 'individual', verified: false, activeListings: 0 },
+    listing: { ...report.listing!, title: 'Şabalıd — Castanea sativa', status: 'pending', contactPhoneVerified: false } as OwnListing,
+    changes: [],
+  }
+  const pendingQueue = { items: [item], total: 1, page: 1, pageCount: 1, totals: { pending: 1, recheck: 0, approved: 3, rejected: 0 } }
+
+  it('shows how long each listing has waited and what needs a look, before it is opened', async () => {
+    repo.getMe.mockResolvedValue(person('moderator'))
+    admin.moderationQueue = vi.fn(async () => pendingQueue)
+    render(await ApiModerationPage(params()))
+    const queueList = screen.getByRole('region', { name: 'Moderasiya növbəsi' })
+    const row = within(queueList).getByRole('link', { name: /Şabalıd/ })
+    expect(row).toHaveTextContent('3 saat gözləyir')
+    expect(row).toHaveTextContent('Nömrə təsdiqlənməyib')
+    expect(row).toHaveTextContent('Şəkil yoxdur')
+    expect(screen.getByText('1 elan yoxlama gözləyir.')).toBeInTheDocument()
+    // The review: no photo said plainly, the unverified number flagged in the checklist.
+    const review = screen.getByRole('article', { name: 'Şabalıd — Castanea sativa' })
+    expect(within(review).getByText('Şəkil əlavə edilməyib')).toBeInTheDocument()
+    expect(within(review).getAllByText(/təsdiqlənməyib/i).length).toBeGreaterThan(0)
+  })
+
+  it('opens the reason and the note only on «Rədd et», and asks for them only after a try', async () => {
+    const user = userEvent.setup()
+    repo.getMe.mockResolvedValue(person('moderator'))
+    admin.moderationQueue = vi.fn(async () => pendingQueue)
+    actions.decideModeration.mockResolvedValue({ ok: true })
+    render(await ApiModerationPage(params()))
+    expect(screen.queryByRole('group', { name: 'Niyə rədd edilir?' })).not.toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Rədd et' }))
+    expect(screen.getByRole('group', { name: 'Niyə rədd edilir?' })).toBeInTheDocument()
+    expect(screen.queryByText('Rədd səbəbini seçin.')).not.toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: /Rədd et və satıcıya göndər/ }))
+    expect(screen.getByText('Rədd səbəbini seçin.')).toBeInTheDocument()
+    expect(actions.decideModeration).not.toHaveBeenCalled()
+
+    await user.click(screen.getByLabelText('Şəkillər tələblərə uyğun deyil'))
+    await user.type(screen.getByLabelText('Satıcıya izah'), 'Bitkinin öz şəklini əlavə edin.')
+    await user.click(screen.getByRole('button', { name: /Rədd et və satıcıya göndər/ }))
+    expect(actions.decideModeration).toHaveBeenCalledWith(ID, { decision: 'reject', reasonCode: 'bad-photos', note: 'Bitkinin öz şəklini əlavə edin.', version: '7' })
+    expect(router.replace).toHaveBeenCalledWith(`/idareetme/moderasiya?done=${ID}&decision=reject`, { scroll: false })
+  })
+
+  it('says the queue is empty when nothing is waiting', async () => {
+    repo.getMe.mockResolvedValue(person('moderator'))
+    admin.moderationQueue = vi.fn(async () => ({ items: [], total: 0, page: 1, pageCount: 1, totals: { pending: 0, recheck: 0, approved: 3, rejected: 0 } }))
+    render(await ApiModerationPage(params()))
+    expect(screen.getByRole('heading', { name: 'Növbə boşdur' })).toBeInTheDocument()
+    expect(screen.getByText('Yoxlama gözləyən elan yoxdur.')).toBeInTheDocument()
   })
 })

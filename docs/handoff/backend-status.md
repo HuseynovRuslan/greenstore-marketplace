@@ -200,7 +200,7 @@ Tam siyahı hər fazanın yoxlama hesabatındadır; burada sizin bilməli olduql
 | `API_INTERNAL_KEY` | API-nin `Internal__ApiKey`-i | eyni (yoxsa bütün sayt bir IP sayılır və limitlər hamıya birdən düşür) |
 | `REVALIDATE_SECRET` | API-nin `Revalidation__Secret`-i | eyni |
 | `NEXT_PUBLIC_SITE_URL` | Staging ünvanı | `https://greenstore.az` kimi |
-| `NEXT_PUBLIC_DEMO_MODE` | `true` olar | **`false`** («Demo versiya» bannerı gizlənir) |
+| `NEXT_PUBLIC_DEMO_MODE` | `true` olar | **`false`** («Demo versiya» bannerı gizlənir). 27 noyabr 2026-dan `DATA_SOURCE=api` ilə banner onsuz da görünmür |
 | `SEO_INDEXABLE` | **`false`** | `true` (yalnız burada) |
 | `CLIENT_IP_HEADER` və ya `TRUSTED_PROXY_HOPS` | hostinqin proxy-sinə görə (kök README.md, «Visitor IP behind the hosting's proxy») | eyni |
 
