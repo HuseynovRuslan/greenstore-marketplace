@@ -14,10 +14,10 @@ const AZ_MONTHS_SHORT = ['yan.', 'fev.', 'mar.', 'apr.', 'may', 'iyn.', 'iyl.', 
 const pad = (n: number) => String(n).padStart(2, '0')
 
 /** "2026-10-12T11:32:00" → "12 okt. · 11:32" (moderation queue rows; zoned ISO strings are shown in local time). */
-export function formatQueueTime(iso: string): string {
+export function formatQueueTime(iso: string, separator = ' · '): string {
   const date = new Date(iso)
   if (Number.isNaN(date.getTime())) return iso
-  return `${date.getDate()} ${AZ_MONTHS_SHORT[date.getMonth()]} · ${pad(date.getHours())}:${pad(date.getMinutes())}`
+  return `${date.getDate()} ${AZ_MONTHS_SHORT[date.getMonth()]}${separator}${pad(date.getHours())}:${pad(date.getMinutes())}`
 }
 
 /** Local "YYYY-MM-DDTHH:MM:SS" for the current moment (no timezone shift). */

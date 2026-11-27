@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event'
 import type { ReactNode } from 'react'
 import { ToastProvider } from '@/components/ui/Toast'
 import type { AccountProfile } from '@/data/user'
-import { changeLine, moderationHref, readModerationParams, reviewChecks, reviewDetails, sellerLine } from '@/features/admin/moderationApi'
+import { changeLine, moderationHref, queueFlags, readModerationParams, reviewChecks, reviewFacts, sellerFacts, waitLabel } from '@/features/admin/moderationApi'
 import { createDraft, withCategory, type PostingDraft } from '@/features/posting/draft'
 import { remotePhotos } from '@/features/posting/fromListing'
 import { photoStore } from '@/features/posting/photos'
@@ -347,14 +347,33 @@ describe('the moderation page’s words for the API’s facts', () => {
     expect(readModerationParams({ done: ID, decision: 'approve' }).done).toEqual({ listingId: ID, decision: 'approve' })
   })
 
-  it('words the listing, the seller and the checklist', () => {
-    expect(reviewDetails(item())).toBe('Ağaclar / İynəyarpaqlı ağaclar · 140 sm · Abşeron, Məhəmmədi')
-    expect(sellerLine(item())).toBe('Yaşıl Həyət · Nigar Rzayeva · +994 55 512 34 56 · Təsdiqlənmiş biznes · 24 aktiv elan · 2021-ci ildən GreenStore-da')
+  it('words the listing, the seller and the checklist as labelled rows', () => {
+    const facts = reviewFacts(item())
+    expect(facts[0]).toEqual({ label: 'Kateqoriya', value: 'Ağaclar / İynəyarpaqlı ağaclar' })
+    expect(facts).toContainEqual({ label: 'Ünvan', value: 'Abşeron, Məhəmmədi' })
+    expect(sellerFacts(item())).toEqual([
+      { label: 'Hesab', value: 'Təsdiqlənmiş biznes' },
+      { label: 'Əlaqə şəxsi', value: 'Nigar Rzayeva' },
+      { label: 'Aktiv elanlar', value: '24' },
+      { label: 'GreenStore-da', value: '2021-ci ildən' },
+    ])
     expect(reviewChecks(item())).toEqual([
       { text: 'Qiymət göstərilib', ok: true },
       { text: 'Əlaqə nömrəsi təsdiqlənməyib', ok: false },
       { text: '3 şəkil əlavə edilib', ok: true },
     ])
+  })
+
+  it('counts how long a listing has waited and flags what needs a look in the queue (Nov 2026)', () => {
+    const sent = Date.parse('2026-11-22T09:00:00Z')
+    expect(waitLabel('2026-11-22T09:00:00Z', sent + 20 * 60_000)).toEqual({ text: '20 dəq', late: false })
+    expect(waitLabel('2026-11-22T09:00:00Z', sent + 30_000)).toEqual({ text: '1 dəq', late: false })
+    // Past the hour sellers are promised: late.
+    expect(waitLabel('2026-11-22T09:00:00Z', sent + 3 * 3_600_000)).toEqual({ text: '3 saat', late: true })
+    expect(waitLabel('2026-11-22T09:00:00Z', sent + 26 * 3_600_000)).toEqual({ text: '1 gün', late: true })
+    expect(queueFlags(item())).toEqual(['Nömrə təsdiqlənməyib'])
+    expect(queueFlags(item({ contactPhoneVerified: true, photoCount: 0 }))).toEqual(['Şəkil yoxdur'])
+    expect(queueFlags(item({ status: 'approved' }))).toEqual([])
   })
 
   it('words the changes since the approved version', () => {
